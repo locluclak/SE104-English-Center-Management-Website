@@ -1,1 +1,10 @@
 .vscode
+# Frontend
+/frontend/node_modules
+/frontend/dist
+
+# Backend
+/backend/node_modules
+
+# General
+.env
