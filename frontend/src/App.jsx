@@ -1,35 +1,24 @@
-import React, { useState } from "react";
-import "./App.css";
-import Login from "./pages/Login";
-import SignUp from "./pages/SignUp";
+import React from 'react';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import Login from './pages/Login';  // Đảm bảo đường dẫn đúng
+import SignUp from './pages/SignUp'; // Đảm bảo đường dẫn đúng
+import OtpForm from './pages/Otpform'; // Thêm đường dẫn OTP
+import ForgotPassword from './pages/Forgotpassword'; // Đường dẫn Forgot Password
+import ResetPassword from './pages/Resetpassword'; // Đường dẫn Reset Password
 
 function App() {
-  const [currentPage, setCurrentPage] = useState("home");
-
-  const renderPage = () => {
-    if (currentPage === "login") {
-      return <Login goBack={() => setCurrentPage("home")} />;
-    } else if (currentPage === "signup") {
-      return <SignUp goBack={() => setCurrentPage("home")} />;
-    } else {
-      return (
-        <div className="home-container">
-          <h1>Welcome to English Center</h1>
-          <p className="home-subtitle">Đăng nhập hoặc đăng ký</p>
-          <div className="button-group">
-            <button onClick={() => setCurrentPage("login")} className="home-button">
-              Login
-            </button>
-            <button onClick={() => setCurrentPage("signup")} className="home-button">
-              Sign Up
-            </button>
-          </div>
-        </div>
-      );
-    }
-  };
-
-  return <div>{renderPage()}</div>;
+  return (
+    <Router>
+      <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/signup" element={<SignUp />} />
+        <Route path="/otp" element={<OtpForm />} />  {/* Thêm Route cho OTP */}
+        <Route path="/forgot-password" element={<ForgotPassword />} />  {/* Forgot Password */}
+        <Route path="/forgot-password/otp" element={<OtpForm />} /> {/* Nhập OTP */}
+        <Route path="/forgot-password/reset" element={<ResetPassword />} /> {/* Reset mật khẩu */}
+      </Routes>
+    </Router>
+  );
 }
 
 export default App;
