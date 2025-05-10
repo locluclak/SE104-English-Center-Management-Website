@@ -1,17 +1,14 @@
 body {
     margin: 0;
     font-family: Arial, sans-serif;
-    background-color: #f0f4f8;
-    align-items: center;
-  }
-  
-  .login-container {
+    background-color: #f4f7fc; /* Màu nền nhẹ */
     display: flex;
     justify-content: center;
     align-items: center;
-  }
-  
-  .login-box {
+    height: 100vh;
+}
+
+.login-box {
     background: #ffffff;
     padding: 2.5rem;
     border-radius: 8px;
@@ -19,47 +16,91 @@ body {
     width: 100%;
     max-width: 400px;
     text-align: center;
-    align-items: center;
-  }
-  
-  .login-box h2 {
+}
+
+.login-box h2 {
     margin-bottom: 1.5rem;
     color: #333;
-    align-items: center;
-  }
-  
-  .form-group {
-    margin-bottom: 1rem;
+    font-weight: bold;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
     text-align: left;
-  }
-  
-  .form-group label {
+}
+
+.form-group label {
     display: block;
     margin-bottom: 0.5rem;
     font-weight: bold;
     color: #555;
-  }
-  
-  .form-group input {
+}
+
+.form-group input {
     width: 100%;
     padding: 0.75rem;
     border: 1px solid #ddd;
     border-radius: 4px;
     font-size: 1rem;
-  }
-  
-  .login-button {
+    box-sizing: border-box;
+}
+
+.forgot-password {
+    text-align: right;
+    font-size: 0.9rem;
+    color: #6c757d;
+    cursor: pointer;
+}
+
+.forgot-password:hover {
+    color: #007bff;
+}
+
+.login-button {
     width: 100%;
     padding: 0.75rem;
-    background-color: #ff9d00;
+    background-color: #6f42c1; /* Màu tím cho nút Sign In */
     color: #fff;
     border: none;
     border-radius: 4px;
     font-size: 1rem;
     cursor: pointer;
     transition: background-color 0.3s;
-  }
-  
-  .login-button:hover {
-    background-color: #0056b3;
-  }
+    margin-top: 1rem;
+}
+
+.login-button:hover {
+    background-color: #5a32a3; /* Màu tối hơn khi hover */
+}
+
+.login-link {
+    margin-top: 1rem;
+    font-size: 0.9rem;
+    color: #6c757d;
+}
+
+.login-link a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.login-link a:hover {
+    text-decoration: underline;
+}
+
+.back-button {
+    width: 40%;
+    padding: 0.75rem;
+    background-color: #27a9ef; /* Màu nền xanh dương */
+    color: #000000; /* Màu chữ trắng */
+    border: none;
+    border-radius: 4px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    margin-top: 1rem;
+}
+
+.back-button:hover {
+    background-color: #0056b3; /* Màu tối hơn khi hover */
+}
