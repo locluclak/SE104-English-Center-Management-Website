@@ -5,62 +5,46 @@ import './SignUp.css';
 function SignUp() {
     const [name, setName] = useState('');
     const [birthday, setBirthday] = useState('');
-    const [emailOrPhone, setEmailOrPhone] = useState('');
-    const [username, setUsername] = useState('');
+    const [email, setEmail] = useState('');
+    const [phoneNumber, setPhoneNumber] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
-    const [role, setRole] = useState('');
     const [isEmail, setIsEmail] = useState(true);
     const navigate = useNavigate();
 
     const handleSubmit = (e) => {
         e.preventDefault();
 
-        if (!role) {
-            alert("Please select a role!");
-            return;
-        }
-
+        // Kiểm tra nếu mật khẩu và xác nhận mật khẩu trùng khớp
         if (password !== confirmPassword) {
             alert("Passwords do not match!");
             return;
         }
 
-        const phoneRegex = /^[0-9]{10}$/;
+        // Kiểm tra số điện thoại hoặc email
+        const phoneRegex = /^[0-9]{10}$/; // Giả định số điện thoại là 10 chữ số
         const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
-        if (phoneRegex.test(emailOrPhone)) {
-            setIsEmail(false);
-        } else if (emailRegex.test(emailOrPhone)) {
-            setIsEmail(true);
+
+        if (phoneRegex.test(phoneNumber)) {
+            setIsEmail(false);  // Đây là số điện thoại
+        } else if (emailRegex.test(email)) {
+            setIsEmail(true);   // Đây là email
         } else {
             alert("Please enter a valid email or phone number.");
             return;
         }
 
+        // Giả lập đăng ký thành công (thực tế sẽ gửi dữ liệu lên server)
         alert("Sign up successful!");
-        navigate('/otp');
+
+        // Sau khi đăng ký thành công, điều hướng đến trang OTP
+        navigate('/otp');  // Chuyển hướng đến trang OTP
     };
 
     return (
         <div className="signup-container">
             <div className="signup-box">
                 <h2>Sign Up for English Center</h2>
-                <div className="form-group">
-                    <label htmlFor="role">Role</label>
-                    <select
-                        id="role"
-                        value={role}
-                        onChange={(e) => setRole(e.target.value)}
-                        required
-                    >
-                        <option value="">Select a role</option>
-                        <option value="admin">Admin</option>
-                        <option value="teacher">Teacher</option>
-                        <option value="student">Student</option>
-                        <option value="accountant">Accountant</option>
-                    </select>
-                </div>
-
                 <form onSubmit={handleSubmit}>
                     <div className="form-group">
                         <label htmlFor="name">Full Name</label>
@@ -73,6 +57,7 @@ function SignUp() {
                             required
                         />
                     </div>
+
                     <div className="form-group">
                         <label htmlFor="birthday">Birthday</label>
                         <input
@@ -83,28 +68,31 @@ function SignUp() {
                             required
                         />
                     </div>
+
                     <div className="form-group">
-                        <label htmlFor="emailOrPhone">Email Address / Phone Number</label>
+                        <label htmlFor="phoneNumber">Phone Number</label>
                         <input
                             type="text"
-                            id="emailOrPhone"
-                            placeholder="Enter your email or phone number"
-                            value={emailOrPhone}
-                            onChange={(e) => setEmailOrPhone(e.target.value)}
+                            id="phoneNumber"
+                            placeholder="Enter your phone number"
+                            value={phoneNumber}
+                            onChange={(e) => setPhoneNumber(e.target.value)}
                             required
                         />
                     </div>
+
                     <div className="form-group">
-                        <label htmlFor="username">Username</label>
+                        <label htmlFor="email">Email Address</label>
                         <input
-                            type="text"
-                            id="username"
-                            placeholder="Choose a username"
-                            value={username}
-                            onChange={(e) => setUsername(e.target.value)}
+                            type="email"
+                            id="email"
+                            placeholder="Enter your email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
                             required
                         />
                     </div>
+
                     <div className="form-group">
                         <label htmlFor="password">Password</label>
                         <input
@@ -116,6 +104,7 @@ function SignUp() {
                             required
                         />
                     </div>
+
                     <div className="form-group">
                         <label htmlFor="confirmPassword">Confirm Password</label>
                         <input
@@ -130,6 +119,7 @@ function SignUp() {
 
                     <button type="submit" className="signup-button">Create an account</button>
                 </form>
+
                 <p>Already a member? <a href="/login">Log in</a></p>
             </div>
         </div>
