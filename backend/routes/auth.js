@@ -6,7 +6,7 @@ require('dotenv').config();
 
 const router = express.Router();
 
-// Đăng ký
+// sign up
 router.post('/signup', async (req, res) => {
   const { name, email, password, phoneNumber, dateOfBirth, role } = req.body;
 
@@ -32,7 +32,7 @@ router.post('/signup', async (req, res) => {
   );
 });
 
-// Đăng nhập
+// login
 router.post('/login', (req, res) => {
   const { email, password } = req.body;
 
