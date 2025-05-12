@@ -16,7 +16,7 @@ router.post('/signup', async (req, res) => {
     INSERT INTO PERSON (NAME, EMAIL, PASSWORD, PHONE_NUMBER, DATE_OF_BIRTH, ROLE)
     VALUES (?, ?, ?, ?, ?, ?)
   `;
-
+  // console.log("call signup")
   db.query(
     sql,
     [name, email, hashedPassword, phoneNumber, dateOfBirth, role || 'STUDENT'],
