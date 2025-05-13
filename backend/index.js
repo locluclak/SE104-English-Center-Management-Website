@@ -1,25 +1,25 @@
-const express = require('express');
-const cors = require('cors');
-const db = require('./db'); // kết nối mysql
-const authRoutes = require('./routes/auth'); // <-- thêm dòng này
+// Import required modules
+const express = require('express'); // Express framework for building the API
+const cors = require('cors'); // Middleware to enable Cross-Origin Resource Sharing
+const db = require('./db'); // Database connection module (assumed to be configured elsewhere)
+const authRoutes = require('./routes/auth'); // Authentication routes module
 
+// Initialize Express application
 const app = express();
+
+// Enable CORS for all routes to allow cross-origin requests
 app.use(cors());
+
+// Parse incoming JSON request bodies
 app.use(express.json());
 
-app.use('/', authRoutes); // <-- gắn router có /signup, /login
+// Mount authentication routes at the root path
+app.use('/', authRoutes);
 
-app.get('/api/courses', async (req, res) => {
-  try {
-    const [rows] = await db.query('SELECT * FROM courses');
-    res.json(rows);
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: 'Database error' });
-  }
-});
-
+// Set the port from environment variable or default to 3000
 const PORT = process.env.PORT || 3000;
+
+// Start the server and listen on the specified port
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
