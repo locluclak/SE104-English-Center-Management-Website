@@ -13,15 +13,24 @@ router.get('/', async (req, res) => {
     try {
         const conn = await db.getConnection();
         const [rows] = await conn.query('SELECT * FROM PERSON WHERE EMAIL = ?', [email]);
-        conn.release();
 
         if (rows.length === 0) {
+            conn.release();
             return res.status(404).json({ message: 'Person not found' });
         }
 
         const user = rows[0];
-        delete user.PASSWORD; // ❌ remove password field
+        delete user.PASSWORD; // Remove password field
 
+        // If the user is STAFF, fetch their specific role
+        if (user.ROLE === 'STAFF') {
+            const [staffRows] = await conn.query('SELECT STAFF_TYPE FROM STAFF WHERE ID = ?', [user.ID]);
+            if (staffRows.length > 0) {
+                user.ROLE = staffRows[0].STAFF_TYPE; // Replace ROLE with specific staff type
+            }
+        }
+
+        conn.release();
         res.json(user);
     } catch (err) {
         console.error('DB error:', err);
