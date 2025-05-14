@@ -1,9 +1,13 @@
+-------- Delete exist database
+
 USE ENGLISH_CENTER_DATABASE;
-
-
-
 DROP DATABASE ENGLISH_CENTER_DATABASE;
 
+
+
+
+
+--------- Create new database
 CREATE DATABASE ENGLISH_CENTER_DATABASE;
 USE ENGLISH_CENTER_DATABASE;
 
@@ -100,6 +104,10 @@ CREATE TABLE SUBMITION (
     FOREIGN KEY (AS_ID) REFERENCES ASSIGNMENT(AS_ID)
 );
 
+--------------- Constraint 
+
+
+--------------- Insert data
 
 -- Insert into PERSON table
 INSERT INTO PERSON (NAME, EMAIL, PHONE_NUMBER, DATE_OF_BIRTH, ROLE, PASSWORD)
