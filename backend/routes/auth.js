@@ -27,7 +27,7 @@ router.post('/signup', async (req, res) => {
         }
         return res.status(500).json({ error: 'System error' });
       }
-      return res.json({ message: 'Registration successful!' });
+      return res.status(200).json({ message: 'Registration successful!' });
     }
   );
 });
@@ -52,7 +52,7 @@ router.post('/login', (req, res) => {
       { expiresIn: '1h' }
     );
 
-    res.json({
+    res.status(200).json({
       message: 'Login successful',
       token,
       user: { id: user.ID, name: user.NAME, role: user.ROLE }
