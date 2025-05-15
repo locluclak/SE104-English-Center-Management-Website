@@ -53,7 +53,7 @@ function SignUp() {
       } else {
         // Thành công, chuyển đến OTP hoặc login
         alert(data.message || 'Registration successful!');
-        navigate('/otp');
+        navigate('/CourseList');
       }
     } catch (err) {
       console.error(err);

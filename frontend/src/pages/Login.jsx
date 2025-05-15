@@ -2,13 +2,36 @@ import React, { useState } from 'react';
 import './Login.css';
 
 function Login() {
-    const [username, setUsername] = useState('');
+    const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
 
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        alert("Login successful!");
-    };
+    const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+
+    try {
+        // Gọi API đăng nhập
+        const response = await fetch('http://localhost:3000/api/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: email, password: password }),
+        });
+
+        const data = await response.json();
+        if (!response.ok) {
+            // Nếu đăng nhập thất bại
+            setError(data.error || 'Login failed. Please try again.');
+        } else {
+            // Nếu đăng nhập thành công, lưu token và chuyển hướng
+            localStorage.setItem('token', data.token); // Lưu token vào localStorage
+            alert('Login successful!');
+            navigate('/courses'); // Chuyển đến trang CourseList
+        }
+    } catch (err) {
+        console.error(err);
+        setError('System error. Please try again later.');
+    }
+};
 
     return (
         <div className="login-container">
@@ -20,13 +43,13 @@ function Login() {
                     <h2>Login to English Center</h2>
                     <form onSubmit={handleSubmit}>
                         <div className="form-group">
-                            <label htmlFor="username">Username</label>
+                            <label htmlFor="email">Email</label>
                             <input
-                                type="text"
-                                id="username"
-                                placeholder="Enter your username"
-                                value={username}
-                                onChange={(e) => setUsername(e.target.value)}
+                                type="email"
+                                id="email"
+                                placeholder="Enter your email"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
                                 required
                             />
                         </div>
