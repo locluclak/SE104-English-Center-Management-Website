@@ -1,70 +1,98 @@
 import React, { useState } from 'react';
-import './Student.css'; // Thêm file CSS để style
+import './Student.css';
+import { FaHome, FaBell, FaSearch, FaUserCircle, FaPlus } from 'react-icons/fa';
+import { HiOutlineCalendar } from 'react-icons/hi';
 
 const StudentPage = () => {
-  // State để quản lý tab đang hoạt động
-  const [activeTab, setActiveTab] = useState('classes');
-
-  // Dữ liệu mẫu về các khóa học
-  const courses = [
-    { id: 1, name: 'Speaking - Writing 400', description: 'Learn the basics of web development.' },
-    { id: 2, name: 'Listening - Reading 500', description: 'Dive into data analysis and machine learning.' },
+  const [activeTab, setActiveTab] = useState('home');
+  const [courses, setCourses] = useState([
     
-    // Thêm các khóa học khác vào đây
-  ];
+  ]);
+
+  // Khởi tạo state cho ngày tháng
+  const today = new Date();
+  const tomorrow = new Date(today);
+  tomorrow.setDate(today.getDate() + 1);
+
+  const formatDate = (date) => {
+    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+    return date.toLocaleDateString('en-US', options);
+  };
+
+  const formatDateRange = (start, end) => {
+    const startOptions = { month: 'long', day: 'numeric' };
+    const endOptions = { day: 'numeric' };
+    const startDate = new Date(start);
+    const endDate = new Date(end);
+    return `${startDate.toLocaleDateString('en-US', startOptions)} to ${endDate.toLocaleDateString('en-US', endOptions)}`;
+  };
+
+  const nextThreeDaysStart = new Date();
+  nextThreeDaysStart.setDate(today.getDate() + 2);
+  const nextThreeDaysEnd = new Date();
+  nextThreeDaysEnd.setDate(today.getDate() + 4);
+
+  const may2025 = new Date(2025, 4, 20); // Tháng 4 là index 4 (0-based)
 
   return (
-    <div>
-      {/* Thanh điều hướng phía trên */}
-      <nav className="navbar">
-        <div className="navbar-container">
-          <div className="logo">EngToiec-Center</div>
-          <ul className="navbar-menu">
-            <li
-              onClick={() => setActiveTab('classes')}
-              className={activeTab === 'classes' ? 'active' : ''}
-            >
-              Classes
-            </li>
-            <li
-              onClick={() => setActiveTab('dashboard')}
-              className={activeTab === 'dashboard' ? 'active' : ''}
-            >
-              Dashboard
-            </li>
-            <li
-              onClick={() => setActiveTab('notification')}
-              className={activeTab === 'notification' ? 'active' : ''}
-            >
-              Notification
-            </li>
-            <li
-              onClick={() => setActiveTab('account')}
-              className={activeTab === 'account' ? 'active' : ''}
-            >
-              Account
-            </li>
-          </ul>
+    <div className="student-page">
+      {/* Header */}
+      <header className="student-header">
+        <div className="header-left">
+          <h1 className="logo">EngToeic-Center</h1>
         </div>
+        <div className="header-center">
+          <div className="search-bar">
+            <FaSearch className="search-icon" />
+            <input type="text" placeholder="Tìm kiếm..." />
+          </div>
+        </div>
+        <div className="header-right">
+          <div className="notification-icon">
+            <FaBell />
+            {/* Bạn có thể thêm badge thông báo nếu cần */}
+          </div>
+          <div className="account-icon">
+            <FaUserCircle />
+          </div>
+        </div>
+      </header>
+
+      {/* Navigation Bar */}
+      <nav className="main-nav">
+        <ul>
+          <li
+            onClick={() => setActiveTab('home')}
+            className={activeTab === 'home' ? 'active' : ''}
+          >
+            <FaHome className="nav-icon" />
+            <span></span>
+          </li>
+          <li
+            onClick={() => setActiveTab('classes')}
+            className={activeTab === 'classes' ? 'active' : ''}
+          >
+            <span>Classes</span>
+          </li>
+          <li
+            onClick={() => setActiveTab('dashboard')}
+            className={activeTab === 'dashboard' ? 'active' : ''}
+          >
+            <span>Dashboard</span>
+          </li>
+        </ul>
       </nav>
 
-      {/* Phần nội dung của trang */}
+      {/* Content */}
       <div className="content">
-        {activeTab === 'classes' && (
-          <div className="courses-list">
-            <h2>Courses Available</h2>
-            <ul>
-              {courses.map((course) => (
-                <li key={course.id}>
-                  <h3>{course.name}</h3>
-                  <p>{course.description}</p>
-                </li>
-              ))}
-            </ul>
+        {activeTab === 'home' && (
+          <div className="home-content">
+            {/* Nội dung trang chủ có thể để trống hoặc thêm các thành phần khác */}
           </div>
         )}
 
-        {activeTab === 'dashboard' && <div>Dashboard Content</div>}
+        {activeTab === 'classes' && <div>My Courses Content</div>}
+        {activeTab === 'dashboard' && <div>Assignment</div>}
         {activeTab === 'notification' && <div>Notification Content</div>}
         {activeTab === 'account' && <div>Account Content</div>}
       </div>
