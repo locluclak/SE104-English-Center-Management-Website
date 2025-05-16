@@ -59,6 +59,7 @@
   background-color: #FFC872;
   padding: 10px 30px;
   border-bottom: 1px solid #dee2e6;
+  ;
 }
 
 .main-nav ul {
@@ -68,7 +69,11 @@
   display: flex;
   align-items: center;
   width: 100%; /* Đảm bảo ul cũng chiếm hết chiều rộng */
+<<<<<<< HEAD
   justify-content: flex-end; /* Căn các mục menu về bên phải */
+=======
+  justify-content: flex-end; /* Căn các mục menu về bên trái */
+>>>>>>> 07422fa (Add react-icons dependency and update AdminPage styles for navigation)
 }
 
 .main-nav li {
@@ -90,7 +95,13 @@
 }
 
 .main-nav .nav-icon {
+  display: flex;             /* làm flex container */
+  align-items: center;       /* căn giữa theo chiều dọc */
+  justify-content: center;   /* căn giữa theo chiều ngang (nếu cần) */
+  width: 24px;               /* đặt kích thước cố định */
+  height: 24px;
   margin-right: 5px;
+  padding: 0;
 }
 
 /* Content Styles */
