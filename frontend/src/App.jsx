@@ -6,7 +6,7 @@ import OtpForm from './pages/Otpform';
 import ForgotPassword from './pages/Forgotpassword';
 import ResetPassword from './pages/Resetpassword';
 import StudentPage from './pages/Student'; // Đảm bảo đường dẫn chính xác
-import AdminPage from './pages/AdminPage';
+import AdminPage from './pages/Admin';
 
 function App() {
   return (
