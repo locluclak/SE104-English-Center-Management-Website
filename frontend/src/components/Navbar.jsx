@@ -40,5 +40,3 @@ const Navbar = ({ role, links, activeTab, setActiveTab }) => {
 };
 
 export default Navbar;
-
-export default Navbar;
