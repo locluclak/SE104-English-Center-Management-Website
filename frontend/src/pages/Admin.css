@@ -69,11 +69,7 @@
   display: flex;
   align-items: center;
   width: 100%; /* Đảm bảo ul cũng chiếm hết chiều rộng */
-<<<<<<< HEAD
   justify-content: flex-end; /* Căn các mục menu về bên phải */
-=======
-  justify-content: flex-end; /* Căn các mục menu về bên trái */
->>>>>>> 07422fa (Add react-icons dependency and update AdminPage styles for navigation)
 }
 
 .main-nav li {
