@@ -1,0 +1,48 @@
+/* Giao diện tổng thể */
+.navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #ffe4b5;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    height: 40px;
+  }
+  
+  /* Trái: logo */
+  .navbar-left .logo {
+    font-weight: bold;
+    font-size: 1.5rem;
+    white-space: nowrap;
+  }
+  
+  /* Giữa: các nút menu */
+  .navbar-center {
+    display: flex;
+    gap: 2rem;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  
+  .navbar-center li {
+    cursor: pointer;
+  }
+  
+  .navbar-center li.active {
+    font-weight: bold;
+    border-bottom: 2px solid black;
+  }
+  
+  /* Phải: icon */
+  .navbar-right {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+  }
+  
+  .icon {
+    font-size: 1.5rem;
+    cursor: pointer;
+  }
+  
