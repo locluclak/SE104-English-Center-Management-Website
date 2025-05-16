@@ -69,7 +69,7 @@
   display: flex;
   align-items: center;
   width: 100%; /* Đảm bảo ul cũng chiếm hết chiều rộng */
-  justify-content: flex-end; /* Căn các mục menu về bên phải */
+  justify-content: flex-end; 
 }
 
 .main-nav li {
