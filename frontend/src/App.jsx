@@ -6,13 +6,13 @@ import OtpForm from './pages/Otpform';
 import ForgotPassword from './pages/Forgotpassword';
 import ResetPassword from './pages/Resetpassword';
 import StudentPage from './pages/Student'; // Đảm bảo đường dẫn chính xác
-import AdminPage from './pages/AdminPage';
+import AdminPage from './pages/Admin';
 
 function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Navigate to="/student" />} />
+        <Route path="/" element={<Navigate to="/admin" />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/otp" element={<OtpForm />} />
