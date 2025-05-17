@@ -1,16 +1,13 @@
--------- Delete exist database
+-- Delete existing database
 
 USE ENGLISH_CENTER_DATABASE;
 DROP DATABASE ENGLISH_CENTER_DATABASE;
 
-
-
-
-
---------- Create new database
+-- Create new database
 CREATE DATABASE ENGLISH_CENTER_DATABASE;
 USE ENGLISH_CENTER_DATABASE;
 
+-- Create PERSON table
 CREATE TABLE PERSON (
     ID INT PRIMARY KEY AUTO_INCREMENT,
     NAME VARCHAR(100),
@@ -21,6 +18,7 @@ CREATE TABLE PERSON (
     PASSWORD VARCHAR(255)
 );
 
+-- Create STUDENT table
 CREATE TABLE STUDENT (
     ID INT,
     ENROLL_DATE DATE,
@@ -28,6 +26,7 @@ CREATE TABLE STUDENT (
     FOREIGN KEY (ID) REFERENCES PERSON(ID)
 );
 
+-- Create STAFF table
 CREATE TABLE STAFF (
     ID INT PRIMARY KEY,
     HIRE_DAY DATE,
@@ -35,6 +34,7 @@ CREATE TABLE STAFF (
     FOREIGN KEY (ID) REFERENCES PERSON(ID)
 );
 
+-- Create COURSE table
 CREATE TABLE COURSE (
     COURSE_ID INT PRIMARY KEY AUTO_INCREMENT,
     NAME VARCHAR(100) NOT NULL,
@@ -42,9 +42,11 @@ CREATE TABLE COURSE (
     START_DATE DATE,
     END_DATE DATE,
     MIN_STU INT,
-    MAX_STU INT
+    MAX_STU INT,
+    NUMBER_STU INT DEFAULT 0
 );
 
+-- Create TUITION table
 CREATE TABLE TUITION (
     T_ID INT PRIMARY KEY AUTO_INCREMENT,
     PRICE DECIMAL(12, 0) NOT NULL,
@@ -53,6 +55,7 @@ CREATE TABLE TUITION (
     STATUS ENUM('UNPAID', 'PAID', 'DEFERRED') DEFAULT 'UNPAID'
 );
 
+-- Create STUDENT_COURSE table
 CREATE TABLE STUDENT_COURSE (
     STUDENT_ID INT,
     COURSE_ID INT,
@@ -63,6 +66,7 @@ CREATE TABLE STUDENT_COURSE (
     FOREIGN KEY (PAYMENT_ID) REFERENCES TUITION(T_ID)
 );
 
+-- Create TEACHER_COURSE table
 CREATE TABLE TEACHER_COURSE (
     TEACHER_ID INT,
     COURSE_ID INT,
@@ -72,26 +76,29 @@ CREATE TABLE TEACHER_COURSE (
     FOREIGN KEY (COURSE_ID) REFERENCES COURSE(COURSE_ID)
 );
 
+-- Create ASSIGNMENT table
 CREATE TABLE ASSIGNMENT (
     AS_ID INT PRIMARY KEY AUTO_INCREMENT,
     NAME VARCHAR(100) NOT NULL,
     DESCRIPTION TEXT,
-    FILE VARCHAR(255), -- link
+    FILE VARCHAR(255), -- file link
     START_DATE DATETIME,
     END_DATE DATETIME,
     COURSE_ID INT,
     FOREIGN KEY (COURSE_ID) REFERENCES COURSE(COURSE_ID)
 );
 
+-- Create DOCUMENT table
 CREATE TABLE DOCUMENT (
     DOC_ID INT PRIMARY KEY AUTO_INCREMENT,
     NAME VARCHAR(100) NOT NULL,
     DESCRIPTION TEXT,
-    FILE VARCHAR(255),  -- link
+    FILE VARCHAR(255),  -- file link
     COURSE_ID INT,
     FOREIGN KEY (COURSE_ID) REFERENCES COURSE(COURSE_ID)
 );
 
+-- Create SUBMITION table
 CREATE TABLE SUBMITION (
     STUDENT_ID INT,
     AS_ID INT,
@@ -104,18 +111,56 @@ CREATE TABLE SUBMITION (
     FOREIGN KEY (AS_ID) REFERENCES ASSIGNMENT(AS_ID)
 );
 
---------------- Constraint 
+-- Trigger: Increase NUMBER_STU in COURSE when a student is added to STUDENT_COURSE
+DELIMITER $$
+CREATE TRIGGER trg_increment_number_stu
+AFTER INSERT ON STUDENT_COURSE
+FOR EACH ROW
+BEGIN
+    UPDATE COURSE
+    SET NUMBER_STU = NUMBER_STU + 1
+    WHERE COURSE_ID = NEW.COURSE_ID;
+END$$
+DELIMITER ;
 
+-- Trigger: Decrease NUMBER_STU in COURSE when a student is removed from STUDENT_COURSE
+DELIMITER $$
+CREATE TRIGGER trg_decrement_number_stu
+AFTER DELETE ON STUDENT_COURSE
+FOR EACH ROW
+BEGIN
+    UPDATE COURSE
+    SET NUMBER_STU = NUMBER_STU - 1
+    WHERE COURSE_ID = OLD.COURSE_ID;
+END$$
+DELIMITER ;
 
---------------- Insert data
+-- Trigger: Adjust NUMBER_STU in COURSE when COURSE_ID is changed in STUDENT_COURSE
+DELIMITER $$
+CREATE TRIGGER trg_update_number_stu
+AFTER UPDATE ON STUDENT_COURSE
+FOR EACH ROW
+BEGIN
+    IF OLD.COURSE_ID <> NEW.COURSE_ID THEN
+        -- Decrease NUMBER_STU for the old course
+        UPDATE COURSE
+        SET NUMBER_STU = NUMBER_STU - 1
+        WHERE COURSE_ID = OLD.COURSE_ID;
+        -- Increase NUMBER_STU for the new course
+        UPDATE COURSE
+        SET NUMBER_STU = NUMBER_STU + 1
+        WHERE COURSE_ID = NEW.COURSE_ID;
+    END IF;
+END$$
+DELIMITER ;
 
--- Insert into PERSON table
+-- Insert sample data into PERSON table
 INSERT INTO PERSON (NAME, EMAIL, PHONE_NUMBER, DATE_OF_BIRTH, ROLE, PASSWORD)
 VALUES 
 ('Alice Johnson', 'alice@example.com', '123-456-7890', '2000-05-15', 'STUDENT', 'hashedpassword1'),
 ('Bob Smith', 'bob@example.com', '234-567-8901', '1985-09-20', 'STAFF', 'hashedpassword2'),
 ('Charlie Davis', 'charlie@example.com', '345-678-9012', '1995-02-10', 'STUDENT', 'hashedpassword3'),
-('ADMIN ROOT', 'root@gmail.com', '456-789-0123', '1978-11-03', 'STAFF', '$2b$10$aqT9n/DCyJCSvSwbTsL.VeOjvBcnjHZDQSZvv/Bd7Mm/9zgcOfAbe'),
+('SUPER ADMIN', 'root@gmail.com', '456-789-0123', '1978-11-03', 'STAFF', '$2b$10$aqT9n/DCyJCSvSwbTsL.VeOjvBcnjHZDQSZvv/Bd7Mm/9zgcOfAbe'),
 ('Edward Blake', 'edward@example.com', '567-890-1234', '1998-04-12', 'STUDENT', 'hashedpassword5'),
 ('Fiona Grey', 'fiona@example.com', '678-901-2345', '1982-12-05', 'STAFF', 'hashedpassword6'),
 ('George King', 'george@example.com', '789-012-3456', '2001-07-30', 'STUDENT', 'hashedpassword7'),
@@ -123,7 +168,7 @@ VALUES
 ('Ian Sharp', 'ian@example.com', '901-234-5678', '1990-06-25', 'STUDENT', 'hashedpassword9'),
 ('Julia Stone', 'julia@example.com', '012-345-6789', '1987-01-09', 'STAFF', 'hashedpassword10');
 
--- Insert into STUDENT table
+-- Insert sample data into STUDENT table
 INSERT INTO STUDENT (ID, ENROLL_DATE)
 VALUES 
 (1, '2019-09-01'),
@@ -132,7 +177,7 @@ VALUES
 (7, '2022-01-10'),
 (9, '2023-03-05');
 
--- Insert into STAFF table
+-- Insert sample data into STAFF table
 INSERT INTO STAFF (ID, HIRE_DAY, STAFF_TYPE)
 VALUES 
 (2, '2010-06-10', 'TEACHER'),
