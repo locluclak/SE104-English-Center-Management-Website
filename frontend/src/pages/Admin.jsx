@@ -1,19 +1,14 @@
 import React, { useState } from 'react';
-import { FaHome, FaPlus } from 'react-icons/fa';
 import Navbar from '../components/Navbar';
 import SidebarSearch from '../components/SidebarSearch';
+import AddClassForm from '../components/AddClassForm'; // bạn cần tạo file này
 import './Admin.css';
 
 const AdminPage = () => {
   const [activeTab, setActiveTab] = useState('home');
-
-  const handleAddClassClick = () => {
-    console.log('Add New Class clicked');
-  };
-
-  const handleStaffManagementClick = (staffType) => {
-    setActiveTab(staffType);
-  };
+  const [searchQuery, setSearchQuery] = useState('');
+  const [items, setItems] = useState(['']);
+  const [showClassForm, setShowClassForm] = useState(false);
 
   const adminLinks = [
     { key: 'classes', name: 'Classes' },
@@ -21,21 +16,26 @@ const AdminPage = () => {
     { key: 'staffs', name: 'Staffs' },
   ];
 
-  const [searchQuery, setSearchQuery] = useState('');
-  const [items, setItems] = useState(['']);
-  
   const handleSearch = (query) => {
     setSearchQuery(query);
   };
-  
+
   const handleNew = () => {
-    alert('Thêm mới');
+    if (activeTab === 'classes') {
+      setShowClassForm(true);
+    } else {
+      alert('Thêm mới');
+    }
   };
-  
-  const filteredItems = items.filter(item =>
+
+  const handleStaffManagementClick = (staffType) => {
+    setActiveTab(staffType);
+  };
+
+  const filteredItems = items.filter((item) =>
     item.toLowerCase().includes(searchQuery.toLowerCase())
   );
-  
+
   return (
     <div className="admin-container">
       <Navbar
@@ -47,17 +47,24 @@ const AdminPage = () => {
 
       <div className="admin-body">
         <SidebarSearch
+          activeTab={activeTab}
           items={filteredItems}
           onSearch={handleSearch}
           onNew={handleNew}
         />
 
         <div className="content">
-          {activeTab === 'home' && (
-            <div className="dashboard"></div>
-          )}
+          {activeTab === 'home' && <div className="dashboard"></div>}
 
-          {activeTab === 'classes' && (<div className="class-management-page"></div>)}
+          {activeTab === 'classes' && (
+            <div className="class-management-page">
+              {showClassForm ? (
+                <AddClassForm onClose={() => setShowClassForm(false)} />
+              ) : (
+                <p>Chọn lớp hoặc bấm "Add" để tạo lớp mới.</p>
+              )}
+            </div>
+          )}
 
           {activeTab === 'staff' && (
             <div className="staff-management-page">

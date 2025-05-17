@@ -1,57 +1,119 @@
-  .sidebar-search {
-    width: 250px;
-    height: 100px;
-    background: linear-gradient(to bottom, #eaeaea, #ffffff);
-    border-right: 1px solid #ccc;
-    padding: 10px;
-    box-sizing: border-box;
-  }
-  
-  .search-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-  }
-  
-  .search-box {
-    position: relative;
-    flex-grow: 1;
-  }
-  
-  .search-box input {
-    width: 100%;
-    padding: 6px 28px 6px 10px;
-    border-radius: 6px;
-    border: 1px solid #ccc;
-  }
-  
-  .search-box .icon {
-    position: absolute;
-    right: 8px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #888;
-  }
-  
-  .new-button {
-    margin-left: 8px;
-    background: none;
-    border: none;
-    cursor: pointer;
-    font-size: 18px;
-    color: #555;
-  }
-  
-  .search-results {
-    margin-top: 20px;
-  }
-  
-  .search-item {
-    padding: 8px 4px;
-    color: #333;
-  }
-  
-  .search-item.bold {
-    font-weight: bold;
-  }
-  
+/* SidebarSearch.css */
+
+.sidebar-search {
+  width: 250px;
+  height: 100%; /* Make it full height of its parent */
+  background-color: #f9f9f9; /* Light gray background */
+  border-right: 1px solid #e0e0e0; /* Light gray right border */
+  padding: 15px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column; /* Arrange content vertically */
+  overflow-y: auto; /* Enable scrolling if content overflows */
+}
+
+.search-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 15px; /* Space between header and results */
+}
+
+.search-box {
+  position: relative;
+  flex-grow: 1; /* Allow search box to take available width */
+  height: 36px; /* Adjust height as needed */
+}
+
+.search-box input {
+  width: 100%;
+  padding: 8px 30px 8px 12px; /* Add padding for text and icon */
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  box-sizing: border-box;
+  font-size: 14px;
+}
+
+.search-box .icon {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #888;
+  pointer-events: none; /* Allow clicks through the icon */
+}
+
+.new-button {
+  margin-left: 10px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 20px;
+  color: #555;
+  outline: none; /* Remove default focus outline */
+}
+
+.search-results {
+  margin-top: 10px;
+}
+
+.search-item {
+  padding: 10px 8px;
+  color: #333;
+  cursor: pointer;
+  border-radius: 6px;
+}
+
+.search-item:hover {
+  background-color: #f0f0f0; /* Light background on hover */
+}
+
+.search-item.bold {
+  font-weight: bold;
+}
+
+/* Styles for the "Classes" and "Students" menus */
+.menu-items {
+  margin-top: 15px;
+}
+
+.menu-items h3 {
+  font-size: 16px;
+  color: #555;
+  margin-bottom: 8px;
+  padding-left: 8px;
+}
+
+.menu-item {
+  padding: 10px 12px;
+  color: #333;
+  cursor: pointer;
+  border-radius: 6px;
+}
+
+.menu-item:hover {
+  background-color: #e8f0fe; /* Light blue on hover for menu items */
+  color: #1e3a8a; /* Darker blue text on hover */
+}
+
+.menu-item.selected {
+  background-color: #dbeafe; /* Light blue background for selected item */
+  color: #1e3a8a; /* Darker blue text for selected item */
+  font-weight: bold;
+}
+
+.add-button {
+  background-color: #fbbf24;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  margin-top: 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+  width: 100%;
+}
+
+.add-button:hover {
+  background-color: #f59e0b;
+}
