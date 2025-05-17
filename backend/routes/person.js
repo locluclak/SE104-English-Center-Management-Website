@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const db = require('../db');
+const bcrypt = require('bcrypt'); // Import bcrypt for password hashing comparison
 
 // GET /person?email=...
 router.get('/', async (req, res) => {
@@ -32,6 +33,116 @@ router.get('/', async (req, res) => {
 
         conn.release();
         res.json(user);
+    } catch (err) {
+        console.error('DB error:', err);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// Middleware to check if the user is the root admin
+const isRootAdmin = async (req, res, next) => {
+    const { email, password } = req.query; // Expect both email and password as query parameters
+
+    if (!email || !password) {
+        return res.status(400).json({ error: 'Email and password are required' });
+    }
+
+    try {
+        const conn = await db.getConnection();
+        const [rows] = await conn.query('SELECT PASSWORD FROM PERSON WHERE EMAIL = ? AND ROLE = "STAFF"', [email]);
+
+        if (rows.length === 0) {
+            conn.release();
+            return res.status(403).json({ error: 'Access denied. Invalid credentials.' });
+        }
+
+        const isPasswordValid = await bcrypt.compare(password, rows[0].PASSWORD);
+        conn.release();
+
+        if (!isPasswordValid) {
+            return res.status(403).json({ error: 'Access denied. Invalid credentials.' });
+        }
+
+        if (email !== 'root@gmail.com') {
+            return res.status(403).json({ error: 'Access denied. Only the root admin can perform this action.' });
+        }
+
+        next();
+    } catch (err) {
+        console.error('DB error:', err);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};
+
+// Add a new route to get all teachers
+router.get('/teachers', async (req, res) => {
+    try {
+        const conn = await db.getConnection();
+        const [rows] = await conn.query(
+            `SELECT p.ID, p.NAME, p.EMAIL, p.PHONE_NUMBER, p.DATE_OF_BIRTH, s.HIRE_DAY 
+             FROM PERSON p
+             JOIN STAFF s ON p.ID = s.ID
+             WHERE s.STAFF_TYPE = 'TEACHER'`
+        );
+
+        conn.release();
+        res.json(rows);
+    } catch (err) {
+        console.error('DB error:', err);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// Add a new route to get all students
+router.get('/students', async (req, res) => {
+    try {
+        const conn = await db.getConnection();
+        const [rows] = await conn.query(
+            `SELECT p.ID, p.NAME, p.EMAIL, p.PHONE_NUMBER, p.DATE_OF_BIRTH, s.ENROLL_DATE
+             FROM PERSON p
+             JOIN STUDENT s ON p.ID = s.ID`
+        );
+
+        conn.release();
+        res.json(rows);
+    } catch (err) {
+        console.error('DB error:', err);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// Add a new route to get all accountants
+router.get('/accountants', async (req, res) => {
+    try {
+        const conn = await db.getConnection();
+        const [rows] = await conn.query(
+            `SELECT p.ID, p.NAME, p.EMAIL, p.PHONE_NUMBER, p.DATE_OF_BIRTH, s.HIRE_DAY
+             FROM PERSON p
+             JOIN STAFF s ON p.ID = s.ID
+             WHERE s.STAFF_TYPE = 'ACCOUNTANT'`
+        );
+
+        conn.release();
+        res.json(rows);
+    } catch (err) {
+        console.error('DB error:', err);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
+// Route to get all admin users
+router.get('/admins', isRootAdmin, async (req, res) => {
+    try {
+        const conn = await db.getConnection();
+        const [rows] = await conn.query(
+            `SELECT p.ID, p.NAME, p.EMAIL, p.PHONE_NUMBER, p.DATE_OF_BIRTH, s.HIRE_DAY
+             FROM PERSON p
+             JOIN STAFF s ON p.ID = s.ID
+             WHERE s.STAFF_TYPE = 'ADMIN'`
+        );
+
+        conn.release();
+        res.json(rows);
     } catch (err) {
         console.error('DB error:', err);
         res.status(500).json({ error: 'Internal server error' });
