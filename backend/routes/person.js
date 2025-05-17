@@ -39,40 +39,6 @@ router.get('/', async (req, res) => {
     }
 });
 
-// Middleware to check if the user is the root admin
-const isRootAdmin = async (req, res, next) => {
-    const { email, password } = req.query; // Expect both email and password as query parameters
-
-    if (!email || !password) {
-        return res.status(400).json({ error: 'Email and password are required' });
-    }
-
-    try {
-        const conn = await db.getConnection();
-        const [rows] = await conn.query('SELECT PASSWORD FROM PERSON WHERE EMAIL = ? AND ROLE = "STAFF"', [email]);
-
-        if (rows.length === 0) {
-            conn.release();
-            return res.status(403).json({ error: 'Access denied. Invalid credentials.' });
-        }
-
-        const isPasswordValid = await bcrypt.compare(password, rows[0].PASSWORD);
-        conn.release();
-
-        if (!isPasswordValid) {
-            return res.status(403).json({ error: 'Access denied. Invalid credentials.' });
-        }
-
-        if (email !== 'root@gmail.com') {
-            return res.status(403).json({ error: 'Access denied. Only the root admin can perform this action.' });
-        }
-
-        next();
-    } catch (err) {
-        console.error('DB error:', err);
-        res.status(500).json({ error: 'Internal server error' });
-    }
-};
 
 // Add a new route to get all teachers
 router.get('/teachers', async (req, res) => {
@@ -130,11 +96,28 @@ router.get('/accountants', async (req, res) => {
     }
 });
 
-// Route to get all admin users
-router.get('/admins', isRootAdmin, async (req, res) => {
+// API: Get all ADMINs if id belongs to SUPER ADMIN
+router.get('/admins', async (req, res) => {
+    const { id } = req.query;
+    if (!id) {
+        return res.status(400).json({ error: 'Missing id parameter' });
+    }
+
     try {
         const conn = await db.getConnection();
-        const [rows] = await conn.query(
+
+        // Check if the id belongs to SUPER ADMIN
+        const [superAdminRows] = await conn.query(
+            "SELECT NAME FROM PERSON WHERE ID = ? AND NAME = 'SUPER ADMIN'",
+            [id]
+        );
+        if (superAdminRows.length === 0) {
+            conn.release();
+            return res.status(403).json({ error: 'Access denied' });
+        }
+
+        // Get all ADMINs
+        const [adminRows] = await conn.query(
             `SELECT p.ID, p.NAME, p.EMAIL, p.PHONE_NUMBER, p.DATE_OF_BIRTH, s.HIRE_DAY
              FROM PERSON p
              JOIN STAFF s ON p.ID = s.ID
@@ -142,7 +125,7 @@ router.get('/admins', isRootAdmin, async (req, res) => {
         );
 
         conn.release();
-        res.json(rows);
+        res.json(adminRows);
     } catch (err) {
         console.error('DB error:', err);
         res.status(500).json({ error: 'Internal server error' });
