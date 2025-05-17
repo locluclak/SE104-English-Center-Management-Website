@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './SignUp.css';
+import { signup } from '../services/authService';
 
 function SignUp() {
   const [name, setName] = useState('');
@@ -17,47 +18,31 @@ function SignUp() {
     e.preventDefault();
     setError('');
 
-    // Mật khẩu và xác nhận mật khẩu
     if (password !== confirmPassword) {
       setError('Passwords do not match.');
       return;
     }
 
-    // Kiểm tra định dạng email
     const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
     if (!emailRegex.test(email)) {
       setError('Please enter a valid email address.');
       return;
     }
 
-    // Gọi API signup
     setLoading(true);
     try {
-      const response = await fetch('http://localhost:3000/signup', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name,
-          email,
-          password,
-          phoneNumber,
-          dateOfBirth: birthday,
-          role: 'STUDENT'
-        })
+      const data = await signup({
+        name,
+        email,
+        password,
+        phoneNumber,
+        dateOfBirth: birthday,
+        role: 'STUDENT',
       });
-
-      const data = await response.json();
-      if (!response.ok) {
-        // Lỗi từ server
-        setError(data.error || 'Signup failed.');
-      } else {
-        // Thành công, chuyển đến OTP hoặc login
-        alert(data.message || 'Registration successful!');
-        navigate('/CourseList');
-      }
+      alert(data.message || 'Registration successful!');
+      navigate('/CourseList');
     } catch (err) {
-      console.error(err);
-      setError('System error. Please try again later.');
+      setError(err.message);
     } finally {
       setLoading(false);
     }
