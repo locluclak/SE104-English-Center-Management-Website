@@ -1,63 +1,66 @@
 import React, { useEffect, useState } from 'react';
 import './SidebarSearch.css';
 
-function SidebarSearch({ activeTab, onSearch, onNew }) {
+function SidebarSearch({ role, activeTab, onSearch, onNew }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState([]);
 
-  useEffect(() => {
-    switch (activeTab) {
-      case 'classes':
-        setSearchResults(['Waiting', 'Current', 'End']);
-        break;
-      case 'students':
-        setSearchResults(['View All', 'Enrolled', 'Unenroll']);
-        break;
-      case 'staffs':
-        setSearchResults(['Admin', 'Teacher', 'Accountant']);
-        break;
-      default:
-        setSearchResults([]);
-    }
-    setSearchTerm('');
-  }, [activeTab]);
-
-  const handleSearchChange = (event) => {
-    setSearchTerm(event.target.value);
-    const allItems = {
+  // Menu items theo từng role
+  const itemsByRole = {
+    admin: {
       classes: ['Waiting', 'Current', 'End'],
       students: ['View All', 'Enrolled', 'Unenroll'],
       staffs: ['Admin', 'Teacher', 'Accountant'],
-    };
-    const filtered = allItems[activeTab]?.filter((item) =>
-      item.toLowerCase().includes(event.target.value.toLowerCase())
+    },
+    teacher: {
+      classes: ['Assigned', 'Completed'],
+      students: ['My Students'],
+    },
+    student: {
+      classes: ['My Classes', 'Available'],
+    },
+  };
+
+  // Cập nhật danh sách theo activeTab + role
+  useEffect(() => {
+    const items = itemsByRole[role]?.[activeTab] || [];
+    setSearchResults(items);
+    setSearchTerm('');
+  }, [activeTab, role]);
+
+  // Xử lý tìm kiếm
+  const handleSearchChange = (event) => {
+    const term = event.target.value;
+    setSearchTerm(term);
+
+    const fullList = itemsByRole[role]?.[activeTab] || [];
+    const filtered = fullList.filter(item =>
+      item.toLowerCase().includes(term.toLowerCase())
     );
-    setSearchResults(filtered || []);
+    setSearchResults(filtered);
   };
 
+  // Click từng item trong sidebar
   const handleItemClick = (item) => {
-    onItemSelected(item);
+    if (onSearch) onSearch(item);
   };
 
-  const getSidebarItems = () => {
-    switch (activeTab) {
-      case 'classes':
-        return ['Waiting', 'Current', 'End'];
-      case 'students':
-        return ['View All', 'Enrolled', 'Unenroll'];
-      case 'staffs':
-        return ['Admin', 'Teacher', 'Accountant'];
-      default:
-        return [];
-    }
+  // Hiển thị danh sách các item trong sidebar
+  const renderSidebarItems = () => {
+    return searchResults.map((item, index) => (
+      <div
+        key={index}
+        className="search-item"
+        onClick={() => handleItemClick(item)}
+      >
+        {item}
+      </div>
+    ));
   };
 
-  const [showClassForm, setShowClassForm] = useState(false);
-
-  const handleNew = () => {
-    if (activeTab === 'classes') {
-      setShowClassForm(true);
-    }
+  // Gọi khi bấm nút "Add"
+  const handleAddClick = () => {
+    if (onNew) onNew(); // gửi sự kiện lên component cha
   };
 
   return (
@@ -72,23 +75,14 @@ function SidebarSearch({ activeTab, onSearch, onNew }) {
           />
         </div>
 
-        {activeTab === 'classes' && (
-          <button className="add-button" onClick={onNew}>
-            + Add
-          </button>
+        {/* Nút Add cho admin ở tab Classes */}
+        {role === 'admin' && activeTab === 'classes' && (
+          <button className="new-button" onClick={handleAddClick}>＋</button>
         )}
       </div>
 
       <div className="search-results">
-        {getSidebarItems().map((item, index) => (
-          <div
-            key={index}
-            className="search-item"
-            onClick={() => console.log(`${activeTab} - ${item} clicked`)}
-          >
-            {item}
-          </div>
-        ))}
+        {renderSidebarItems()}
       </div>
     </div>
   );

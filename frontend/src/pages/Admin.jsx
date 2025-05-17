@@ -1,13 +1,12 @@
 import React, { useState } from 'react';
 import Navbar from '../components/Navbar';
 import SidebarSearch from '../components/SidebarSearch';
-import AddClassForm from '../components/AddClassForm'; // bạn cần tạo file này
+import ClassesTab from '../components/AdminPage/ClassesTab';
 import './Admin.css';
 
 const AdminPage = () => {
   const [activeTab, setActiveTab] = useState('home');
-  const [searchQuery, setSearchQuery] = useState('');
-  const [items, setItems] = useState(['']);
+  const [selectedStatus, setSelectedStatus] = useState('');
   const [showClassForm, setShowClassForm] = useState(false);
 
   const adminLinks = [
@@ -16,10 +15,6 @@ const AdminPage = () => {
     { key: 'staffs', name: 'Staffs' },
   ];
 
-  const handleSearch = (query) => {
-    setSearchQuery(query);
-  };
-
   const handleNew = () => {
     if (activeTab === 'classes') {
       setShowClassForm(true);
@@ -27,14 +22,6 @@ const AdminPage = () => {
       alert('Thêm mới');
     }
   };
-
-  const handleStaffManagementClick = (staffType) => {
-    setActiveTab(staffType);
-  };
-
-  const filteredItems = items.filter((item) =>
-    item.toLowerCase().includes(searchQuery.toLowerCase())
-  );
 
   return (
     <div className="admin-container">
@@ -47,25 +34,22 @@ const AdminPage = () => {
 
       <div className="admin-body">
         <SidebarSearch
+          role="admin"
           activeTab={activeTab}
-          items={filteredItems}
-          onSearch={handleSearch}
-          onNew={handleNew}
+          onSearch={(item) => setSelectedStatus(item)} // << ĐỔI thành setSelectedStatus
+          onNew={handleNew} // << DÙNG HÀM ĐÃ VIẾT
         />
 
         <div className="content">
-          {activeTab === 'home' && <div className="dashboard"></div>}
-
           {activeTab === 'classes' && (
-            <div className="class-management-page">
-              {showClassForm ? (
-                <AddClassForm onClose={() => setShowClassForm(false)} />
-              ) : (
-                <p>Chọn lớp hoặc bấm "Add" để tạo lớp mới.</p>
-              )}
-            </div>
+            <ClassesTab
+              selectedStatus={selectedStatus}
+              showClassForm={showClassForm}
+              setShowClassForm={setShowClassForm}
+            />
           )}
 
+          {/* TAB STAFF */}
           {activeTab === 'staff' && (
             <div className="staff-management-page">
               <h2>Staff Management</h2>
@@ -77,6 +61,7 @@ const AdminPage = () => {
             </div>
           )}
 
+          {/* CÁC PHÂN MỤC CON */}
           {activeTab === 'admins' && <h2>Admin Management</h2>}
           {activeTab === 'teachers' && <h2>Teacher Management</h2>}
           {activeTab === 'accountants' && <h2>Accountant Management</h2>}
