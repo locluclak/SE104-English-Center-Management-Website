@@ -1,10 +1,8 @@
 /* SidebarSearch.css */
-
 .sidebar-search {
   width: 250px;
-  height: 100vx; /* Make it full height of its parent */
-  background-color: #f9f9f9; /* Light gray background */
-  border-right: 1px solid #e0e0e0; /* Light gray right border */
+  background-color: #edf2fb; 
+  border-right: 1px solid #edf2fb; 
   padding: 15px;
   box-sizing: border-box;
   display: flex;
@@ -45,11 +43,11 @@
 
 .new-button {
   margin-left: 10px;
-  background-color: #ffe4b5;
-  background: none;
-  border: 1;
+  background-color: #c1d3fe;
+  background: 1;
+  border: 1px solid #ccc;
   cursor: pointer;
-  font-size: 10px;
+  font-size: 12px;
   color: black;
   outline: none; /* Remove default focus outline */
 }
@@ -60,7 +58,7 @@
 
 .search-item {
   padding: 10px 8px;
-  color: #333;
+  color: black;
   cursor: pointer;
   border-radius: 6px;
 }
@@ -70,6 +68,12 @@
 }
 
 .search-item.bold {
+  font-weight: bold;
+}
+
+.search-item.selected {
+  background-color: #c1d3fe; 
+  color: black;         
   font-weight: bold;
 }
 
@@ -103,18 +107,3 @@
   font-weight: bold;
 }
 
-.add-button {
-  background-color: #ffe4b5;
-  color: white;
-  border: none;
-  padding: 8px 12px;
-  margin-top: 10px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: bold;
-  width: 100%;
-}
-
-.add-button:hover {
-  background-color: #ffe4b5;
-}

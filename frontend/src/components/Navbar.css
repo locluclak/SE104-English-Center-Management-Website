@@ -1,6 +1,6 @@
 .navbar-container {
   width: 100%;
-  background-color: #ffe4b5;
+  background-color: #abc4ff;
   border-radius: 10px 10px 0 0;
   height: 5%;
 }
@@ -9,7 +9,7 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: #ffe4b5;
+  background-color: #c1d3fe;
   padding: 0.5rem 1rem;
   border-radius: 8px;
   height: 40px;

@@ -6,159 +6,10 @@
   font-family: sans-serif;
 }
 
-/* Header Styles */
-.admin-header {
-  background-color: #FFE3B3;
-  color: black;
-  padding: 15px 30px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.header-left .logo {
-  margin: 0;
-  font-size: 24px;
-}
-
-.header-center .search-bar {
-  display: flex;
-  align-items: center;
-  background-color: #f8f9fa;
-  border-radius: 5px;
-  padding: 5px 15px;
-}
-
-.header-center .search-icon {
-  color: #6c757d;
-  margin-right: 10px;
-}
-
-.header-center input[type="text"] {
-  border: none;
-  background: transparent;
-  padding: 8px;
-  width: 500px;
-  outline: none;
-}
-
-.header-right {
-  display: flex;
-  align-items: center;
-}
-
-.header-right .notification-icon,
-.header-right .account-icon {
-  font-size: 25px;
-  margin-left: 20px;
-  cursor: pointer;
-}
-
-/* Navigation Bar Styles */
-.main-nav {
-  background-color: #FFC872;
-  padding: 10px 30px;
-  border-bottom: 1px solid #dee2e6;
-  ;
-}
-
-.main-nav ul {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: flex;
-  align-items: center;
-  width: 100%; /* Đảm bảo ul cũng chiếm hết chiều rộng */
-  justify-content: flex-end; 
-}
-
-.main-nav li {
-  margin-right: 50px;
-}
-
-.main-nav li:last-child {
-  margin-right: 0;
-}
-
-.main-nav li.active span {
-  font-weight: bold;
-}
-
-.main-nav li span {
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-}
-
-.main-nav .nav-icon {
-  display: flex;             /* làm flex container */
-  align-items: center;       /* căn giữa theo chiều dọc */
-  justify-content: center;   /* căn giữa theo chiều ngang (nếu cần) */
-  width: 24px;               /* đặt kích thước cố định */
-  height: 24px;
-  margin-right: 5px;
-  padding: 0;
-}
-
 /* Content Styles */
 .content {
+  flex-grow: 1;
   padding: 20px;
-}
-
-
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 20px;
-  margin-top: 20px;
-}
-
-.stat-card {
-  background-color: #fff;
-  padding: 20px;
-  border-radius: 5px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
-}
-
-.stat-card h3 {
-  margin-top: 0;
-  color: #343a40;
-}
-
-.stat-card p {
-  font-size: 1.5em;
-  color: #FFC872;
-  margin-bottom: 0;
-}
-
-/* Class Management Page Styles */
-.class-management-page {
-  padding: 20px;
-}
-
-.class-management-page h2 {
-  margin-top: 0;
-  margin-bottom: 20px;
-}
-
-.class-management-page .add-class-button {
-  background-color: #FFC872;
-  color: white;
-  border: none;
-  padding: 10px 15px;
-  border-radius: 5px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  font-size: 1em;
-}
-
-.class-management-page .add-class-button .add-icon {
-  margin-right: 5px;
-}
-
-.class-management-page .add-class-button:hover {
-  background-color: #FFC872;
 }
 
 /* Staff Management Page Styles */
@@ -191,31 +42,36 @@
   background-color: #FFC872;
 }
 
-/* Admin, Teacher, Accountant Pages Styles */
-.admin-page,
-.teacher-page,
-.accountant-page,
-.point-report-page {
-  padding: 20px;
-}
-
-.admin-page h2,
-.teacher-page h2,
-.accountant-page h2,
-.point-report-page h2 {
-  margin-top: 0;
-}
-
 .admin-body {
   display: flex;
 }
 
-.sidebar-search {
-  width: 250px;
-  border-right: 1px solid #ccc;
+/* Student List Table Styles */
+.student-table-container {
+  margin-top: 20px;
+  overflow-x: auto;
 }
 
-.content {
-  flex-grow: 1;
-  padding: 20px;
+.student-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #edf2fb;
+  font-size: 15px;
+}
+
+.student-table th,
+.student-table td {
+  padding: 10px 10px;
+  border: 1px solid #ccc;
+  text-align: left;
+}
+
+.student-table th {
+  background-color: #ccdbfd;
+  color: #333;
+  font-weight: bold;
+}
+
+.student-table tbody tr:hover {
+  background-color: #ccdbfd;
 }

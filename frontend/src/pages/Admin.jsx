@@ -2,12 +2,32 @@ import React, { useState } from 'react';
 import Navbar from '../components/Navbar';
 import SidebarSearch from '../components/SidebarSearch';
 import ClassesTab from '../components/AdminPage/ClassesTab';
+import StudentListFull from '../components/AdminPage/StudentListFull';
+import StudentListBasic from '../components/AdminPage/StudentListBasic';
 import './Admin.css';
 
 const AdminPage = () => {
   const [activeTab, setActiveTab] = useState('home');
   const [selectedStatus, setSelectedStatus] = useState('');
   const [showClassForm, setShowClassForm] = useState(false);
+
+  {/* Lấy dữ liệu từ API: phần mockStudents có thể thay bằng state từ useEffect + fetch */}
+  const mockStudents = [
+    {
+      id: 'S001',
+      name: 'Alice Nguyen',
+      email: 'alice@example.com',
+      password: 'password123',
+      status: 'Enrolled',
+    },
+    {
+      id: 'S002',
+      name: 'Bob Tran',
+      email: 'bob@example.com',
+      password: 'abc123',
+      status: 'Unenroll',
+    },
+  ];
 
   const adminLinks = [
     { key: 'classes', name: 'Classes' },
@@ -47,6 +67,23 @@ const AdminPage = () => {
               showClassForm={showClassForm}
               setShowClassForm={setShowClassForm}
             />
+          )}
+
+          {/* TAB STUDENTS */}
+          {activeTab === 'students' && (
+            <>
+              {selectedStatus === 'View All' && (
+                <StudentListFull students={mockStudents} />
+              )}
+
+              {(selectedStatus === 'Enrolled' || selectedStatus === 'Unenroll') && (
+                <StudentListBasic
+                  students={mockStudents.filter(
+                    (student) => student.status === selectedStatus
+                  )}
+                />
+              )}
+            </>
           )}
 
           {/* TAB STAFF */}

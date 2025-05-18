@@ -26,7 +26,11 @@ function SidebarSearch({ role, activeTab, onSearch, onNew }) {
     const items = itemsByRole[role]?.[activeTab] || [];
     setSearchResults(items);
     setSearchTerm('');
-  }, [activeTab, role]);
+    if (items.length > 0) {
+      setSelectedItem(items[0]); // Mặc định chọn mục đầu tiên
+      if (onSearch) onSearch(items[0]); // Gửi callback về cha
+    }
+  }, [activeTab, role]);  
 
   // Xử lý tìm kiếm
   const handleSearchChange = (event) => {
@@ -41,7 +45,10 @@ function SidebarSearch({ role, activeTab, onSearch, onNew }) {
   };
 
   // Click từng item trong sidebar
+  const [selectedItem, setSelectedItem] = useState('');
+
   const handleItemClick = (item) => {
+    setSelectedItem(item); // lưu item được chọn
     if (onSearch) onSearch(item);
   };
 
@@ -50,7 +57,7 @@ function SidebarSearch({ role, activeTab, onSearch, onNew }) {
     return searchResults.map((item, index) => (
       <div
         key={index}
-        className="search-item"
+        className={`search-item ${item === selectedItem ? 'selected' : ''}`}
         onClick={() => handleItemClick(item)}
       >
         {item}
@@ -76,7 +83,7 @@ function SidebarSearch({ role, activeTab, onSearch, onNew }) {
         </div>
 
         {/* Nút Add cho admin ở tab Classes */}
-        {role === 'admin' && activeTab === 'classes' && (
+        {role === 'admin' && (
           <button className="new-button" onClick={handleAddClick}>＋</button>
         )}
       </div>

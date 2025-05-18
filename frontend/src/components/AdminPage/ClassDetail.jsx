@@ -40,7 +40,7 @@ const ClassDetail = ({ className, selectedStatus, onBack }) => {
       {/* Tabs */}
       {selectedStatus === 'Waiting' ? (
         <>
-          <button onClick={() => setShowAddStudent(!showAddStudent)}>
+          <button className="add-student" onClick={() => setShowAddStudent(!showAddStudent)}>
             + Add Student
           </button>
 
@@ -62,7 +62,7 @@ const ClassDetail = ({ className, selectedStatus, onBack }) => {
                   setNewStudent({ ...newStudent, email: e.target.value })
                 }
               />
-              <button onClick={handleAddStudent}>Add</button>
+              <button className="add-button" onClick={handleAddStudent}>Add</button>
             </div>
           )}
         </>

@@ -43,7 +43,7 @@ textarea {
 }
 
 .add-student-btn {
-  background-color: #ffe4b5;
+  background-color: #c1d3fe;
   border: 1px solid #ccc;
   padding: 6px 10px;
   border-radius: 6px;
@@ -61,6 +61,6 @@ button[type="button"]:not(.add-student-btn) {
   padding: 8px 14px;
   border-radius: 6px;
   border: 1px solid #ccc;
-  background-color: #ffe4b5;
+  background-color: #c1d3fe;
   cursor: pointer;
 }
