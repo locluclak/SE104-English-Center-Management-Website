@@ -10,7 +10,7 @@ function SidebarSearch({ role, activeTab, onSearch, onNew }) {
     admin: {
       classes: ['Waiting', 'Current', 'End'],
       students: ['View All', 'Enrolled', 'Unenroll'],
-      staffs: ['Admin', 'Teacher', 'Accountant'],
+      staffs: ['Teacher', 'Accountant'],
     },
     teacher: {
       classes: ['Assigned', 'Completed'],

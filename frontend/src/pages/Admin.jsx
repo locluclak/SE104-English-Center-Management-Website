@@ -54,7 +54,6 @@ const AdminPage = () => {
             <div className="staff-management-page">
               <h2>Staff Management</h2>
               <div className="staff-options">
-                <button onClick={() => handleStaffManagementClick('admins')}>Admin</button>
                 <button onClick={() => handleStaffManagementClick('teachers')}>Teacher</button>
                 <button onClick={() => handleStaffManagementClick('accountants')}>Accountant</button>
               </div>
@@ -65,7 +64,6 @@ const AdminPage = () => {
           {activeTab === 'admins' && <h2>Admin Management</h2>}
           {activeTab === 'teachers' && <h2>Teacher Management</h2>}
           {activeTab === 'accountants' && <h2>Accountant Management</h2>}
-          {activeTab === 'pointReport' && <h2>Point Report</h2>}
         </div>
       </div>
     </div>
