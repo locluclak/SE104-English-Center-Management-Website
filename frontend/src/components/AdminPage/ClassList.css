@@ -1,0 +1,32 @@
+.class-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); /* responsive */
+  gap: 16px;
+  padding: 20px 0;
+}
+
+.class-card {
+  background-color: #fff5e1; /* mềm mại */
+  border: 1px solid #ffd59a;
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.class-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.class-card h3 {
+  margin-bottom: 8px;
+  font-size: 1.2rem;
+  color: #333;
+}
+
+.class-card p {
+  font-size: 0.95rem;
+  color: #666;
+}

@@ -1,0 +1,42 @@
+.class-detail-container {
+    padding: 20px;
+    background-color: #fffef8;
+    border-radius: 12px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  .back-btn {
+    margin-bottom: 10px;
+    background-color: #ffe4b5;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+  
+  .tabs {
+    display: flex;
+    gap: 12px;
+    margin: 16px 0;
+  }
+  
+  .tabs button {
+    padding: 8px 16px;
+    border: 1px solid #ccc;
+    background-color: #ffe4b5;
+    cursor: pointer;
+    border-radius: 8px;
+  }
+  
+  .tabs button.active {
+    font-weight: bold;
+    background-color: #ffd591;
+  }
+  
+  .tab-content {
+    padding: 12px;
+    background-color: #fff;
+    border: 1px solid #eee;
+    border-radius: 8px;
+  }
+  

@@ -63,7 +63,7 @@ const AddClassForm = ({ onClose }) => {
     ))}
 
     <div className="form-actions">
-      <button type="submit">Submit</button>
+      <button type="submit">Create</button>
       <button type="button" onClick={onClose}>Cancel</button>
     </div>
     </form>
