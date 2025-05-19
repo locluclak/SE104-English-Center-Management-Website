@@ -16,41 +16,39 @@ const StaffsTab = ({ staffType, data, onEdit, onDelete }) => {
   }
 
   return (
-    <div className="staffs-tab-container">
-      <h2>{title}</h2>
-      <table className="staff-table">
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Name</th>
-            <th>Email</th>
-            {staffType === 'teachers' && <th>Specialization</th>}
-            {staffType === 'accountants' && <th>Department</th>}
-            <th>Actions</th>
+  <div className="staffs-tab-container">
+    <h2>{title}</h2>
+    <table className="staff-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>Name</th>
+          <th>Birthday</th> {/* Thêm cột Birthday kế cột Name */}
+          <th>Email</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {data.map((staffMember) => (
+          <tr key={staffMember.id}>
+            <td>{staffMember.id}</td>
+            <td>{staffMember.name}</td>
+            <td>{staffMember.birthday || 'N/A'}</td> {/* Hiển thị birthday ngay sau name */}
+            <td>{staffMember.email}</td>
+            <td>
+              <button className="action-btn edit-btn" onClick={() => onEdit(staffMember.id, staffType)}>
+                Edit
+              </button>
+              <button className="action-btn delete-btn" onClick={() => onDelete(staffMember.id, staffType)}>
+                Delete
+              </button>
+            </td>
           </tr>
-        </thead>
-        <tbody>
-          {data.map((staffMember) => (
-            <tr key={staffMember.id}>
-              <td>{staffMember.id}</td>
-              <td>{staffMember.name}</td>
-              <td>{staffMember.email}</td>
-              {staffType === 'teachers' && <td>{staffMember.specialization || 'N/A'}</td>}
-              {staffType === 'accountants' && <td>{staffMember.department || 'N/A'}</td>}
-              <td>
-                <button className="action-btn edit-btn" onClick={() => onEdit(staffMember.id, staffType)}>
-                  Edit
-                </button>
-                <button className="action-btn delete-btn" onClick={() => onDelete(staffMember.id, staffType)}>
-                  Delete
-                </button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  );
+        ))}
+      </tbody>
+    </table>
+  </div>
+);
 };
 
 export default StaffsTab;
