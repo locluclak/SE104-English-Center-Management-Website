@@ -1,7 +1,19 @@
+import React, { useState } from 'react';
 import { FaBell, FaUserCircle } from 'react-icons/fa';
+import NotificationPopup from './NotificationPopup';
+import AccountPopup from './AccountPopup';  // import popup tài khoản
 import './Navbar.css';
 
 const Navbar = ({ role, links, activeTab, setActiveTab }) => {
+  const [showNotifications, setShowNotifications] = useState(false);
+  const [showAccountPopup, setShowAccountPopup] = useState(false);
+
+  const notifications = [
+    { id: 1, message: "Bạn có đơn đăng ký mới." },
+    { id: 2, message: "Lịch học hôm nay có thay đổi." },
+    { id: 3, message: "Phiên bản mới đã được cập nhật." },
+  ];
+
   return (
     <div className="navbar-container">
       <nav className="navbar">
@@ -23,8 +35,39 @@ const Navbar = ({ role, links, activeTab, setActiveTab }) => {
                 </li>
               ))}
           </ul>
-          <FaBell className="icon" />
-          <FaUserCircle className="icon" />
+
+          <div className="notification-wrapper" style={{ position: 'relative' }}>
+            <FaBell
+              className="icon"
+              onClick={() => {
+                setShowNotifications(!showNotifications);
+                if (showAccountPopup) setShowAccountPopup(false); // đóng popup account nếu đang mở
+              }}
+              title="Thông báo"
+              style={{ cursor: 'pointer' }}
+            />
+            <NotificationPopup
+              notifications={notifications}
+              visible={showNotifications}
+              onClose={() => setShowNotifications(false)}
+            />
+          </div>
+
+          <div className="account-wrapper" style={{ position: 'relative', marginLeft: 15 }}>
+            <FaUserCircle
+              className="icon"
+              onClick={() => {
+                setShowAccountPopup(!showAccountPopup);
+                if (showNotifications) setShowNotifications(false); // đóng popup thông báo nếu đang mở
+              }}
+              title="Tài khoản"
+              style={{ cursor: 'pointer' }}
+            />
+            <AccountPopup
+              visible={showAccountPopup}
+              onClose={() => setShowAccountPopup(false)}
+            />
+          </div>
         </div>
       </nav>
     </div>
