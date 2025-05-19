@@ -1,6 +1,7 @@
 /* SidebarSearch.css */
 .sidebar-search {
   width: 250px;
+  height: 95vh;
   background-color: #edf2fb; 
   border-right: 1px solid #edf2fb; 
   padding: 15px;

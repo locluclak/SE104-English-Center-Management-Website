@@ -1,0 +1,119 @@
+/* AddForm.css (Hoặc có thể là AddClassForm.css nếu dùng chung) */
+.form-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 15px; /* Khoảng cách giữa các dòng/phần tử */
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+  max-width: 600px; /* Giới hạn chiều rộng form */
+  margin: 20px auto; /* Căn giữa form (nếu cần) */
+}
+
+.form-grid h2 {
+  text-align: center;
+  margin-bottom: 10px;
+  color: #333;
+}
+
+.form-row {
+  display: flex;
+  gap: 15px; /* Khoảng cách giữa các input trên cùng một dòng */
+}
+
+.form-row > input,
+.form-grid > input, /* Cho input không nằm trong form-row */
+.form-grid > textarea,
+.form-row > div { /* Cho các container như teacher-select */
+  flex-grow: 1; /* Để các input/div con chia đều không gian */
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.form-grid > textarea {
+  resize: vertical; /* Cho phép thay đổi chiều cao textarea */
+}
+
+.form-row .teacher-select,
+.form-row > div { /* Áp dụng cho các div chứa label + input/select */
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.form-row label {
+  font-weight: bold;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.form-row select {
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+  background-color: white;
+}
+
+.students-section {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 10px;
+}
+
+.students-section label {
+  font-weight: bold;
+  color: #555;
+}
+
+.add-student-btn {
+  padding: 8px 12px;
+  background-color: #28a745; /* Màu xanh lá */
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.add-student-btn:hover {
+  background-color: #218838;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end; /* Căn các nút về bên phải */
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.form-actions button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: bold;
+}
+
+.form-actions button[type="submit"] {
+  background-color: #007bff; /* Màu xanh dương */
+  color: white;
+}
+
+.form-actions button[type="submit"]:hover {
+  background-color: #0056b3;
+}
+
+.form-actions button[type="button"] {
+  background-color: #6c757d; /* Màu xám */
+  color: white;
+}
+
+.form-actions button[type="button"]:hover {
+  background-color: #545b62;
+}
