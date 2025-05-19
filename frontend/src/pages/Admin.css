@@ -75,3 +75,23 @@
 .student-table tbody tr:hover {
   background-color: #ccdbfd;
 }
+
+.staff-sub-tabs {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.staff-sub-tabs button {
+  padding: 8px 16px;
+  border: none;
+  background-color: #e0e0e0;
+  cursor: pointer;
+  border-radius: 6px;
+}
+
+.staff-sub-tabs button.active {
+  background-color: #007bff;
+  color: white;
+  font-weight: bold;
+}

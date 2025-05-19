@@ -1,88 +1,101 @@
-// SidebarSearch.js
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import './SidebarSearch.css';
 
-const SidebarSearch = ({
-  activeTabKeyForSidebar, // 'classes', 'students', 'staffs' (để biết nhóm menu nào cần hiển thị)
+const itemsByRole = {
+  admin: {
+    classes: [
+      { key: 'waiting', name: 'Waiting' },
+      { key: 'current', name: 'Current' },
+      { key: 'end', name: 'End' },
+    ],
+    students: [
+      { key: 'all', name: 'View All' },
+      { key: 'enrolled', name: 'Enrolled' },
+      { key: 'unenroll', name: 'Unenroll' },
+    ],
+    staffs: [
+      { key: 'teacher', name: 'Teacher' },
+      { key: 'accountant', name: 'Accountant' },
+    ],
+  },
+  teacher: {},
+  student: {
+    classes: [
+      { key: 'my_classes', name: 'My Classes' },
+    ],
+    dashboard: [],
+  },
+};
 
-  // Props cho Classes
-  classFilterItems = [],
-  selectedClassFilter,
-  onSelectClassFilter,
+function SidebarSearch({ role, activeTab, onSearch, onNew }) {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [selectedItemKey, setSelectedItemKey] = useState('');
 
-  // Props cho Students
-  studentStatusFilters = [],
-  selectedStudentStatus,
-  onSelectStudentStatus,
+  // Cập nhật menu khi role/tab thay đổi
+  useEffect(() => {
+    const items = itemsByRole[role]?.[activeTab] || [];
+    setSearchResults(items);
+    setSearchTerm('');
 
-  // Props cho Staffs
-  staffSubNavigationItems = [],
-  selectedStaffSubCategory,
-  onSelectStaffSubCategory,
+    if (items.length > 0) {
+      setSelectedItemKey(items[0].key);
+      onSearch?.(items[0].name); // gửi key về component cha
+    }
+  }, [role, activeTab]);
 
-  onNew, // Nút "+"
-}) => {
+  const handleSearchChange = (e) => {
+    const term = e.target.value;
+    setSearchTerm(term);
+
+    const allItems = itemsByRole[role]?.[activeTab] || [];
+    const filtered = allItems.filter(item =>
+      item.name.toLowerCase().includes(term.toLowerCase())
+    );
+    setSearchResults(filtered);
+  };
+
+  const handleItemClick = (item) => {
+    setSelectedItemKey(item.key);
+    onSearch?.(item.name);
+  };
+
+  // Gọi khi bấm nút "Add"
+  const handleAddClick = () => {
+    if (onNew) onNew(); // gửi sự kiện lên component cha
+  };
+
   return (
     <div className="sidebar-search">
       <div className="search-header">
         <div className="search-box">
-          <input type="text" placeholder="Search..." />
+          <input
+            type="text"
+            placeholder="Search"
+            value={searchTerm}
+            onChange={handleSearchChange}
+          />
           <span className="icon">🔍</span>
         </div>
-        {onNew && (
-          <button className="new-button" onClick={onNew}>+</button>
+
+        {onNew && role === 'admin' && (
+          <button className="new-button" onClick={handleAddClick}>＋</button>
         )}
       </div>
 
-      {/* Menu cho Classes */}
-      {activeTabKeyForSidebar === 'classes' && classFilterItems.length > 0 && (
-        <div className="menu-items">
-          <h3>Class Status</h3> {/* Hoặc bạn có thể bỏ title này */}
-          {classFilterItems.map((item) => (
-            <div
-              key={item.key}
-              className={`menu-item ${selectedClassFilter === item.key ? 'selected' : ''}`}
-              onClick={() => onSelectClassFilter(item.key)}
-            >
-              {item.name}
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Menu cho Students */}
-      {activeTabKeyForSidebar === 'students' && studentStatusFilters.length > 0 && (
-        <div className="menu-items">
-          <h3>Student Status</h3> {/* Hoặc bạn có thể bỏ title này */}
-          {studentStatusFilters.map((item) => (
-            <div
-              key={item.key}
-              className={`menu-item ${selectedStudentStatus === item.key ? 'selected' : ''}`}
-              onClick={() => onSelectStudentStatus(item.key)}
-            >
-              {item.name}
-            </div>
-          ))}
-        </div>
-      )}
-      
-      {/* Menu cho Staffs */}
-      {activeTabKeyForSidebar === 'staffs' && staffSubNavigationItems.length > 0 && (
-        <div className="menu-items">
-          {/* Không cần title nếu "Teacher" và "Accountant" là các mục chính */}
-          {staffSubNavigationItems.map((item) => (
-            <div
-              key={item.key}
-              className={`menu-item ${selectedStaffSubCategory === item.key ? 'selected' : ''}`}
-              onClick={() => onSelectStaffSubCategory(item.key)}
-            >
-              {item.name}
-            </div>
-          ))}
-        </div>
-      )}
+      <div className="search-results">
+        {searchResults.map((item) => (
+          <div
+            key={item.key}
+            className={`search-item ${item.key === selectedItemKey ? 'selected' : ''}`}
+            onClick={() => handleItemClick(item)}
+          >
+            {item.name}
+          </div>
+        ))}
+      </div>
     </div>
   );
-};
+}
 
 export default SidebarSearch;

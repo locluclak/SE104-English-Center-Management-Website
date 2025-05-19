@@ -1,15 +1,15 @@
 /* SidebarSearch.css */
 .sidebar-search {
   width: 250px;
-  height: 95vh;
-  background-color: #edf2fb; 
-  border-right: 1px solid #edf2fb; 
+  background-color: #edf2fb;
+  border-right: 1px solid #edf2fb;
   padding: 15px;
   box-sizing: border-box;
   display: flex;
   flex-direction: column; /* Arrange content vertically */
   overflow-y: auto; /* Enable scrolling if content overflows */
 }
+
 
 .search-header {
   display: flex;
@@ -18,11 +18,13 @@
   margin-bottom: 15px; /* Space between header and results */
 }
 
+
 .search-box {
   position: relative;
   flex-grow: 1; /* Allow search box to take available width */
   height: 36px; /* Adjust height as needed */
 }
+
 
 .search-box input {
   width: 100%;
@@ -33,6 +35,7 @@
   font-size: 14px;
 }
 
+
 .search-box .icon {
   position: absolute;
   right: 10px;
@@ -41,6 +44,7 @@
   color: #888;
   pointer-events: none; /* Allow clicks through the icon */
 }
+
 
 .new-button {
   margin-left: 10px;
@@ -53,9 +57,11 @@
   outline: none; /* Remove default focus outline */
 }
 
+
 .search-results {
   margin-top: 10px;
 }
+
 
 .search-item {
   padding: 10px 8px;
@@ -64,24 +70,29 @@
   border-radius: 6px;
 }
 
+
 .search-item:hover {
   background-color: #f0f0f0; /* Light background on hover */
 }
+
 
 .search-item.bold {
   font-weight: bold;
 }
 
+
 .search-item.selected {
-  background-color: #c1d3fe; 
-  color: black;         
+  background-color: #c1d3fe;
+  color: black;        
   font-weight: bold;
 }
+
 
 /* Styles for the "Classes" and "Students" menus */
 .menu-items {
   margin-top: 15px;
 }
+
 
 .menu-items h3 {
   font-size: 16px;
@@ -90,6 +101,7 @@
   padding-left: 8px;
 }
 
+
 .menu-item {
   padding: 10px 12px;
   color: #333;
@@ -97,14 +109,15 @@
   border-radius: 6px;
 }
 
+
 .menu-item:hover {
   background-color: #e8f0fe; /* Light blue on hover for menu items */
   color: #1e3a8a; /* Darker blue text on hover */
 }
+
 
 .menu-item.selected {
   background-color: #dbeafe; /* Light blue background for selected item */
   color: #1e3a8a; /* Darker blue text for selected item */
   font-weight: bold;
 }
-

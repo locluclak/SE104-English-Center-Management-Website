@@ -27,7 +27,7 @@ const ClassesTab = ({ selectedStatus, showClassForm, setShowClassForm }) => {
         <>
           <h2>
             {selectedStatus
-              ? `${selectedStatus} Classes`
+              ? `${selectedStatus.charAt(0).toUpperCase() + selectedStatus.slice(1)} Classes`
               : 'Please select a category (Waiting, Current, End)'}
           </h2>
 

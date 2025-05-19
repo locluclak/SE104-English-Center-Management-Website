@@ -1,0 +1,23 @@
+.student-tab-container {
+  padding: 20px;
+}
+
+.student-table-container {
+  margin-top: 20px;
+}
+
+.student-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.student-table th,
+.student-table td {
+  border: 1px solid #ccc;
+  padding: 8px 12px;
+  text-align: left;
+}
+
+.student-table th {
+  background-color: #f5f5f5;
+}
