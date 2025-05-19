@@ -11,6 +11,7 @@ import StudentTab from "../components/AdminPage/StudentsTab/StudentTab";
 import AddClassForm from "../components/AdminPage/ClassesTab/AddClassForm";
 import AddTeacherForm from "../components/AdminPage/StaffsTab/AddTeacherForm";
 import AddAccountantForm from "../components/AdminPage/StaffsTab/AddAccountantForm";
+import AddStudentForm from "../components/AdminPage/StudentsTab/AddStudentForm";
 
 import "./Admin.css";
 
@@ -20,24 +21,29 @@ const AdminPage = () => {
   const [showClassForm, setShowClassForm] = useState(false);
   const [showTeacherForm, setShowTeacherForm] = useState(false);
   const [showAccountantForm, setShowAccountantForm] = useState(false);
+  const [showStudentForm, setShowStudentForm] = useState(false);
 
   const [teachers, setTeachers] = useState([]);
   const [accountants, setAccountants] = useState([]);
-
-  const mockStudents = [
+  const [students, setStudents] = useState([
     {
       id: "S001",
       name: "Alice Nguyen",
+      birthday: "12/01/2004",
       email: "alice@example.com",
       status: "Enrolled",
     },
     {
       id: "S002",
       name: "Bob Tran",
+      birthday: "15/06/2003",
       email: "bob@example.com",
       status: "Unenroll",
     },
-  ];
+  ]);
+
+  const [editingStudent, setEditingStudent] = useState(null);
+  const [editingStaff, setEditingStaff] = useState(null);
 
   const adminLinks = [
     { key: "classes", name: "Classes" },
@@ -86,18 +92,22 @@ const AdminPage = () => {
       setShowTeacherForm(false);
       setShowAccountantForm(false);
     }
+    if (activeTab !== "students") {
+      setShowStudentForm(false);
+      setEditingStudent(null);
+    }
   }, [activeTab]);
-
-  const [editingStaff, setEditingStaff] = useState(null);
 
   const handleNew = () => {
     setShowClassForm(false);
     setShowTeacherForm(false);
     setShowAccountantForm(false);
+    setShowStudentForm(false);
+    setEditingStudent(null);
+    setEditingStaff(null);
 
     if (activeTab === "classes") setShowClassForm(true);
-    else if (activeTab === "students")
-      alert("Thêm mới Student (form chưa triển khai)");
+    else if (activeTab === "students") setShowStudentForm(true);
     else if (activeTab === "staffs") {
       if (selectedStatus === "Teacher") setShowTeacherForm(true);
       else if (selectedStatus === "Accountant") setShowAccountantForm(true);
@@ -106,12 +116,34 @@ const AdminPage = () => {
     }
   };
 
-  const handleFormSubmitSuccess = (type) => {
+  const handleFormSubmitSuccess = (type, newData, isEdit = false) => {
     console.log(`${type} data saved!`);
-    if (type === "Teacher") setShowTeacherForm(false);
-    if (type === "Accountant") setShowAccountantForm(false);
+    if (type === "Teacher") {
+      setShowTeacherForm(false);
+      setEditingStaff(null);
+      // Bạn có thể cập nhật danh sách teachers tại đây nếu cần
+    }
+    if (type === "Accountant") {
+      setShowAccountantForm(false);
+      setEditingStaff(null);
+      // Bạn có thể cập nhật danh sách accountants tại đây nếu cần
+    }
     if (type === "Class") setShowClassForm(false);
+    if (type === "Student") {
+      if (isEdit) {
+        // Cập nhật student đã sửa
+        setStudents((prev) =>
+          prev.map((s) => (s.id === newData.id ? newData : s))
+        );
+      } else {
+        // Thêm mới student
+        setStudents((prev) => [...prev, newData]);
+      }
+      setShowStudentForm(false);
+      setEditingStudent(null);
+    }
   };
+
   const handleEditStaff = (staffMember, staffType) => {
     setEditingStaff({ ...staffMember, staffType });
     if (staffType === "teachers") setShowTeacherForm(true);
@@ -131,6 +163,22 @@ const AdminPage = () => {
       }
     }
   };
+
+  const handleEditStudent = (student) => {
+    setEditingStudent(student);
+    setShowStudentForm(true);
+  };
+
+  const handleDeleteStudent = (student) => {
+    if (
+      window.confirm(
+        `Are you sure you want to delete Student ${student.name} (ID: ${student.id})?`
+      )
+    ) {
+      setStudents((prev) => prev.filter((s) => s.id !== student.id));
+    }
+  };
+
   return (
     <div className="admin-container">
       <Navbar
@@ -156,10 +204,28 @@ const AdminPage = () => {
           )}
 
           {activeTab === "students" && (
-            <StudentTab
-              students={mockStudents}
-              selectedStatus={selectedStatus}
-            />
+            <>
+              {!showStudentForm && (
+                <StudentTab
+                  students={students}
+                  selectedStatus={selectedStatus}
+                  onEditStudent={handleEditStudent}
+                  onDeleteStudent={handleDeleteStudent}
+                />
+              )}
+              {showStudentForm && (
+                <AddStudentForm
+                  initialData={editingStudent}
+                  onClose={() => {
+                    setShowStudentForm(false);
+                    setEditingStudent(null);
+                  }}
+                  onSubmitSuccess={(data, isEdit) =>
+                    handleFormSubmitSuccess("Student", data, isEdit)
+                  }
+                />
+              )}
+            </>
           )}
 
           {activeTab === "staffs" && (

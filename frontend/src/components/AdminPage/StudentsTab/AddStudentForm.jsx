@@ -7,7 +7,7 @@ const AddStudentForm = ({ isEditMode, initialData, onSubmitSuccess, onClose }) =
     name: '',
     email: '',
     birthday: '',
-    status: 'Enrolled', // Giá trị mặc định
+    status: 'Unenroll', // Giá trị mặc định
   });
   const [errors, setErrors] = useState({});
 
@@ -78,7 +78,7 @@ const AddStudentForm = ({ isEditMode, initialData, onSubmitSuccess, onClose }) =
 
   return (
     <div className="add-student-form-container">
-      <h2>{isEditMode ? 'Chỉnh sửa Thông tin Sinh viên' : 'Thêm Sinh viên Mới'}</h2>
+      <h2>{isEditMode ? 'Chỉnh sửa thông tin sinh viên' : 'Cập nhật sinh viên'}</h2>
       <form onSubmit={handleSubmit} className="student-form">
         <div className="form-group">
           <label htmlFor="name">Họ và Tên:</label>
@@ -127,16 +127,14 @@ const AddStudentForm = ({ isEditMode, initialData, onSubmitSuccess, onClose }) =
             onChange={handleChange}
           >
             <option value="Enrolled">Đang học (Enrolled)</option>
-            <option value="Unenroll">Đã nghỉ (Unenrolled)</option>
-            <option value="Graduated">Đã tốt nghiệp (Graduated)</option>
-            <option value="Dropped">Bỏ học (Dropped)</option>
+            <option value="Unenroll">Chưa học (Unenroll)</option>
             {/* Thêm các trạng thái khác nếu cần */}
           </select>
         </div>
 
         <div className="form-actions">
           <button type="submit" className="btn btn-primary">
-            {isEditMode ? 'Cập nhật' : 'Thêm Sinh viên'}
+            {isEditMode ? 'Cập nhật' : 'Cập nhật thông tin sinh viên'}
           </button>
           <button type="button" className="btn btn-secondary" onClick={onClose}>
             Hủy

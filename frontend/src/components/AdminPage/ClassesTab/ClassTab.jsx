@@ -17,7 +17,7 @@ const ClassesTab = ({ selectedStatus, showClassForm, setShowClassForm }) => {
       {showClassForm ? (
         <AddClassForm onClose={() => setShowClassForm(false)} />
       ) : selectedClass ? (
-        // ✅ Truyền selectedStatus vào đây
+        // Truyền selectedStatus vào đây
         <ClassDetail
           classData={selectedClass}
           selectedStatus={selectedStatus}
@@ -33,9 +33,6 @@ const ClassesTab = ({ selectedStatus, showClassForm, setShowClassForm }) => {
 
           {selectedStatus && (
             <div>
-              <p>
-                List of <strong>{selectedStatus.toLowerCase()}</strong> classes will appear here.
-              </p>
               <ClassList classList={mockClasses} onSelectClass={setSelectedClass} />
             </div>
           )}
