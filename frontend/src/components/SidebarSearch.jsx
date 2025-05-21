@@ -23,7 +23,7 @@ const itemsByRole = {
   student: {
     courses: [
       { key: 'home', name: 'Home', icon: <FaHome /> },
-      { key: 'blog', name: 'Blog', icon: <FaBookOpen /> }
+      { key: 'my-courses', name: 'My Courses', icon: <FaBookOpen /> }
     ],
     notes: [
       { key: 'calendar', name: 'Calendar', icon: <FaCalendarAlt /> },
