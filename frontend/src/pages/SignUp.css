@@ -79,7 +79,7 @@ body, html {
   width: 100%;
   padding: 0.75rem;
   background-color: #752092;
-  color: #fff;
+  color: #333;
   border: none;
   border-radius: 4px;
   font-size: 1rem;
@@ -89,7 +89,7 @@ body, html {
 }
 
 .signup-button:hover {
-  background-color: #752092;
+  background-color: #6586e6;
 }
 
 .signup-box p {
