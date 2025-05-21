@@ -4,7 +4,30 @@ import NotificationPopup from './NotificationPopup';
 import AccountPopup from './AccountPopup';  // import popup tài khoản
 import './Navbar.css';
 
-const Navbar = ({ role, links, activeTab, setActiveTab }) => {
+const getLinksByRole = (role) => {
+  switch (role) {
+    case 'admin':
+      return [
+        { key: 'classes', name: 'Classes' },
+        { key: 'students', name: 'Students' },
+        { key: 'staffs', name: 'Staffs' },
+      ];
+    case 'student':
+      return [
+        { key: 'courses', name: 'Courses' },
+        { key: 'notes', name: 'Notes' },
+      ];
+    case 'teacher':
+      return [
+        { key: 'classes', name: 'Classes' },
+        { key: 'students', name: 'Students' },
+      ];
+    default:
+      return [];
+  }
+};
+
+const Navbar = ({ role, activeTab, setActiveTab }) => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showAccountPopup, setShowAccountPopup] = useState(false);
 
@@ -23,17 +46,15 @@ const Navbar = ({ role, links, activeTab, setActiveTab }) => {
 
         <div className="navbar-right">
           <ul className="navbar-center">
-            {links
-              .filter((link) => link.key !== 'home')
-              .map((link) => (
-                <li
-                  key={link.key}
-                  onClick={() => setActiveTab(link.key)}
-                  className={activeTab === link.key ? 'active' : ''}
-                >
-                  <span>{link.name}</span>
-                </li>
-              ))}
+            {getLinksByRole(role).map((link) => (
+              <li
+                key={link.key}
+                onClick={() => setActiveTab(link.key)}
+                className={activeTab === link.key ? 'active' : ''}
+              >
+                <span>{link.name}</span>
+              </li>
+            ))}
           </ul>
 
           <div className="notification-wrapper" style={{ position: 'relative' }}>

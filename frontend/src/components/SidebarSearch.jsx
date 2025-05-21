@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { FaHome, FaBookOpen, FaCalendarAlt, FaStickyNote } from 'react-icons/fa';
 import './SidebarSearch.css';
 
 const itemsByRole = {
@@ -20,10 +21,14 @@ const itemsByRole = {
   },
   teacher: {},
   student: {
-    classes: [
-      { key: 'my_classes', name: 'My Classes' },
+    courses: [
+      { key: 'home', name: 'Home', icon: <FaHome /> },
+      { key: 'blog', name: 'Blog', icon: <FaBookOpen /> }
     ],
-    dashboard: [],
+    notes: [
+      { key: 'calendar', name: 'Calendar', icon: <FaCalendarAlt /> },
+      { key: 'notes', name: 'Notes', icon: <FaStickyNote /> }
+    ],
   },
 };
 
@@ -66,17 +71,19 @@ function SidebarSearch({ role, activeTab, onSearch, onNew }) {
   };
 
   return (
-    <div className="sidebar-search">
+    <div className={`sidebar-search ${role}`}>
       <div className="search-header">
-        <div className="search-box">
-          <input
-            type="text"
-            placeholder="Search"
-            value={searchTerm}
-            onChange={handleSearchChange}
-          />
-          <span className="icon">🔍</span>
-        </div>
+        {role === 'admin' && (
+          <div className="search-box">
+            <input
+              type="text"
+              placeholder="Search"
+              value={searchTerm}
+              onChange={handleSearchChange}
+            />
+            <span className="icon">🔍</span>
+          </div>
+        )}
 
         {onNew && role === 'admin' && (
           <button className="new-button" onClick={handleAddClick}>＋</button>
@@ -90,7 +97,8 @@ function SidebarSearch({ role, activeTab, onSearch, onNew }) {
             className={`search-item ${item.key === selectedItemKey ? 'selected' : ''}`}
             onClick={() => handleItemClick(item)}
           >
-            {item.name}
+            <div className="icon-top">{item.icon}</div>
+            <div className="text-below">{item.name}</div>
           </div>
         ))}
       </div>

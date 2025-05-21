@@ -8,7 +8,6 @@ import StaffsTab from "../components/AdminPage/StaffsTab/StaffsTab";
 import StudentTab from "../components/AdminPage/StudentsTab/StudentTab";
 
 // Forms
-import AddClassForm from "../components/AdminPage/ClassesTab/AddClassForm";
 import AddTeacherForm from "../components/AdminPage/StaffsTab/AddTeacherForm";
 import AddAccountantForm from "../components/AdminPage/StaffsTab/AddAccountantForm";
 import AddStudentForm from "../components/AdminPage/StudentsTab/AddStudentForm";
@@ -45,11 +44,6 @@ const AdminPage = () => {
   const [editingStudent, setEditingStudent] = useState(null);
   const [editingStaff, setEditingStaff] = useState(null);
 
-  const adminLinks = [
-    { key: "classes", name: "Classes" },
-    { key: "students", name: "Students" },
-    { key: "staffs", name: "Staffs" },
-  ];
 
   useEffect(() => {
     setTeachers([
@@ -182,11 +176,11 @@ const AdminPage = () => {
   return (
     <div className="admin-container">
       <Navbar
-        role="admin"
-        links={adminLinks}
+        role="admin" // hoặc "student", "teacher"
         activeTab={activeTab}
         setActiveTab={setActiveTab}
       />
+
       <div className="admin-body">
         <SidebarSearch
           role="admin"
@@ -194,6 +188,7 @@ const AdminPage = () => {
           onSearch={(item) => setSelectedStatus(item)}
           onNew={handleNew}
         />
+
         <div className="content">
           {activeTab === "classes" && (
             <ClassesTab
