@@ -6,7 +6,8 @@ const authRoutes = require('./routes/auth'); // Authentication routes module
 const personRoutes = require('./routes/person');
 const courseRoutes = require('./routes/course'); // Import course routes
 const paymentRoutes = require('./routes/payment'); // Import payment routes
-
+const documentRoutes = require('./routes/document');
+const path = require('path');
 // Initialize Express application
 const app = express();
 
@@ -15,13 +16,14 @@ app.use(cors());
 
 // Parse incoming JSON request bodies
 app.use(express.json());
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Mount authentication routes at the root path
 app.use('/', authRoutes);
 app.use('/person', personRoutes);
 app.use('/course', courseRoutes); // Mount course routes
 app.use('/payment', paymentRoutes); // Mount payment routes
-
+app.use('/documents', documentRoutes);
 // Set the port from environment variable or default to 3000
 const PORT = process.env.PORT || 3000;
 
