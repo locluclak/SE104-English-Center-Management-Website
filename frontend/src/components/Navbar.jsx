@@ -15,7 +15,7 @@ const getLinksByRole = (role) => {
     case 'student':
       return [
         { key: 'courses', name: 'Courses' },
-        { key: 'notes', name: 'Notes' },
+        { key: 'dashboard', name: 'Dashboard' },
       ];
     case 'teacher':
       return [
