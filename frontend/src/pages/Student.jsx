@@ -4,6 +4,7 @@ import SidebarSearch from "../components/SidebarSearch";
 
 import CourseAd from "../components/StudentPage/CoursesTab/CourseAd";
 import CourseSection from "../components/StudentPage/CoursesTab/CourseSection";
+import CourseDetail from "../components/StudentPage/CoursesTab/CourseDetail";
 
 import Calendar from '../components/StudentPage/DashboardTab/CalendarTab';
 import Padlet from '../components/StudentPage/DashboardTab/PadletTab';
@@ -13,7 +14,8 @@ import './Student.css';
 const StudentPage = () => {
   // activeTab luôn là chữ thường: 'courses' hoặc 'dashboard'
   const [activeTab, setActiveTab] = useState('courses');
-
+  const [selectedStatus, setSelectedStatus] = useState(null);
+  const [selectedClass, setSelectedClass] = useState(null);
   // selectedDashboardFeature lưu key, ví dụ 'calendar', 'padlet'
   const [selectedDashboardFeature, setSelectedDashboardFeature] = useState('');
 
@@ -33,6 +35,7 @@ const StudentPage = () => {
 
   const handleClassClick = (className) => {
     console.log(`Clicked class: ${className}`);
+    setSelectedClass(className);
   };
 
   return (
@@ -56,17 +59,26 @@ const StudentPage = () => {
         <div className="content">
           {activeTab === 'courses' && (
             <div style={{ display: 'flex', flexDirection: 'column', marginLeft: '20px' }}>
-              <CourseAd />
-              <CourseSection
-                title="Khoá học nghe đọc"
-                classList={['Class A', 'Class B']}
-                onClassClick={handleClassClick}
-              />
-              <CourseSection
-                title="Khoá học nói viết"
-                classList={['Class C', 'Class D']}
-                onClassClick={handleClassClick}
-              />
+              {selectedClass ? (
+                <CourseDetail
+                  className={selectedClass}
+                  onBack={() => setSelectedClass(null)}
+                />
+              ) : (
+                <>
+                  <CourseAd />
+                  <CourseSection
+                    title="Khoá học nghe đọc"
+                    classList={['Class A', 'Class B']}
+                    onClassClick={handleClassClick}
+                  />
+                  <CourseSection
+                    title="Khoá học nói viết"
+                    classList={['Class C', 'Class D']}
+                    onClassClick={handleClassClick}
+                  />
+                </>
+              )}
             </div>
           )}
 

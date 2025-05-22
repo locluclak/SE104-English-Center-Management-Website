@@ -46,7 +46,7 @@ function SidebarSearch({ role, activeTab, onSearch, onNew }) {
 
     if (items.length > 0) {
       setSelectedItemKey(items[0].key);
-      onSearch?.(items[0].name); // gửi key về component cha
+      onSearch?.(items[0].key); // gửi key về component cha
     }
   }, [role, activeTab]);
 
@@ -63,7 +63,7 @@ function SidebarSearch({ role, activeTab, onSearch, onNew }) {
 
   const handleItemClick = (item) => {
     setSelectedItemKey(item.key);
-    onSearch?.(item.name);
+    onSearch?.(item.key);
   };
 
   // Gọi khi bấm nút "Add"
