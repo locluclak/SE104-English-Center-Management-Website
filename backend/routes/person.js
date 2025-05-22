@@ -132,4 +132,57 @@ router.get('/admins', async (req, res) => {
     }
 });
 
+
+
+// Update person info by ID (more specific route)
+router.put('/update/:id', async (req, res) => {
+    const { id } = req.params;
+    const { name, email, phone_number, date_of_birth } = req.body;
+
+    if (!name && !email && !phone_number && !date_of_birth) {
+        return res.status(400).json({ error: 'No fields to update' });
+    }
+
+    try {
+        const conn = await db.getConnection();
+
+        // Build dynamic query
+        const fields = [];
+        const values = [];
+        if (name) {
+            fields.push('NAME = ?');
+            values.push(name);
+        }
+        if (email) {
+            fields.push('EMAIL = ?');
+            values.push(email);
+        }
+        if (phone_number) {
+            fields.push('PHONE_NUMBER = ?');
+            values.push(phone_number);
+        }
+        if (date_of_birth) {
+            fields.push('DATE_OF_BIRTH = ?');
+            values.push(date_of_birth);
+        }
+        values.push(id);
+
+        const [result] = await conn.query(
+            `UPDATE PERSON SET ${fields.join(', ')} WHERE ID = ?`,
+            values
+        );
+
+        conn.release();
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: 'Person not found' });
+        }
+
+        res.json({ message: 'Person updated successfully' });
+    } catch (err) {
+        console.error('DB error:', err);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
+
 module.exports = router;
