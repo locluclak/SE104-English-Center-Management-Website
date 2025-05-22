@@ -4,12 +4,14 @@ import SidebarSearch from "../components/SidebarSearch";
 
 import CourseAd from "../components/StudentPage/CoursesTab/CourseAd";
 import CourseSection from "../components/StudentPage/CoursesTab/CourseSection";
+import CourseDetail from "../components/StudentPage/CoursesTab/CourseDetail";
 
 import './Student.css';
 
 const StudentPage = () => {
   const [activeTab, setActiveTab] = useState('home');
   const [selectedStatus, setSelectedStatus] = useState(null);
+  const [selectedClass, setSelectedClass] = useState(null);
 
   const handleNew = () => {
     console.log('StudentPage: handleNew called');
@@ -17,6 +19,7 @@ const StudentPage = () => {
 
   const handleClassClick = (className) => {
     console.log(`Clicked class: ${className}`);
+    setSelectedClass(className);
   };
 
   return (
@@ -33,17 +36,26 @@ const StudentPage = () => {
 
         {activeTab === 'courses' && selectedStatus === "Home" && (
           <div style={{ display: 'flex', flexDirection: 'column', marginLeft: '20px' }}>
-          <CourseAd />
-          <CourseSection
-            title="Khoá học nghe đọc"
-            classList={['Class A', 'Class B']}
-            onClassClick={handleClassClick}
-          />
-          <CourseSection
-            title="Khoá học nói viết"
-            classList={['Class C', 'Class D']}
-            onClassClick={handleClassClick}
-          />
+            {selectedClass ? (
+              <CourseDetail
+                className={selectedClass}
+                onBack={() => setSelectedClass(null)}
+              />
+            ) : (
+              <>
+                <CourseAd />
+                <CourseSection
+                  title="Khoá học nghe đọc"
+                  classList={['Class A', 'Class B']}
+                  onClassClick={handleClassClick}
+                />
+                <CourseSection
+                  title="Khoá học nói viết"
+                  classList={['Class C', 'Class D']}
+                  onClassClick={handleClassClick}
+                />
+              </>
+            )}
           </div>
         )}
       </div>

@@ -1,0 +1,31 @@
+.course-detail {
+    padding: 20px;
+    border: 1px solid #ccc;
+    margin-left: 20px;
+    background: #f9f9f9;
+    border-radius: 8px;
+    width: 100%;
+  }
+  
+  .course-detail h2 {
+    margin-bottom: 16px;
+  }
+  
+  .course-info p {
+    margin: 6px 0;
+  }
+  
+  .back-btn {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-bottom: 20px;
+  }
+  
+  .back-btn:hover {
+    background-color: #0056b3;
+  }
+  
