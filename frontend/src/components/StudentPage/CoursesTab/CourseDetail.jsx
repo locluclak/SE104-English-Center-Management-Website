@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import './CourseDetail.css';
 
 const CourseDetail = ({ className, onBack }) => {
-  // Dữ liệu mẫu – có thể thay bằng props hoặc fetch từ backend
+  const [showConfirm, setShowConfirm] = useState(false);
+
   const info = {
     id: 'ENG123',
     name: className,
@@ -10,7 +11,21 @@ const CourseDetail = ({ className, onBack }) => {
     teacher: 'Nguyễn Văn A',
     startDate: '01/06/2025',
     endDate: '30/08/2025',
-    schedule: 'Thứ 2, 4, 6 - 18:00 đến 20:00',
+    numberStudents: '30',
+    tuition: '2.000.000 VNĐ',
+  };
+
+  const handleRegister = () => {
+    setShowConfirm(true);
+  };
+
+  const handleConfirm = () => {
+    setShowConfirm(false);
+    alert('Đăng ký thành công!');
+  };
+
+  const handleCancel = () => {
+    setShowConfirm(false);
   };
 
   return (
@@ -19,12 +34,27 @@ const CourseDetail = ({ className, onBack }) => {
       <h2>Thông tin lớp: {className}</h2>
       <div className="course-info">
         <p><strong>ID:</strong> {info.id}</p>
-        <p><strong>Mô tả:</strong> {info.description}</p>
-        <p><strong>Giáo viên:</strong> {info.teacher}</p>
-        <p><strong>Thời gian học:</strong> {info.schedule}</p>
-        <p><strong>Ngày bắt đầu:</strong> {info.startDate}</p>
-        <p><strong>Ngày kết thúc:</strong> {info.endDate}</p>
+        <p><strong>Desciprtion:</strong> {info.description}</p>
+        <p><strong>teacher:</strong> {info.teacher}</p>
+        <p><strong>Number of students:</strong> {info.numberStudents}</p>
+        <p><strong>Start date:</strong> {info.startDate}</p>
+        <p><strong>End date:</strong> {info.endDate}</p>
+        <p><strong>Tuition:</strong> {info.tuition}</p>
+        <div className="register-btn-wrapper">
+          <button className="register-btn" onClick={handleRegister}>Register</button>
+        </div>
       </div>
+      {showConfirm && (
+        <div className="confirm-modal">
+          <div className="confirm-box">
+            <p>Are you sure you want to register for this class?</p>
+            <div className="modal-buttons">
+              <button onClick={handleConfirm}>Confirm</button>
+              <button onClick={handleCancel}>Cancel</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

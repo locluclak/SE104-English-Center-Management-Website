@@ -3,6 +3,7 @@
   background-color: #abc4ff;
   border-radius: 10px 10px 0 0;
   height: 5%;
+
 }
 
 .navbar {
@@ -13,6 +14,7 @@
   padding: 0.5rem 1rem;
   border-radius: 8px;
   height: 40px;
+  padding: 10px 30px;
 }
 
 .navbar-left h1 {

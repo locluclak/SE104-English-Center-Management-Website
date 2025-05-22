@@ -2,30 +2,25 @@ import React, { useState, useEffect } from 'react';
 import Navbar from '../components/Navbar';
 import SidebarSearch from "../components/SidebarSearch";
 
-import CourseAd from "../components/StudentPage/CoursesTab/CourseAd";
-import CourseSection from "../components/StudentPage/CoursesTab/CourseSection";
-import CourseDetail from "../components/StudentPage/CoursesTab/CourseDetail";
-
+import HomeTab from "../components/StudentPage/CoursesTab/HomeTab";
+import MyCoursesTab from "../components/StudentPage/CoursesTab/MyCoursesTab";
 import Calendar from '../components/StudentPage/DashboardTab/CalendarTab';
 import Padlet from '../components/StudentPage/DashboardTab/PadletTab';
 
+import CourseDetail from '../components/StudentPage/CoursesTab/CourseDetail';
 import './Student.css';
 
 const StudentPage = () => {
-  // activeTab luôn là chữ thường: 'courses' hoặc 'dashboard'
   const [activeTab, setActiveTab] = useState('courses');
-  const [selectedStatus, setSelectedStatus] = useState(null);
   const [selectedClass, setSelectedClass] = useState(null);
-  // selectedDashboardFeature lưu key, ví dụ 'calendar', 'padlet'
-  const [selectedDashboardFeature, setSelectedDashboardFeature] = useState('');
+  const [selectedFeature, setSelectedFeature] = useState('home'); // 'home' hoặc 'my-courses'
 
+  // Khi activeTab thay đổi, reset selectedFeature
   useEffect(() => {
-    if (activeTab === 'dashboard') {
-      // Khi chuyển sang tab dashboard, mặc định chọn item đầu tiên là 'calendar'
-      setSelectedDashboardFeature('calendar');
-    } else {
-      // Khi chuyển sang courses, reset selectedDashboardFeature
-      setSelectedDashboardFeature('');
+    if (activeTab === 'courses') {
+      setSelectedFeature('home');
+    } else if (activeTab === 'dashboard') {
+      setSelectedFeature('calendar');
     }
   }, [activeTab]);
 
@@ -38,21 +33,19 @@ const StudentPage = () => {
     setSelectedClass(className);
   };
 
+  const handleFeatureSelect = (featureKey) => {
+    setSelectedFeature(featureKey);
+  };
+
   return (
     <div className="student-page">
       <Navbar role="student" activeTab={activeTab} setActiveTab={setActiveTab} />
 
       <div className="student-body">
-        <SidebarSearch
+        <SidebarSearch 
           role="student"
           activeTab={activeTab}
-          onSearch={(itemKey) => {
-            if (activeTab === 'courses') {
-              console.log(`Courses tab item selected: ${itemKey}`);
-            } else if (activeTab === 'dashboard') {
-              setSelectedDashboardFeature(itemKey);
-            }
-          }}
+          onSearch={handleFeatureSelect}
           onNew={handleNew}
         />
 
@@ -66,17 +59,8 @@ const StudentPage = () => {
                 />
               ) : (
                 <>
-                  <CourseAd />
-                  <CourseSection
-                    title="Khoá học nghe đọc"
-                    classList={['Class A', 'Class B']}
-                    onClassClick={handleClassClick}
-                  />
-                  <CourseSection
-                    title="Khoá học nói viết"
-                    classList={['Class C', 'Class D']}
-                    onClassClick={handleClassClick}
-                  />
+                  {selectedFeature === 'home' && <HomeTab handleClassClick={handleClassClick} />}
+                  {selectedFeature === 'my-courses' && <MyCoursesTab handleClassClick={handleClassClick} />}
                 </>
               )}
             </div>
@@ -84,8 +68,8 @@ const StudentPage = () => {
 
           {activeTab === 'dashboard' && (
             <div style={{ marginLeft: '20px' }}>
-              {selectedDashboardFeature === 'calendar' && <Calendar />}
-              {selectedDashboardFeature === 'padlet' && <Padlet />}
+              {selectedFeature === 'calendar' && <Calendar />}
+              {selectedFeature === 'padlet' && <Padlet />}
             </div>
           )}
         </div>
