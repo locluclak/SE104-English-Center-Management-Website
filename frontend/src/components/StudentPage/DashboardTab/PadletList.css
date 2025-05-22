@@ -1,0 +1,17 @@
+.padlet-list {
+  display: grid;
+  gap: 16px;
+}
+
+.padlet-card {
+  border: 1px solid #ccc;
+  padding: 12px;
+  border-radius: 10px;
+  background-color: #fff;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.padlet-card:hover {
+  transform: scale(1.02);
+}

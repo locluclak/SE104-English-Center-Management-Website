@@ -1,0 +1,75 @@
+.calendar-tab-container {
+  max-width: 900px;
+  margin: auto;
+  position: relative;
+  padding: 15px;
+}
+
+/* Tiêu đề tháng */
+.calendar-title {
+  font-weight: 700;
+  font-size: 1.5rem;
+  color: #222;
+  margin-bottom: 12px;
+}
+
+/* Nhóm nút điều khiển trên góc trên bên phải */
+.calendar-controls {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  z-index: 10;
+}
+
+.nav-button {
+  background-color: #007bff;
+  border: none;
+  border-radius: 4px;
+  padding: 6px 14px;
+  font-size: 14px;       /* Cỡ chữ bằng today button */
+  cursor: pointer;
+  color: white;
+  font-weight: 600;
+  user-select: none;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.nav-button:hover {
+  background-color: #0056b3;
+}
+
+.today-button {
+  background-color: #007bff;
+  border: none;
+  border-radius: 4px;
+  padding: 5px 14px;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  user-select: none;
+}
+
+.today-button:hover {
+  background-color: #0056b3;
+}
+
+/* Đảm bảo lịch có khoảng padding trên đủ để hiện nút */
+.fc {
+  padding-top: 10px !important;
+}
+
+/* Đặt màu chữ cho ngày trong lịch thành màu đen */
+.fc .fc-daygrid-day-number,
+.fc .fc-daygrid-event {
+  color: black !important;
+}
+
+/* Nếu muốn chữ sự kiện đậm và dễ nhìn */
+.fc .fc-daygrid-event {
+  font-weight: 600;
+}
