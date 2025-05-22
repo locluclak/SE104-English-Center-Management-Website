@@ -5,6 +5,7 @@ const db = require('./db'); // Database connection module (assumed to be configu
 const authRoutes = require('./routes/auth'); // Authentication routes module
 const personRoutes = require('./routes/person');
 const courseRoutes = require('./routes/course'); // Import course routes
+const paymentRoutes = require('./routes/payment'); // Import payment routes
 
 // Initialize Express application
 const app = express();
@@ -19,6 +20,7 @@ app.use(express.json());
 app.use('/', authRoutes);
 app.use('/person', personRoutes);
 app.use('/course', courseRoutes); // Mount course routes
+app.use('/payment', paymentRoutes); // Mount payment routes
 
 // Set the port from environment variable or default to 3000
 const PORT = process.env.PORT || 3000;
