@@ -1,7 +1,7 @@
 /* SidebarSearch.css */
 .sidebar-search.admin {
   width: 250px;
-  height: 93vh;
+  height: calc(100vh - 60px); /* Trừ chiều cao navbar */
   background-color: #edf2fb;
   border-right: 1px solid #edf2fb;
   padding: 15px;
@@ -13,7 +13,7 @@
 
 .sidebar-search.student {
   width: 100px;
-  height: 93vh;
+  height: calc(100vh - 60px); /* Trừ chiều cao navbar */
   background-color: #edf2fb;
   border-right: 1px solid #edf2fb;
   padding: 15px;

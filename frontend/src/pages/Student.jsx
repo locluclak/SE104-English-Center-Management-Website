@@ -8,6 +8,8 @@ import Calendar from '../components/StudentPage/DashboardTab/CalendarTab';
 import Padlet from '../components/StudentPage/DashboardTab/PadletTab';
 
 import CourseDetail from '../components/StudentPage/CoursesTab/CourseDetail';
+import CourseProgress from '../components/StudentPage/CoursesTab/CourseProgress';
+
 import './Student.css';
 
 const StudentPage = () => {
@@ -51,12 +53,15 @@ const StudentPage = () => {
 
         <div className="content">
           {activeTab === 'courses' && (
-            <div style={{ display: 'flex', flexDirection: 'column', marginLeft: '20px' }}>
+            <div className="course-display-area"> {/* Thêm class mới để styling */}
               {selectedClass ? (
-                <CourseDetail
-                  className={selectedClass}
-                  onBack={() => setSelectedClass(null)}
-                />
+                <>
+                  <CourseDetail
+                    className={selectedClass}
+                    onBack={() => setSelectedClass(null)}
+                  />
+                  <CourseProgress className={selectedClass} /> {/* Đặt CourseProgress ở đây */}
+                </>
               ) : (
                 <>
                   {selectedFeature === 'home' && <HomeTab handleClassClick={handleClassClick} />}

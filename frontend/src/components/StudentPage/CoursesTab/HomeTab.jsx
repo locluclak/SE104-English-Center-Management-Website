@@ -4,7 +4,7 @@ import CourseSection from "./CourseSection";
 
 const HomeTab = ({ handleClassClick }) => {
   return (
-    <>
+    <div className="home-tab-content"> {/* Thêm một div bọc ngoài */}
       <CourseAd />
       <CourseSection
         title="Khoá học nghe đọc"
@@ -16,7 +16,7 @@ const HomeTab = ({ handleClassClick }) => {
         classList={['Class C', 'Class D']}
         onClassClick={handleClassClick}
       />
-    </>
+    </div>
   );
 };
 

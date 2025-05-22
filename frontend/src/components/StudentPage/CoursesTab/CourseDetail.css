@@ -1,13 +1,14 @@
-.course-detail {
-  padding: 20px;
-  margin-left: 20px;
-  background: #edf2fb;
-  border-radius: 8px;
-  width: 92%;
+.course-detail-container {
+  display: flex;
+  gap: 0;
+  flex: 1;
+  min-width: 400px;
 }
 
-.course-detail h2 {
-  margin-bottom: 20px;
+.course-detail-main {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
 }
 
 .course-info {
@@ -17,10 +18,6 @@
   border-radius: 10px;
   min-height: 250px;
   padding-bottom: 70px; /* Đảm bảo không bị đè lên nút */
-}
-
-.course-info p {
-  margin: 6px 0;
 }
 
 .back-btn {
@@ -35,6 +32,17 @@
 
 .back-btn:hover {
   background-color: #91a8ed;
+}
+
+.course-info {
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.course-info p {
+  margin: 10px 0;
 }
 
 .register-btn-wrapper {
@@ -57,33 +65,32 @@
   background-color: #91a8ed;
 }
 
-/* Modal giữ nguyên */
 .confirm-modal {
   position: fixed;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
-  background-color: rgba(0,0,0,0.4);
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
   display: flex;
   justify-content: center;
   align-items: center;
-  z-index: 999;
+  z-index: 1000;
 }
 
 .confirm-box {
   background-color: white;
-  padding: 25px 30px;
+  padding: 20px;
   border-radius: 8px;
+  width: 300px;
   text-align: center;
-  max-width: 300px;
 }
 
 .modal-buttons {
-  margin-top: 15px;
   display: flex;
   justify-content: center;
-  gap: 12px;
+  gap: 10px;
+  margin-top: 20px;
 }
 
 .modal-buttons button {
@@ -94,19 +101,11 @@
 }
 
 .modal-buttons button:first-child {
-  background-color: #abc4ff;
-  color: black;
-}
-
-.modal-buttons button:first-child:hover {
-  background-color: #91a8ed;
+  background-color: #28a745;
+  color: white;
 }
 
 .modal-buttons button:last-child {
-  background-color: #edf2fb;
-  color: black;
-}
-
-.modal-buttons button:last-child:hover {
-  background-color: #91a8ed;
+  background-color: #dc3545;
+  color: white;
 }

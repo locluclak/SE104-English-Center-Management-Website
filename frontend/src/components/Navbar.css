@@ -2,8 +2,7 @@
   width: 100%;
   background-color: #abc4ff;
   border-radius: 10px 10px 0 0;
-  height: 5%;
-
+  height: 60px; /* Cố định chiều cao */
 }
 
 .navbar {
@@ -19,7 +18,7 @@
 
 .navbar-left h1 {
   font-weight: bold;
-  font-size: 1.5rem;
+  font-size: 1.2rem; /* Giảm kích thước */
   white-space: nowrap;
 }
 
@@ -32,7 +31,7 @@
 .navbar-center {
   display: flex;
   list-style: none;
-  gap: 50px;
+  gap: 20px; /* Giảm khoảng cách */
   margin: 0;
   padding: 0px 50px;
 }
@@ -41,6 +40,8 @@
   cursor: pointer;
   font-weight: 500;
   color: #1e293b;
+  font-size: 1rem; /* Giảm kích thước */
+  padding: 5px 0;
 }
 
 .navbar-center li.active {
