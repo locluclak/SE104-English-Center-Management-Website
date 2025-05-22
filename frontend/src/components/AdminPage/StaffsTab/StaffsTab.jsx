@@ -1,6 +1,5 @@
-// StaffsTab.js
 import React from 'react';
-import './StaffsTab.css'; // Tạo file CSS này để style
+import './StaffsTab.css';
 
 const StaffsTab = ({ staffType, data, onEdit, onDelete }) => {
   const title = staffType === 'teachers' ? 'Teacher Management' : 'Accountant Management';
@@ -23,7 +22,7 @@ const StaffsTab = ({ staffType, data, onEdit, onDelete }) => {
         <tr>
           <th>ID</th>
           <th>Name</th>
-          <th>Birthday</th> {/* Thêm cột Birthday kế cột Name */}
+          <th>Birthday</th>
           <th>Email</th>
           <th>Actions</th>
         </tr>

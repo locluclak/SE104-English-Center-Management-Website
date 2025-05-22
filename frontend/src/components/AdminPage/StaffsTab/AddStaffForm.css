@@ -6,7 +6,7 @@
   padding: 20px;
   border: 1px solid #ccc;
   border-radius: 8px;
-  background-color: #f9f9f9;
+  background-color: white;
   max-width: 600px; /* Giới hạn chiều rộng form */
   margin: 20px auto; /* Căn giữa form (nếu cần) */
 }
@@ -58,32 +58,6 @@
   background-color: white;
 }
 
-.students-section {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 10px;
-}
-
-.students-section label {
-  font-weight: bold;
-  color: #555;
-}
-
-.add-student-btn {
-  padding: 8px 12px;
-  background-color: #28a745; /* Màu xanh lá */
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-size: 0.9rem;
-}
-
-.add-student-btn:hover {
-  background-color: #218838;
-}
-
 .form-actions {
   display: flex;
   justify-content: flex-end; /* Căn các nút về bên phải */
@@ -101,19 +75,19 @@
 }
 
 .form-actions button[type="submit"] {
-  background-color: #007bff; /* Màu xanh dương */
-  color: white;
+  background-color: #abc4ff;
+  color: #212529;
 }
 
 .form-actions button[type="submit"]:hover {
-  background-color: #0056b3;
+  background-color: #91a8ed;
 }
 
 .form-actions button[type="button"] {
-  background-color: #6c757d; /* Màu xám */
-  color: white;
+  background-color: #edf2fb;
+  color: black;
 }
 
 .form-actions button[type="button"]:hover {
-  background-color: #545b62;
+  background-color: #91a8ed;
 }

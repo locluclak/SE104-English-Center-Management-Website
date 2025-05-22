@@ -1,8 +1,10 @@
 .calendar-tab-container {
-  max-width: 900px;
   margin: auto;
   position: relative;
-  padding: 15px;
+  width: 100%; 
+  padding: 20px;
+  box-sizing: border-box; 
+  overflow-y: auto; 
 }
 
 /* Tiêu đề tháng */

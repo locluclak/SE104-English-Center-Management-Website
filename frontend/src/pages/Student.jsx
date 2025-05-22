@@ -53,7 +53,7 @@ const StudentPage = () => {
 
         <div className="content">
           {activeTab === 'courses' && (
-            <div className="course-display-area"> {/* Thêm class mới để styling */}
+          <div className="course-display-area"> {/* Thêm class mới để styling */}
               {selectedClass ? (
                 <>
                   <CourseDetail

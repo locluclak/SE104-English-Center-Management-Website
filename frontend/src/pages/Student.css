@@ -17,7 +17,6 @@
 }
 
 .content {
-  display: flex;
   flex: 1;
   overflow: hidden;
   width: 100%;
@@ -35,7 +34,7 @@ body, html {
 }
 
 .course-display-area {
-  display: flex; 
+  display: flex;
   gap: 20px;
   flex: 1; 
   padding-left: 20px;

@@ -103,8 +103,8 @@ const AdminPage = () => {
     if (activeTab === "classes") setShowClassForm(true);
     else if (activeTab === "students") setShowStudentForm(true);
     else if (activeTab === "staffs") {
-      if (selectedStatus === "Teacher") setShowTeacherForm(true);
-      else if (selectedStatus === "Accountant") setShowAccountantForm(true);
+      if (selectedStatus === "teacher") setShowTeacherForm(true);
+      else if (selectedStatus === "accountant") setShowAccountantForm(true);
     } else {
       alert("Thêm mới không xác định.");
     }
@@ -190,72 +190,81 @@ const AdminPage = () => {
         />
 
         <div className="content">
-          {activeTab === "classes" && (
-            <ClassesTab
-              selectedStatus={selectedStatus}
-              showClassForm={showClassForm}
-              setShowClassForm={setShowClassForm}
-            />
-          )}
+          <div className="admin-display-area">
+            {activeTab === "classes" && (
+              <ClassesTab
+                selectedStatus={selectedStatus}
+                showClassForm={showClassForm}
+                setShowClassForm={setShowClassForm}
+              />
+            )}
 
-          {activeTab === "students" && (
-            <>
-              {!showStudentForm && (
-                <StudentTab
-                  students={students}
-                  selectedStatus={selectedStatus}
-                  onEditStudent={handleEditStudent}
-                  onDeleteStudent={handleDeleteStudent}
-                />
-              )}
-              {showStudentForm && (
-                <AddStudentForm
-                  initialData={editingStudent}
-                  onClose={() => {
-                    setShowStudentForm(false);
-                    setEditingStudent(null);
-                  }}
-                  onSubmitSuccess={(data, isEdit) =>
-                    handleFormSubmitSuccess("Student", data, isEdit)
-                  }
-                />
-              )}
-            </>
-          )}
+            {activeTab === "students" && (
+              <>
+                {!showStudentForm && (
+                  <StudentTab
+                    students={students}
+                    selectedStatus={selectedStatus}
+                    onEditStudent={handleEditStudent}
+                    onDeleteStudent={handleDeleteStudent}
+                  />
+                )}
+                {showStudentForm && (
+                  <AddStudentForm
+                    initialData={editingStudent}
+                    onClose={() => {
+                      setShowStudentForm(false);
+                      setEditingStudent(null);
+                    }}
+                    onSubmitSuccess={(data, isEdit) =>
+                      handleFormSubmitSuccess("Student", data, isEdit)
+                    }
+                  />
+                )}
+              </>
+            )}
 
-          {activeTab === "staffs" && (
-            <div>
-              {selectedStatus === "Teacher" && !showTeacherForm && (
-                <StaffsTab
-                  staffType="teachers"
-                  data={teachers}
-                  onEdit={(staff) => handleEditStaff(staff, "teachers")}
-                  onDelete={(staff) => handleDeleteStaff(staff, "teachers")}
-                />
-              )}
-              {selectedStatus === "Teacher" && showTeacherForm && (
-                <AddTeacherForm
-                  onClose={() => setShowTeacherForm(false)}
-                  onSubmitSuccess={() => handleFormSubmitSuccess("Teacher")}
-                />
-              )}
+            {activeTab === "staffs" && (
+              <div>
+                {/* Hiển thị form thêm giáo viên nếu showTeacherForm là true */}
+                {showTeacherForm && (
+                  <AddTeacherForm
+                    onClose={() => setShowTeacherForm(false)}
+                    onSubmitSuccess={() => handleFormSubmitSuccess("Teacher")}
+                  />
+                )}
 
-              {selectedStatus === "Accountant" && !showAccountantForm && (
-                <StaffsTab
-                  staffType="accountants"
-                  data={accountants}
-                  onEdit={(staff) => handleEditStaff(staff, "accountants")}
-                  onDelete={(staff) => handleDeleteStaff(staff, "accountants")}
-                />
-              )}
-              {selectedStatus === "Accountant" && showAccountantForm && (
-                <AddAccountantForm
-                  onClose={() => setShowAccountantForm(false)}
-                  onSubmitSuccess={() => handleFormSubmitSuccess("Accountant")}
-                />
-              )}
-            </div>
-          )}
+                {/* Hiển thị form thêm kế toán nếu showAccountantForm là true */}
+                {showAccountantForm && (
+                  <AddAccountantForm
+                    onClose={() => setShowAccountantForm(false)}
+                    onSubmitSuccess={() => handleFormSubmitSuccess("Accountant")}
+                  />
+                )}
+
+                {!showTeacherForm && !showAccountantForm && (
+                  <>
+                    {selectedStatus === "teacher" && (
+                      <StaffsTab
+                        staffType="teachers"
+                        data={teachers}
+                        onEdit={(staff) => handleEditStaff(staff, "teachers")}
+                        onDelete={(staff) => handleDeleteStaff(staff, "teachers")}
+                      />
+                    )}
+                    {selectedStatus === "accountant" && (
+                      <StaffsTab
+                        staffType="accountants"
+                        data={accountants}
+                        onEdit={(staff) => handleEditStaff(staff, "accountants")}
+                        onDelete={(staff) => handleDeleteStaff(staff, "accountants")}
+                      />
+                    )}
+                  </>
+                )}
+              </div>
+            )}  
+          </div>
         </div>
       </div>
     </div>

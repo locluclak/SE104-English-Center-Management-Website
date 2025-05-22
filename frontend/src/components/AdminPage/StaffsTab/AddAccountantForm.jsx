@@ -1,6 +1,5 @@
-// AddAccountantForm.js
 import React, { useState } from 'react';
-import './AddStaffForm.css'; // Sử dụng một file CSS chung cho các form hoặc tạo file riêng
+import './AddStaffForm.css';
 
 const AddAccountantForm = ({ onClose, onSubmitSuccess }) => {
   const [accountantId, setAccountantId] = useState('');
@@ -71,7 +70,6 @@ const AddAccountantForm = ({ onClose, onSubmitSuccess }) => {
           onChange={(e) => setAccountantDepartment(e.target.value)}
         />
       </div>
-      {/* Bạn có thể thêm các trường khác nếu cần */}
 
       <div className="form-actions">
         <button type="submit">Create Accountant</button>

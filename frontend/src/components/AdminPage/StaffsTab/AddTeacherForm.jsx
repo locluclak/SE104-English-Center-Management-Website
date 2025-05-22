@@ -1,6 +1,5 @@
-// AddTeacherForm.js
 import React, { useState } from 'react';
-import './AddStaffForm.css'; // Sử dụng một file CSS chung cho các form hoặc tạo file riêng
+import './AddStaffForm.css';
 
 const AddTeacherForm = ({ onClose, onSubmitSuccess }) => {
   const [teacherId, setTeacherId] = useState('');
@@ -60,7 +59,6 @@ const AddTeacherForm = ({ onClose, onSubmitSuccess }) => {
           placeholder="Password (optional)"
           value={teacherPassword}
           onChange={(e) => setTeacherPassword(e.target.value)}
-          // Bỏ 'required' nếu không bắt buộc
         />
       </div>
 
@@ -72,7 +70,6 @@ const AddTeacherForm = ({ onClose, onSubmitSuccess }) => {
           onChange={(e) => setTeacherSpecialization(e.target.value)}
         />
       </div>
-      {/* Bạn có thể thêm các trường khác nếu cần, ví dụ: Số điện thoại, Địa chỉ, v.v. */}
 
       <div className="form-actions">
         <button type="submit">Create Teacher</button>
