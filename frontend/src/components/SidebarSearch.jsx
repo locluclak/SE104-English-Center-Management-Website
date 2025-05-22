@@ -20,14 +20,15 @@ const itemsByRole = {
     ],
   },
   teacher: {},
+  
   student: {
     courses: [
       { key: 'home', name: 'Home', icon: <FaHome /> },
       { key: 'my-courses', name: 'My Courses', icon: <FaBookOpen /> }
     ],
-    notes: [
+    dashboard: [
       { key: 'calendar', name: 'Calendar', icon: <FaCalendarAlt /> },
-      { key: 'notes', name: 'Notes', icon: <FaStickyNote /> }
+      { key: 'padlet', name: 'Padlet', icon: <FaStickyNote /> }
     ],
   },
 };
