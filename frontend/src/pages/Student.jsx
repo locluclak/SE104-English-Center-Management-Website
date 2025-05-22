@@ -7,13 +7,25 @@ import CourseSection from "../components/StudentPage/CoursesTab/CourseSection";
 
 import Calendar from '../components/StudentPage/DashboardTab/CalendarTab';
 import Padlet from '../components/StudentPage/DashboardTab/PadletTab';
-import CourseDetail from "../components/StudentPage/CoursesTab/CourseDetail";
 
 import './Student.css';
 
 const StudentPage = () => {
-  const [activeTab, setActiveTab] = useState('home');
-  const [selectedStatus, setSelectedStatus] = useState(null);
+  // activeTab luôn là chữ thường: 'courses' hoặc 'dashboard'
+  const [activeTab, setActiveTab] = useState('courses');
+
+  // selectedDashboardFeature lưu key, ví dụ 'calendar', 'padlet'
+  const [selectedDashboardFeature, setSelectedDashboardFeature] = useState('');
+
+  useEffect(() => {
+    if (activeTab === 'dashboard') {
+      // Khi chuyển sang tab dashboard, mặc định chọn item đầu tiên là 'calendar'
+      setSelectedDashboardFeature('calendar');
+    } else {
+      // Khi chuyển sang courses, reset selectedDashboardFeature
+      setSelectedDashboardFeature('');
+    }
+  }, [activeTab]);
 
   const handleNew = () => {
     console.log('StudentPage: handleNew called');
@@ -21,7 +33,6 @@ const StudentPage = () => {
 
   const handleClassClick = (className) => {
     console.log(`Clicked class: ${className}`);
-    setSelectedClass(className);
   };
 
   return (
@@ -42,21 +53,30 @@ const StudentPage = () => {
           onNew={handleNew}
         />
 
-        {activeTab === 'courses' && selectedStatus === "Home" && (
-          <div style={{ display: 'flex', flexDirection: 'column', marginLeft: '20px' }}>
-          <CourseAd />
-          <CourseSection
-            title="Khoá học nghe đọc"
-            classList={['Class A', 'Class B']}
-            onClassClick={handleClassClick}
-          />
-          <CourseSection
-            title="Khoá học nói viết"
-            classList={['Class C', 'Class D']}
-            onClassClick={handleClassClick}
-          />
-          </div>
-        )}
+        <div className="content">
+          {activeTab === 'courses' && (
+            <div style={{ display: 'flex', flexDirection: 'column', marginLeft: '20px' }}>
+              <CourseAd />
+              <CourseSection
+                title="Khoá học nghe đọc"
+                classList={['Class A', 'Class B']}
+                onClassClick={handleClassClick}
+              />
+              <CourseSection
+                title="Khoá học nói viết"
+                classList={['Class C', 'Class D']}
+                onClassClick={handleClassClick}
+              />
+            </div>
+          )}
+
+          {activeTab === 'dashboard' && (
+            <div style={{ marginLeft: '20px' }}>
+              {selectedDashboardFeature === 'calendar' && <Calendar />}
+              {selectedDashboardFeature === 'padlet' && <Padlet />}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
