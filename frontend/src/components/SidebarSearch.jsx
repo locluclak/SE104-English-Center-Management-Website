@@ -19,8 +19,15 @@ const itemsByRole = {
       { key: 'accountant', name: 'Accountant' },
     ],
   },
-  teacher: {},
-  
+  teacher: {
+    classes: [
+      { key: 'my-classes', name: 'My Classes' },
+      { key: 'teaching-now', name: 'Teaching Now' },
+    ],
+    students: [
+      { key: 'student-list', name: 'Student List' },
+    ],
+  },  
   student: {
     courses: [
       { key: 'home', name: 'Home', icon: <FaHome /> },

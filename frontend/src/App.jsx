@@ -7,6 +7,7 @@ import ForgotPassword from './pages/Forgotpassword';
 import ResetPassword from './pages/Resetpassword';
 import StudentPage from './pages/Student'; // Đảm bảo đường dẫn chính xác
 import AdminPage from './pages/Admin';
+import TeacherPage from './pages/Teacher';
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
         <Route path="/forgot-password/reset" element={<ResetPassword />} />
         <Route path="/student" element={<StudentPage />} />
         <Route path="/admin" element={<AdminPage />} />
+        <Route path="/teacher" element={<TeacherPage />} />
       </Routes>
     </Router>
   );
