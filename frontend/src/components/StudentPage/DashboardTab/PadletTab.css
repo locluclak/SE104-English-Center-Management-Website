@@ -1,77 +1,32 @@
 .padlet-grid-container {
-  max-width: 1000px;
-  margin: 40px auto;
-  padding: 0 20px;
-
+  margin: 30px;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 24px;
-
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
-
-.padlet-card {
-  background-color: #fefefe;
   border-radius: 12px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-  padding: 24px 20px;
-
-  cursor: pointer;
-  transition: box-shadow 0.3s ease, transform 0.3s ease;
-
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  min-height: 140px;
-  text-align: center;
-}
-
-.padlet-card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 10px 20px rgba(0,0,0,0.15);
-}
-
-.padlet-title {
-  font-weight: 600;
-  color: #333;
-  font-size: 1.1rem;
-  line-height: 1.2;
-  user-select: none;
-  margin-bottom: 12px;
-}
-
-.padlet-preview {
-  font-size: 0.9rem;
-  color: #666;
-  line-height: 1.4;
-  user-select: none;
-
-  overflow: hidden;
-  text-overflow: ellipsis;
-  display: -webkit-box;
-  /*-webkit-line-clamp: 3; /* giới hạn 3 dòng */
-  -webkit-box-orient: vertical;
 }
 
 .fab {
   position: fixed;
-  bottom: 24px;
-  right: 24px;
+  bottom: 28px;
+  right: 28px;
   width: 56px;
   height: 56px;
-  background-color: #ff7043;
-  color: white;
-  font-size: 2.5rem;
+  background-color: #abc4ff;
+  color: black;
+  font-size: 2.8rem;
   border-radius: 50%;
   cursor: pointer;
 
-  display: flex;              /* bật flexbox */
-  align-items: center;        /* căn dọc chính giữa */
-  justify-content: center;    /* căn ngang chính giữa */
+  display: flex;
+  justify-content: center;
 
   user-select: none;
-  transition: background-color 0.3s ease;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
   z-index: 9999;
   padding: 0;
   line-height: 1;
+}
+
+.fab:hover {
+  background-color: #91a8ed;
 }

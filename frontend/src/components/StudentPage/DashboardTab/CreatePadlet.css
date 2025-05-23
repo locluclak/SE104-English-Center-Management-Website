@@ -4,7 +4,7 @@
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(0,0,0,0.4);
+  background: rgba(0, 0, 0, 0.45);
   z-index: 1000;
   display: flex;
   align-items: center;
@@ -13,73 +13,84 @@
 
 .create-padlet-form {
   background-color: #fff;
-  padding: 30px;
-  width: 80vw;
-  height: 80vh;
+  padding: 32px 40px;
+  width: 700px;
+  max-width: 90vw;
+  max-height: 85vh;
   display: flex;
   flex-direction: column;
-  border-radius: 16px;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+  border-radius: 20px;
+  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.15);
+  overflow-y: auto;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 .padlet-title-input {
   font-size: 24px;
-  padding: 12px;
+  padding: 14px 16px;
   border: none;
-  border-bottom: 2px solid #007bff;
   outline: none;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
+  font-weight: 600;
+  color: #111;
+}
+
+.padlet-title-input::placeholder {
+  color: #999;
+  font-weight: 400;
 }
 
 .padlet-content-area {
   flex: 1;
-  padding: 14px;
+  padding: 16px 18px;
   font-size: 18px;
-  border: 1px solid #ddd;
-  border-radius: 10px;
+  border: 1.8px solid #ddd;
+  border-radius: 16px;
   resize: none;
   outline: none;
   line-height: 1.6;
+  color: #222;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  margin-bottom: 24px;
+}
+
+.padlet-content-area:focus {
+  border-color: #1976d2;
+  box-shadow: 0 0 8px #a3cdfd;
 }
 
 .button-group {
   margin-top: 20px;
   display: flex;
-  gap: 12px;
+  gap: 14px;
   justify-content: flex-end;
 }
 
 .button-group button {
-  padding: 10px 18px;
-  font-size: 16px;
-  font-weight: bold;
+  padding: 12px 22px;
+  font-size: 17px;
+  font-weight: 700;
   border: none;
-  border-radius: 8px;
+  border-radius: 14px;
   cursor: pointer;
+  transition: background-color 0.3s ease;
+  user-select: none;
 }
 
 .button-group button[type='submit'] {
-  background-color: #28a745;
-  color: white;
+  background-color: #abc4ff;
+  color: black;
+}
+
+.button-group button[type='submit']:hover {
+  background-color: #91a8ed;
 }
 
 .button-group button[type='button'] {
-  background-color: #dc3545;
-  color: white;
+  background-color: #d7e3fc;
+  color: black;
 }
 
-/* Giữ nguyên full screen style như trước */
-.button-group {
-  margin-top: 16px;
-  display: flex;
-  justify-content: flex-end;
-}
-
-.button-group button {
-  background-color: #6c757d;
-  color: white;
-  padding: 10px 18px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
+.button-group button[type='button']:hover {
+  background-color: #91a8ed;
 }

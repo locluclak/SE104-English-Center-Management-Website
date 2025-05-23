@@ -72,7 +72,7 @@ const StudentPage = () => {
           )}
 
           {activeTab === 'dashboard' && (
-            <div style={{ marginLeft: '20px' }}>
+            <div>
               {selectedFeature === 'calendar' && <Calendar />}
               {selectedFeature === 'padlet' && <Padlet />}
             </div>
