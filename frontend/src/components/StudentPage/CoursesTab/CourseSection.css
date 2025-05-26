@@ -1,0 +1,11 @@
+.course-section {
+  margin-bottom: 50px;
+}
+  
+.course-grid {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-top: 10px;
+}
+  

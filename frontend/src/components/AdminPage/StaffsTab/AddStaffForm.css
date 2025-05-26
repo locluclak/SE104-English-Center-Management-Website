@@ -1,0 +1,93 @@
+/* AddForm.css (Hoặc có thể là AddClassForm.css nếu dùng chung) */
+.form-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 15px; /* Khoảng cách giữa các dòng/phần tử */
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: white;
+  max-width: 600px; /* Giới hạn chiều rộng form */
+  margin: 20px auto; /* Căn giữa form (nếu cần) */
+}
+
+.form-grid h2 {
+  text-align: center;
+  margin-bottom: 10px;
+  color: #333;
+}
+
+.form-row {
+  display: flex;
+  gap: 15px; /* Khoảng cách giữa các input trên cùng một dòng */
+}
+
+.form-row > input,
+.form-grid > input, /* Cho input không nằm trong form-row */
+.form-grid > textarea,
+.form-row > div { /* Cho các container như teacher-select */
+  flex-grow: 1; /* Để các input/div con chia đều không gian */
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.form-grid > textarea {
+  resize: vertical; /* Cho phép thay đổi chiều cao textarea */
+}
+
+.form-row .teacher-select,
+.form-row > div { /* Áp dụng cho các div chứa label + input/select */
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.form-row label {
+  font-weight: bold;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.form-row select {
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 1rem;
+  background-color: white;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: flex-end; /* Căn các nút về bên phải */
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.form-actions button {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 1rem;
+  font-weight: bold;
+}
+
+.form-actions button[type="submit"] {
+  background-color: #abc4ff;
+  color: #212529;
+}
+
+.form-actions button[type="submit"]:hover {
+  background-color: #91a8ed;
+}
+
+.form-actions button[type="button"] {
+  background-color: #edf2fb;
+  color: black;
+}
+
+.form-actions button[type="button"]:hover {
+  background-color: #91a8ed;
+}

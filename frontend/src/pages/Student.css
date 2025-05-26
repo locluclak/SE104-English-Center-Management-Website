@@ -1,103 +1,49 @@
+/* Student.css - Full màn hình */
 .student-page {
-  font-family: sans-serif;
   display: flex;
   flex-direction: column;
+  height: 100vh;
   width: 100vw;
-  min-height: 100vh; /* Đảm bảo chiều cao tối thiểu bằng chiều cao viewport */
-}
-
-/* Стиль cho thanh điều hướng phía trên */
-.student-header {
-  background-color: #FFE3B3;
-  color: black;
-  padding: 15px 30px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.header-left .logo {
   margin: 0;
-  font-size: 24px;
+  padding: 0;
+  overflow: hidden;
 }
 
-.header-center .search-bar {
+.student-body {
   display: flex;
-  align-items: center;
-  background-color: #f8f9fa;
-  border-radius: 5px;
-  padding: 5px 15px;
+  flex: 1;
+  min-height: 0; /* Fix cho trình duyệt Firefox */
+  width: 100%;
 }
 
-.header-center .search-icon {
-  color: #6c757d;
-  margin-right: 10px;
-}
-
-.header-center input[type="text"] {
-  border: none;
-  background: transparent;
-  padding: 8px;
-  width: 500px;
-  outline: none;
-}
-
-.header-right {
-  display: flex;
-  align-items: center;
-}
-
-.header-right .notification-icon,
-.header-right .account-icon {
-  font-size: 25px;
-  margin-left: 20px;
-  cursor: pointer;
-}
-/* Navigation Bar Styles */
-.main-nav {
-  background-color: #FFC872;
-  padding: 10px 30px;
-  border-bottom: 1px solid #dee2e6;
-}
-
-.main-nav ul {
-  list-style: none;
+.content {
+  flex: 1;
+  overflow: hidden;
+  width: 100%;
   padding: 0;
   margin: 0;
-  display: flex;
-  align-items: center;
+}
+
+/* Đảm bảo không có khoảng trắng thừa */
+body, html {
+  margin: 0;
+  padding: 0;
+  height: 100%;
   width: 100%;
-  justify-content: flex-end; /* Căn các mục về bên phải */
+  overflow: hidden;
 }
 
-.main-nav li {
-  margin-left: 30px; /* Tạo khoảng cách giữa các mục */
-  margin-right: 0; /* Loại bỏ margin-right không cần thiết */
-}
-
-.main-nav li:first-child {
-  margin-left: 30px; /* Loại bỏ margin-left cho mục đầu tiên nếu bạn muốn nó sát lề phải (thường không nên) */
-}
-
-.main-nav li:last-child {
-  margin-right: 30px; /* Tạo khoảng cách với lề phải */
-}
-
-.main-nav li.active span {
-  font-weight: bold;
-}
-
-.main-nav li span {
-  cursor: pointer;
+.course-display-area {
   display: flex;
-  align-items: center;
+  gap: 20px;
+  flex: 1; 
+  padding-left: 20px;
+  overflow: hidden; 
 }
 
-.main-nav .nav-icon {
-  margin-right: 5px;
-}
-
-/* Content Styles */
-.content {
-  padding: 20px;
+.home-tab-content { 
+  display: flex;
+  flex-direction: column;
+  flex: 1; 
+  gap: 20px;
 }
