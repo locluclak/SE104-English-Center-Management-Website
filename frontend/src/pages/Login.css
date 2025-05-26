@@ -24,7 +24,9 @@ body, html {
 
 .login-image {
     flex: 0 0 50%;
-    background-color: #91a8ed;
+    background-image: url('../assets/login-bg.jpg');
+    background-size: cover;
+    background-position: center;
     display: flex;
     justify-content: center;
     align-items: center;

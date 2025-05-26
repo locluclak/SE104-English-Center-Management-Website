@@ -1,4 +1,3 @@
-// Padlet.jsx
 import React, { useState } from "react";
 import PadletList from "./PadletList";
 import PadletDetail from "./PadletDetail";
