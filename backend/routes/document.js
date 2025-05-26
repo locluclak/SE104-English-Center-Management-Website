@@ -62,4 +62,96 @@ router.delete('/delete/:id', async (req, res) => {
   }
 });
 
+// GET /documents/download/:id - Download document file by ID
+router.get('/download/:id', async (req, res) => {
+  const docId = req.params.id;
+
+  try {
+    // Fetch the file path of the document from the database
+    const [rows] = await db.execute('SELECT FILE FROM DOCUMENT WHERE DOC_ID = ?', [docId]);
+
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'Document not found' });
+    }
+
+    const filePath = rows[0].FILE;
+
+    if (!filePath) {
+      return res.status(404).json({ error: 'File not found for this document' });
+    }
+
+    const fullPath = path.join(__dirname, '../', filePath);
+
+    // Send the file to the client
+    res.download(fullPath, (err) => {
+      if (err) {
+        console.error('Error downloading file:', err);
+        res.status(500).json({ error: 'Internal server error' });
+      }
+    });
+  } catch (err) {
+    console.error('Error fetching document file:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// GET /documents/course/:id - Get all document info in a course by course ID (excluding file link)
+router.get('/getbycourse/:id', async (req, res) => {
+  const courseId = req.params.id;
+
+  try {
+    // Fetch document information excluding the file link
+    const [rows] = await db.execute(
+      'SELECT DOC_ID, NAME, DESCRIPTION, COURSE_ID FROM DOCUMENT WHERE COURSE_ID = ?',
+      [courseId]
+    );
+
+    if (rows.length === 0) {
+      return res.status(404).json({ message: 'No documents found for this course' });
+    }
+
+    res.json(rows);
+  } catch (err) {
+    console.error('Error fetching documents:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// PUT /documents/update/:id - Update document details (excluding course_id)
+router.put('/update/:id', async (req, res) => {
+  const docId = req.params.id;
+  const { name, description } = req.body;
+
+  if (!name && !description) {
+    return res.status(400).json({ message: 'No fields to update' });
+  }
+
+  try {
+    // Build dynamic query for updating fields
+    const fields = [];
+    const values = [];
+    if (name) {
+      fields.push('NAME = ?');
+      values.push(name);
+    }
+    if (description) {
+      fields.push('DESCRIPTION = ?');
+      values.push(description);
+    }
+    values.push(docId);
+
+    const sql = `UPDATE DOCUMENT SET ${fields.join(', ')} WHERE DOC_ID = ?`;
+    const [result] = await db.execute(sql, values);
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'Document not found' });
+    }
+
+    res.json({ message: 'Document updated successfully' });
+  } catch (err) {
+    console.error('Error updating document:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 module.exports = router;
