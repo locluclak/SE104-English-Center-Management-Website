@@ -19,7 +19,7 @@ const getLinksByRole = (role) => {
       ];
     case 'teacher':
       return [
-        { key: 'classes', name: 'Classes' },
+        { key: 'classes', name: 'My Classes' },
         { key: 'dashboard', name: 'Dashboard' },
       ];
     case 'accountant':

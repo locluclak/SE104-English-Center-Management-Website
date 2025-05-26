@@ -1,0 +1,43 @@
+.class-detail-container {
+  display: flex;
+  gap: 0;
+  min-width: 95%;
+}
+
+.class-detail-main {
+  flex: 1;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.classes-info {
+  position: relative; /* Quan trọng để đặt nút bên trong */
+  background-color: #edf2fb;
+  padding: 20px;
+  border-radius: 10px;
+  padding-bottom: 70px; /* Đảm bảo không bị đè lên nút */
+}
+
+.back-btn {
+  background-color: #abc4ff;
+  color: black;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.back-btn:hover {
+  background-color: #91a8ed;
+}
+
+.classes-info {
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.class-info p {
+  margin: 10px 0;
+}

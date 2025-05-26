@@ -21,3 +21,19 @@
   border-left: 1px solid #ddd;
   overflow-y: auto;
 }
+
+body, html {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
+.class-display-area {
+  display: flex;
+  gap: 20px;
+  flex: 1; 
+  padding-left: 20px;
+  overflow: hidden; 
+}

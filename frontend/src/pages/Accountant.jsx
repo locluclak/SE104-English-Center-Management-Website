@@ -16,12 +16,16 @@ const AccountantPage = () => {
     if (activeTab === 'dashboard') {
       setSelectedFeature('calendar');
     } else if (activeTab === 'tuition') {
-      setSelectedFeature('home');
+      setSelectedFeature('student');
+    } else if (activeTab === 'payments') {
+      setSelectedFeature('transfer');
+    } else if (activeTab === 'reports') {
+      setSelectedFeature('time')
     }
   }, [activeTab]);
 
   const handleNew = () => {
-    console.log('TeacherPage: handleNew called');
+    console.log('AccountantPage: handleNew called');
   };
 
   const handleFeatureSelect = (featureKey) => {

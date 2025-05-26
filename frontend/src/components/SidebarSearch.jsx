@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { FaHome, FaBookOpen, FaCalendarAlt, FaStickyNote, FaChild, FaMoneyCheckAlt, FaFileInvoiceDollar } from 'react-icons/fa';
-import { FaRegClock, FaReceipt } from 'react-icons/fa';
+import { FaRegClock, FaReceipt, FaHourglassEnd, FaHourglassHalf } from 'react-icons/fa';
 
 import './SidebarSearch.css';
 
@@ -23,8 +23,8 @@ const itemsByRole = {
   },
   teacher: {
     classes: [
-      { key: 'home', name: 'Home', icon: <FaHome /> },
-      { key: 'my-classes', name: 'My Classes', icon: <FaBookOpen /> }
+      { key: 'current', name: 'Current', icon: <FaHourglassHalf /> },
+      { key: 'end', name: 'End', icon: <FaHourglassEnd /> }
     ],
     dashboard: [
       { key: 'calendar', name: 'Calendar', icon: <FaCalendarAlt /> },
