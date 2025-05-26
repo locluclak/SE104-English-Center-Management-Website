@@ -147,4 +147,49 @@ router.get('/getbycourse/:courseId', async (req, res) => {
   }
 });
 
+// PUT /assignments/update/:id - Update assignment details (excluding course_id)
+router.put('/update/:id', async (req, res) => {
+  const assignmentId = req.params.id;
+  const { name, description, start_date, end_date } = req.body;
+
+  if (!name && !description && !start_date && !end_date) {
+    return res.status(400).json({ message: 'No fields to update' });
+  }
+
+  try {
+    // Build dynamic query for updating fields
+    const fields = [];
+    const values = [];
+    if (name) {
+      fields.push('NAME = ?');
+      values.push(name);
+    }
+    if (description) {
+      fields.push('DESCRIPTION = ?');
+      values.push(description);
+    }
+    if (start_date) {
+      fields.push('START_DATE = ?');
+      values.push(start_date);
+    }
+    if (end_date) {
+      fields.push('END_DATE = ?');
+      values.push(end_date);
+    }
+    values.push(assignmentId);
+
+    const sql = `UPDATE ASSIGNMENT SET ${fields.join(', ')} WHERE AS_ID = ?`;
+    const [result] = await db.execute(sql, values);
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'Assignment not found' });
+    }
+
+    res.json({ message: 'Assignment updated successfully' });
+  } catch (err) {
+    console.error('Error updating assignment:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 module.exports = router;
