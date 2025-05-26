@@ -1,4 +1,4 @@
-.teacher-page {
+.accountant-page {
   display: flex;
   flex-direction: column;
   height: 100vh;
@@ -8,13 +8,13 @@
   overflow: hidden;
 }
 
-.teacher-content {
+.accountant-content {
   display: flex;
   flex: 1;
   background-color: #f5f5f5;
 }
 
-.teacher-main {
+.accountant-main {
   flex: 1;
   padding: 20px;
   background-color: #ffffff;

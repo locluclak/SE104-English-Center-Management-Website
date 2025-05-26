@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { FaBell, FaUserCircle } from 'react-icons/fa';
 import NotificationPopup from './NotificationPopup';
-import AccountPopup from './AccountPopup';  // import popup tài khoản
+import AccountPopup from './AccountPopup'; 
 import './Navbar.css';
 
 const getLinksByRole = (role) => {
@@ -20,7 +20,14 @@ const getLinksByRole = (role) => {
     case 'teacher':
       return [
         { key: 'classes', name: 'Classes' },
-        { key: 'students', name: 'Students' },
+        { key: 'dashboard', name: 'Dashboard' },
+      ];
+    case 'accountant':
+      return [
+        { key: 'dashboard', name: 'Dashboard' },
+        { key: 'tuition', name: 'Tuition Fee' },
+        { key: 'payments', name: "Students' Payments" },
+        { key: 'reports', name: 'Reports' },
       ];
     default:
       return [];

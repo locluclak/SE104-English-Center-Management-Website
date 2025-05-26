@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { FaHome, FaBookOpen, FaCalendarAlt, FaStickyNote } from 'react-icons/fa';
+import { FaHome, FaBookOpen, FaCalendarAlt, FaStickyNote, FaChild, FaMoneyCheckAlt, FaFileInvoiceDollar } from 'react-icons/fa';
+import { FaRegClock, FaReceipt } from 'react-icons/fa';
+
 import './SidebarSearch.css';
 
 const itemsByRole = {
@@ -21,11 +23,12 @@ const itemsByRole = {
   },
   teacher: {
     classes: [
-      { key: 'my-classes', name: 'My Classes' },
-      { key: 'teaching-now', name: 'Teaching Now' },
+      { key: 'home', name: 'Home', icon: <FaHome /> },
+      { key: 'my-classes', name: 'My Classes', icon: <FaBookOpen /> }
     ],
-    students: [
-      { key: 'student-list', name: 'Student List' },
+    dashboard: [
+      { key: 'calendar', name: 'Calendar', icon: <FaCalendarAlt /> },
+      { key: 'padlet', name: 'Padlet', icon: <FaStickyNote /> }
     ],
   },  
   student: {
@@ -37,6 +40,25 @@ const itemsByRole = {
       { key: 'calendar', name: 'Calendar', icon: <FaCalendarAlt /> },
       { key: 'padlet', name: 'Padlet', icon: <FaStickyNote /> }
     ],
+  },
+  accountant: {
+    dashboard: [
+      { key: 'calendar', name: 'Calendar', icon: <FaCalendarAlt /> },
+      { key: 'padlet', name: 'Padlet', icon: <FaStickyNote /> }
+    ],
+    tuition: [
+      { key: 'students', name: 'Students', icon: <FaChild /> },
+      { key: 'classes', name: 'Classes', icon: <FaBookOpen /> }
+    ],
+    payments: [
+      { key: 'transfer', name: 'Transfer', icon: <FaMoneyCheckAlt /> },
+      { key: 'paid', name: 'Paid', icon: <FaFileInvoiceDollar /> },
+      { key: 'unpaid', name: 'Unpaid', icon: <FaReceipt /> },
+    ],
+    reports: [
+      { key: 'time', name: 'Time', icon: <FaRegClock /> },
+      { key: 'classes', name: 'Classes', icon: <FaBookOpen /> }
+    ], 
   },
 };
 

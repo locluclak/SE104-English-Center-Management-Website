@@ -5,9 +5,9 @@ import SidebarSearch from '../components/SidebarSearch';
 import Calendar from '../components/DashboardTab/CalendarTab';
 import Padlet from '../components/DashboardTab/PadletTab';
 
-import './Teacher.css';
+import './Accountant.css';
 
-const TeacherPage = () => {
+const AccountantPage = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [selectedClass, setSelectedClass] = useState(null);
   const [selectedFeature, setSelectedFeature] = useState('home');
@@ -27,14 +27,14 @@ const TeacherPage = () => {
   const handleFeatureSelect = (featureKey) => {
     setSelectedFeature(featureKey);
   };
-  
-  return (
-    <div className="teacher-page">
-      <Navbar role="teacher" activeTab={activeTab} setActiveTab={setActiveTab} />
 
-      <div className="teacher-content">
+  return (
+    <div className="accountant-page">
+      <Navbar role="accountant" activeTab={activeTab} setActiveTab={setActiveTab} />
+
+      <div className="accountant-content">
         <SidebarSearch
-          role="teacher"
+          role="accountant"
           activeTab={activeTab}
           onSearch={handleFeatureSelect}
           onNew={handleNew}
@@ -55,4 +55,4 @@ const TeacherPage = () => {
   );
 };
 
-export default TeacherPage;
+export default AccountantPage;

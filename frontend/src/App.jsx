@@ -8,6 +8,7 @@ import ResetPassword from './pages/Resetpassword';
 import StudentPage from './pages/Student'; // Đảm bảo đường dẫn chính xác
 import AdminPage from './pages/Admin';
 import TeacherPage from './pages/Teacher';
+import AccountantPage from './pages/Accountant'
 
 function App() {
   return (
@@ -22,6 +23,7 @@ function App() {
         <Route path="/student" element={<StudentPage />} />
         <Route path="/admin" element={<AdminPage />} />
         <Route path="/teacher" element={<TeacherPage />} />
+        <Route path="/accountant" element={<AccountantPage />} />
       </Routes>
     </Router>
   );

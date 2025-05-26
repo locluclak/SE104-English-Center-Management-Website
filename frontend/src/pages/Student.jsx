@@ -4,8 +4,8 @@ import SidebarSearch from "../components/SidebarSearch";
 
 import HomeTab from "../components/StudentPage/CoursesTab/HomeTab";
 import MyCoursesTab from "../components/StudentPage/CoursesTab/MyCoursesTab";
-import Calendar from '../components/StudentPage/DashboardTab/CalendarTab';
-import Padlet from '../components/StudentPage/DashboardTab/PadletTab';
+import Calendar from '../components/DashboardTab/CalendarTab';
+import Padlet from '../components/DashboardTab/PadletTab';
 
 import CourseDetail from '../components/StudentPage/CoursesTab/CourseDetail';
 import CourseProgress from '../components/StudentPage/CoursesTab/CourseProgress';
