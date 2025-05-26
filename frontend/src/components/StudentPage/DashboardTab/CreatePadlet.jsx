@@ -10,6 +10,7 @@ export default function CreatePadlet({ padlet, onSubmit, onCancel }) {
   const [audioURL, setAudioURL] = useState("");
   const mediaRecorderRef = useRef(null);
   const audioChunksRef = useRef([]);
+  const textAreaRef = useRef(null);
 
   // Xử lý chọn file
   const handleFileChange = (e) => {
@@ -81,6 +82,10 @@ export default function CreatePadlet({ padlet, onSubmit, onCancel }) {
   const clearRecording = () => {
     setAudioBlob(null);
     setAudioURL("");
+  };
+  const formatText = (command, value = null) => {
+    document.execCommand(command, false, value);
+    textAreaRef.current.focus();
   };
 
   return (
@@ -185,13 +190,17 @@ export default function CreatePadlet({ padlet, onSubmit, onCancel }) {
           </div>
         )}
 
-        <textarea 
-          className="padlet-content-area"
-          value={content}
-          onChange={(e) => setContent(e.target.value)}
-          placeholder="Nội dung..."
-          required
-        />
+        <div
+          contentEditable
+          ref={textAreaRef}
+          className="editor"
+          style={{
+            border: "1px solid #ccc",
+            padding: "10px",
+            minHeight: "200px",
+            marginTop: "10px",
+          }}
+        ></div>
 
         <div className="button-group">
           <button type="submit">Save</button>
