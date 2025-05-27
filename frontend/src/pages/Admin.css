@@ -29,15 +29,6 @@
   box-sizing: border-box;
 }
 
-/* Đảm bảo không có khoảng trắng thừa */
-body, html {
-  margin: 0;
-  padding: 0;
-  height: 100%;
-  width: 100%;
-  overflow: hidden;
-}
-
 .class-management-page {
   width: 100%; 
   box-sizing: border-box; 
