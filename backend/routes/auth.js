@@ -112,10 +112,11 @@ router.post('/login', async (req, res) => {
     try {
         const conn = await db.getConnection();
 
+        // Query the PERSON table to find the user by email
         const [rows] = await conn.query('SELECT * FROM PERSON WHERE EMAIL = ?', [email]);
-        conn.release();
 
         if (rows.length === 0) {
+            conn.release();
             return res.status(401).json({ message: 'Invalid email or password' });
         }
 
@@ -123,20 +124,40 @@ router.post('/login', async (req, res) => {
         const match = await bcrypt.compare(password, user.PASSWORD);
 
         if (!match) {
+            conn.release();
             return res.status(401).json({ message: 'Invalid email or password' });
         }
 
+        let role = 'STUDENT'; // Default role is STUDENT
+
+        // If the user is a staff member, query the STAFF table for their staff_type
+        if (user.ROLE === 'STAFF') {
+            const [staffRows] = await conn.query('SELECT STAFF_TYPE FROM STAFF WHERE ID = ?', [user.ID]);
+            if (staffRows.length > 0) {
+                role = staffRows[0].STAFF_TYPE; // Set role to the staff_type (e.g., TEACHER, ADMIN, ACCOUNTANT)
+            }
+        }
+
+        conn.release();
+
+        // Generate a JWT token
         const token = jwt.sign(
-            { id: user.ID, email: user.EMAIL, role: user.ROLE },
+            { id: user.ID, email: user.EMAIL, role },
             process.env.JWT_SECRET || 'your_jwt_secret',
             { expiresIn: '1h' }
         );
 
-        res.json({ message: 'Login successful', token });
+        // Respond with the token and role
+        res.json({
+            message: 'Login successful',
+            token,
+            role
+        });
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: 'Server error' });
     }
 });
+
 
 module.exports = router;
