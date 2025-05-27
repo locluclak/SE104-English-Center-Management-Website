@@ -8,6 +8,7 @@ const courseRoutes = require('./routes/course'); // Import course routes
 const paymentRoutes = require('./routes/payment'); // Import payment routes
 const documentRoutes = require('./routes/document');
 const assignmentRoutes = require('./routes/assignment'); // Import assignment routes
+const submissionRoutes = require('./routes/submission'); // Import submission routes
 const path = require('path');
 // Initialize Express application
 const app = express();
@@ -26,6 +27,7 @@ app.use('/course', courseRoutes); // Mount course routes
 app.use('/payment', paymentRoutes); // Mount payment routes
 app.use('/documents', documentRoutes);
 app.use('/assignments', assignmentRoutes); // Mount assignment routes
+app.use('/submissions', submissionRoutes); // Mount submission routes
 // Set the port from environment variable or default to 3000
 const PORT = process.env.PORT || 3000;
 
