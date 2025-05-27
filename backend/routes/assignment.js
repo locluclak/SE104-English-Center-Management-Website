@@ -29,10 +29,6 @@ router.post('/upload', upload.single('file'), async (req, res) => {
     return res.status(400).json({ error: 'Missing required fields: name, start_date, end_date, or course_id' });
   }
 
-  if (!filePath) {
-    return res.status(400).json({ error: 'File upload failed. Please provide a valid file.' });
-  }
-
   try {
     const sql = `
       INSERT INTO ASSIGNMENT (NAME, DESCRIPTION, FILE, START_DATE, END_DATE, COURSE_ID)
@@ -41,7 +37,7 @@ router.post('/upload', upload.single('file'), async (req, res) => {
     const [result] = await db.execute(sql, [
       name,
       description || null, // Use null if description is not provided
-      filePath,
+      filePath, // File path can be null if no file is uploaded
       start_date,
       end_date,
       course_id
