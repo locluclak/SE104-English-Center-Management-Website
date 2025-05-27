@@ -2,10 +2,9 @@
   position: relative;
   background: linear-gradient(to right, #abc4ff, #d7e3fc);
   height: 100px;
-  width: 100%;
   border-radius: 12px;
-  margin-bottom: 20px; 
   margin-top: 20px;
+  margin-right: 20px;
   display: flex;
   align-items: center;
   justify-content: center; 
@@ -18,7 +17,6 @@
   font-size: 15px;
   font-weight: bold;
   text-align: center;
-  max-width: calc(100% - 40px);
   transition: opacity 0.3s ease-in-out;
   white-space: normal;
   word-wrap: break-word;

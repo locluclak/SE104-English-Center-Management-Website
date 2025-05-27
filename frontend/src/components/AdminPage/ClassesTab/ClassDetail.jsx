@@ -22,7 +22,7 @@ const ClassDetail = ({ className, selectedStatus, onBack }) => {
     <div className="class-detail-container">
       {/* Nút Back */}
       <button className="back-btn" onClick={onBack}>
-        ←
+        ← Back
       </button>
 
       <h2>{className}</h2>

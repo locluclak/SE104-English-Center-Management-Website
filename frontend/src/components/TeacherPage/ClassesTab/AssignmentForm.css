@@ -1,0 +1,137 @@
+.assignment-form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 12px;
+  max-width: 600px;
+  margin: 0 auto;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  font-family: Arial, sans-serif;
+}
+
+.assignment-form label {
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+.assignment-form input[type="text"] {
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  width: 100%;
+  font-size: 16px;
+}
+
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.formatting-group,
+.file-recording-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.formatting-group button,
+.file-recording-group button,
+.file-upload-btn {
+  background: #f1f1f1;
+  border: 1px solid #ccc;
+  padding: 6px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.formatting-group select {
+  padding: 6px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+}
+
+.file-upload-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.attachment-preview,
+.audio-preview {
+  border: 1px dashed #ccc;
+  padding: 10px;
+  border-radius: 6px;
+  background-color: #f9f9f9;
+}
+
+.attachment-preview p {
+  margin: 0 0 8px 0;
+  font-size: 14px;
+}
+
+.attachment-preview img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin-top: 4px;
+  border-radius: 4px;
+}
+
+.audio-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.clear-audio-btn {
+  align-self: flex-start;
+  background: #ffcccc;
+  color: #a00;
+  border: none;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.editor {
+  background-color: #fffefb;
+  border: 1px solid #ccc;
+  padding: 10px;
+  min-height: 150px;
+  border-radius: 6px;
+  font-size: 15px;
+  overflow-y: auto;
+}
+
+.button-group {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.button-group button {
+  padding: 8px 16px;
+  font-size: 15px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+@media (max-width: 600px) {
+  .assignment-form {
+    padding: 15px;
+  }
+
+  .toolbar {
+    flex-direction: column;
+    gap: 8px;
+  }
+}
