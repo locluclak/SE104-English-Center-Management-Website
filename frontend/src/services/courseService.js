@@ -1,31 +1,59 @@
-// Bạn có thể cần import một thư viện HTTP client như axios, hoặc sử dụng fetch API có sẵn
-// import axios from 'axios'; 
+// src/services/courseService.js
+import axios from 'axios';
 
-const BASE_URL = 'http://localhost:3000/course/1'; // Thay đổi thành URL API của bạn
+const API_BASE = '/api/courses'; // Điều chỉnh theo base path backend của bạn
 
-const courseService = {
-  getAllCourses: async () => {
-    try {
-      const response = await fetch(`${BASE_URL}/classes`); // Hoặc /courses tùy theo API của bạn
-      // const response = await axios.get(`${BASE_URL}/classes`); // Nếu dùng axios
-
-      if (!response.ok) {
-        // Xử lý lỗi HTTP (ví dụ: 404, 500)
-        const errorData = await response.json(); // Cố gắng đọc thông báo lỗi từ server
-        throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
-      }
-      return await response.json(); // Trả về dữ liệu JSON
-    } catch (error) {
-      console.error("Error fetching courses:", error);
-      throw error; // Ném lỗi để component có thể bắt và hiển thị
-    }
-  },
-
-  // Bạn có thể thêm các hàm khác ở đây, ví dụ:
-  // getCourseById: async (id) => { ... },
-  // createCourse: async (courseData) => { ... },
-  // updateCourse: async (id, courseData) => { ... },
-  // deleteCourse: async (id) => { ... },
+// Tạo khóa học mới
+export const createCourse = async (courseData) => {
+  try {
+    const response = await axios.post(`${API_BASE}/create`, courseData);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error;
+  }
 };
 
-export default courseService;
+// Lấy thông tin khóa học theo ID
+export const getCourseById = async (courseId) => {
+  try {
+    const response = await axios.get(`${API_BASE}/${courseId}`);
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error;
+  }
+};
+
+// Thêm giáo viên vào khóa học
+export const addTeacherToCourse = async ({ teacherId, courseId, role }) => {
+  try {
+    const response = await axios.post(`${API_BASE}/add-teacher`, { teacherId, courseId, role });
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error;
+  }
+};
+
+// Xóa giáo viên khỏi khóa học
+export const removeTeacherFromCourse = async ({ teacherId, courseId }) => {
+  try {
+    const response = await axios.delete(`${API_BASE}/remove-teacher`, { data: { teacherId, courseId } });
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error;
+  }
+};
+
+// Thêm học viên vào khóa học và tạo thanh toán
+export const addStudentToCourse = async ({ studentId, courseId, paymentType, paymentDescription }) => {
+  try {
+    const response = await axios.post(`${API_BASE}/add-student`, {
+      studentId,
+      courseId,
+      paymentType,
+      paymentDescription,
+    });
+    return response.data;
+  } catch (error) {
+    throw error.response?.data || error;
+  }
+};
