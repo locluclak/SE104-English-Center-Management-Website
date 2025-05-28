@@ -1,0 +1,86 @@
+.class-cards-container {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.class-card {
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  padding: 15px;
+  width: 220px;
+  cursor: pointer;
+  background-color: #f9f9f9;
+  transition: box-shadow 0.3s ease;
+}
+
+.class-card:hover {
+  box-shadow: 0 0 10px rgba(0,0,0,0.2);
+}
+
+.class-card.selected {
+  border-color: #007bff;
+  background-color: #e7f1ff;
+}
+
+.class-detail {
+  border-top: 2px solid #007bff;
+  padding-top: 15px;
+}
+
+.class-detail table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.class-detail th,
+.class-detail td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+
+.class-detail th {
+  background-color: #007bff;
+  color: white;
+}
+
+.class-detail-fullscreen {
+  padding: 1rem;
+  background: white;
+  border-left: 1px solid #ccc;
+  overflow-y: auto;
+  z-index: 1; 
+}
+
+.back-button {
+  margin-bottom: 15px;
+  padding: 8px 15px;
+  font-size: 16px;
+  cursor: pointer;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 4px;
+}
+
+.back-button:hover {
+  background-color: #0056b3;
+}
+
+.accountant-content {
+  display: flex;
+  height: calc(100vh - 60px); /* hoặc tùy theo chiều cao Navbar */
+}
+
+.sidebar {
+  width: 250px;
+  flex-shrink: 0;
+}
+
+.content {
+  flex-grow: 1;
+  overflow-y: auto;
+  padding: 20px;
+}

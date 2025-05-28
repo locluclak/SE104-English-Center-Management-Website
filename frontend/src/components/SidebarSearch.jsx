@@ -1,15 +1,18 @@
 import React, { useEffect, useState } from 'react';
-import { FaHome, FaBookOpen, FaCalendarAlt, FaStickyNote, FaChild, FaMoneyCheckAlt, FaFileInvoiceDollar } from 'react-icons/fa';
-import { FaRegClock, FaReceipt, FaHourglassEnd, FaHourglassHalf } from 'react-icons/fa';
-
+import {
+  FaHome, FaBookOpen, FaCalendarAlt, FaStickyNote, FaChild,
+  FaMoneyCheckAlt, FaFileInvoiceDollar, FaRegClock, FaReceipt,
+  FaHourglassEnd, FaHourglassHalf, FaSearch, FaSpinner, FaUsers,
+  FaUserCheck, FaUserClock, FaChalkboardTeacher, FaDonate
+} from 'react-icons/fa';
 import './SidebarSearch.css';
 
 const itemsByRole = {
   admin: {
     classes: [
-      { key: 'waiting', name: 'Waiting' },
-      { key: 'current', name: 'Current' },
-      { key: 'end', name: 'End' },
+      { key: 'waiting', name: 'Waiting', icon: <FaSpinner /> },
+      { key: 'current', name: 'Current', icon: <FaHourglassHalf /> },
+      { key: 'end', name: 'End', icon: <FaHourglassEnd /> },
     ],
     students: [
       { key: 'all', name: 'View All' },
@@ -50,11 +53,6 @@ const itemsByRole = {
       { key: 'students', name: 'Students', icon: <FaChild /> },
       { key: 'classes', name: 'Classes', icon: <FaBookOpen /> }
     ],
-    payments: [
-      { key: 'transfer', name: 'Transfer', icon: <FaMoneyCheckAlt /> },
-      { key: 'paid', name: 'Paid', icon: <FaFileInvoiceDollar /> },
-      { key: 'unpaid', name: 'Unpaid', icon: <FaReceipt /> },
-    ],
     reports: [
       { key: 'time', name: 'Time', icon: <FaRegClock /> },
       { key: 'classes', name: 'Classes', icon: <FaBookOpen /> }
@@ -62,10 +60,19 @@ const itemsByRole = {
   },
 };
 
+const paymentSubItems = [
+  { key: 'transfer', name: 'Transfer', icon: <FaMoneyCheckAlt /> },
+  { key: 'paid', name: 'Paid', icon: <FaFileInvoiceDollar /> },
+  { key: 'unpaid', name: 'Unpaid', icon: <FaReceipt /> },
+];
+
 function SidebarSearch({ role, activeTab, onSearch, onNew }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [selectedItemKey, setSelectedItemKey] = useState('');
+  const [selectedMainKey, setSelectedMainKey] = useState('');
+  const [selectedSubKey, setSelectedSubKey] = useState('');
+  const [subMenu, setSubMenu] = useState([]);
 
   // Cập nhật menu khi role/tab thay đổi
   useEffect(() => {
@@ -74,10 +81,20 @@ function SidebarSearch({ role, activeTab, onSearch, onNew }) {
     setSearchTerm('');
 
     if (items.length > 0) {
-      setSelectedItemKey(items[0].key);
-      onSearch?.(items[0].key); // gửi key về component cha
+      const defaultItem = items[0];
+      setSelectedMainKey(defaultItem.key);
+      setSelectedSubKey('');
+
+
+      if (role === 'accountant' && activeTab === 'tuition' && defaultItem.key === 'students') {
+        setSubMenu(paymentSubItems);
+        setSelectedSubKey('transfer');
+        onSearch?.('transfer');
+      } else {
+        onSearch?.(defaultItem.key);
+      }
     }
-  }, [role, activeTab]);
+  }, [role, activeTab, onSearch]);
 
   const handleSearchChange = (e) => {
     const term = e.target.value;
@@ -91,7 +108,21 @@ function SidebarSearch({ role, activeTab, onSearch, onNew }) {
   };
 
   const handleItemClick = (item) => {
-    setSelectedItemKey(item.key);
+    setSelectedMainKey(item.key);
+    setSelectedSubKey('');
+    if (role === 'accountant' && activeTab === 'tuition' && item.key === 'students') {
+      setSubMenu(paymentSubItems);
+      setSelectedSubKey('transfer');
+      onSearch?.('transfer');
+    } else {
+      setSubMenu([]);
+      setSelectedSubKey('');
+      onSearch?.(item.key);
+    }
+  };
+
+  const handleSubItemClick = (item) => {
+    setSelectedSubKey(item.key);
     onSearch?.(item.key);
   };
 
@@ -111,7 +142,7 @@ function SidebarSearch({ role, activeTab, onSearch, onNew }) {
               value={searchTerm}
               onChange={handleSearchChange}
             />
-            <span className="icon">🔍</span>
+            <span className="icon"> <FaSearch /> </span>
           </div>
         )}
 
@@ -124,13 +155,27 @@ function SidebarSearch({ role, activeTab, onSearch, onNew }) {
         {searchResults.map((item) => (
           <div
             key={item.key}
-            className={`search-item ${item.key === selectedItemKey ? 'selected' : ''}`}
+            className={`search-item ${item.key === selectedMainKey ? 'selected' : ''}`}
             onClick={() => handleItemClick(item)}
           >
             <div className="icon-top">{item.icon}</div>
             <div className="text-below">{item.name}</div>
           </div>
         ))}
+
+        {subMenu.length > 0 && (
+          <div className="submenu">
+            {subMenu.map((item) => (
+              <div
+                key={item.key}
+                className={`sub-item ${item.key === selectedSubKey ? 'selected' : ''}`}
+                onClick={() => handleSubItemClick(item)}
+              >
+                <span className="sub-icon">{item.icon}</span> {item.name}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

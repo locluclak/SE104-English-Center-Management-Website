@@ -1,26 +1,33 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Navbar from '../components/Navbar';
 import SidebarSearch from '../components/SidebarSearch';
 
 import Calendar from '../components/DashboardTab/CalendarTab';
 import Padlet from '../components/DashboardTab/PadletTab';
 
+import StudentsTab from '../components/AccountantPage/TuitionFeeTab/StudentsTab';
+import ClassesTab from '../components/AccountantPage/TuitionFeeTab/ClassesTab';
+
 import './Accountant.css';
 
 const AccountantPage = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
-  const [selectedClass, setSelectedClass] = useState(null);
-  const [selectedFeature, setSelectedFeature] = useState('home');
+  const [selectedFeature, setSelectedFeature] = useState('calendar'); // default for dashboard
+  const [tuitionSubTab, setTuitionSubTab] = useState('students'); // 'students' or 'classes'
+
+  const prevActiveTab = useRef('dashboard');
 
   useEffect(() => {
-    if (activeTab === 'dashboard') {
-      setSelectedFeature('calendar');
-    } else if (activeTab === 'tuition') {
-      setSelectedFeature('student');
-    } else if (activeTab === 'payments') {
-      setSelectedFeature('transfer');
-    } else if (activeTab === 'reports') {
-      setSelectedFeature('time')
+    if (prevActiveTab.current !== activeTab) {
+      if (activeTab === 'dashboard') {
+        setSelectedFeature('calendar');
+      } else if (activeTab === 'tuition') {
+        setTuitionSubTab('students');
+        setSelectedFeature('transfer'); // default submenu for students
+      } else if (activeTab === 'reports') {
+        setSelectedFeature('time');
+      }
+      prevActiveTab.current = activeTab;
     }
   }, [activeTab]);
 
@@ -29,7 +36,17 @@ const AccountantPage = () => {
   };
 
   const handleFeatureSelect = (featureKey) => {
-    setSelectedFeature(featureKey);
+    if (featureKey === 'students' || featureKey === 'classes') {
+      setTuitionSubTab(featureKey);
+      // Không set lại selectedFeature ở đây nếu đã được chọn trước đó
+      if (featureKey === 'students' && tuitionSubTab !== 'students') {
+        setSelectedFeature('transfer');
+      } else if (featureKey === 'classes' && tuitionSubTab !== 'classes') {
+        setSelectedFeature('current'); // bạn có thể đổi tùy logic
+      }
+    } else {
+      setSelectedFeature(featureKey);
+    }
   };
 
   return (
@@ -46,13 +63,25 @@ const AccountantPage = () => {
 
         <div className="content">
           {activeTab === 'dashboard' && (
-            <div>
+            <>
               {selectedFeature === 'calendar' && <Calendar />}
               {selectedFeature === 'padlet' && <Padlet />}
-            </div>
+            </>
           )}
-        
 
+          {activeTab === 'tuition' && (
+            <>
+              {tuitionSubTab === 'classes' && <ClassesTab status={selectedFeature} />}
+              {tuitionSubTab === 'students' && <StudentsTab status={selectedFeature} />}
+            </>
+          )}
+
+          {activeTab === 'reports' && (
+            <>
+              {selectedFeature === 'time' && <div>Reports - Time (add component here)</div>}
+              {selectedFeature === 'classes' && <div>Reports - Classes (add component here)</div>}
+            </>
+          )}
         </div>
       </div>
     </div>

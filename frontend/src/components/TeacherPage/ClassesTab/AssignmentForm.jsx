@@ -1,4 +1,5 @@
 import React, { useState, useRef } from "react";
+import { FaMicrophone, FaPaperclip, FaStop } from 'react-icons/fa';
 import './AssignmentForm.css';
 
 const AssignmentForm = ({ onSubmit, onCancel }) => {
@@ -129,13 +130,13 @@ const AssignmentForm = ({ onSubmit, onCancel }) => {
               style={{ display: 'none' }}
               accept="image/*,audio/*,video/*,application/pdf"
             />
-            📎
+              < FaPaperclip />
           </label>
 
           {!isRecording ? (
-            <button type="button" onClick={startRecording} className="record-btn">🎤</button>
+            <button type="button" onClick={startRecording} className="record-btn"> < FaMicrophone /> </button>
           ) : (
-            <button type="button" onClick={stopRecording} className="stop-record-btn">⏹</button>
+            <button type="button" onClick={stopRecording} className="stop-record-btn"> < FaStop /> </button>
           )}
         </div>
       </div>

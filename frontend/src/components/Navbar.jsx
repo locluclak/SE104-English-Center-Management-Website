@@ -26,7 +26,6 @@ const getLinksByRole = (role) => {
       return [
         { key: 'dashboard', name: 'Dashboard' },
         { key: 'tuition', name: 'Tuition Fee' },
-        { key: 'payments', name: "Students' Payments" },
         { key: 'reports', name: 'Reports' },
       ];
     default:
