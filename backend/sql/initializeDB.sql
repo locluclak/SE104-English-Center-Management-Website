@@ -174,16 +174,16 @@ DELIMITER ;
 -- Insert sample data into PERSON table
 INSERT INTO PERSON (NAME, EMAIL, PHONE_NUMBER, DATE_OF_BIRTH, ROLE, PASSWORD)
 VALUES 
-('Alice Johnson', 'alice@example.com', '123-456-7890', '2000-05-15', 'STUDENT', 'hashedpassword1'),
-('Bob Smith', 'bob@example.com', '234-567-8901', '1985-09-20', 'STAFF', 'hashedpassword2'),
-('Charlie Davis', 'charlie@example.com', '345-678-9012', '1995-02-10', 'STUDENT', 'hashedpassword3'),
+('Alice Johnson', 'alice@example.com', '123-456-7890', '2000-05-15', 'STUDENT', '$2b$10$aqT9n/DCyJCSvSwbTsL.VeOjvBcnjHZDQSZvv/Bd7Mm/9zgcOfAbe'),
+('Bob Smith', 'bob@example.com', '234-567-8901', '1985-09-20', 'STAFF', '$2b$10$aqT9n/DCyJCSvSwbTsL.VeOjvBcnjHZDQSZvv/Bd7Mm/9zgcOfAbe'),
+('Charlie Davis', 'charlie@example.com', '345-678-9012', '1995-02-10', 'STUDENT', '$2b$10$aqT9n/DCyJCSvSwbTsL.VeOjvBcnjHZDQSZvv/Bd7Mm/9zgcOfAbe'),
 ('SUPER ADMIN', 'root@gmail.com', '456-789-0123', '1978-11-03', 'STAFF', '$2b$10$aqT9n/DCyJCSvSwbTsL.VeOjvBcnjHZDQSZvv/Bd7Mm/9zgcOfAbe'),
-('Edward Blake', 'edward@example.com', '567-890-1234', '1998-04-12', 'STUDENT', 'hashedpassword5'),
-('Fiona Grey', 'fiona@example.com', '678-901-2345', '1982-12-05', 'STAFF', 'hashedpassword6'),
-('George King', 'george@example.com', '789-012-3456', '2001-07-30', 'STUDENT', 'hashedpassword7'),
-('Helen Wood', 'helen@example.com', '890-123-4567', '1975-03-18', 'STAFF', 'hashedpassword8'),
-('Ian Sharp', 'ian@example.com', '901-234-5678', '1990-06-25', 'STUDENT', 'hashedpassword9'),
-('Julia Stone', 'julia@example.com', '012-345-6789', '1987-01-09', 'STAFF', 'hashedpassword10');
+('Edward Blake', 'edward@example.com', '567-890-1234', '1998-04-12', 'STUDENT', '$2b$10$aqT9n/DCyJCSvSwbTsL.VeOjvBcnjHZDQSZvv/Bd7Mm/9zgcOfAbe'),
+('Fiona Grey', 'fiona@example.com', '678-901-2345', '1982-12-05', 'STAFF', '$2b$10$aqT9n/DCyJCSvSwbTsL.VeOjvBcnjHZDQSZvv/Bd7Mm/9zgcOfAbe'),
+('George King', 'george@example.com', '789-012-3456', '2001-07-30', 'STUDENT', '$2b$10$aqT9n/DCyJCSvSwbTsL.VeOjvBcnjHZDQSZvv/Bd7Mm/9zgcOfAbe'),
+('Helen Wood', 'helen@example.com', '890-123-4567', '1975-03-18', 'STAFF', '$2b$10$aqT9n/DCyJCSvSwbTsL.VeOjvBcnjHZDQSZvv/Bd7Mm/9zgcOfAbe'),
+('Ian Sharp', 'ian@example.com', '901-234-5678', '1990-06-25', 'STUDENT', '$2b$10$aqT9n/DCyJCSvSwbTsL.VeOjvBcnjHZDQSZvv/Bd7Mm/9zgcOfAbe'),
+('Julia Stone', 'julia@example.com', '012-345-6789', '1987-01-09', 'STAFF', '$2b$10$aqT9n/DCyJCSvSwbTsL.VeOjvBcnjHZDQSZvv/Bd7Mm/9zgcOfAbe');
 
 -- Insert sample data into STUDENT table
 INSERT INTO STUDENT (ID, ENROLL_DATE)
