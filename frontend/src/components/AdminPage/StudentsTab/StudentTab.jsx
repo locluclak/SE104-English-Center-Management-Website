@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { fetchStudents, updatePerson, deletePerson } from "../../../services/personService";
+import { fetchStudents, deletePerson } from "../../../services/personService";
 import "./StudentTab.css";
 
 const StudentTab = ({ selectedStatus, onEditStudent, onDeleteStudent }) => {
-  const [students, setStudents] = useState([]);
+  const [studentsList, setStudents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -15,7 +15,6 @@ const StudentTab = ({ selectedStatus, onEditStudent, onDeleteStudent }) => {
         setLoading(true);
         const data = await fetchStudents();
 
-        // Map dữ liệu backend sang chuẩn frontend
         const mappedData = data.map((student) => ({
           id: student.ID,
           name: student.NAME,
@@ -38,37 +37,27 @@ const StudentTab = ({ selectedStatus, onEditStudent, onDeleteStudent }) => {
     loadStudents();
   }, []);
 
-  // Gọi callback sửa nếu có
-  const handleEdit = (student) => {
+  const handleEditClick = (student) => {
     if (onEditStudent) onEditStudent(student);
   };
 
-  // Xóa student, gọi API deletePerson
-  const handleDelete = async (student) => {
-    if (!window.confirm(`Bạn chắc chắn muốn xóa sinh viên ${student.name}?`)) return;
-
-    try {
-      await deletePerson(student.id);
-      setStudents((prev) => prev.filter((s) => s.id !== student.id));
-      if (onDeleteStudent) onDeleteStudent(student);
-    } catch (err) {
-      alert("Lỗi xóa sinh viên: " + err.message);
-    }
+  const handleDeleteClick = (student) => {
+    if (onDeleteStudent) onDeleteStudent(student);
   };
 
-  // Lọc theo selectedStatus
-  let studentsToDisplay = students;
+  // Lọc theo selectedStatus dựa trên studentsList
+  let studentsToDisplay = studentsList;
   if (
     selectedStatus &&
     selectedStatus !== "AllStudents" &&
     selectedStatus.toLowerCase() !== "all"
   ) {
     if (selectedStatus === "View All") {
-      studentsToDisplay = students.filter(
+      studentsToDisplay = studentsList.filter(
         (student) => student.status === "Enrolled" || student.status === "Unenroll"
       );
     } else {
-      studentsToDisplay = students.filter(
+      studentsToDisplay = studentsList.filter(
         (student) => student.status === selectedStatus
       );
     }
@@ -92,7 +81,7 @@ const StudentTab = ({ selectedStatus, onEditStudent, onDeleteStudent }) => {
     );
   }
 
-  if (students.length === 0) {
+  if (studentsList.length === 0) {
     return (
       <div className="student-tab-container">
         <h2>{title}</h2>
@@ -115,40 +104,42 @@ const StudentTab = ({ selectedStatus, onEditStudent, onDeleteStudent }) => {
     );
   }
 
-  return (
-    <div className="student-tab-container">
+ return (
+    <div className="staffs-tab-container">
       <h2>
-        {title} {selectedStatus && selectedStatus !== "AllStudents" ? `(${selectedStatus})` : ""}
+        Quản lý Sinh viên {selectedStatus && selectedStatus !== "AllStudents" ? `(${selectedStatus})` : ""}
       </h2>
-      <table className="student-table">
+      <table className="staff-table">
         <thead>
           <tr>
             <th>ID</th>
-            <th>Họ và Tên</th>
-            <th>Ngày Sinh</th>
+            <th>Name</th>
+            <th>Birthday</th>
             <th>Email</th>
-            <th>Trạng Thái</th>
-            <th>Hành động</th>
+            <th>Phone Number</th>
+            <th>Status</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
-          {studentsToDisplay.map((student) => (
+          {studentsToDisplay.map(student => (
             <tr key={student.id}>
               <td>{student.id}</td>
               <td>{student.name}</td>
-              <td>{student.birthday || "N/A"}</td>
+              <td>{student.birthday ? new Date(student.birthday).toLocaleDateString() : "N/A"}</td>
               <td>{student.email || "N/A"}</td>
+              <td>{student.phoneNumber || "N/A"}</td>
               <td>{student.status || "N/A"}</td>
               <td>
                 <button
                   className="action-btn edit-btn"
-                  onClick={() => handleEdit(student)}
+                  onClick={() => handleEditClick(student)}
                 >
                   Edit
                 </button>
                 <button
                   className="action-btn delete-btn"
-                  onClick={() => handleDelete(student)}
+                  onClick={() => handleDeleteClick(student)}
                 >
                   Delete
                 </button>
