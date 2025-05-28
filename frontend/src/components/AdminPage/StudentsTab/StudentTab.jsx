@@ -45,7 +45,6 @@ const StudentTab = ({ selectedStatus, onEditStudent, onDeleteStudent }) => {
     if (onDeleteStudent) onDeleteStudent(student);
   };
 
-  // Lọc theo selectedStatus dựa trên studentsList
   let studentsToDisplay = studentsList;
   if (
     selectedStatus &&
@@ -65,7 +64,7 @@ const StudentTab = ({ selectedStatus, onEditStudent, onDeleteStudent }) => {
 
   if (loading) {
     return (
-      <div className="student-tab-container">
+      <div className="staffs-tab-container">
         <h2>{title}</h2>
         <p>Đang tải dữ liệu sinh viên...</p>
       </div>
@@ -74,7 +73,7 @@ const StudentTab = ({ selectedStatus, onEditStudent, onDeleteStudent }) => {
 
   if (error) {
     return (
-      <div className="student-tab-container">
+      <div className="staffs-tab-container">
         <h2>{title}</h2>
         <p style={{ color: "red" }}>Lỗi: {error}</p>
       </div>
@@ -83,32 +82,25 @@ const StudentTab = ({ selectedStatus, onEditStudent, onDeleteStudent }) => {
 
   if (studentsList.length === 0) {
     return (
-      <div className="student-tab-container">
+      <div className="staffs-tab-container">
         <h2>{title}</h2>
-        <p>
-          Hiện tại không có sinh viên nào trong hệ thống. Nhấn nút "+" ở sidebar để thêm mới.
-        </p>
+        <p>Hiện tại không có sinh viên nào trong hệ thống. Nhấn nút "+" để thêm mới.</p>
       </div>
     );
   }
 
   if (studentsToDisplay.length === 0) {
     return (
-      <div className="student-tab-container">
+      <div className="staffs-tab-container">
         <h2>{title}</h2>
-        <p>
-          Không có sinh viên nào với trạng thái "{selectedStatus}". Nhấn nút "+" ở sidebar để
-          thêm mới hoặc chọn bộ lọc khác.
-        </p>
+        <p>Không có sinh viên nào với trạng thái "{selectedStatus}". Nhấn nút "+" để thêm mới hoặc chọn bộ lọc khác.</p>
       </div>
     );
   }
 
- return (
+  return (
     <div className="staffs-tab-container">
-      <h2>
-        Quản lý Sinh viên {selectedStatus && selectedStatus !== "AllStudents" ? `(${selectedStatus})` : ""}
-      </h2>
+      <h2>{title} {selectedStatus && selectedStatus !== "AllStudents" ? `(${selectedStatus})` : ""}</h2>
       <table className="staff-table">
         <thead>
           <tr>

@@ -1,33 +1,51 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './AddStaffForm.css';
 
-const AddAccountantForm = ({ onClose, onSubmitSuccess }) => {
+const AddAccountantForm = ({ isEditMode, initialData, onClose, onSubmitSuccess }) => {
   const [accountantId, setAccountantId] = useState('');
   const [accountantName, setAccountantName] = useState('');
   const [accountantEmail, setAccountantEmail] = useState('');
-  const [accountantPassword, setAccountantPassword] = useState(''); // Tùy chọn
+  const [accountantPassword, setAccountantPassword] = useState('');
   const [accountantDepartment, setAccountantDepartment] = useState('');
+
+  useEffect(() => {
+    if (isEditMode && initialData) {
+      setAccountantId(initialData.ID || '');
+      setAccountantName(initialData.NAME || '');
+      setAccountantEmail(initialData.EMAIL || '');
+      // Không set password khi edit vì lý do bảo mật
+      setAccountantDepartment(initialData.DEPARTMENT || '');
+    } else {
+      // Reset form khi không edit hoặc không có dữ liệu
+      setAccountantId('');
+      setAccountantName('');
+      setAccountantEmail('');
+      setAccountantPassword('');
+      setAccountantDepartment('');
+    }
+  }, [isEditMode, initialData]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    // TODO: Gọi API để lưu thông tin kế toán
-    console.log('Submitting Accountant Data:', {
-      id: accountantId,
-      name: accountantName,
-      email: accountantEmail,
-      password: accountantPassword, // Chỉ log nếu bạn thực sự thu thập nó
-      department: accountantDepartment,
-    });
-    // Giả sử submit thành công
-    if (onSubmitSuccess) {
-      onSubmitSuccess('Accountant'); // Thông báo loại form đã submit
-    }
-    onClose(); // Đóng form sau khi submit
+
+    const dataToSubmit = {
+      ID: accountantId,
+      NAME: accountantName,
+      EMAIL: accountantEmail,
+      PASSWORD: accountantPassword, // Bỏ trống khi edit nếu không thay đổi mật khẩu
+      DEPARTMENT: accountantDepartment,
+    };
+
+    // TODO: gọi API tạo mới hoặc cập nhật tùy isEditMode
+    console.log(isEditMode ? 'Updating accountant:' : 'Creating accountant:', dataToSubmit);
+
+    if (onSubmitSuccess) onSubmitSuccess(dataToSubmit, isEditMode);
+    onClose();
   };
 
   return (
     <form className="form-grid" onSubmit={handleSubmit}>
-      <h2>Create New Accountant</h2>
+      <h2>{isEditMode ? 'Edit Accountant' : 'Create New Accountant'}</h2>
 
       <div className="form-row">
         <input
@@ -36,6 +54,7 @@ const AddAccountantForm = ({ onClose, onSubmitSuccess }) => {
           value={accountantId}
           onChange={(e) => setAccountantId(e.target.value)}
           required
+          disabled={isEditMode} // Khóa ID khi chỉnh sửa
         />
         <input
           type="text"
@@ -56,26 +75,25 @@ const AddAccountantForm = ({ onClose, onSubmitSuccess }) => {
         />
         <input
           type="password"
-          placeholder="Password (optional)"
+          placeholder={isEditMode ? "Leave blank to keep current password" : "Password"}
           value={accountantPassword}
           onChange={(e) => setAccountantPassword(e.target.value)}
+          required={!isEditMode}
         />
       </div>
 
       <div className="form-row">
         <input
           type="text"
-          placeholder="Department/Role (e.g., Payroll, General Ledger)"
+          placeholder="Department (e.g., Finance, Billing)"
           value={accountantDepartment}
           onChange={(e) => setAccountantDepartment(e.target.value)}
         />
       </div>
 
       <div className="form-actions">
-        <button type="submit">Create Accountant</button>
-        <button type="button" onClick={onClose}>
-          Cancel
-        </button>
+        <button type="submit">{isEditMode ? 'Update' : 'Create'}</button>
+        <button type="button" onClick={onClose}>Cancel</button>
       </div>
     </form>
   );

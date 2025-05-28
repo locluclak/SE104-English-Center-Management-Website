@@ -2,72 +2,23 @@ import React, { useState, useEffect } from 'react';
 import { fetchTeachers, fetchAccountants, updatePerson, deletePerson } from '../../../services/personService';
 import './StaffsTab.css';
 
-const StaffsTab = ({ staffType, onEdit, onDelete }) => {
-  const [staffList, setStaffList] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+const StaffsTab = ({ staffType, data, onEdit, onDelete }) => {
+  // data, onEdit, onDelete từ AdminPage truyền xuống
 
-  useEffect(() => {
-    const loadStaff = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        let data = [];
-        if (staffType === 'teachers') {
-          data = await fetchTeachers();
-        } else if (staffType === 'accountants') {
-          data = await fetchAccountants();
-        }
+  const title = staffType === 'teachers' ? 'Teacher Management' : 'Accountant Management';
 
-        // Map dữ liệu từ backend (chữ hoa) sang camelCase
-        const mappedData = data.map(item => ({
-          id: item.ID,
-          name: item.NAME,
-          birthday: item.DATE_OF_BIRTH,
-          email: item.EMAIL,
-          phoneNumber: item.PHONE_NUMBER,
-          hireDay: item.HIRE_DAY,
-        }));
+  const handleEditClick = (staff) => {
+    if (onEdit) onEdit(staff);
+  };
 
-        setStaffList(mappedData);
-      } catch (err) {
-        setError(err.message || 'Failed to load staff data');
-        setStaffList([]);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const handleDeleteClick = (staff) => {
+    if (onDelete) onDelete(staff);
+  };
 
-    if (staffType === 'teachers' || staffType === 'accountants') {
-      loadStaff();
-    } else {
-      setStaffList([]);
-      setLoading(false);
-    }
-  }, [staffType]);
-
-  if (loading) {
+  if (!data || data.length === 0) {
     return (
       <div className="staffs-tab-container">
-        <h2>{staffType === 'teachers' ? 'Teacher Management' : 'Accountant Management'}</h2>
-        <p>Loading data...</p>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="staffs-tab-container">
-        <h2>{staffType === 'teachers' ? 'Teacher Management' : 'Accountant Management'}</h2>
-        <p style={{ color: 'red' }}>Error: {error}</p>
-      </div>
-    );
-  }
-
-  if (!staffList.length) {
-    return (
-      <div className="staffs-tab-container">
-        <h2>{staffType === 'teachers' ? 'Teacher Management' : 'Accountant Management'}</h2>
+        <h2>{title}</h2>
         <p>No {staffType} found. Click the "+" button in the sidebar to add a new one.</p>
       </div>
     );
@@ -75,7 +26,7 @@ const StaffsTab = ({ staffType, onEdit, onDelete }) => {
 
   return (
     <div className="staffs-tab-container">
-      <h2>{staffType === 'teachers' ? 'Teacher Management' : 'Accountant Management'}</h2>
+      <h2>{title}</h2>
       <table className="staff-table">
         <thead>
           <tr>
@@ -89,17 +40,27 @@ const StaffsTab = ({ staffType, onEdit, onDelete }) => {
           </tr>
         </thead>
         <tbody>
-          {staffList.map((staff) => (
-            <tr key={staff.id}>
-              <td>{staff.id}</td>
-              <td>{staff.name}</td>
-              <td>{staff.birthday ? new Date(staff.birthday).toLocaleDateString() : 'N/A'}</td>
-              <td>{staff.email || 'N/A'}</td>
-              <td>{staff.phoneNumber || 'N/A'}</td>
-              <td>{staff.hireDay ? new Date(staff.hireDay).toLocaleDateString() : 'N/A'}</td>
+          {data.map((staff) => (
+            <tr key={staff.ID || staff.id}>
+              <td>{staff.ID || staff.id}</td>
+              <td>{staff.NAME || staff.name}</td>
+              <td>{staff.DATE_OF_BIRTH ? new Date(staff.DATE_OF_BIRTH).toLocaleDateString() : "N/A"}</td>
+              <td>{staff.EMAIL || "N/A"}</td>
+              <td>{staff.PHONE_NUMBER || "N/A"}</td>
+              <td>{staff.HIRE_DAY ? new Date(staff.HIRE_DAY).toLocaleDateString() : "N/A"}</td>
               <td>
-                <button className="action-btn edit-btn" onClick={() => onEdit(staff)}>Edit</button>
-                <button className="action-btn delete-btn" onClick={() => onDelete(staff)}>Delete</button>
+                <button
+                  className="action-btn edit-btn"
+                  onClick={() => handleEditClick(staff)}
+                >
+                  Edit
+                </button>
+                <button
+                  className="action-btn delete-btn"
+                  onClick={() => handleDeleteClick(staff)}
+                >
+                  Delete
+                </button>
               </td>
             </tr>
           ))}

@@ -32,7 +32,7 @@ const AdminPage = () => {
   const [editingStudent, setEditingStudent] = useState(null);
   const [editingStaff, setEditingStaff] = useState(null);
 
-  // Fetch dữ liệu teachers hoặc accountants khi activeTab và selectedStatus thay đổi
+  // Fetch dữ liệu teachers hoặc accountants khi activeTab hoặc selectedStatus thay đổi
   useEffect(() => {
     const fetchStaffData = async () => {
       if (activeTab !== "staffs") return;
@@ -95,19 +95,27 @@ const AdminPage = () => {
     if (type === "Teacher") {
       setShowTeacherForm(false);
       setEditingStaff(null);
-      // Reload lại danh sách teacher khi cần, hoặc fetch lại toàn bộ dữ liệu
+      if (isEdit) {
+        setTeachers(prev => prev.map(t => (t.ID === newData.ID ? newData : t)));
+      } else {
+        setTeachers(prev => [...prev, newData]);
+      }
     }
     if (type === "Accountant") {
       setShowAccountantForm(false);
       setEditingStaff(null);
-      // Reload lại danh sách accountant khi cần
+      if (isEdit) {
+        setAccountants(prev => prev.map(a => (a.ID === newData.ID ? newData : a)));
+      } else {
+        setAccountants(prev => [...prev, newData]);
+      }
     }
     if (type === "Class") setShowClassForm(false);
     if (type === "Student") {
       if (isEdit) {
-        setStudents((prev) => prev.map((s) => (s.id === newData.id ? newData : s)));
+        setStudents(prev => prev.map(s => (s.id === newData.id ? newData : s)));
       } else {
-        setStudents((prev) => [...prev, newData]);
+        setStudents(prev => [...prev, newData]);
       }
       setShowStudentForm(false);
       setEditingStudent(null);
@@ -123,13 +131,13 @@ const AdminPage = () => {
   const handleDeleteStaff = (staffMember, staffType) => {
     if (
       window.confirm(
-        `Are you sure you want to delete ${staffType} ${staffMember.name} (ID: ${staffMember.id})?`
+        `Are you sure you want to delete ${staffType} ${staffMember.NAME} (ID: ${staffMember.ID})?`
       )
     ) {
       if (staffType === "teachers") {
-        setTeachers((prev) => prev.filter((t) => t.id !== staffMember.id));
+        setTeachers(prev => prev.filter(t => t.ID !== staffMember.ID));
       } else if (staffType === "accountants") {
-        setAccountants((prev) => prev.filter((a) => a.id !== staffMember.id));
+        setAccountants(prev => prev.filter(a => a.ID !== staffMember.ID));
       }
     }
   };
@@ -145,7 +153,7 @@ const AdminPage = () => {
         `Are you sure you want to delete Student ${student.name} (ID: ${student.id})?`
       )
     ) {
-      setStudents((prev) => prev.filter((s) => s.id !== student.id));
+      setStudents(prev => prev.filter(s => s.id !== student.id));
     }
   };
 
@@ -157,7 +165,7 @@ const AdminPage = () => {
         <SidebarSearch
           role="admin"
           activeTab={activeTab}
-          onSearch={(item) => setSelectedStatus(item)}
+          onSearch={item => setSelectedStatus(item)}
           onNew={handleNew}
         />
 
@@ -183,6 +191,7 @@ const AdminPage = () => {
                 )}
                 {showStudentForm && (
                   <AddStudentForm
+                    isEditMode={Boolean(editingStudent)}
                     initialData={editingStudent}
                     onClose={() => {
                       setShowStudentForm(false);
@@ -197,46 +206,54 @@ const AdminPage = () => {
             )}
 
             {activeTab === "staffs" && (
-              <div>
-                {/* Hiển thị form thêm giáo viên nếu showTeacherForm là true */}
+              <>
                 {showTeacherForm && (
                   <AddTeacherForm
+                    isEditMode={Boolean(editingStaff)}
                     initialData={editingStaff}
-                    onClose={() => setShowTeacherForm(false)}
-                    onSubmitSuccess={() => handleFormSubmitSuccess("Teacher")}
+                    onClose={() => {
+                      setShowTeacherForm(false);
+                      setEditingStaff(null);
+                    }}
+                    onSubmitSuccess={(data, isEdit) =>
+                      handleFormSubmitSuccess("Teacher", data, isEdit)
+                    }
                   />
                 )}
-
-                {/* Hiển thị form thêm kế toán nếu showAccountantForm là true */}
                 {showAccountantForm && (
                   <AddAccountantForm
+                    isEditMode={Boolean(editingStaff)}
                     initialData={editingStaff}
-                    onClose={() => setShowAccountantForm(false)}
-                    onSubmitSuccess={() => handleFormSubmitSuccess("Accountant")}
+                    onClose={() => {
+                      setShowAccountantForm(false);
+                      setEditingStaff(null);
+                    }}
+                    onSubmitSuccess={(data, isEdit) =>
+                      handleFormSubmitSuccess("Accountant", data, isEdit)
+                    }
                   />
                 )}
-
                 {!showTeacherForm && !showAccountantForm && (
                   <>
                     {selectedStatus === "teacher" && (
                       <StaffsTab
                         staffType="teachers"
                         data={teachers}
-                        onEdit={(staff) => handleEditStaff(staff, "teachers")}
-                        onDelete={(staff) => handleDeleteStaff(staff, "teachers")}
+                        onEdit={staff => handleEditStaff(staff, "teachers")}
+                        onDelete={staff => handleDeleteStaff(staff, "teachers")}
                       />
                     )}
                     {selectedStatus === "accountant" && (
                       <StaffsTab
                         staffType="accountants"
                         data={accountants}
-                        onEdit={(staff) => handleEditStaff(staff, "accountants")}
-                        onDelete={(staff) => handleDeleteStaff(staff, "accountants")}
+                        onEdit={staff => handleEditStaff(staff, "accountants")}
+                        onDelete={staff => handleDeleteStaff(staff, "accountants")}
                       />
                     )}
                   </>
                 )}
-              </div>
+              </>
             )}
           </div>
         </div>
