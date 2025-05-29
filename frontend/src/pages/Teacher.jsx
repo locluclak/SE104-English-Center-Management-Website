@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import Header from '../components/layout/Header';
 import SidebarSearch from '../components//layout/SidebarSearch';
 
@@ -33,9 +33,10 @@ const TeacherPage = () => {
     setSelectedClass(className);
   };
 
-  const handleFeatureSelect = (featureKey) => {
+  const handleFeatureSelect = useCallback((featureKey) => {
+    console.log('handleFeatureSelect called with:', featureKey);
     setSelectedFeature(featureKey);
-  };
+  }, []);
   
   return (
     <div className="teacher-page">

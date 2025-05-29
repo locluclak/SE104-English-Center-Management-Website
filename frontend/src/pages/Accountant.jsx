@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import Header from '../components/layout/Header';
 import SidebarSearch from '../components/layout/SidebarSearch';
 
@@ -35,7 +35,7 @@ const AccountantPage = () => {
     console.log('AccountantPage: handleNew called');
   };
 
-  const handleFeatureSelect = (featureKey) => {
+  const handleFeatureSelect = useCallback((featureKey) => {
     if (featureKey === 'students' || featureKey === 'classes') {
       setTuitionSubTab(featureKey);
       // Không set lại selectedFeature ở đây nếu đã được chọn trước đó
@@ -45,9 +45,10 @@ const AccountantPage = () => {
         setSelectedFeature('current'); // bạn có thể đổi tùy logic
       }
     } else {
+      console.log('handleFeatureSelect called with:', featureKey);
       setSelectedFeature(featureKey);
     }
-  };
+  }, []);
 
   return (
     <div className="accountant-page">
