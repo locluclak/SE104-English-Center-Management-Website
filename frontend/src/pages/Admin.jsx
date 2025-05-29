@@ -3,6 +3,11 @@ import Header from '../components/layout/Header';
 import SidebarSearch from "../components/layout/SidebarSearch";
 
 import Table from '../components/common/Table/Table';
+import {
+  getStudentTableColumns,
+  getTeacherTableColumns,
+  getAccountantTableColumns,
+} from "../config/tableConfig.jsx";
 
 import ClassesTab from "../components/AdminPage/ClassesTab/ClassTab";
 // Forms
@@ -62,6 +67,11 @@ const AdminPage = () => {
       setSelectedStatus('teacher'); 
     }
   }, [activeTab]);
+
+  const handleStatusSelect = useCallback((featureKey) => {
+    console.log('handleStatusSelect called with:', featureKey);
+    setSelectedStatus(featureKey);
+  }, []);
 
   const handleNew = () => {
     setShowClassForm(false);
@@ -147,55 +157,6 @@ const AdminPage = () => {
     }
   }, []);
 
-  const studentColumns = [
-    { header: 'ID', accessor: 'id' },
-    { header: 'Họ và Tên', accessor: 'name' },
-    { header: 'Ngày sinh', accessor: 'birthday' },
-    { header: 'Email', accessor: 'email' },
-    { header: 'Trạng thái', accessor: 'status' },
-    {
-      header: 'Hành động',
-      render: (row) => (
-        <div className="action-buttons">
-        <button onClick={() => handleEditStudent(row)}>Sửa</button>
-        <button onClick={() => handleDeleteStudent(row)}>Xóa</button>
-        </div>
-      ),
-    },
-  ];
-
-  const teacherColumns = [
-    { header: 'ID', accessor: 'id' },
-    { header: 'Họ và Tên', accessor: 'name' },
-    { header: 'Ngày sinh', accessor: 'birthday' },
-    { header: 'Email', accessor: 'email' },
-    {
-      header: 'Hành động',
-      render: (row) => (
-        <div className="action-buttons">
-        <button onClick={() => handleEditStaff(row, 'teachers')}>Sửa</button>
-        <button onClick={() => handleDeleteStaff(row, 'teachers')}>Xóa</button>
-        </div>
-      ),
-    },
-  ];
-
-  const accountantColumns = [
-    { header: 'ID', accessor: 'id' },
-    { header: 'Họ và Tên', accessor: 'name' },
-    { header: 'Ngày sinh', accessor: 'birthday' },
-    { header: 'Email', accessor: 'email' },
-    {
-      header: 'Hành động',
-      render: (row) => (
-      <div className="action-buttons">
-      <button onClick={() => handleEditStaff(row, 'accountants')}>Sửa</button>
-      <button onClick={() => handleDeleteStaff(row, 'accountants')}>Xóa</button>
-      </div>
-      ),
-    },
-  ];
-
   const filteredStudents = selectedStatus === "all"
     ? students
     : students.filter(student => student.status.toLowerCase() === selectedStatus);
@@ -208,43 +169,43 @@ const AdminPage = () => {
         setActiveTab={setActiveTab}
       />
 
-    <div className="admin-body">
-      <SidebarSearch
-        role="admin"
-        activeTab={activeTab}
-        onSearch={(item) => setSelectedStatus(item)}
-        onNew={handleNew}
-      />
+      <div className="admin-body">
+        <SidebarSearch
+          role="admin"
+          activeTab={activeTab}
+          onSearch={handleStatusSelect}
+          onNew={handleNew}
+        />
 
-    <div className="content">
-      <div className="admin-display-area">
-        {activeTab === "classes" && (
-          <ClassesTab
-          selectedStatus={selectedStatus}
-          showClassForm={showClassForm}
-          setShowClassForm={setShowClassForm}
-          />
-        )}
-
-        {activeTab === "students" && (
-          <>
-            {showStudentForm && (
-              <AddStudentForm
-                initialData={editingStudent}
-                onClose={() => {
-                  setShowStudentForm(false);
-                  setEditingStudent(null);
-                }}
-                onSubmitSuccess={(data, isEdit) =>
-                  handleFormSubmitSuccess("Student", data, isEdit)
-                }
+        <div className="content">
+          <div className="admin-display-area">
+            {activeTab === "classes" && (
+              <ClassesTab
+              selectedStatus={selectedStatus}
+              showClassForm={showClassForm}
+              setShowClassForm={setShowClassForm}
               />
             )}
-            {!showStudentForm && (
-              <Table
-                columns={studentColumns}
-                data={filteredStudents}
-              />
+
+            {activeTab === "students" && (
+              <>
+                {showStudentForm && (
+                  <AddStudentForm
+                    initialData={editingStudent}
+                    onClose={() => {
+                      setShowStudentForm(false);
+                      setEditingStudent(null);
+                    }}
+                    onSubmitSuccess={(data, isEdit) =>
+                      handleFormSubmitSuccess("Student", data, isEdit)
+                    }
+                  />
+                )}
+                {!showStudentForm && (
+                  <Table
+                    columns={getStudentTableColumns(handleEditStudent, handleDeleteStudent)}
+                    data={filteredStudents}
+                  />
                 )}
               </>
             )}
@@ -281,14 +242,19 @@ const AdminPage = () => {
                   <>
                     {selectedStatus === "teacher" && (
                       <Table
-                        columns={teacherColumns}
-                        data={teachers} // Có thể thêm logic lọc nếu cần
+                        columns={getTeacherTableColumns(
+                          (row) => handleEditStaff(row, 'teachers'),
+                          (row) => handleDeleteStaff(row, 'teachers')
+                        )}
+                        data={teachers}
                       />
                     )}
                     {selectedStatus === "accountant" && (
                       <Table
-                        columns={accountantColumns}
-                        data={accountants} // Có thể thêm logic lọc nếu cần
+                        columns={getAccountantTableColumns(
+                          (row) => handleEditStaff(row, 'accountants')
+                        )}
+                        data={accountants}
                       />
                     )}
                   </>
