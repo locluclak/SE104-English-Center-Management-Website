@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
-import Navbar from "../components/Navbar";
-import SidebarSearch from "../components/SidebarSearch";
+import Header from '../components/layout/Header';
+import SidebarSearch from "../components/layout/SidebarSearch";
 
 // Tabs
 import ClassesTab from "../components/AdminPage/ClassesTab/ClassTab";
@@ -175,7 +175,7 @@ const AdminPage = () => {
 
   return (
     <div className="admin-container">
-      <Navbar
+      <Header
         role="admin" // hoặc "student", "teacher"
         activeTab={activeTab}
         setActiveTab={setActiveTab}

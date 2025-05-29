@@ -1,41 +1,15 @@
 import React, { useState } from 'react';
 import { FaBell, FaUserCircle } from 'react-icons/fa';
 import NotificationPopup from './NotificationPopup';
-import AccountPopup from './AccountPopup'; 
-import './Navbar.css';
+import AccountPopup from './AccountPopup';
+import { itemsByRole } from '../../config/navigationConfig.jsx'; // dùng lại config này
+import './Header.css';
 
-const getLinksByRole = (role) => {
-  switch (role) {
-    case 'admin':
-      return [
-        { key: 'classes', name: 'Classes' },
-        { key: 'students', name: 'Students' },
-        { key: 'staffs', name: 'Staffs' },
-      ];
-    case 'student':
-      return [
-        { key: 'courses', name: 'Courses' },
-        { key: 'dashboard', name: 'Dashboard' },
-      ];
-    case 'teacher':
-      return [
-        { key: 'classes', name: 'My Classes' },
-        { key: 'dashboard', name: 'Dashboard' },
-      ];
-    case 'accountant':
-      return [
-        { key: 'dashboard', name: 'Dashboard' },
-        { key: 'tuition', name: 'Tuition Fee' },
-        { key: 'reports', name: 'Reports' },
-      ];
-    default:
-      return [];
-  }
-};
-
-const Navbar = ({ role, activeTab, setActiveTab }) => {
+const Header = ({ role, activeTab, setActiveTab }) => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showAccountPopup, setShowAccountPopup] = useState(false);
+
+  const tabKeys = Object.keys(itemsByRole[role] || {});
 
   const notifications = [
     { id: 1, message: "Bạn có đơn đăng ký mới." },
@@ -52,13 +26,13 @@ const Navbar = ({ role, activeTab, setActiveTab }) => {
 
         <div className="navbar-right">
           <ul className="navbar-center">
-            {getLinksByRole(role).map((link) => (
+            {tabKeys.map((key) => (
               <li
-                key={link.key}
-                onClick={() => setActiveTab(link.key)}
-                className={activeTab === link.key ? 'active' : ''}
+                key={key}
+                onClick={() => setActiveTab(key)}
+                className={activeTab === key ? 'active' : ''}
               >
-                <span>{link.name}</span>
+                <span>{key.charAt(0).toUpperCase() + key.slice(1)}</span>
               </li>
             ))}
           </ul>
@@ -68,7 +42,7 @@ const Navbar = ({ role, activeTab, setActiveTab }) => {
               className="icon"
               onClick={() => {
                 setShowNotifications(!showNotifications);
-                if (showAccountPopup) setShowAccountPopup(false); // đóng popup account nếu đang mở
+                setShowAccountPopup(false);
               }}
               title="Thông báo"
               style={{ cursor: 'pointer' }}
@@ -85,7 +59,7 @@ const Navbar = ({ role, activeTab, setActiveTab }) => {
               className="icon"
               onClick={() => {
                 setShowAccountPopup(!showAccountPopup);
-                if (showNotifications) setShowNotifications(false); // đóng popup thông báo nếu đang mở
+                setShowNotifications(false);
               }}
               title="Tài khoản"
               style={{ cursor: 'pointer' }}
@@ -101,4 +75,4 @@ const Navbar = ({ role, activeTab, setActiveTab }) => {
   );
 };
 
-export default Navbar;
+export default Header;

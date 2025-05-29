@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import Navbar from '../components/Navbar';
-import SidebarSearch from "../components/SidebarSearch";
+import Header from '../components/layout/Header';
+import SidebarSearch from "../components/layout/SidebarSearch";
 
 import HomeTab from "../components/StudentPage/CoursesTab/HomeTab";
 import MyCoursesTab from "../components/StudentPage/CoursesTab/MyCoursesTab";
@@ -41,7 +41,7 @@ const StudentPage = () => {
 
   return (
     <div className="student-page">
-      <Navbar role="student" activeTab={activeTab} setActiveTab={setActiveTab} />
+      <Header role="student" activeTab={activeTab} setActiveTab={setActiveTab} />
 
       <div className="student-body">
         <SidebarSearch 
