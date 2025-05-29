@@ -2,11 +2,9 @@ import React, { useEffect, useState, useCallback } from 'react';
 import Header from '../components/layout/Header';
 import SidebarSearch from "../components/layout/SidebarSearch";
 
-// Tabs
-import ClassesTab from "../components/AdminPage/ClassesTab/ClassTab";
-import StaffsTab from "../components/AdminPage/StaffsTab/StaffsTab";
-import StudentTab from "../components/AdminPage/StudentsTab/StudentTab";
+import Table from '../components/common/Table/Table';
 
+import ClassesTab from "../components/AdminPage/ClassesTab/ClassTab";
 // Forms
 import AddTeacherForm from "../components/AdminPage/StaffsTab/AddTeacherForm";
 import AddAccountantForm from "../components/AdminPage/StaffsTab/AddAccountantForm";
@@ -16,7 +14,7 @@ import "./Admin.css";
 
 const AdminPage = () => {
   const [activeTab, setActiveTab] = useState("classes");
-  const [selectedStatus, setSelectedStatus] = useState("");
+  const [selectedStatus, setSelectedStatus] = useState(""); // Dùng cho sidebar
   const [showClassForm, setShowClassForm] = useState(false);
   const [showTeacherForm, setShowTeacherForm] = useState(false);
   const [showAccountantForm, setShowAccountantForm] = useState(false);
@@ -25,70 +23,43 @@ const AdminPage = () => {
   const [teachers, setTeachers] = useState([]);
   const [accountants, setAccountants] = useState([]);
   const [students, setStudents] = useState([
-    {
-      id: "S001",
-      name: "Alice Nguyen",
-      birthday: "12/01/2004",
-      email: "alice@example.com",
-      status: "Enrolled",
-    },
-    {
-      id: "S002",
-      name: "Bob Tran",
-      birthday: "15/06/2003",
-      email: "bob@example.com",
-      status: "Unenroll",
-    },
+    { id: "S001", name: "Alice Nguyen", birthday: "12/01/2004", email: "alice@example.com", status: "Enrolled" },
+    { id: "S002", name: "Bob Tran", birthday: "15/06/2003", email: "bob@example.com", status: "Unenroll" },
+    { id: "S003", name: "Charlie Phan", birthday: "01/01/2005", email: "charlie@example.com", status: "Enrolled" },
   ]);
 
   const [editingStudent, setEditingStudent] = useState(null);
-  const [editingStaff, setEditingStaff] = useState(null);
-
+  const [editingStaff, setEditingStaff] = useState(null); 
 
   useEffect(() => {
     setTeachers([
-      {
-        id: "T001",
-        name: "Dr. Smith",
-        birthday: "01/02/1998",
-        email: "smith@example.com",
-        subject: "Math",
-      },
-      {
-        id: "T002",
-        name: "Ms. Jones",
-        birthday: "02/02/1998",
-        email: "jones@example.com",
-        subject: "Science",
-      },
+      { id: "T001", name: "Dr. Smith", birthday: "01/02/1998", email: "smith@example.com", subject: "Math" },
+      { id: "T002", name: "Ms. Jones", birthday: "02/02/1998", email: "jones@example.com", subject: "Science" },
     ]);
     setAccountants([
-      {
-        id: "A001",
-        name: "Mr. Brown",
-        birthday: "01/03/1998",
-        email: "brown@example.com",
-        department: "Finance",
-      },
-      {
-        id: "A002",
-        name: "Mrs. Davis",
-        birthday: "02/03/1998",
-        email: "davis@example.com",
-        department: "Billing",
-      },
+      { id: "A001", name: "Mr. Brown", birthday: "01/03/1998", email: "brown@example.com", department: "Finance" },
+      { id: "A002", name: "Mrs. Davis", birthday: "02/03/1998", email: "davis@example.com", department: "Billing" },
     ]);
   }, []);
 
   useEffect(() => {
-    if (activeTab !== "classes") setShowClassForm(false);
-    if (activeTab !== "staffs") {
-      setShowTeacherForm(false);
-      setShowAccountantForm(false);
-    }
-    if (activeTab !== "students") {
-      setShowStudentForm(false);
-      setEditingStudent(null);
+    setShowClassForm(false);
+    setShowTeacherForm(false);
+    setShowAccountantForm(false);
+    setShowStudentForm(false);
+    setEditingStudent(null);
+    setEditingStaff(null);
+  }, [activeTab]);
+
+  useEffect(() => {
+    if (activeTab === 'classes') {
+      setSelectedStatus('waiting'); 
+    } else if (activeTab === 'dashboard') {
+      setSelectedStatus('calendar'); 
+    } else if (activeTab === 'students') {
+      setSelectedStatus('all'); 
+    } else if (activeTab === 'staffs') {
+      setSelectedStatus('teacher'); 
     }
   }, [activeTab]);
 
@@ -100,9 +71,11 @@ const AdminPage = () => {
     setEditingStudent(null);
     setEditingStaff(null);
 
-    if (activeTab === "classes") setShowClassForm(true);
-    else if (activeTab === "students") setShowStudentForm(true);
-    else if (activeTab === "staffs") {
+    if (activeTab === "classes") {
+      setShowClassForm(true);
+    } else if (activeTab === "students") {
+      setShowStudentForm(true);
+    } else if (activeTab === "staffs") {
       if (selectedStatus === "teacher") setShowTeacherForm(true);
       else if (selectedStatus === "accountant") setShowAccountantForm(true);
     } else {
@@ -113,24 +86,30 @@ const AdminPage = () => {
   const handleFormSubmitSuccess = (type, newData, isEdit = false) => {
     console.log(`${type} data saved!`);
     if (type === "Teacher") {
+      if (isEdit) {
+        setTeachers(prev => prev.map(t => t.id === newData.id ? newData : t));
+      } else {
+        setTeachers(prev => [...prev, newData]);
+      }
       setShowTeacherForm(false);
       setEditingStaff(null);
-      // Bạn có thể cập nhật danh sách teachers tại đây nếu cần
     }
     if (type === "Accountant") {
+      if (isEdit) {
+        setAccountants(prev => prev.map(a => a.id === newData.id ? newData : a));
+      } else {
+        setAccountants(prev => [...prev, newData]);
+      }
       setShowAccountantForm(false);
       setEditingStaff(null);
-      // Bạn có thể cập nhật danh sách accountants tại đây nếu cần
     }
-    if (type === "Class") setShowClassForm(false);
+    if (type === "Class") {
+      setShowClassForm(false);
+    }
     if (type === "Student") {
       if (isEdit) {
-        // Cập nhật student đã sửa
-        setStudents((prev) =>
-          prev.map((s) => (s.id === newData.id ? newData : s))
-        );
+        setStudents((prev) => prev.map((s) => (s.id === newData.id ? newData : s)));
       } else {
-        // Thêm mới student
         setStudents((prev) => [...prev, newData]);
       }
       setShowStudentForm(false);
@@ -138,132 +117,184 @@ const AdminPage = () => {
     }
   };
 
-  const handleEditStaff = (staffMember, staffType) => {
-    setEditingStaff({ ...staffMember, staffType });
-    if (staffType === "teachers") setShowTeacherForm(true);
-    else if (staffType === "accountants") setShowAccountantForm(true);
-  };
+  const handleEditStudent = useCallback((student) => {
+    setEditingStudent(student);
+    setShowStudentForm(true);
+  }, []);
 
-  const handleDeleteStaff = (staffMember, staffType) => {
-    if (
-      window.confirm(
-        `Are you sure you want to delete ${staffType} ${staffMember.name} (ID: ${staffMember.id})?`
-      )
-    ) {
+  const handleDeleteStudent = useCallback((student) => {
+    if (window.confirm(`Bạn có chắc chắn muốn xóa học viên ${student.name} (ID: ${student.id})?`)) {
+      setStudents((prev) => prev.filter((s) => s.id !== student.id));
+     }
+  }, []);
+
+  const handleEditStaff = useCallback((staffMember, staffType) => {
+    setEditingStaff(staffMember); // Lưu thông tin nhân viên đang chỉnh sửa
+    if (staffType === "teachers") {
+      setShowTeacherForm(true);
+    } else if (staffType === "accountants") {
+      setShowAccountantForm(true);
+    }
+  }, []);
+
+  const handleDeleteStaff = useCallback((staffMember, staffType) => {
+    if (window.confirm(`Bạn có chắc chắn muốn xóa ${staffType === 'teachers' ? 'giáo viên' : 'kế toán'} ${staffMember.name} (ID: ${staffMember.id})?`)) {
       if (staffType === "teachers") {
         setTeachers((prev) => prev.filter((t) => t.id !== staffMember.id));
       } else if (staffType === "accountants") {
         setAccountants((prev) => prev.filter((a) => a.id !== staffMember.id));
       }
     }
-  };
+  }, []);
 
-  const handleEditStudent = (student) => {
-    setEditingStudent(student);
-    setShowStudentForm(true);
-  };
+  const studentColumns = [
+    { header: 'ID', accessor: 'id' },
+    { header: 'Họ và Tên', accessor: 'name' },
+    { header: 'Ngày sinh', accessor: 'birthday' },
+    { header: 'Email', accessor: 'email' },
+    { header: 'Trạng thái', accessor: 'status' },
+    {
+      header: 'Hành động',
+      render: (row) => (
+        <div className="action-buttons">
+        <button onClick={() => handleEditStudent(row)}>Sửa</button>
+        <button onClick={() => handleDeleteStudent(row)}>Xóa</button>
+        </div>
+      ),
+    },
+  ];
 
-  const handleDeleteStudent = (student) => {
-    if (
-      window.confirm(
-        `Are you sure you want to delete Student ${student.name} (ID: ${student.id})?`
-      )
-    ) {
-      setStudents((prev) => prev.filter((s) => s.id !== student.id));
-    }
-  };
+  const teacherColumns = [
+    { header: 'ID', accessor: 'id' },
+    { header: 'Họ và Tên', accessor: 'name' },
+    { header: 'Ngày sinh', accessor: 'birthday' },
+    { header: 'Email', accessor: 'email' },
+    {
+      header: 'Hành động',
+      render: (row) => (
+        <div className="action-buttons">
+        <button onClick={() => handleEditStaff(row, 'teachers')}>Sửa</button>
+        <button onClick={() => handleDeleteStaff(row, 'teachers')}>Xóa</button>
+        </div>
+      ),
+    },
+  ];
+
+  const accountantColumns = [
+    { header: 'ID', accessor: 'id' },
+    { header: 'Họ và Tên', accessor: 'name' },
+    { header: 'Ngày sinh', accessor: 'birthday' },
+    { header: 'Email', accessor: 'email' },
+    {
+      header: 'Hành động',
+      render: (row) => (
+      <div className="action-buttons">
+      <button onClick={() => handleEditStaff(row, 'accountants')}>Sửa</button>
+      <button onClick={() => handleDeleteStaff(row, 'accountants')}>Xóa</button>
+      </div>
+      ),
+    },
+  ];
+
+  const filteredStudents = selectedStatus === "all"
+    ? students
+    : students.filter(student => student.status.toLowerCase() === selectedStatus);
 
   return (
     <div className="admin-container">
       <Header
-        role="admin" // hoặc "student", "teacher"
+        role="admin"
         activeTab={activeTab}
         setActiveTab={setActiveTab}
       />
 
-      <div className="admin-body">
-        <SidebarSearch
-          role="admin"
-          activeTab={activeTab}
-          onSearch={(item) => setSelectedStatus(item)}
-          onNew={handleNew}
-        />
+    <div className="admin-body">
+      <SidebarSearch
+        role="admin"
+        activeTab={activeTab}
+        onSearch={(item) => setSelectedStatus(item)}
+        onNew={handleNew}
+      />
 
-        <div className="content">
-          <div className="admin-display-area">
-            {activeTab === "classes" && (
-              <ClassesTab
-                selectedStatus={selectedStatus}
-                showClassForm={showClassForm}
-                setShowClassForm={setShowClassForm}
+    <div className="content">
+      <div className="admin-display-area">
+        {activeTab === "classes" && (
+          <ClassesTab
+          selectedStatus={selectedStatus}
+          showClassForm={showClassForm}
+          setShowClassForm={setShowClassForm}
+          />
+        )}
+
+        {activeTab === "students" && (
+          <>
+            {showStudentForm && (
+              <AddStudentForm
+                initialData={editingStudent}
+                onClose={() => {
+                  setShowStudentForm(false);
+                  setEditingStudent(null);
+                }}
+                onSubmitSuccess={(data, isEdit) =>
+                  handleFormSubmitSuccess("Student", data, isEdit)
+                }
               />
             )}
-
-            {activeTab === "students" && (
-              <>
-                {!showStudentForm && (
-                  <StudentTab
-                    students={students}
-                    selectedStatus={selectedStatus}
-                    onEditStudent={handleEditStudent}
-                    onDeleteStudent={handleDeleteStudent}
-                  />
-                )}
-                {showStudentForm && (
-                  <AddStudentForm
-                    initialData={editingStudent}
-                    onClose={() => {
-                      setShowStudentForm(false);
-                      setEditingStudent(null);
-                    }}
-                    onSubmitSuccess={(data, isEdit) =>
-                      handleFormSubmitSuccess("Student", data, isEdit)
-                    }
-                  />
+            {!showStudentForm && (
+              <Table
+                columns={studentColumns}
+                data={filteredStudents}
+              />
                 )}
               </>
             )}
 
             {activeTab === "staffs" && (
               <div>
-                {/* Hiển thị form thêm giáo viên nếu showTeacherForm là true */}
                 {showTeacherForm && (
                   <AddTeacherForm
-                    onClose={() => setShowTeacherForm(false)}
-                    onSubmitSuccess={() => handleFormSubmitSuccess("Teacher")}
+                    initialData={editingStaff} // Truyền dữ liệu để chỉnh sửa
+                    onClose={() => {
+                      setShowTeacherForm(false);
+                      setEditingStaff(null);
+                    }}
+                    onSubmitSuccess={(data, isEdit) =>
+                      handleFormSubmitSuccess("Teacher", data, isEdit)
+                    }
                   />
                 )}
 
-                {/* Hiển thị form thêm kế toán nếu showAccountantForm là true */}
                 {showAccountantForm && (
                   <AddAccountantForm
-                    onClose={() => setShowAccountantForm(false)}
-                    onSubmitSuccess={() => handleFormSubmitSuccess("Accountant")}
+                    initialData={editingStaff} // Truyền dữ liệu để chỉnh sửa
+                    onClose={() => {
+                      setShowAccountantForm(false);
+                      setEditingStaff(null);
+                    }}
+                    onSubmitSuccess={(data, isEdit) =>
+                      handleFormSubmitSuccess("Accountant", data, isEdit)
+                    }
                   />
                 )}
 
                 {!showTeacherForm && !showAccountantForm && (
                   <>
                     {selectedStatus === "teacher" && (
-                      <StaffsTab
-                        staffType="teachers"
-                        data={teachers}
-                        onEdit={(staff) => handleEditStaff(staff, "teachers")}
-                        onDelete={(staff) => handleDeleteStaff(staff, "teachers")}
+                      <Table
+                        columns={teacherColumns}
+                        data={teachers} // Có thể thêm logic lọc nếu cần
                       />
                     )}
                     {selectedStatus === "accountant" && (
-                      <StaffsTab
-                        staffType="accountants"
-                        data={accountants}
-                        onEdit={(staff) => handleEditStaff(staff, "accountants")}
-                        onDelete={(staff) => handleDeleteStaff(staff, "accountants")}
+                      <Table
+                        columns={accountantColumns}
+                        data={accountants} // Có thể thêm logic lọc nếu cần
                       />
                     )}
                   </>
                 )}
               </div>
-            )}  
+            )}
           </div>
         </div>
       </div>
