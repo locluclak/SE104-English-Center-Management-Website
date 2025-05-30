@@ -1,149 +1,202 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './DynamicForm.css';
 
-const DynamicForm = ({ formConfig, onClose }) => {
-  if (!formConfig) return <div>No form config provided</div>;
+const DynamicForm = ({ formConfig, initialData, onClose, onSubmitSuccess }) => {
+  if (!formConfig) {
+    console.error("DynamicForm: No formConfig provided.");
+    return (
+      <div className="form-error-message">
+        Không tìm thấy cấu hình form. Vui lòng kiểm tra lại.
+      </div>
+    );
+  }
 
-  const [formData, setFormData] = useState({});
+  const [formData, setFormData] = useState(initialData || {});
+
+  useEffect(() => {
+    setFormData(initialData || {});
+  }, [initialData, formConfig]);
 
   const handleChange = (name, value) => {
-    setFormData({ ...formData, [name]: value });
+    setFormData(prevData => ({
+      ...prevData,
+      [name]: value
+    }));
   };
 
-  // Xử lý thay đổi trường trong students array
-  const handleStudentChange = (index, fieldName, value) => {
-    const newStudents = formData.students ? [...formData.students] : [];
-    newStudents[index] = { ...newStudents[index], [fieldName]: value };
-    setFormData({ ...formData, students: newStudents });
+  const handleDynamicListChange = (listName, index, fieldName, value) => {
+    setFormData(prevData => {
+      const currentList = prevData[listName] ? [...prevData[listName]] : [];
+      currentList[index] = { ...currentList[index], [fieldName]: value };
+      return { ...prevData, [listName]: currentList };
+    });
   };
 
-  const handleAddStudent = () => {
-    const newStudents = formData.students ? [...formData.students] : [];
-    newStudents.push({ studentId: '', name: '', email: '' });
-    setFormData({ ...formData, students: newStudents });
+  const handleAddDynamicListItem = (listName, defaultItem) => {
+    setFormData(prevData => {
+      const currentList = prevData[listName] ? [...prevData[listName]] : [];
+      return { ...prevData, [listName]: [...currentList, { ...defaultItem }] };
+    });
+  };
+
+  const handleRemoveDynamicListItem = (listName, indexToRemove) => {
+    setFormData(prevData => {
+      const currentList = prevData[listName] ? [...prevData[listName]] : [];
+      return {
+        ...prevData,
+        [listName]: currentList.filter((_, idx) => idx !== indexToRemove)
+      };
+    });
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     console.log('Form submitted:', formData);
-    // TODO: Gửi dữ liệu backend hoặc xử lý tiếp
+    onSubmitSuccess(formData, !!initialData);
   };
 
-  // Lấy 2 nhóm trường như cũ
-  const twoColsFields = ['id', 'name'];
-  const threeColsFields = ['teacher', 'startDate', 'endDate'];
-
   return (
-    <form className="form-grid" onSubmit={handleSubmit}>
-      <h2>{formConfig.title}</h2>
+    <div className="dynamic-form-overlay">
+      <form className="dynamic-form-container" onSubmit={handleSubmit}>
+        <div className="form-grid">
+          {formConfig.fields.map((field) => {
+            if (field.type === 'dynamicList') {
+              return null;
+            }
 
-      {/* Nhóm 2 cột */}
-      <div className="form-row two-cols">
-        {twoColsFields.map((name) => {
-          const field = formConfig.fields.find(f => f.name === name);
-          if (!field) return null;
-
-          return (
-            <div className="form-col" key={field.name}>
-              <label>{field.label}</label>
-              <input
-                type={field.type || 'text'}
-                placeholder={field.placeholder || ''}
-                onChange={(e) => handleChange(field.name, e.target.value)}
-              />
-            </div>
-          );
-        })}
-      </div>
-
-      {/* Nhóm 3 cột */}
-      <div className="form-row three-cols">
-        {threeColsFields.map((name) => {
-          const field = formConfig.fields.find(f => f.name === name);
-          if (!field) return null;
-
-          if (field.type === 'select') {
             return (
-              <div className="form-col" key={field.name}>
-                <label>{field.label}</label>
-                <select onChange={(e) => handleChange(field.name, e.target.value)}>
-                  {field.options.map((opt, i) => (
-                    <option key={i} value={opt}>{opt}</option>
-                  ))}
-                </select>
+              <div className="form-group" key={field.name}>
+                <label htmlFor={field.name} className="form-label">
+                  {field.label}
+                  {field.required && <span className="form-required">*</span>}
+                </label>
+                {field.type === 'textarea' ? (
+                  <textarea
+                    id={field.name}
+                    name={field.name}
+                    rows={field.rows || 3}
+                    placeholder={field.placeholder || ''}
+                    value={formData[field.name] || ''}
+                    onChange={(e) => handleChange(field.name, e.target.value)}
+                    required={field.required}
+                    className="form-input form-textarea"
+                  />
+                ) : field.type === 'select' ? (
+                  <select
+                    id={field.name}
+                    name={field.name}
+                    value={formData[field.name] || ''}
+                    onChange={(e) => handleChange(field.name, e.target.value)}
+                    required={field.required}
+                    className="form-input form-select"
+                  >
+                    <option value="">-- Chọn {field.label} --</option>
+                    {field.options && field.options.map((opt, i) => (
+                      <option key={i} value={opt}>{opt}</option>
+                    ))}
+                  </select>
+                ) : (
+                  <input
+                    id={field.name}
+                    name={field.name}
+                    type={field.type || 'text'}
+                    placeholder={field.placeholder || ''}
+                    value={formData[field.name] || ''}
+                    onChange={(e) => handleChange(field.name, e.target.value)}
+                    required={field.required}
+                    className="form-input"
+                  />
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Render dynamicList fields (ví dụ: students) */}
+        {formConfig.fields.map(field => {
+          if (field.type === 'dynamicList') {
+            const listName = field.name; // Ví dụ: 'students'
+            const listItems = formData[listName] || [];
+            const defaultNewItem = field.fields.reduce((acc, f) => ({ ...acc, [f.name]: '' }), {});
+
+            return (
+              <div key={listName} className="dynamic-list-section">
+                <div className="dynamic-list-header">
+                  <label className="dynamic-list-label">{field.label}</label>
+                  <button
+                    type="button"
+                    onClick={() => handleAddDynamicListItem(listName, defaultNewItem)}
+                    className="btn btn-add-item"
+                  >
+                    Thêm {field.label.slice(0, -1)}
+                  </button>
+                </div>
+                {listItems.length > 0 ? (
+                  <div className="dynamic-list-table-wrapper">
+                    <table className="dynamic-list-table">
+                      <thead>
+                        <tr>
+                          {field.fields.map((f, i) => (
+                            <th key={i}>{f.placeholder || f.name}</th>
+                          ))}
+                          <th>Hành động</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {listItems.map((item, idx) => (
+                          <tr key={idx}>
+                            {field.fields.map((f) => (
+                              <td key={f.name}>
+                                <input
+                                  type={f.type || 'text'}
+                                  value={item[f.name] || ''}
+                                  onChange={(e) => handleDynamicListChange(listName, idx, f.name, e.target.value)}
+                                  placeholder={f.placeholder || ''}
+                                  className="dynamic-list-input"
+                                />
+                              </td>
+                            ))}
+                            <td>
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveDynamicListItem(listName, idx)}
+                                className="btn btn-remove-item"
+                              >
+                                Xóa
+                              </button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <p className="dynamic-list-empty-message">Chưa có mục nào được thêm.</p>
+                )}
               </div>
             );
           }
-
-          return (
-            <div className="form-col" key={field.name}>
-              <label>{field.label}</label>
-              <input
-                type={field.type || 'text'}
-                placeholder={field.placeholder || ''}
-                onChange={(e) => handleChange(field.name, e.target.value)}
-              />
-            </div>
-          );
+          return null;
         })}
-      </div>
 
-      {/* Phần hiển thị danh sách students dạng bảng có thể nhập */}
-      <div style={{ marginTop: 20 }}>
-        <label>Students Enrolled</label>
-        <button type="button" onClick={handleAddStudent} style={{ marginLeft: 10 }}>
-          Add Student
-        </button>
-        {formData.students && formData.students.length > 0 ? (
-          <table border="1" cellPadding="5" style={{ marginTop: 10, width: '100%', borderCollapse: 'collapse' }}>
-            <thead>
-              <tr>
-                <th>Student ID</th>
-                <th>Name</th>
-                <th>Email</th>
-              </tr>
-            </thead>
-            <tbody>
-              {formData.students.map((student, idx) => (
-                <tr key={idx}>
-                  <td>
-                    <input
-                      type="text"
-                      value={student.studentId}
-                      onChange={(e) => handleStudentChange(idx, 'studentId', e.target.value)}
-                      placeholder="ID"
-                    />
-                  </td>
-                  <td>
-                    <input
-                      type="text"
-                      value={student.name}
-                      onChange={(e) => handleStudentChange(idx, 'name', e.target.value)}
-                      placeholder="Student Name"
-                    />
-                  </td>
-                  <td>
-                    <input
-                      type="email"
-                      value={student.email}
-                      onChange={(e) => handleStudentChange(idx, 'email', e.target.value)}
-                      placeholder="Email"
-                    />
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        ) : (
-          <p>No students added yet.</p>
-        )}
-      </div>
 
-      <div className="form-actions" style={{ marginTop: 20 }}>
-        <button type="submit">{formConfig.submitLabel || 'Create'}</button>
-        <button type="button" onClick={onClose}>Cancel</button>
-      </div>
-    </form>
+        <div className="form-actions">
+          <button
+            type="submit"
+            className="btn btn-primary"
+          >
+            {initialData ? 'Cập nhật' : 'Tạo mới'}
+          </button>
+          <button
+            type="button"
+            onClick={onClose}
+            className="btn btn-secondary"
+          >
+            Hủy
+          </button>
+        </div>
+      </form>
+    </div>
   );
 };
 

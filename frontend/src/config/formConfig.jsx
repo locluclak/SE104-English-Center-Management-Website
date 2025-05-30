@@ -1,5 +1,6 @@
-const formConfigs = {
-  addClass: {
+export const formConfigs = {
+  classes: {
+    type: 'Class',
     title: 'Create New Class',
     fields: [
       { 
@@ -16,7 +17,7 @@ const formConfigs = {
       },
       {
         name: 'teacher', label: 'Teacher', type: 'select',
-        options: ['Mr. A', 'Ms. B', 'Mrs. C'], // Có thể cập nhật động nếu cần
+        options: ['Mr. A', 'Ms. B', 'Mrs. C'],
       },
       { name: 'startDate', label: 'Start Date', type: 'date' },
       { name: 'endDate', label: 'End Date', type: 'date' },
@@ -31,9 +32,43 @@ const formConfigs = {
     ],
   },
 
-  // Bạn có thể thêm các form khác như:
-  // addExercise: { ... }
-  // addMaterial: { ... }
+  staffs_teacher: {
+    type: 'Teacher',
+    title: "Add Teacher",
+    fields: [
+      { name: "id", label: "Teacher ID", type: "text", required: true, placeholder: "Teacher ID" },
+      { name: "name", label: "Full Name", type: "text", required: true, placeholder: "Full Name" },
+      { name: "birthday", label: "Birthday", type: "date", required: true },
+      { name: "email", label: "Email", type: "email", required: true, placeholder: "Email" },
+      { name: "password", label: "Password", type: "password", required: true, placeholder: "Password" }, 
+      { name: "specialization", label: "Specialization", type: "text", placeholder: "e.g., Math, Science" }
+    ]
+  },
+
+  staffs_accountant: {
+    type: 'Accountant',
+    title: "Add Accountant",
+    fields: [
+      { name: "id", label: "Accountant ID", type: "text", required: true, placeholder: "Accountant ID" },
+      { name: "name", label: "Full Name", type: "text", required: true, placeholder: "Full Name" },
+      { name: "birthday", label: "Birthday", type: "date", required: true },
+      { name: "email", label: "Email", type: "email", required: true, placeholder: "Email" },
+      { name: "password", label: "Password", type: "password", required: true, placeholder: "Password" },
+      { name: "department", label: "Department/Role", type: "text", placeholder: "e.g., Payroll, General Ledger" }
+    ]
+  },
+
+  students: {
+    type: 'Student',
+    title: "Add Student",
+    fields: [
+      { name: "id", label: "Student ID", type: "text", required: true, placeholder: "Student ID" },
+      { name: "name", label: "Full Name", type: "text", required: true, placeholder: "Full Name" },
+      { name: "birthday", label: "Birthday", type: "date", required: true },
+      { name: "email", label: "Email", type: "email", required: true, placeholder: "Email" },
+      { name: "status", label: "Status", type: "select", options: ["Enrolled", "Unenroll"], required: true }
+    ]
+  }
 };
 
 export default formConfigs;
