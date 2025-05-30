@@ -159,4 +159,46 @@ router.post('/login', async (req, res) => {
     }
 });
 
+// POST /change-password
+router.post('/change-password', async (req, res) => {
+    const { email, oldPassword, newPassword } = req.body;
+
+    if (!email || !oldPassword || !newPassword) {
+        return res.status(400).json({ message: 'Missing required fields' });
+    }
+
+    try {
+        const conn = await db.getConnection();
+
+        // Query the PERSON table to find the user by email
+        const [rows] = await conn.query('SELECT * FROM PERSON WHERE EMAIL = ?', [email]);
+
+        if (rows.length === 0) {
+            conn.release();
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        const user = rows[0];
+        const match = await bcrypt.compare(oldPassword, user.PASSWORD);
+
+        if (!match) {
+            conn.release();
+            return res.status(401).json({ message: 'Incorrect old password' });
+        }
+
+        // Hash the new password
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+        // Update the password in the database
+        await conn.query('UPDATE PERSON SET PASSWORD = ? WHERE EMAIL = ?', [hashedPassword, email]);
+
+        conn.release();
+
+        res.status(200).json({ message: 'Password updated successfully' });
+    } catch (err) {
+        console.error('Error updating password:', err);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
 module.exports = router;
