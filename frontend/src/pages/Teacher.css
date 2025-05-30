@@ -2,6 +2,10 @@
   display: flex;
   flex-direction: column;
   height: 100vh;
+  width: 100vw;
+  margin: 0;
+  padding: 0;
+  overflow: auto;
 }
 
 .teacher-content {
@@ -16,4 +20,20 @@
   background-color: #ffffff;
   border-left: 1px solid #ddd;
   overflow-y: auto;
+}
+
+body, html {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
+.class-display-area {
+  display: flex;
+  gap: 20px;
+  flex: 1; 
+  padding-left: 20px;
+  overflow: hidden; 
 }

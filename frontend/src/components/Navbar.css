@@ -11,7 +11,6 @@
   align-items: center;
   background-color: #c1d3fe;
   padding: 0.5rem 1rem;
-  border-radius: 8px;
   height: 40px;
   padding: 10px 30px;
 }
@@ -25,15 +24,15 @@
 .navbar-right {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 30px;
 }
 
 .navbar-center {
   display: flex;
   list-style: none;
-  gap: 20px; /* Giảm khoảng cách */
+  gap: 50px; /* Giảm khoảng cách */
   margin: 0;
-  padding: 0px 50px;
+  padding: 0px 20px;
 }
 
 .navbar-center li {

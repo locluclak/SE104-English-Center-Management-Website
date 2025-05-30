@@ -3,21 +3,19 @@ import AddClassForm from './AddClassForm';
 import ClassList from './ClassList';
 import ClassDetail from './ClassDetail';
 
-const mockClasses = [
-  { id: 'A', name: 'Class A', teacher: 'Mr. A', description: 'Basic TOEIC class' },
-  { id: 'B', name: 'Class B', teacher: 'Ms. B', description: 'Intermediate TOEIC class' },
-  { id: 'C', name: 'Class C', teacher: 'Mrs. C', description: 'Advanced TOEIC class' },
-];
-
-const ClassesTab = ({ selectedStatus, showClassForm, setShowClassForm }) => {
+const ClassesTab = ({ selectedStatus, showClassForm, setShowClassForm, classes = [] }) => {
   const [selectedClass, setSelectedClass] = useState(null);
+
+  // Lọc classes theo selectedStatus nếu cần (ví dụ bạn có trường status hoặc category trong class)
+  const filteredClasses = selectedStatus
+    ? classes.filter(cls => cls.status === selectedStatus) // hoặc tùy filter phù hợp dữ liệu thật
+    : classes;
 
   return (
     <div className="class-management-page">
       {showClassForm ? (
         <AddClassForm onClose={() => setShowClassForm(false)} />
       ) : selectedClass ? (
-        // Truyền selectedStatus vào đây
         <ClassDetail
           classData={selectedClass}
           selectedStatus={selectedStatus}
@@ -31,10 +29,10 @@ const ClassesTab = ({ selectedStatus, showClassForm, setShowClassForm }) => {
               : 'Please select a category (Waiting, Current, End)'}
           </h2>
 
-          {selectedStatus && (
-            <div>
-              <ClassList classList={mockClasses} onSelectClass={setSelectedClass} />
-            </div>
+          {filteredClasses.length > 0 ? (
+            <ClassList classList={filteredClasses} onSelectClass={setSelectedClass} />
+          ) : (
+            <p>No classes available.</p>
           )}
         </>
       )}
