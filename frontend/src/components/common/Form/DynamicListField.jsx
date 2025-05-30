@@ -50,7 +50,6 @@ const DynamicListField = ({ field, value = [], onChange }) => {
           <button type="button" onClick={() => removeRow(idx)}>Remove</button>
         </div>
       ))}
-      <button type="button" onClick={addRow}>Add Student</button>
 
       {/* Bảng hiển thị dưới nút Add Student */}
       <div style={{ marginTop: '20px' }}>

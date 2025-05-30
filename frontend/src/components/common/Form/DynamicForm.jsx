@@ -57,6 +57,7 @@ const DynamicForm = ({ formConfig, initialData, onClose, onSubmitSuccess }) => {
   };
 
   const handleSubmit = (e) => {
+    e.preventDefault(); 
     console.log('Form submitted:', formData);
     onSubmitSuccess(formData, !!initialData);
   };
@@ -96,7 +97,7 @@ const DynamicForm = ({ formConfig, initialData, onClose, onSubmitSuccess }) => {
                     required={field.required}
                     className="form-input form-select"
                   >
-                    <option value="">-- Chọn {field.label} --</option>
+                    <option value="">-- Choose {field.label} --</option>
                     {field.options && field.options.map((opt, i) => (
                       <option key={i} value={opt}>{opt}</option>
                     ))}
@@ -130,7 +131,7 @@ const DynamicForm = ({ formConfig, initialData, onClose, onSubmitSuccess }) => {
                 <div className="dynamic-list-header">
                   <label className="dynamic-list-label">{field.label}</label>
                   <AddButton onClick={() => handleAddDynamicListItem(listName, defaultNewItem)}>
-                    Add {field.label.slice(0, -1)}
+                    Add Student
                   </AddButton>
                 </div>
                 {listItems.length > 0 ? (
@@ -141,7 +142,7 @@ const DynamicForm = ({ formConfig, initialData, onClose, onSubmitSuccess }) => {
                           {field.fields.map((f, i) => (
                             <th key={i}>{f.placeholder || f.name}</th>
                           ))}
-                          <th>Hành động</th>
+                          <th>Action</th>
                         </tr>
                       </thead>
                       <tbody>
@@ -178,7 +179,6 @@ const DynamicForm = ({ formConfig, initialData, onClose, onSubmitSuccess }) => {
           }
           return null;
         })}
-
 
         <div className="form-actions">
           {initialData ? (

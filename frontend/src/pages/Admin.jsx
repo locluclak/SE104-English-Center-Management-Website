@@ -20,6 +20,8 @@ const AdminPage = () => {
   const [showForm, setShowForm] = useState(false);
   const [editingData, setEditingData] = useState(null);
 
+  const [classes, setClasses] = useState([]);
+
   const [teachers, setTeachers] = useState([]);
   const [accountants, setAccountants] = useState([]);
   const [students, setStudents] = useState([
@@ -62,33 +64,39 @@ const AdminPage = () => {
 
   const getCurrentFormConfig = useCallback(() => {
     if (activeTab === 'staffs') {
-      if (selectedStatus === 'teacher') {
-        return formConfigs.staffs_teacher;
-      } else if (selectedStatus === 'accountant') {
-        return formConfigs.staffs_accountant;
-      }
+      if (selectedStatus === 'teacher') return formConfigs.staffs_teacher;
+      if (selectedStatus === 'accountant') return formConfigs.staffs_accountant;
       return null;
     }
     return formConfigs[activeTab];
   }, [activeTab, selectedStatus]);
 
   const handleFormSubmitSuccess = (data, isEdit = false) => {
-    const currentFormConfig = getCurrentFormConfig();
-    const type = formConfig[activeTab]?.type;
+    const formConfig = getCurrentFormConfig();
+    const type = formConfig?.type;
+
     if (!type) {
       console.warn("Could not determine type for form submission.");
       return;
     }
 
     if (type === 'Student') {
-      if (isEdit) setStudents(prev => prev.map(s => s.id === data.id ? data : s));
-      else setStudents(prev => [...prev, data]);
+      setStudents(prev => isEdit
+        ? prev.map(s => s.id === data.id ? data : s)
+        : [...prev, data]);
     } else if (type === 'Teacher') {
-      if (isEdit) setTeachers(prev => prev.map(t => t.id === data.id ? data : t));
-      else setTeachers(prev => [...prev, data]);
+      setTeachers(prev => isEdit
+        ? prev.map(t => t.id === data.id ? data : t)
+        : [...prev, data]);
     } else if (type === 'Accountant') {
-      if (isEdit) setAccountants(prev => prev.map(a => a.id === data.id ? data : a));
-      else setAccountants(prev => [...prev, data]);
+      setAccountants(prev => isEdit
+        ? prev.map(a => a.id === data.id ? data : a)
+        : [...prev, data]);
+    } else if (type === "Class") {
+      const newClass = { ...data, status: data.status || "waiting" };
+      setClasses(prev => isEdit
+        ? prev.map(cls => cls.id === newClass.id ? newClass : cls)
+        : [...prev, newClass]);
     }
 
     setShowForm(false);
@@ -136,7 +144,11 @@ const AdminPage = () => {
             )}
 
             {!showForm && activeTab === "classes" && (
-              <ClassesTab selectedStatus={selectedStatus} />
+              <ClassesTab
+                selectedStatus={selectedStatus}
+                classes={classes}
+                setClasses={setClasses}
+              />
             )}
 
             {!showForm && activeTab === "students" && (

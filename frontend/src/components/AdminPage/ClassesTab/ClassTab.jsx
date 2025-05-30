@@ -4,15 +4,11 @@ import Card from '../../common/Card/Card';
 import formConfigs from '../../../config/formConfig';
 import DynamicForm from '../../common/Form/DynamicForm';
 
-const mockClasses = [
-  { id: 'A', name: 'Class A', teacher: 'Mr. A', description: 'Basic TOEIC class' },
-  { id: 'B', name: 'Class B', teacher: 'Ms. B', description: 'Intermediate TOEIC class' },
-  { id: 'C', name: 'Class C', teacher: 'Mrs. C', description: 'Advanced TOEIC class' },
-];
-
-const ClassesTab = ({ selectedStatus, showClassForm, setShowClassForm }) => {
+const ClassesTab = ({ selectedStatus, showClassForm, setShowClassForm, classes, setClasses }) => {
   const [selectedClass, setSelectedClass] = useState(null);
   const classFormConfig = formConfigs.addClass;
+
+  const filteredClasses = classes.filter(cls => cls.status === selectedStatus);
 
   return (
     <div className="class-management-page">
@@ -21,9 +17,10 @@ const ClassesTab = ({ selectedStatus, showClassForm, setShowClassForm }) => {
           formConfig={classFormConfig}
           onSubmit={(data) => {
             console.log('Submitted class:', data);
+            setClasses(prev => [...prev, newClass]);
             setShowClassForm(false);
           }}
-          onCancel={() => setShowClassForm(false)}
+          onClose={() => setShowClassForm(false)}
         />
       ) : selectedClass ? (
         <ClassDetail
@@ -41,7 +38,7 @@ const ClassesTab = ({ selectedStatus, showClassForm, setShowClassForm }) => {
 
           {selectedStatus && (
             <div className="class-grid">
-              {mockClasses.map(cls => (
+              {filteredClasses.map(cls => (
                 <Card
                   key={cls.id}
                   title={cls.name}

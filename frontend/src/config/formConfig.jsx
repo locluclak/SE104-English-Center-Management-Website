@@ -29,6 +29,7 @@ export const formConfigs = {
           { name: 'email', placeholder: 'Email', type: 'email' },
         ],
       },
+      { name: "status", type: "hidden", defaultValue: "waiting" },
     ],
   },
 

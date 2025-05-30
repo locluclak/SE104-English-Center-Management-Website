@@ -1,4 +1,5 @@
 .btn {
+  margin-left: 20px;
   padding: 8px 16px;
   font-size: 14px;
   font-weight: 500;
@@ -17,22 +18,22 @@
 
 /* Màu riêng cho từng loại button */
 .btn-add {
-  background-color: #4CAF50;
-  color: white;
+  background-color: #92b9e3;
+  color: black;
 }
 
 .btn-add:hover:not(:disabled) {
-  background-color: #45a049;
+  background-color: #647e9b;
 }
 
 .btn-save, .btn-create {
-  background-color: #2196F3;
+  background-color: #6c7ee1;
   color: white;
 }
 
 .btn-save:hover:not(:disabled),
 .btn-create:hover:not(:disabled) {
-  background-color: #1976D2;
+  background-color: #3e4a8d;
 }
 
 .btn-cancel,
@@ -47,17 +48,17 @@
 }
 
 .btn-delete {
-  background-color: #f44336;
-  color: white;
+  background-color: #e17a8d;
+  color: black;
 }
 
 .btn-delete:hover:not(:disabled) {
-  background-color: #d32f2f;
+  background-color: #d03955;
 }
 
 .btn-edit {
-  background-color: #FF9800;
-  color: white;
+  background-color: #ffc4a4;
+  color: black;
 }
 
 .btn-edit:hover:not(:disabled) {

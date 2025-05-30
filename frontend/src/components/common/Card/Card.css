@@ -1,10 +1,11 @@
 .custom-card {
   border: 1px solid #ccc;
   border-radius: 10px;
-  padding: 16px;
+  padding: 15px;
   cursor: pointer;
   background-color: white;
   transition: box-shadow 0.3s;
+  width: 150px;
 }
 
 .custom-card:hover {
@@ -12,5 +13,5 @@
 }
 
 .card-content {
-  margin-top: 8px;
+  margin-left: 10px;
 }

@@ -38,10 +38,6 @@ const ClassDetail = ({ className, selectedStatus, onBack }) => {
       {/* Tabs */}
       {selectedStatus === 'Waiting' ? (
         <>
-          <button className="add-student" onClick={() => setShowAddStudentForm(true)}>
-            + Add Student
-          </button>
-
           {showAddStudentForm && (
             <DynamicForm
               formConfig={formConfigs.addStudent}
