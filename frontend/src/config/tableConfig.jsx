@@ -1,15 +1,15 @@
 export const getStudentTableColumns = (onEdit, onDelete) => [
   { header: 'ID', accessor: 'id' },
-  { header: 'Họ và Tên', accessor: 'name' },
-  { header: 'Ngày sinh', accessor: 'birthday' },
+  { header: 'Name', accessor: 'name' },
+  { header: 'Birthday', accessor: 'birthday' },
   { header: 'Email', accessor: 'email' },
-  { header: 'Trạng thái', accessor: 'status' },
+  { header: 'Status', accessor: 'status' },
   {
-    header: 'Hành động',
+    header: 'Action',
     render: (row) => (
       <div className="action-buttons">
-        <button onClick={() => onEdit(row)}>Sửa</button>
-        <button onClick={() => onDelete(row)}>Xóa</button>
+        <button onClick={() => onEdit(row)}>Edit</button>
+        <button onClick={() => onDelete(row)}>Delete</button>
       </div>
     ),
   },
@@ -17,15 +17,15 @@ export const getStudentTableColumns = (onEdit, onDelete) => [
 
 export const getTeacherTableColumns = (onEdit, onDelete) => [
   { header: 'ID', accessor: 'id' },
-  { header: 'Họ và Tên', accessor: 'name' },
-  { header: 'Ngày sinh', accessor: 'birthday' },
+  { header: 'Name', accessor: 'name' },
+  { header: 'Birthday', accessor: 'birthday' },
   { header: 'Email', accessor: 'email' },
   {
-    header: 'Hành động',
+    header: 'Action',
     render: (row) => (
       <div className="action-buttons">
-        <button onClick={() => onEdit(row)}>Sửa</button>
-        <button onClick={() => onDelete(row)}>Xóa</button>
+        <button onClick={() => onEdit(row)}>Edit</button>
+        <button onClick={() => onDelete(row)}>Delete</button>
       </div>
     ),
   },
@@ -33,15 +33,15 @@ export const getTeacherTableColumns = (onEdit, onDelete) => [
 
 export const getAccountantTableColumns = (onEdit, onDelete) => [
   { header: 'ID', accessor: 'id' },
-  { header: 'Họ và Tên', accessor: 'name' },
-  { header: 'Ngày sinh', accessor: 'birthday' },
+  { header: 'Name', accessor: 'name' },
+  { header: 'Birthday', accessor: 'birthday' },
   { header: 'Email', accessor: 'email' },
   {
-    header: 'Hành động',
+    header: 'Action',
     render: (row) => (
       <div className="action-buttons">
-        <button onClick={() => onEdit(row)}>Sửa</button>
-        <button onClick={() => onDelete(row)}>Xóa</button>
+        <button onClick={() => onEdit(row)}>Edit</button>
+        <button onClick={() => onDelete(row)}>Delete</button>
       </div>
     ),
   },
@@ -49,15 +49,15 @@ export const getAccountantTableColumns = (onEdit, onDelete) => [
 
 export const assignmentTableColumns = [
   { header: 'ID', accessor: 'id' },
-  { header: 'Tên bài tập', accessor: 'title' },
-  { header: 'Mô tả', accessor: 'description' },
-  { header: 'Ngày giao', accessor: 'assignedDate' },
+  { header: 'Name', accessor: 'title' },
+  { header: 'Description', accessor: 'description' },
+  { header: 'Date Start', accessor: 'assignedDate' },
   {
-    header: 'Thao tác',
+    header: 'Action',
     render: (row) => (
       <>
-        <button onClick={() => alert(`Xem ${row.title}`)}>Xem</button>
-        <button onClick={() => alert(`Xoá ${row.title}`)}>Xoá</button>
+        <button onClick={() => alert(`Xem ${row.title}`)}>Edit</button>
+        <button onClick={() => alert(`Xoá ${row.title}`)}>Delete</button>
       </>
     ),
   },
@@ -65,15 +65,15 @@ export const assignmentTableColumns = [
 
 export const documentTableColumns = [
   { header: 'ID', accessor: 'id' },
-  { header: 'Tên tài liệu', accessor: 'name' },
-  { header: 'Mô tả', accessor: 'description' },
-  { header: 'Ngày tải lên', accessor: 'uploadDate' },
+  { header: 'Name', accessor: 'name' },
+  { header: 'Description', accessor: 'description' },
+  { header: 'Upload Date', accessor: 'uploadDate' },
   {
-    header: 'Thao tác',
+    header: 'Action',
     render: (row) => (
       <>
-        <button onClick={() => alert(`Xem ${row.name}`)}>Xem</button>
-        <button onClick={() => alert(`Xoá ${row.name}`)}>Xoá</button>
+        <button onClick={() => alert(`Xem ${row.name}`)}>Edit</button>
+        <button onClick={() => alert(`Xoá ${row.name}`)}>Delete</button>
       </>
     ),
   },

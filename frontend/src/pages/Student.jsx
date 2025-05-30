@@ -2,6 +2,13 @@ import React, { useEffect, useState, useCallback } from 'react';
 import Header from '../components/layout/Header';
 import SidebarSearch from "../components/layout/SidebarSearch";
 
+import Table from '../components/common/Table/Table';
+import {
+  getStudentTableColumns,
+  getTeacherTableColumns,
+  getAccountantTableColumns,
+} from "../config/tableConfig.jsx";
+
 import HomeTab from "../components/StudentPage/CoursesTab/HomeTab";
 import MyCoursesTab from "../components/StudentPage/CoursesTab/MyCoursesTab";
 import Calendar from '../components/DashboardTab/CalendarTab';
@@ -15,9 +22,8 @@ import './Student.css';
 const StudentPage = () => {
   const [activeTab, setActiveTab] = useState('courses');
   const [selectedClass, setSelectedClass] = useState(null);
-  const [selectedFeature, setSelectedFeature] = useState('home'); // 'home' hoặc 'my-courses'
+  const [selectedFeature, setSelectedFeature] = useState('home');
 
-  // Khi activeTab thay đổi, reset selectedFeature
   useEffect(() => {
     if (activeTab === 'courses') {
       setSelectedFeature('home');
@@ -54,14 +60,14 @@ const StudentPage = () => {
 
         <div className="content">
           {activeTab === 'courses' && (
-          <div className="course-display-area"> {/* Thêm class mới để styling */}
+          <div className="course-display-area"> 
               {selectedClass ? (
                 <>
                   <CourseDetail
                     className={selectedClass}
                     onBack={() => setSelectedClass(null)}
                   />
-                  <CourseProgress className={selectedClass} /> {/* Đặt CourseProgress ở đây */}
+                  <CourseProgress className={selectedClass} />
                 </>
               ) : (
                 <>

@@ -1,7 +1,13 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import Header from '../components/layout/Header';
 import SidebarSearch from '../components/layout/SidebarSearch';
+
 import Table from '../components/common/Table/Table';
+import {
+  getStudentTableColumns,
+  getTeacherTableColumns,
+  getAccountantTableColumns,
+} from "../config/tableConfig.jsx";
 
 import Calendar from '../components/DashboardTab/CalendarTab';
 import Padlet from '../components/DashboardTab/PadletTab';

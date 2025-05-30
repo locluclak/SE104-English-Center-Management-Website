@@ -1,5 +1,5 @@
 import React from 'react';
-import './Table.css'; // Import CSS cho bảng
+import './Table.css';
 
 const Table = ({ columns, data }) => {
   if (!data || data.length === 0) {
