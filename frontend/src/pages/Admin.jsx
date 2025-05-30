@@ -13,49 +13,30 @@ import AddAccountantForm from "../components/AdminPage/StaffsTab/AddAccountantFo
 import AddStudentForm from "../components/AdminPage/StudentsTab/AddStudentForm";
 
 // Services
-import { fetchTeachers, fetchAccountants, fetchStudents, fetchClasses } from "../services/personService"; // Hoặc courseService cho classes
+import { fetchTeachers, fetchAccountants } from "../services/personService";
 
 import "./Admin.css";
 
 const AdminPage = () => {
   const [activeTab, setActiveTab] = useState("classes");
-  const [selectedStatus, setSelectedStatus] = useState(""); // để lọc trong staff hoặc classes nếu cần
+  const [selectedStatus, setSelectedStatus] = useState("teacher"); // default chọn teacher
   const [showClassForm, setShowClassForm] = useState(false);
   const [showTeacherForm, setShowTeacherForm] = useState(false);
   const [showAccountantForm, setShowAccountantForm] = useState(false);
   const [showStudentForm, setShowStudentForm] = useState(false);
 
-  const [classes, setClasses] = useState([]);
   const [teachers, setTeachers] = useState([]);
   const [accountants, setAccountants] = useState([]);
   const [students, setStudents] = useState([]);
 
   const [editingStudent, setEditingStudent] = useState(null);
   const [editingStaff, setEditingStaff] = useState(null);
-  const [editingClass, setEditingClass] = useState(null);
 
-  // Lấy dữ liệu classes
+  // Fetch dữ liệu teachers hoặc accountants khi activeTab hoặc selectedStatus thay đổi
   useEffect(() => {
-    if (activeTab !== "classes") return;
-
-    const loadClasses = async () => {
-      try {
-        const data = await fetchClasses(); // gọi API lấy lớp học
-        setClasses(data);
-      } catch (error) {
-        console.error("Failed to fetch classes:", error);
-        setClasses([]);
-      }
-    };
-
-    loadClasses();
-  }, [activeTab]);
-
-  // Lấy dữ liệu teachers hoặc accountants khi activeTab hoặc selectedStatus thay đổi
-  useEffect(() => {
-    if (activeTab !== "staffs") return;
-
     const fetchStaffData = async () => {
+      if (activeTab !== "staffs") return;
+
       if (selectedStatus === "teacher") {
         try {
           const data = await fetchTeachers();
@@ -78,30 +59,11 @@ const AdminPage = () => {
     fetchStaffData();
   }, [activeTab, selectedStatus]);
 
-  // Lấy dữ liệu students khi activeTab là students
-  useEffect(() => {
-    if (activeTab !== "students") return;
-
-    const loadStudents = async () => {
-      try {
-        const data = await fetchStudents();
-        setStudents(data);
-      } catch (error) {
-        console.error("Failed to fetch students:", error);
-        setStudents([]);
-      }
-    };
-
-    loadStudents();
-  }, [activeTab]);
-
-  // Đóng form khi đổi tab
   useEffect(() => {
     if (activeTab !== "classes") setShowClassForm(false);
     if (activeTab !== "staffs") {
       setShowTeacherForm(false);
       setShowAccountantForm(false);
-      setEditingStaff(null);
     }
     if (activeTab !== "students") {
       setShowStudentForm(false);
@@ -109,7 +71,6 @@ const AdminPage = () => {
     }
   }, [activeTab]);
 
-  // Mở form thêm mới theo tab và trạng thái chọn
   const handleNew = () => {
     setShowClassForm(false);
     setShowTeacherForm(false);
@@ -117,7 +78,6 @@ const AdminPage = () => {
     setShowStudentForm(false);
     setEditingStudent(null);
     setEditingStaff(null);
-    setEditingClass(null);
 
     if (activeTab === "classes") setShowClassForm(true);
     else if (activeTab === "students") setShowStudentForm(true);
@@ -126,22 +86,12 @@ const AdminPage = () => {
       else if (selectedStatus === "accountant") setShowAccountantForm(true);
       else alert("Please select a staff type to add");
     } else {
-      alert("Invalid new action");
+      alert("Thêm mới không xác định.");
     }
   };
 
-  // Xử lý submit thành công form
   const handleFormSubmitSuccess = (type, newData, isEdit = false) => {
-    if (type === "Class") {
-      setShowClassForm(false);
-      setEditingClass(null);
-      if (isEdit) {
-        setClasses(prev => prev.map(c => (c.COURSE_ID === newData.COURSE_ID ? newData : c)));
-      } else {
-        setClasses(prev => [...prev, newData]);
-      }
-    }
-
+    console.log(`${type} data saved!`);
     if (type === "Teacher") {
       setShowTeacherForm(false);
       setEditingStaff(null);
@@ -151,7 +101,6 @@ const AdminPage = () => {
         setTeachers(prev => [...prev, newData]);
       }
     }
-
     if (type === "Accountant") {
       setShowAccountantForm(false);
       setEditingStaff(null);
@@ -161,28 +110,30 @@ const AdminPage = () => {
         setAccountants(prev => [...prev, newData]);
       }
     }
-
+    if (type === "Class") setShowClassForm(false);
     if (type === "Student") {
-      setShowStudentForm(false);
-      setEditingStudent(null);
       if (isEdit) {
         setStudents(prev => prev.map(s => (s.id === newData.id ? newData : s)));
       } else {
         setStudents(prev => [...prev, newData]);
       }
+      setShowStudentForm(false);
+      setEditingStudent(null);
     }
   };
 
-  // Xử lý chỉnh sửa staff
   const handleEditStaff = (staffMember, staffType) => {
     setEditingStaff({ ...staffMember, staffType });
     if (staffType === "teachers") setShowTeacherForm(true);
     else if (staffType === "accountants") setShowAccountantForm(true);
   };
 
-  // Xử lý xóa staff
   const handleDeleteStaff = (staffMember, staffType) => {
-    if (window.confirm(`Are you sure to delete ${staffType} ${staffMember.NAME} (ID: ${staffMember.ID})?`)) {
+    if (
+      window.confirm(
+        `Are you sure you want to delete ${staffType} ${staffMember.NAME} (ID: ${staffMember.ID})?`
+      )
+    ) {
       if (staffType === "teachers") {
         setTeachers(prev => prev.filter(t => t.ID !== staffMember.ID));
       } else if (staffType === "accountants") {
@@ -191,29 +142,18 @@ const AdminPage = () => {
     }
   };
 
-  // Xử lý chỉnh sửa student
   const handleEditStudent = (student) => {
     setEditingStudent(student);
     setShowStudentForm(true);
   };
 
-  // Xử lý xóa student
   const handleDeleteStudent = (student) => {
-    if (window.confirm(`Are you sure to delete Student ${student.name} (ID: ${student.id})?`)) {
+    if (
+      window.confirm(
+        `Are you sure you want to delete Student ${student.name} (ID: ${student.id})?`
+      )
+    ) {
       setStudents(prev => prev.filter(s => s.id !== student.id));
-    }
-  };
-
-  // Xử lý chỉnh sửa class
-  const handleEditClass = (cls) => {
-    setEditingClass(cls);
-    setShowClassForm(true);
-  };
-
-  // Xử lý xóa class
-  const handleDeleteClass = (cls) => {
-    if (window.confirm(`Are you sure to delete Class ${cls.NAME} (ID: ${cls.COURSE_ID})?`)) {
-      setClasses(prev => prev.filter(c => c.COURSE_ID !== cls.COURSE_ID));
     }
   };
 
@@ -232,29 +172,11 @@ const AdminPage = () => {
         <div className="content">
           <div className="admin-display-area">
             {activeTab === "classes" && (
-              <>
-                {!showClassForm && (
-                  <ClassesTab
-                    selectedStatus={selectedStatus}
-                    showClassForm={showClassForm}
-                    setShowClassForm={setShowClassForm}
-                    classes={classes}
-                    onEditClass={handleEditClass}
-                    onDeleteClass={handleDeleteClass}
-                  />
-                )}
-                {showClassForm && (
-                  <AddClassForm
-                    isEditMode={Boolean(editingClass)}
-                    initialData={editingClass}
-                    onClose={() => {
-                      setShowClassForm(false);
-                      setEditingClass(null);
-                    }}
-                    onSubmitSuccess={(data, isEdit) => handleFormSubmitSuccess("Class", data, isEdit)}
-                  />
-                )}
-              </>
+              <ClassesTab
+                selectedStatus={selectedStatus}
+                showClassForm={showClassForm}
+                setShowClassForm={setShowClassForm}
+              />
             )}
 
             {activeTab === "students" && (
@@ -275,7 +197,9 @@ const AdminPage = () => {
                       setShowStudentForm(false);
                       setEditingStudent(null);
                     }}
-                    onSubmitSuccess={(data, isEdit) => handleFormSubmitSuccess("Student", data, isEdit)}
+                    onSubmitSuccess={(data, isEdit) =>
+                      handleFormSubmitSuccess("Student", data, isEdit)
+                    }
                   />
                 )}
               </>
@@ -291,7 +215,9 @@ const AdminPage = () => {
                       setShowTeacherForm(false);
                       setEditingStaff(null);
                     }}
-                    onSubmitSuccess={(data, isEdit) => handleFormSubmitSuccess("Teacher", data, isEdit)}
+                    onSubmitSuccess={(data, isEdit) =>
+                      handleFormSubmitSuccess("Teacher", data, isEdit)
+                    }
                   />
                 )}
                 {showAccountantForm && (
@@ -302,7 +228,9 @@ const AdminPage = () => {
                       setShowAccountantForm(false);
                       setEditingStaff(null);
                     }}
-                    onSubmitSuccess={(data, isEdit) => handleFormSubmitSuccess("Accountant", data, isEdit)}
+                    onSubmitSuccess={(data, isEdit) =>
+                      handleFormSubmitSuccess("Accountant", data, isEdit)
+                    }
                   />
                 )}
                 {!showTeacherForm && !showAccountantForm && (
