@@ -1,15 +1,15 @@
 import React from 'react';
 import BaseButton from './BaseButton';
 
-const BackButton = ({ onClick, disabled = false, children = 'Back' }) => (
+const SaveButton = ({ onClick, disabled = false, children = 'Save' }) => (
   <BaseButton
     onClick={onClick}
-    className="btn-back"
+    className="btn-save"
     disabled={disabled}
-    type="button"
+    type="submit"
   >
     {children}
   </BaseButton>
 );
 
-export default BackButton;
+export default SaveButton;

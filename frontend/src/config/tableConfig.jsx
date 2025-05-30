@@ -1,3 +1,6 @@
+import EditButton from '../components/common/Button/EditButton';
+import DeleteButton from '../components/common/Button/DeleteButton';
+
 export const getStudentTableColumns = (onEdit, onDelete) => [
   { header: 'ID', accessor: 'id' },
   { header: 'Name', accessor: 'name' },
@@ -8,8 +11,8 @@ export const getStudentTableColumns = (onEdit, onDelete) => [
     header: 'Action',
     render: (row) => (
       <div className="action-buttons">
-        <button onClick={() => onEdit(row)}>Edit</button>
-        <button onClick={() => onDelete(row)}>Delete</button>
+        <EditButton onClick={() => onEdit(row)} />
+        <DeleteButton onClick={() => onDelete(row)} />
       </div>
     ),
   },
@@ -24,8 +27,8 @@ export const getTeacherTableColumns = (onEdit, onDelete) => [
     header: 'Action',
     render: (row) => (
       <div className="action-buttons">
-        <button onClick={() => onEdit(row)}>Edit</button>
-        <button onClick={() => onDelete(row)}>Delete</button>
+        <EditButton onClick={() => onEdit(row)} />
+        <DeleteButton onClick={() => onDelete(row)} />
       </div>
     ),
   },
@@ -40,8 +43,8 @@ export const getAccountantTableColumns = (onEdit, onDelete) => [
     header: 'Action',
     render: (row) => (
       <div className="action-buttons">
-        <button onClick={() => onEdit(row)}>Edit</button>
-        <button onClick={() => onDelete(row)}>Delete</button>
+        <EditButton onClick={() => onEdit(row)} />
+        <DeleteButton onClick={() => onDelete(row)} />
       </div>
     ),
   },
@@ -56,8 +59,8 @@ export const assignmentTableColumns = [
     header: 'Action',
     render: (row) => (
       <>
-        <button onClick={() => alert(`Xem ${row.title}`)}>Edit</button>
-        <button onClick={() => alert(`Xoá ${row.title}`)}>Delete</button>
+        <EditButton onClick={() => alert(`Xem ${row.title}`)} />
+        <DeleteButton onClick={() => alert(`Xoá ${row.title}`)} />
       </>
     ),
   },
@@ -72,8 +75,8 @@ export const documentTableColumns = [
     header: 'Action',
     render: (row) => (
       <>
-        <button onClick={() => alert(`Xem ${row.name}`)}>Edit</button>
-        <button onClick={() => alert(`Xoá ${row.name}`)}>Delete</button>
+        <EditButton onClick={() => alert(`Xem ${row.name}`)} />
+        <DeleteButton onClick={() => alert(`Xoá ${row.name}`)} />
       </>
     ),
   },

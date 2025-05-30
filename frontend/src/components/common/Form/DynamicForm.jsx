@@ -1,4 +1,11 @@
 import React, { useState, useEffect } from 'react';
+
+import AddButton from '../Button/AddButton';
+import CreateButton from '../Button/CreateButton';
+import SaveButton from '../Button/SaveButton';
+import DeleteButton from '../Button/DeleteButton';
+import CancelButton from '../Button/CancelButton'
+
 import './DynamicForm.css';
 
 const DynamicForm = ({ formConfig, initialData, onClose, onSubmitSuccess }) => {
@@ -50,7 +57,6 @@ const DynamicForm = ({ formConfig, initialData, onClose, onSubmitSuccess }) => {
   };
 
   const handleSubmit = (e) => {
-    e.preventDefault();
     console.log('Form submitted:', formData);
     onSubmitSuccess(formData, !!initialData);
   };
@@ -123,13 +129,9 @@ const DynamicForm = ({ formConfig, initialData, onClose, onSubmitSuccess }) => {
               <div key={listName} className="dynamic-list-section">
                 <div className="dynamic-list-header">
                   <label className="dynamic-list-label">{field.label}</label>
-                  <button
-                    type="button"
-                    onClick={() => handleAddDynamicListItem(listName, defaultNewItem)}
-                    className="btn btn-add-item"
-                  >
-                    Thêm {field.label.slice(0, -1)}
-                  </button>
+                  <AddButton onClick={() => handleAddDynamicListItem(listName, defaultNewItem)}>
+                    Add {field.label.slice(0, -1)}
+                  </AddButton>
                 </div>
                 {listItems.length > 0 ? (
                   <div className="dynamic-list-table-wrapper">
@@ -157,13 +159,11 @@ const DynamicForm = ({ formConfig, initialData, onClose, onSubmitSuccess }) => {
                               </td>
                             ))}
                             <td>
-                              <button
-                                type="button"
+                              <DeleteButton
                                 onClick={() => handleRemoveDynamicListItem(listName, idx)}
-                                className="btn btn-remove-item"
                               >
-                                Xóa
-                              </button>
+                                Delete
+                              </DeleteButton>
                             </td>
                           </tr>
                         ))}
@@ -181,19 +181,16 @@ const DynamicForm = ({ formConfig, initialData, onClose, onSubmitSuccess }) => {
 
 
         <div className="form-actions">
-          <button
-            type="submit"
-            className="btn btn-primary"
-          >
-            {initialData ? 'Cập nhật' : 'Tạo mới'}
-          </button>
-          <button
-            type="button"
-            onClick={onClose}
-            className="btn btn-secondary"
-          >
-            Hủy
-          </button>
+          {initialData ? (
+            <SaveButton type="submit">
+              Save
+            </SaveButton>
+          ) : (
+            <CreateButton type="submit" />
+          )}
+          <CancelButton type="button" onClick={onClose}>
+            Cancel
+          </CancelButton>
         </div>
       </form>
     </div>

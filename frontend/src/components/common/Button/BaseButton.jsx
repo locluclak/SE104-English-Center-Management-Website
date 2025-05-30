@@ -1,11 +1,18 @@
 import React from 'react';
-import './BaseButton.css'
+import './BaseButton.css';
 
-const BaseButton = ({ onClick, children, className = '', disabled = false }) => {
+const BaseButton = ({
+  onClick,
+  children,
+  className = '',
+  disabled = false,
+  type = 'button', // ⚠️ tránh bị mặc định là "submit" trong form
+}) => {
   return (
-    <button 
-      className={`btn ${className}`} 
-      onClick={onClick} 
+    <button
+      type={type}
+      className={`btn ${className}`}
+      onClick={onClick}
       disabled={disabled}
     >
       {children}
