@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
-import AddClassForm from './AddClassForm';
 import ClassList from './ClassList';
 import ClassDetail from './ClassDetail';
+import formConfigs from '../../../config/formConfig';
+import DynamicForm from '../../common/Form/DynamicForm';
 
 const mockClasses = [
   { id: 'A', name: 'Class A', teacher: 'Mr. A', description: 'Basic TOEIC class' },
@@ -11,13 +12,20 @@ const mockClasses = [
 
 const ClassesTab = ({ selectedStatus, showClassForm, setShowClassForm }) => {
   const [selectedClass, setSelectedClass] = useState(null);
+  const classFormConfig = formConfigs.addClass;
 
   return (
     <div className="class-management-page">
       {showClassForm ? (
-        <AddClassForm onClose={() => setShowClassForm(false)} />
+        <DynamicForm
+          formConfig={classFormConfig}
+          onSubmit={(data) => {
+            console.log('Submitted class:', data);
+            setShowClassForm(false);
+          }}
+          onCancel={() => setShowClassForm(false)}
+        />
       ) : selectedClass ? (
-        // Truyền selectedStatus vào đây
         <ClassDetail
           classData={selectedClass}
           selectedStatus={selectedStatus}

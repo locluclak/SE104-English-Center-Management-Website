@@ -1,14 +1,18 @@
 import React from 'react';
+import Card from '../../common/Card/Card';
 import './ClassList.css';
 
 const ClassList = ({ classList, onSelectClass }) => {
   return (
     <div className="class-grid">
       {classList.map(cls => (
-        <div className="class-card" key={cls.id} onClick={() => onSelectClass(cls)}>
-          <h3>{cls.name}</h3>
+        <Card
+          key={cls.id}
+          title={cls.name}
+          onClick={() => onSelectClass(cls)}
+        >
           <p><strong>Teacher:</strong> {cls.teacher}</p>
-        </div>
+        </Card>
       ))}
     </div>
   );
