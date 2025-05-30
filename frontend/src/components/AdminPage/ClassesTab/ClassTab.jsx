@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import ClassList from './ClassList';
 import ClassDetail from './ClassDetail';
+import Card from '../../common/Card/Card';
 import formConfigs from '../../../config/formConfig';
 import DynamicForm from '../../common/Form/DynamicForm';
 
@@ -40,8 +40,16 @@ const ClassesTab = ({ selectedStatus, showClassForm, setShowClassForm }) => {
           </h2>
 
           {selectedStatus && (
-            <div>
-              <ClassList classList={mockClasses} onSelectClass={setSelectedClass} />
+            <div className="class-grid">
+              {mockClasses.map(cls => (
+                <Card
+                  key={cls.id}
+                  title={cls.name}
+                  onClick={() => setSelectedClass(cls)}
+                >
+                  <p><strong>Teacher:</strong> {cls.teacher}</p>
+                </Card>
+              ))}
             </div>
           )}
         </>

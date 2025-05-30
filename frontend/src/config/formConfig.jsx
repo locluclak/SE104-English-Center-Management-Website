@@ -68,7 +68,16 @@ export const formConfigs = {
       { name: "email", label: "Email", type: "email", required: true, placeholder: "Email" },
       { name: "status", label: "Status", type: "select", options: ["Enrolled", "Unenroll"], required: true }
     ]
-  }
+  },
+
+  addStudent: {
+    title: 'Thêm học viên',
+    fields: [
+      { name: 'name', label: 'Tên học viên', type: 'text', required: true, placeholder: 'Nguyen Van A' },
+      { name: 'email', label: 'Email', type: 'email', required: true, placeholder: 'a@example.com' }
+    ]
+  },
+
 };
 
 export default formConfigs;
