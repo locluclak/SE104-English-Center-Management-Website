@@ -1,24 +1,11 @@
+.course-section {
+  margin-bottom: 50px;
+}
+  
 .course-grid {
   display: flex;
   gap: 16px;
   flex-wrap: wrap;
   margin-top: 10px;
 }
-
-.class-box {
-  width: 120px;
-  height: 120px;
-  background-color: #abc4ff;
-  border: 2px solid #ccc;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: transform 0.2s ease;
-}
-
-.class-box:hover {
-  transform: scale(1.05);
-  border-color: #888;
-}
+  

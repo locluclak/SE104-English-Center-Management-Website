@@ -1,28 +1,23 @@
 import React, { useState } from 'react';
+import AddClassForm from './AddClassForm';
+import ClassList from './ClassList';
 import ClassDetail from './ClassDetail';
-import Card from '../../common/Card/Card';
-import formConfigs from '../../../config/formConfig';
-import DynamicForm from '../../common/Form/DynamicForm';
 
-const ClassesTab = ({ selectedStatus, showClassForm, setShowClassForm, classes, setClasses }) => {
+const mockClasses = [
+  { id: 'A', name: 'Class A', teacher: 'Mr. A', description: 'Basic TOEIC class' },
+  { id: 'B', name: 'Class B', teacher: 'Ms. B', description: 'Intermediate TOEIC class' },
+  { id: 'C', name: 'Class C', teacher: 'Mrs. C', description: 'Advanced TOEIC class' },
+];
+
+const ClassesTab = ({ selectedStatus, showClassForm, setShowClassForm }) => {
   const [selectedClass, setSelectedClass] = useState(null);
-  const classFormConfig = formConfigs.addClass;
-
-  const filteredClasses = classes.filter(cls => cls.status === selectedStatus);
 
   return (
     <div className="class-management-page">
       {showClassForm ? (
-        <DynamicForm
-          formConfig={classFormConfig}
-          onSubmit={(data) => {
-            console.log('Submitted class:', data);
-            setClasses(prev => [...prev, newClass]);
-            setShowClassForm(false);
-          }}
-          onClose={() => setShowClassForm(false)}
-        />
+        <AddClassForm onClose={() => setShowClassForm(false)} />
       ) : selectedClass ? (
+        // Truyền selectedStatus vào đây
         <ClassDetail
           classData={selectedClass}
           selectedStatus={selectedStatus}
@@ -37,16 +32,8 @@ const ClassesTab = ({ selectedStatus, showClassForm, setShowClassForm, classes, 
           </h2>
 
           {selectedStatus && (
-            <div className="class-grid">
-              {filteredClasses.map(cls => (
-                <Card
-                  key={cls.id}
-                  title={cls.name}
-                  onClick={() => setSelectedClass(cls)}
-                >
-                  <p><strong>Teacher:</strong> {cls.teacher}</p>
-                </Card>
-              ))}
+            <div>
+              <ClassList classList={mockClasses} onSelectClass={setSelectedClass} />
             </div>
           )}
         </>

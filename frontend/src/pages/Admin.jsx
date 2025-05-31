@@ -1,234 +1,269 @@
-import React, { useEffect, useState, useCallback } from "react";
-import Header from "../components/layout/Header";
-import SidebarSearch from "../components/layout/SidebarSearch";
-import Table from "../components/common/Table/Table";
+import React, { useState, useEffect } from "react";
+import Navbar from "../components/Navbar";
+import SidebarSearch from "../components/SidebarSearch";
+
+// Tabs
 import ClassesTab from "../components/AdminPage/ClassesTab/ClassTab";
-import DynamicForm from "../components/common/Form/DynamicForm";
-import formConfigs from "../config/formConfig";
-import {
-  getStudentTableColumns,
-  getTeacherTableColumns,
-  getAccountantTableColumns,
-} from "../config/tableConfig.jsx";
-import {
-  fetchStudents,
-  fetchTeachers,
-  fetchAccountants,
-} from "../services/personService";
+import StaffsTab from "../components/AdminPage/StaffsTab/StaffsTab";
+import StudentTab from "../components/AdminPage/StudentsTab/StudentTab";
+
+// Forms
+import AddTeacherForm from "../components/AdminPage/StaffsTab/AddTeacherForm";
+import AddAccountantForm from "../components/AdminPage/StaffsTab/AddAccountantForm";
+import AddStudentForm from "../components/AdminPage/StudentsTab/AddStudentForm";
 
 import "./Admin.css";
 
-// Dữ liệu từ API chuẩn hóa về đúng định dạng table
-const normalizeStudents = (students) =>
-  students.map((s) => ({
-    id: s.ID,
-    name: s.NAME,
-    birthday: s.BIRTHDAY,
-    email: s.EMAIL,
-    status: s.STATUS,
-  }));
-
-const normalizeTeachers = (teachers) =>
-  teachers.map((t) => ({
-    id: t.ID,
-    name: t.NAME,
-    birthday: t.BIRTHDAY,
-    email: t.EMAIL,
-    subject: t.SUBJECT,
-  }));
-
-const normalizeAccountants = (accountants) =>
-  accountants.map((a) => ({
-    id: a.ID,
-    name: a.NAME,
-    birthday: a.BIRTHDAY,
-    email: a.EMAIL,
-    department: a.DEPARTMENT,
-  }));
-
 const AdminPage = () => {
   const [activeTab, setActiveTab] = useState("classes");
-  const [selectedStatus, setSelectedStatus] = useState("teacher");
-  const [showForm, setShowForm] = useState(false);
-  const [editingData, setEditingData] = useState(null);
-  const [classes, setClasses] = useState([]);
+  const [selectedStatus, setSelectedStatus] = useState("");
+  const [showClassForm, setShowClassForm] = useState(false);
+  const [showTeacherForm, setShowTeacherForm] = useState(false);
+  const [showAccountantForm, setShowAccountantForm] = useState(false);
+  const [showStudentForm, setShowStudentForm] = useState(false);
+
   const [teachers, setTeachers] = useState([]);
   const [accountants, setAccountants] = useState([]);
-  const [students, setStudents] = useState([]);
+  const [students, setStudents] = useState([
+    {
+      id: "S001",
+      name: "Alice Nguyen",
+      birthday: "12/01/2004",
+      email: "alice@example.com",
+      status: "Enrolled",
+    },
+    {
+      id: "S002",
+      name: "Bob Tran",
+      birthday: "15/06/2003",
+      email: "bob@example.com",
+      status: "Unenroll",
+    },
+  ]);
+
+  const [editingStudent, setEditingStudent] = useState(null);
+  const [editingStaff, setEditingStaff] = useState(null);
+
 
   useEffect(() => {
-    const fetchStaffData = async () => {
-      if (activeTab !== "staffs") return;
-      try {
-        if (selectedStatus === "teacher") {
-          const data = await fetchTeachers();
-          setTeachers(normalizeTeachers(data));
-        } else if (selectedStatus === "accountant") {
-          const data = await fetchAccountants();
-          setAccountants(normalizeAccountants(data));
-        }
-      } catch (err) {
-        console.error("Failed to fetch staff:", err);
-        setTeachers([]);
-        setAccountants([]);
-      }
-    };
-
-    fetchStaffData();
-  }, [activeTab, selectedStatus]);
+    setTeachers([
+      {
+        id: "T001",
+        name: "Dr. Smith",
+        birthday: "01/02/1998",
+        email: "smith@example.com",
+        subject: "Math",
+      },
+      {
+        id: "T002",
+        name: "Ms. Jones",
+        birthday: "02/02/1998",
+        email: "jones@example.com",
+        subject: "Science",
+      },
+    ]);
+    setAccountants([
+      {
+        id: "A001",
+        name: "Mr. Brown",
+        birthday: "01/03/1998",
+        email: "brown@example.com",
+        department: "Finance",
+      },
+      {
+        id: "A002",
+        name: "Mrs. Davis",
+        birthday: "02/03/1998",
+        email: "davis@example.com",
+        department: "Billing",
+      },
+    ]);
+  }, []);
 
   useEffect(() => {
-    const fetchStudentData = async () => {
-      if (activeTab !== "students") return;
-      try {
-        const data = await fetchStudents();
-        setStudents(normalizeStudents(data));
-      } catch (err) {
-        console.error("Failed to fetch students:", err);
-        setStudents([]);
-      }
-    };
-
-    fetchStudentData();
+    if (activeTab !== "classes") setShowClassForm(false);
+    if (activeTab !== "staffs") {
+      setShowTeacherForm(false);
+      setShowAccountantForm(false);
+    }
+    if (activeTab !== "students") {
+      setShowStudentForm(false);
+      setEditingStudent(null);
+    }
   }, [activeTab]);
-
-  useEffect(() => {
-    setShowForm(false);
-    setEditingData(null);
-  }, [activeTab]);
-
-  useEffect(() => {
-    if (activeTab === "classes") setSelectedStatus("waiting");
-    else if (activeTab === "dashboard") setSelectedStatus("calendar");
-    else if (activeTab === "students") setSelectedStatus("all");
-    else if (activeTab === "staffs") setSelectedStatus("teacher");
-  }, [activeTab]);
-
-  const handleStatusSelect = useCallback((key) => setSelectedStatus(key), []);
 
   const handleNew = () => {
-    setShowForm(true);
-    setEditingData(null);
+    setShowClassForm(false);
+    setShowTeacherForm(false);
+    setShowAccountantForm(false);
+    setShowStudentForm(false);
+    setEditingStudent(null);
+    setEditingStaff(null);
+
+    if (activeTab === "classes") setShowClassForm(true);
+    else if (activeTab === "students") setShowStudentForm(true);
+    else if (activeTab === "staffs") {
+      if (selectedStatus === "teacher") setShowTeacherForm(true);
+      else if (selectedStatus === "accountant") setShowAccountantForm(true);
+    } else {
+      alert("Thêm mới không xác định.");
+    }
   };
 
-  const getCurrentFormConfig = useCallback(() => {
-    if (activeTab === "staffs") {
-      if (selectedStatus === "teacher") return formConfigs.staffs_teacher;
-      if (selectedStatus === "accountant") return formConfigs.staffs_accountant;
-      return null;
+  const handleFormSubmitSuccess = (type, newData, isEdit = false) => {
+    console.log(`${type} data saved!`);
+    if (type === "Teacher") {
+      setShowTeacherForm(false);
+      setEditingStaff(null);
+      // Bạn có thể cập nhật danh sách teachers tại đây nếu cần
     }
-    return formConfigs[activeTab];
-  }, [activeTab, selectedStatus]);
-
-  const handleFormSubmitSuccess = (data, isEdit = false) => {
-    const formConfig = getCurrentFormConfig();
-    const type = formConfig?.type;
-    if (!type) return;
-
+    if (type === "Accountant") {
+      setShowAccountantForm(false);
+      setEditingStaff(null);
+      // Bạn có thể cập nhật danh sách accountants tại đây nếu cần
+    }
+    if (type === "Class") setShowClassForm(false);
     if (type === "Student") {
-      setStudents((prev) =>
-        isEdit ? prev.map((s) => (s.id === data.id ? data : s)) : [...prev, data]
-      );
-    } else if (type === "Teacher") {
-      setTeachers((prev) =>
-        isEdit ? prev.map((t) => (t.id === data.id ? data : t)) : [...prev, data]
-      );
-    } else if (type === "Accountant") {
-      setAccountants((prev) =>
-        isEdit ? prev.map((a) => (a.id === data.id ? data : a)) : [...prev, data]
-      );
-    } else if (type === "Class") {
-      const newClass = { ...data, status: data.status || "waiting" };
-      setClasses((prev) =>
-        isEdit ? prev.map((cls) => (cls.id === newClass.id ? newClass : cls)) : [...prev, newClass]
-      );
+      if (isEdit) {
+        // Cập nhật student đã sửa
+        setStudents((prev) =>
+          prev.map((s) => (s.id === newData.id ? newData : s))
+        );
+      } else {
+        // Thêm mới student
+        setStudents((prev) => [...prev, newData]);
+      }
+      setShowStudentForm(false);
+      setEditingStudent(null);
     }
-
-    setShowForm(false);
-    setEditingData(null);
   };
 
-  const handleEdit = (data, type) => {
-    setEditingData(data);
-    setShowForm(true);
+  const handleEditStaff = (staffMember, staffType) => {
+    setEditingStaff({ ...staffMember, staffType });
+    if (staffType === "teachers") setShowTeacherForm(true);
+    else if (staffType === "accountants") setShowAccountantForm(true);
   };
 
-  const handleDelete = (item, type) => {
-    if (!window.confirm(`Bạn có chắc chắn muốn xóa ${item.name} (ID: ${item.id})?`)) return;
-
-    if (type === "Student") setStudents((prev) => prev.filter((s) => s.id !== item.id));
-    else if (type === "Teacher") setTeachers((prev) => prev.filter((t) => t.id !== item.id));
-    else if (type === "Accountant") setAccountants((prev) => prev.filter((a) => a.id !== item.id));
+  const handleDeleteStaff = (staffMember, staffType) => {
+    if (
+      window.confirm(
+        `Are you sure you want to delete ${staffType} ${staffMember.name} (ID: ${staffMember.id})?`
+      )
+    ) {
+      if (staffType === "teachers") {
+        setTeachers((prev) => prev.filter((t) => t.id !== staffMember.id));
+      } else if (staffType === "accountants") {
+        setAccountants((prev) => prev.filter((a) => a.id !== staffMember.id));
+      }
+    }
   };
 
-  const filteredStudents =
-    selectedStatus === "all"
-      ? students
-      : students.filter((student) => student.status?.toLowerCase() === selectedStatus);
+  const handleEditStudent = (student) => {
+    setEditingStudent(student);
+    setShowStudentForm(true);
+  };
+
+  const handleDeleteStudent = (student) => {
+    if (
+      window.confirm(
+        `Are you sure you want to delete Student ${student.name} (ID: ${student.id})?`
+      )
+    ) {
+      setStudents((prev) => prev.filter((s) => s.id !== student.id));
+    }
+  };
 
   return (
     <div className="admin-container">
-      <Header role="admin" activeTab={activeTab} setActiveTab={setActiveTab} />
+      <Navbar
+        role="admin" // hoặc "student", "teacher"
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+      />
 
       <div className="admin-body">
         <SidebarSearch
           role="admin"
           activeTab={activeTab}
-          onSearch={handleStatusSelect}
+          onSearch={(item) => setSelectedStatus(item)}
           onNew={handleNew}
         />
 
         <div className="content">
           <div className="admin-display-area">
-            {showForm && (
-              <DynamicForm
-                formConfig={getCurrentFormConfig()}
-                initialData={editingData}
-                onClose={() => setShowForm(false)}
-                onSubmitSuccess={handleFormSubmitSuccess}
-              />
-            )}
-
-            {!showForm && activeTab === "classes" && (
+            {activeTab === "classes" && (
               <ClassesTab
                 selectedStatus={selectedStatus}
-                classes={classes}
-                setClasses={setClasses}
+                showClassForm={showClassForm}
+                setShowClassForm={setShowClassForm}
               />
             )}
 
-            {!showForm && activeTab === "students" && (
-              <Table
-                columns={getStudentTableColumns(
-                  (row) => handleEdit(row, "Student"),
-                  (row) => handleDelete(row, "Student")
-                )}
-                data={filteredStudents}
-              />
-            )}
-
-            {!showForm && activeTab === "staffs" && (
+            {activeTab === "students" && (
               <>
-                {selectedStatus === "teacher" && (
-                  <Table
-                    columns={getTeacherTableColumns(
-                      (row) => handleEdit(row, "Teacher"),
-                      (row) => handleDelete(row, "Teacher")
-                    )}
-                    data={teachers}
+                {!showStudentForm && (
+                  <StudentTab
+                    students={students}
+                    selectedStatus={selectedStatus}
+                    onEditStudent={handleEditStudent}
+                    onDeleteStudent={handleDeleteStudent}
                   />
                 )}
-                {selectedStatus === "accountant" && (
-                  <Table
-                    columns={getAccountantTableColumns(
-                      (row) => handleEdit(row, "Accountant"),
-                      (row) => handleDelete(row, "Accountant")
-                    )}
-                    data={accountants}
+                {showStudentForm && (
+                  <AddStudentForm
+                    initialData={editingStudent}
+                    onClose={() => {
+                      setShowStudentForm(false);
+                      setEditingStudent(null);
+                    }}
+                    onSubmitSuccess={(data, isEdit) =>
+                      handleFormSubmitSuccess("Student", data, isEdit)
+                    }
                   />
                 )}
               </>
             )}
+
+            {activeTab === "staffs" && (
+              <div>
+                {/* Hiển thị form thêm giáo viên nếu showTeacherForm là true */}
+                {showTeacherForm && (
+                  <AddTeacherForm
+                    onClose={() => setShowTeacherForm(false)}
+                    onSubmitSuccess={() => handleFormSubmitSuccess("Teacher")}
+                  />
+                )}
+
+                {/* Hiển thị form thêm kế toán nếu showAccountantForm là true */}
+                {showAccountantForm && (
+                  <AddAccountantForm
+                    onClose={() => setShowAccountantForm(false)}
+                    onSubmitSuccess={() => handleFormSubmitSuccess("Accountant")}
+                  />
+                )}
+
+                {!showTeacherForm && !showAccountantForm && (
+                  <>
+                    {selectedStatus === "teacher" && (
+                      <StaffsTab
+                        staffType="teachers"
+                        data={teachers}
+                        onEdit={(staff) => handleEditStaff(staff, "teachers")}
+                        onDelete={(staff) => handleDeleteStaff(staff, "teachers")}
+                      />
+                    )}
+                    {selectedStatus === "accountant" && (
+                      <StaffsTab
+                        staffType="accountants"
+                        data={accountants}
+                        onEdit={(staff) => handleEditStaff(staff, "accountants")}
+                        onDelete={(staff) => handleDeleteStaff(staff, "accountants")}
+                      />
+                    )}
+                  </>
+                )}
+              </div>
+            )}  
           </div>
         </div>
       </div>

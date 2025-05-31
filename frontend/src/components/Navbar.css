@@ -1,0 +1,59 @@
+.navbar-container {
+  width: 100%;
+  background-color: #abc4ff;
+  border-radius: 10px 10px 0 0;
+  height: 60px; /* Cố định chiều cao */
+}
+
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #c1d3fe;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  height: 40px;
+  padding: 10px 30px;
+}
+
+.navbar-left h1 {
+  font-weight: bold;
+  font-size: 1.2rem; /* Giảm kích thước */
+  white-space: nowrap;
+}
+
+.navbar-right {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.navbar-center {
+  display: flex;
+  list-style: none;
+  gap: 20px; /* Giảm khoảng cách */
+  margin: 0;
+  padding: 0px 50px;
+}
+
+.navbar-center li {
+  cursor: pointer;
+  font-weight: 500;
+  color: #1e293b;
+  font-size: 1rem; /* Giảm kích thước */
+  padding: 5px 0;
+}
+
+.navbar-center li.active {
+  font-weight: bold;
+  border-bottom: 2px solid #1e293b;
+}
+
+.icon {
+  font-size: 1.5rem;
+  color: #1e293b;
+  cursor: pointer;
+  display: flex;
+}
+
+

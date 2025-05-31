@@ -1,34 +1,17 @@
 .class-detail-container {
-  margin-top: 20px;
-  margin-left: 20px;
-  border-radius: 16px;
-  max-width: 900px;
-  font-family: 'Segoe UI', sans-serif;
-  flex-direction: column;
-  text-align: left; 
-  flex: 1;
-}
-
-.class-info {
-  background-color: #fff;
-  border: 1px solid #eee;
-  padding: 16px;
+  padding: 20px;
+  background-color: #edf2fb;
   border-radius: 12px;
-}
-.class-info p {
-  margin: 4px 0;
-  font-size: 16px;
-}
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+} 
   
 .back-btn {
-  width: fit-content;
-  background-color: #abc4ff;
-  color: black;
+  margin-bottom: 10px;
+  background-color: #c1d3fe;
   border: none;
-  padding: 8px 14px;
-  border-radius: 4px;
+  padding: 8px 16px;
+  border-radius: 8px;
   cursor: pointer;
-  margin-left: 0;
 }
 
 .add-student {
@@ -49,7 +32,7 @@
 }
   
 .tabs {
-  display: block;
+  display: flex;
   gap: 12px;
   margin: 16px 0;
 }
@@ -60,7 +43,6 @@
   background-color: #c1d3fe;
   cursor: pointer;
   border-radius: 8px;
-  margin-left: 10px;
 }
   
 .tabs button.active {

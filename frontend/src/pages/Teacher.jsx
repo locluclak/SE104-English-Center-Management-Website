@@ -1,87 +1,28 @@
-import React, { useEffect, useState, useCallback } from 'react';
-import Header from '../components/layout/Header';
-import SidebarSearch from '../components//layout/SidebarSearch';
-
-import Table from '../components/common/Table/Table';
-import {
-  getStudentTableColumns,
-  getTeacherTableColumns,
-  getAccountantTableColumns,
-} from "../config/tableConfig.jsx";
-
-import CurrentTab from "../components/TeacherPage/ClassesTab/CurrentTab";
-import EndTab from "../components/TeacherPage/ClassesTab/EndTab";
-import ClassDetail from "../components/TeacherPage/ClassesTab/ClassDetail";
-
-import Calendar from '../components/DashboardTab/CalendarTab';
-import Padlet from '../components/DashboardTab/PadletTab';
-
+import React, { useState } from 'react';
+import Navbar from '../components/Navbar';
+import SidebarSearch from '../components/SidebarSearch';
 import './Teacher.css';
 
 const TeacherPage = () => {
   const [activeTab, setActiveTab] = useState('classes');
-  const [selectedClass, setSelectedClass] = useState(null);
-  const [selectedFeature, setSelectedFeature] = useState('home');
+  const [searchKey, setSearchKey] = useState('');
 
-  useEffect(() => {
-    if (activeTab === 'classes') {
-      setSelectedFeature('current');
-    } else if (activeTab === 'dashboard') {
-      setSelectedFeature('calendar');
-    }
-  }, [activeTab]);
-
-  const handleNew = () => {
-    console.log('TeacherPage: handleNew called');
-  };
-
-  const handleClassClick = (className) => {
-    console.log(`Clicked class: ${className}`);
-    setSelectedClass(className);
-  };
-
-  const handleFeatureSelect = useCallback((featureKey) => {
-    console.log('handleFeatureSelect called with:', featureKey);
-    setSelectedFeature(featureKey);
-  }, []);
-  
   return (
     <div className="teacher-page">
-      <Header role="teacher" activeTab={activeTab} setActiveTab={setActiveTab} />
+      <Navbar role="teacher" activeTab={activeTab} setActiveTab={setActiveTab} />
 
       <div className="teacher-content">
         <SidebarSearch
           role="teacher"
           activeTab={activeTab}
-          onSearch={handleFeatureSelect}
-          onNew={handleNew}
+          onSearch={setSearchKey}
         />
 
-        <div className="content">
-          {activeTab === 'classes' && (
-            <div className="class-display-area"> {/* Thêm class mới để styling */}
-              {selectedClass ? (
-                <>
-                  <ClassDetail
-                  className={selectedClass}
-                  onBack={() => setSelectedClass(null)}
-                />
-              </>
-              ) : (
-                <>
-                  {selectedFeature === 'current' && <CurrentTab handleClassClick={handleClassClick} />}
-                  {selectedFeature === 'end' && <EndTab handleClassClick={handleClassClick} />}
-                </>
-              )}
-            </div>
-          )}
-
-          {activeTab === 'dashboard' && (
-            <div>
-              {selectedFeature === 'calendar' && <Calendar />}
-              {selectedFeature === 'padlet' && <Padlet />}
-            </div>
-          )}
+        <div className="teacher-main">
+          <h2>Teacher Dashboard</h2>
+          <p>Tab: {activeTab}</p>
+          <p>Search Key: {searchKey}</p>
+          {/* Bạn có thể render thêm nội dung chính tương ứng ở đây */}
         </div>
       </div>
     </div>
