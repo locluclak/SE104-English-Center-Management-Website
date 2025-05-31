@@ -1,0 +1,118 @@
+.home-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100vw;
+  margin: 0;
+  padding: 0;
+  overflow: auto;
+  background: white;
+}
+
+.home-intro{
+  display: flex;  
+  flex-direction: column;
+  align-items: center;
+  justify-content: center; 
+  text-align: center;
+  margin-top: 10px;
+}
+
+.home-intro h2 {
+  font-size: 30px;
+  font-weight: bold;
+  color: #333;
+}
+
+.home-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0; /* Fix cho trình duyệt Firefox */
+  width: 100%;
+}
+
+.intro-image {
+  flex: 0 0 70%;
+  background-image: url('../../assets/intro.jpg');
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.section h2 {
+  font-size: 30px;
+  font-weight: bold;
+  color: #333;
+  display: flex;  
+  flex-direction: column;
+  align-items: center;
+  justify-content: center; 
+  text-align: center;
+}
+
+.course-section-container {
+  display: flex;
+  gap: 2rem;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.about-section {
+  padding: 20px 20px;
+  background: linear-gradient(to bottom, white, #ffc4a4);
+}
+
+.course-intro {
+  display: flex;
+  gap: 2rem;
+  justify-content: center;
+  flex-wrap: wrap;
+  background: linear-gradient(to top, #fce4d7, #ffc4a4);
+}
+
+.courses-layout {
+  display: flex;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  align-items: stretch;
+}
+
+.courses-left {
+  padding-left: 20px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  flex: 0 0 48.2%;
+  background: linear-gradient(to bottom, #fce4d7, #d7e3fc);
+}
+
+.courses-right {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  flex: 0 0 50%;
+  background: linear-gradient(to bottom, #fce4d7, #d7e3fc);
+}
+
+.cefr-image,
+.progress-image {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16/9;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain; 
+  border-radius: 10px;
+}
+
+.cefr-image {
+  background-image: url('../../assets/CEFR.jpg');
+}
+
+.progress-image {
+  background-image: url('../../assets/study-progress.jpg');
+}
