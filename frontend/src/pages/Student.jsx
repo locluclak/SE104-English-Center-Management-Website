@@ -1,11 +1,18 @@
-import React, { useState, useEffect } from 'react';
-import Navbar from '../components/Navbar';
-import SidebarSearch from "../components/SidebarSearch";
+import React, { useEffect, useState, useCallback } from 'react';
+import Header from '../components/layout/Header';
+import SidebarSearch from "../components/layout/SidebarSearch";
 
-import HomeTab from "../components/StudentPage/CoursesTab/HomeTab";
-import MyCoursesTab from "../components/StudentPage/CoursesTab/MyCoursesTab";
-import Calendar from '../components/StudentPage/DashboardTab/CalendarTab';
-import Padlet from '../components/StudentPage/DashboardTab/PadletTab';
+import Table from '../components/common/Table/Table';
+import {
+  getStudentTableColumns,
+  getTeacherTableColumns,
+  getAccountantTableColumns,
+} from "../config/tableConfig.jsx";
+
+import HomeContent from '../components/layout/HomeContent';
+import CourseSection from "../components/StudentPage/CoursesTab/CourseSection";
+import Calendar from '../components/DashboardTab/CalendarTab';
+import Padlet from '../components/DashboardTab/PadletTab';
 
 import CourseDetail from '../components/StudentPage/CoursesTab/CourseDetail';
 import CourseProgress from '../components/StudentPage/CoursesTab/CourseProgress';
@@ -13,14 +20,13 @@ import CourseProgress from '../components/StudentPage/CoursesTab/CourseProgress'
 import './Student.css';
 
 const StudentPage = () => {
-  const [activeTab, setActiveTab] = useState('courses');
+  const [activeTab, setActiveTab] = useState('home');
   const [selectedClass, setSelectedClass] = useState(null);
-  const [selectedFeature, setSelectedFeature] = useState('home'); // 'home' hoặc 'my-courses'
+  const [selectedFeature, setSelectedFeature] = useState('my-course');
 
-  // Khi activeTab thay đổi, reset selectedFeature
   useEffect(() => {
     if (activeTab === 'courses') {
-      setSelectedFeature('home');
+      setSelectedFeature('my-course');
     } else if (activeTab === 'dashboard') {
       setSelectedFeature('calendar');
     }
@@ -35,49 +41,81 @@ const StudentPage = () => {
     setSelectedClass(className);
   };
 
-  const handleFeatureSelect = (featureKey) => {
+  const handleFeatureSelect = useCallback((featureKey) => {
+    console.log('handleFeatureSelect called with:', featureKey);
     setSelectedFeature(featureKey);
-  };
+  }, []);
 
   return (
     <div className="student-page">
-      <Navbar role="student" activeTab={activeTab} setActiveTab={setActiveTab} />
+      <Header role="student" activeTab={activeTab} setActiveTab={setActiveTab} />
 
       <div className="student-body">
-        <SidebarSearch 
-          role="student"
-          activeTab={activeTab}
-          onSearch={handleFeatureSelect}
-          onNew={handleNew}
-        />
+        {activeTab === 'home' && (
+          <div className="home-container">
+            <HomeContent handleClassClick={handleClassClick} />
+          </div>
+        )}
 
-        <div className="content">
-          {activeTab === 'courses' && (
-          <div className="course-display-area"> {/* Thêm class mới để styling */}
-              {selectedClass ? (
-                <>
-                  <CourseDetail
-                    className={selectedClass}
-                    onBack={() => setSelectedClass(null)}
-                  />
-                  <CourseProgress className={selectedClass} /> {/* Đặt CourseProgress ở đây */}
-                </>
-              ) : (
-                <>
-                  {selectedFeature === 'home' && <HomeTab handleClassClick={handleClassClick} />}
-                  {selectedFeature === 'my-courses' && <MyCoursesTab handleClassClick={handleClassClick} />}
-                </>
+        {activeTab !== 'home' && (
+          <>
+            <SidebarSearch 
+              role="student"
+              activeTab={activeTab}
+              onSearch={handleFeatureSelect}
+              onNew={handleNew}
+            />
+
+            <div className="content">          
+              {activeTab === 'courses' && (
+                <div className="course-display-area"> 
+                  {selectedFeature === 'my-courses' && (
+                    selectedClass ? (
+                      <>
+                        <CourseDetail
+                          className={selectedClass}
+                          onBack={() => setSelectedClass(null)}
+                        />
+                        <CourseProgress className={selectedClass} />
+                      </>
+                    ) : (
+                      <CourseSection
+                        title="Khoá học của tôi"
+                        classList={['My Class 1', 'My Class 2', 'My Class 3']}
+                        onClassClick={handleClassClick}
+                      />
+                    )
+                  )}
+
+                  {selectedFeature === 'waiting' && (
+                    selectedClass ? (
+                      <>
+                        <CourseDetail
+                          className={selectedClass}
+                          onBack={() => setSelectedClass(null)}
+                        />
+                        <CourseProgress className={selectedClass} />
+                      </>
+                    ) : (
+                      <CourseSection
+                        title="Khoá học đang chờ"
+                        classList={['Waiting Class 1', 'Waiting Class 2']}
+                        onClassClick={handleClassClick}
+                      />
+                    )
+                  )}
+                </div>
+              )}
+
+              {activeTab === 'dashboard' && (
+                <div>
+                  {selectedFeature === 'calendar' && <Calendar />}
+                  {selectedFeature === 'padlet' && <Padlet />}
+                </div>
               )}
             </div>
-          )}
-
-          {activeTab === 'dashboard' && (
-            <div>
-              {selectedFeature === 'calendar' && <Calendar />}
-              {selectedFeature === 'padlet' && <Padlet />}
-            </div>
-          )}
-        </div>
+          </>
+        )}
       </div>
     </div>
   );
