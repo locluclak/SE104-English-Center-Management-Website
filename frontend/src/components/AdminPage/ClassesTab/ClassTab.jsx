@@ -4,7 +4,7 @@ import Card from '../../common/Card/Card';
 import formConfigs from '../../../config/formConfig';
 import DynamicForm from '../../common/Form/DynamicForm';
 
-const ClassesTab = ({ selectedStatus, showClassForm, setShowClassForm, classes, setClasses }) => {
+const ClassesTab = ({ selectedStatus, showClassForm, setShowClassForm, classes = [], setClasses }) => {
   const [selectedClass, setSelectedClass] = useState(null);
   const classFormConfig = formConfigs.addClass;
 
