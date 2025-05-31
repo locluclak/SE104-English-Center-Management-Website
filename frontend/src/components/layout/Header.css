@@ -43,10 +43,10 @@
   font-size: 1rem; /* Giảm kích thước */
   padding: 5px 0;
 }
-
+/* 
 .navbar-center li:hover {
   text-decoration: underline;
-}
+} */
 
 .navbar-center li.active {
   font-weight: bold;

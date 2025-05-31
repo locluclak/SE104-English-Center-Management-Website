@@ -1,0 +1,64 @@
+{
+  "hash": "777ed439",
+  "configHash": "d227fd89",
+  "lockfileHash": "887da292",
+  "browserHash": "d06b329f",
+  "optimized": {
+    "react": {
+      "src": "../../node_modules/react/index.js",
+      "file": "react.js",
+      "fileHash": "604c9a5c",
+      "needsInterop": true
+    },
+    "react-dom/client": {
+      "src": "../../node_modules/react-dom/client.js",
+      "file": "react-dom_client.js",
+      "fileHash": "b7d6df94",
+      "needsInterop": true
+    },
+    "react-router-dom": {
+      "src": "../../node_modules/react-router-dom/dist/index.mjs",
+      "file": "react-router-dom.js",
+      "fileHash": "ce49fb01",
+      "needsInterop": false
+    },
+    "react-icons/fa": {
+      "src": "../../node_modules/react-icons/fa/index.mjs",
+      "file": "react-icons_fa.js",
+      "fileHash": "6394770e",
+      "needsInterop": false
+    },
+    "@fullcalendar/react": {
+      "src": "../../node_modules/@fullcalendar/react/dist/index.js",
+      "file": "@fullcalendar_react.js",
+      "fileHash": "cc58fdb3",
+      "needsInterop": false
+    },
+    "@fullcalendar/daygrid": {
+      "src": "../../node_modules/@fullcalendar/daygrid/index.js",
+      "file": "@fullcalendar_daygrid.js",
+      "fileHash": "b4f19e61",
+      "needsInterop": false
+    },
+    "@fullcalendar/interaction": {
+      "src": "../../node_modules/@fullcalendar/interaction/index.js",
+      "file": "@fullcalendar_interaction.js",
+      "fileHash": "57b8e4b4",
+      "needsInterop": false
+    }
+  },
+  "chunks": {
+    "chunk-XQIPT53K": {
+      "file": "chunk-XQIPT53K.js"
+    },
+    "chunk-KS2M7ZJI": {
+      "file": "chunk-KS2M7ZJI.js"
+    },
+    "chunk-UYCYNHLB": {
+      "file": "chunk-UYCYNHLB.js"
+    },
+    "chunk-5WRI5ZAA": {
+      "file": "chunk-5WRI5ZAA.js"
+    }
+  }
+}

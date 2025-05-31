@@ -1,3 +1,4 @@
+import React from 'react';
 import {
   FaHome, FaBookOpen, FaCalendarAlt, FaStickyNote, FaChild,
   FaMoneyCheckAlt, FaFileInvoiceDollar, FaRegClock, FaReceipt,

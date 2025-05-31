@@ -1,45 +1,96 @@
-import React, { useEffect, useState, useCallback } from 'react';
-import Header from '../components/layout/Header';
+import React, { useEffect, useState, useCallback } from "react";
+import Header from "../components/layout/Header";
 import SidebarSearch from "../components/layout/SidebarSearch";
-import Table from '../components/common/Table/Table';
+import Table from "../components/common/Table/Table";
+import ClassesTab from "../components/AdminPage/ClassesTab/ClassTab";
+import DynamicForm from "../components/common/Form/DynamicForm";
+import formConfigs from "../config/formConfig";
 import {
   getStudentTableColumns,
   getTeacherTableColumns,
   getAccountantTableColumns,
 } from "../config/tableConfig.jsx";
-
-import ClassesTab from "../components/AdminPage/ClassesTab/ClassTab";
-import DynamicForm from "../components/common/Form/DynamicForm";
-import formConfigs from "../config/formConfig";
+import {
+  fetchStudents,
+  fetchTeachers,
+  fetchAccountants,
+} from "../services/personService";
 
 import "./Admin.css";
 
+// Dữ liệu từ API chuẩn hóa về đúng định dạng table
+const normalizeStudents = (students) =>
+  students.map((s) => ({
+    id: s.ID,
+    name: s.NAME,
+    birthday: s.BIRTHDAY,
+    email: s.EMAIL,
+    status: s.STATUS,
+  }));
+
+const normalizeTeachers = (teachers) =>
+  teachers.map((t) => ({
+    id: t.ID,
+    name: t.NAME,
+    birthday: t.BIRTHDAY,
+    email: t.EMAIL,
+    subject: t.SUBJECT,
+  }));
+
+const normalizeAccountants = (accountants) =>
+  accountants.map((a) => ({
+    id: a.ID,
+    name: a.NAME,
+    birthday: a.BIRTHDAY,
+    email: a.EMAIL,
+    department: a.DEPARTMENT,
+  }));
+
 const AdminPage = () => {
   const [activeTab, setActiveTab] = useState("classes");
-  const [selectedStatus, setSelectedStatus] = useState("");
+  const [selectedStatus, setSelectedStatus] = useState("teacher");
   const [showForm, setShowForm] = useState(false);
   const [editingData, setEditingData] = useState(null);
-
   const [classes, setClasses] = useState([]);
-
   const [teachers, setTeachers] = useState([]);
   const [accountants, setAccountants] = useState([]);
-  const [students, setStudents] = useState([
-    { id: "S001", name: "Alice Nguyen", birthday: "12/01/2004", email: "alice@example.com", status: "Enrolled" },
-    { id: "S002", name: "Bob Tran", birthday: "15/06/2003", email: "bob@example.com", status: "Unenroll" },
-    { id: "S003", name: "Charlie Phan", birthday: "01/01/2005", email: "charlie@example.com", status: "Enrolled" },
-  ]);
+  const [students, setStudents] = useState([]);
 
   useEffect(() => {
-    setTeachers([
-      { id: "T001", name: "Dr. Smith", birthday: "01/02/1998", email: "smith@example.com", subject: "Math" },
-      { id: "T002", name: "Ms. Jones", birthday: "02/02/1998", email: "jones@example.com", subject: "Science" },
-    ]);
-    setAccountants([
-      { id: "A001", name: "Mr. Brown", birthday: "01/03/1998", email: "brown@example.com", department: "Finance" },
-      { id: "A002", name: "Mrs. Davis", birthday: "02/03/1998", email: "davis@example.com", department: "Billing" },
-    ]);
-  }, []);
+    const fetchStaffData = async () => {
+      if (activeTab !== "staffs") return;
+      try {
+        if (selectedStatus === "teacher") {
+          const data = await fetchTeachers();
+          setTeachers(normalizeTeachers(data));
+        } else if (selectedStatus === "accountant") {
+          const data = await fetchAccountants();
+          setAccountants(normalizeAccountants(data));
+        }
+      } catch (err) {
+        console.error("Failed to fetch staff:", err);
+        setTeachers([]);
+        setAccountants([]);
+      }
+    };
+
+    fetchStaffData();
+  }, [activeTab, selectedStatus]);
+
+  useEffect(() => {
+    const fetchStudentData = async () => {
+      if (activeTab !== "students") return;
+      try {
+        const data = await fetchStudents();
+        setStudents(normalizeStudents(data));
+      } catch (err) {
+        console.error("Failed to fetch students:", err);
+        setStudents([]);
+      }
+    };
+
+    fetchStudentData();
+  }, [activeTab]);
 
   useEffect(() => {
     setShowForm(false);
@@ -47,15 +98,13 @@ const AdminPage = () => {
   }, [activeTab]);
 
   useEffect(() => {
-    if (activeTab === 'classes') setSelectedStatus('waiting');
-    else if (activeTab === 'dashboard') setSelectedStatus('calendar');
-    else if (activeTab === 'students') setSelectedStatus('all');
-    else if (activeTab === 'staffs') setSelectedStatus('teacher');
+    if (activeTab === "classes") setSelectedStatus("waiting");
+    else if (activeTab === "dashboard") setSelectedStatus("calendar");
+    else if (activeTab === "students") setSelectedStatus("all");
+    else if (activeTab === "staffs") setSelectedStatus("teacher");
   }, [activeTab]);
 
-  const handleStatusSelect = useCallback((featureKey) => {
-    setSelectedStatus(featureKey);
-  }, []);
+  const handleStatusSelect = useCallback((key) => setSelectedStatus(key), []);
 
   const handleNew = () => {
     setShowForm(true);
@@ -63,9 +112,9 @@ const AdminPage = () => {
   };
 
   const getCurrentFormConfig = useCallback(() => {
-    if (activeTab === 'staffs') {
-      if (selectedStatus === 'teacher') return formConfigs.staffs_teacher;
-      if (selectedStatus === 'accountant') return formConfigs.staffs_accountant;
+    if (activeTab === "staffs") {
+      if (selectedStatus === "teacher") return formConfigs.staffs_teacher;
+      if (selectedStatus === "accountant") return formConfigs.staffs_accountant;
       return null;
     }
     return formConfigs[activeTab];
@@ -74,51 +123,48 @@ const AdminPage = () => {
   const handleFormSubmitSuccess = (data, isEdit = false) => {
     const formConfig = getCurrentFormConfig();
     const type = formConfig?.type;
+    if (!type) return;
 
-    if (!type) {
-      console.warn("Could not determine type for form submission.");
-      return;
-    }
-
-    if (type === 'Student') {
-      setStudents(prev => isEdit
-        ? prev.map(s => s.id === data.id ? data : s)
-        : [...prev, data]);
-    } else if (type === 'Teacher') {
-      setTeachers(prev => isEdit
-        ? prev.map(t => t.id === data.id ? data : t)
-        : [...prev, data]);
-    } else if (type === 'Accountant') {
-      setAccountants(prev => isEdit
-        ? prev.map(a => a.id === data.id ? data : a)
-        : [...prev, data]);
+    if (type === "Student") {
+      setStudents((prev) =>
+        isEdit ? prev.map((s) => (s.id === data.id ? data : s)) : [...prev, data]
+      );
+    } else if (type === "Teacher") {
+      setTeachers((prev) =>
+        isEdit ? prev.map((t) => (t.id === data.id ? data : t)) : [...prev, data]
+      );
+    } else if (type === "Accountant") {
+      setAccountants((prev) =>
+        isEdit ? prev.map((a) => (a.id === data.id ? data : a)) : [...prev, data]
+      );
     } else if (type === "Class") {
       const newClass = { ...data, status: data.status || "waiting" };
-      setClasses(prev => isEdit
-        ? prev.map(cls => cls.id === newClass.id ? newClass : cls)
-        : [...prev, newClass]);
+      setClasses((prev) =>
+        isEdit ? prev.map((cls) => (cls.id === newClass.id ? newClass : cls)) : [...prev, newClass]
+      );
     }
 
     setShowForm(false);
     setEditingData(null);
   };
 
-  const handleEdit = useCallback((data, type) => {
+  const handleEdit = (data, type) => {
     setEditingData(data);
     setShowForm(true);
-  }, []);
+  };
 
-  const handleDelete = useCallback((item, type) => {
+  const handleDelete = (item, type) => {
     if (!window.confirm(`Bạn có chắc chắn muốn xóa ${item.name} (ID: ${item.id})?`)) return;
 
-    if (type === 'Student') setStudents(prev => prev.filter(s => s.id !== item.id));
-    else if (type === 'Teacher') setTeachers(prev => prev.filter(t => t.id !== item.id));
-    else if (type === 'Accountant') setAccountants(prev => prev.filter(a => a.id !== item.id));
-  }, []);
+    if (type === "Student") setStudents((prev) => prev.filter((s) => s.id !== item.id));
+    else if (type === "Teacher") setTeachers((prev) => prev.filter((t) => t.id !== item.id));
+    else if (type === "Accountant") setAccountants((prev) => prev.filter((a) => a.id !== item.id));
+  };
 
-  const filteredStudents = selectedStatus === "all"
-    ? students
-    : students.filter(student => student.status.toLowerCase() === selectedStatus);
+  const filteredStudents =
+    selectedStatus === "all"
+      ? students
+      : students.filter((student) => student.status?.toLowerCase() === selectedStatus);
 
   return (
     <div className="admin-container">
@@ -154,8 +200,8 @@ const AdminPage = () => {
             {!showForm && activeTab === "students" && (
               <Table
                 columns={getStudentTableColumns(
-                  (row) => handleEdit(row, 'Student'),
-                  (row) => handleDelete(row, 'Student')
+                  (row) => handleEdit(row, "Student"),
+                  (row) => handleDelete(row, "Student")
                 )}
                 data={filteredStudents}
               />
@@ -166,8 +212,8 @@ const AdminPage = () => {
                 {selectedStatus === "teacher" && (
                   <Table
                     columns={getTeacherTableColumns(
-                      (row) => handleEdit(row, 'Teacher'),
-                      (row) => handleDelete(row, 'Teacher')
+                      (row) => handleEdit(row, "Teacher"),
+                      (row) => handleDelete(row, "Teacher")
                     )}
                     data={teachers}
                   />
@@ -175,7 +221,8 @@ const AdminPage = () => {
                 {selectedStatus === "accountant" && (
                   <Table
                     columns={getAccountantTableColumns(
-                      (row) => handleEdit(row, 'Accountant')
+                      (row) => handleEdit(row, "Accountant"),
+                      (row) => handleDelete(row, "Accountant")
                     )}
                     data={accountants}
                   />

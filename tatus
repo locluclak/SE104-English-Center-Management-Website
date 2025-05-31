@@ -1,0 +1,99 @@
+[33m1858303[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mfrontend[m[33m, [m[1;31morigin/frontend[m[33m)[m HEAD@{0}: checkout: moving from dev to frontend
+[33mdebe7d9[m[33m ([m[1;32mdev[m[33m)[m HEAD@{1}: checkout: moving from dev to dev
+[33mdebe7d9[m[33m ([m[1;32mdev[m[33m)[m HEAD@{2}: checkout: moving from frontend to dev
+[33m1858303[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mfrontend[m[33m, [m[1;31morigin/frontend[m[33m)[m HEAD@{3}: checkout: moving from backend to frontend
+[33m5d24a64[m[33m ([m[1;31morigin/backend[m[33m, [m[1;32mbackend[m[33m)[m HEAD@{4}: checkout: moving from frontend to backend
+[33m1858303[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mfrontend[m[33m, [m[1;31morigin/frontend[m[33m)[m HEAD@{5}: checkout: moving from backend to frontend
+[33m5d24a64[m[33m ([m[1;31morigin/backend[m[33m, [m[1;32mbackend[m[33m)[m HEAD@{6}: checkout: moving from frontend to backend
+[33m1858303[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mfrontend[m[33m, [m[1;31morigin/frontend[m[33m)[m HEAD@{7}: reset: moving to HEAD
+[33m1858303[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mfrontend[m[33m, [m[1;31morigin/frontend[m[33m)[m HEAD@{8}: checkout: moving from backend to frontend
+[33m5d24a64[m[33m ([m[1;31morigin/backend[m[33m, [m[1;32mbackend[m[33m)[m HEAD@{9}: pull: Fast-forward
+[33m2818be4[m HEAD@{10}: checkout: moving from frontend to backend
+[33m1858303[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mfrontend[m[33m, [m[1;31morigin/frontend[m[33m)[m HEAD@{11}: commit: add home page before login
+[33ma313d58[m HEAD@{12}: commit: fix fix tab switching bug when pressing send
+[33m4ac005f[m HEAD@{13}: commit: add buttons components into admin page
+[33m737dbd9[m HEAD@{14}: commit: delete ClassList and add form into ClassTab
+[33m3d96850[m HEAD@{15}: commit: change form components in admin page
+[33m1c1ce51[m HEAD@{16}: commit: add button components
+[33m0ea2ce3[m HEAD@{17}: commit: change table components
+[33m3b22c76[m HEAD@{18}: commit: change table in teacher page
+[33m7d1e96a[m HEAD@{19}: commit: create tableConfig
+[33m6535fd8[m HEAD@{20}: commit: update admin page with table components
+[33ma7f43db[m HEAD@{21}: commit: import UseCallback
+[33ma9480c5[m HEAD@{22}: commit: restructure frontend folder
+[33m270828d[m HEAD@{23}: commit: add submenu to sidebar search of accountant page and change icons
+[33mb11d67f[m HEAD@{24}: commit: Add Assignment Form and Document Form for teacher
+[33md0c5ffa[m HEAD@{25}: commit: remove overridden code
+[33me3bfc9c[m HEAD@{26}: commit: feat: update class detail UI and add teacher class management components
+[33mc0e30fb[m HEAD@{27}: commit: Refactor padlet components & implement Accountant page
+[33m54cb33d[m HEAD@{28}: checkout: moving from dev to frontend
+[33mdebe7d9[m[33m ([m[1;32mdev[m[33m)[m HEAD@{29}: checkout: moving from frontend to dev
+[33m54cb33d[m HEAD@{30}: checkout: moving from dev to frontend
+[33mdebe7d9[m[33m ([m[1;32mdev[m[33m)[m HEAD@{31}: checkout: moving from frontend to dev
+[33m54cb33d[m HEAD@{32}: checkout: moving from dev to frontend
+[33mdebe7d9[m[33m ([m[1;32mdev[m[33m)[m HEAD@{33}: pull: Fast-forward
+[33mdf2aa4a[m HEAD@{34}: checkout: moving from frontend to dev
+[33m54cb33d[m HEAD@{35}: commit: change textAreaRef in Padlet tab
+[33m3b7da91[m HEAD@{36}: commit: update UI login and add toolbar into Padlet tab
+[33m9ce9628[m HEAD@{37}: checkout: moving from dev to frontend
+[33mdf2aa4a[m HEAD@{38}: pull: Fast-forward
+[33mea71a93[m HEAD@{39}: checkout: moving from frontend to dev
+[33m9ce9628[m HEAD@{40}: checkout: moving from backend to frontend
+[33m2818be4[m HEAD@{41}: pull: Fast-forward
+[33meb2f888[m HEAD@{42}: checkout: moving from frontend to backend
+[33m9ce9628[m HEAD@{43}: commit: feat(padlet): Redesign UI and add file attachment & audio recording functionality
+[33ma657646[m HEAD@{44}: commit: add Teacher page and update App.jsx for routing
+[33m0a39c04[m HEAD@{45}: commit: refactor: update UI styles and resolve function conflicts across components
+[33macae6c0[m HEAD@{46}: commit: implement CourseProgress component and update CourseDetail styling
+[33m03dc02b[m HEAD@{47}: pull origin frontend: Fast-forward
+[33m835f9d8[m HEAD@{48}: checkout: moving from frontend to frontend
+[33m835f9d8[m HEAD@{49}: commit: feat(student): add HomeTab & MyCoursesTab, update CourseDetail layout & styles
+[33m754bdd6[m HEAD@{50}: commit: Fix display issue on Dashboard tab
+[33m2ae98e1[m HEAD@{51}: commit: Fix conflict
+[33m8e136c0[m HEAD@{52}: commit (merge): Merge branch 'frontend' of https://github.com/locluclak/SE104-English-Center-Management-Website into frontend
+[33mc6cf07b[m HEAD@{53}: commit: Your descriptive commit message for Student.jsx changes
+[33md9d7c18[m HEAD@{54}: checkout: moving from frontend to frontend
+[33md9d7c18[m HEAD@{55}: checkout: moving from frontend to frontend
+[33md9d7c18[m HEAD@{56}: commit: Edit layout login, sign up and OTP form
+[33m5b43940[m HEAD@{57}: commit: add CoursesTab components and styles to Student page
+[33m6f5a4fc[m HEAD@{58}: commit: Update Navbar and SidebarSearch styles to adapt based on user roles
+[33mece095c[m HEAD@{59}: pull: Fast-forward
+[33m1078a95[m HEAD@{60}: checkout: moving from frontend to frontend
+[33m1078a95[m HEAD@{61}: commit: restructure AdminPage and improve layout, readability
+[33mc6b62dc[m HEAD@{62}: pull: Fast-forward
+[33md1feed7[m HEAD@{63}: checkout: moving from frontend to frontend
+[33md1feed7[m HEAD@{64}: commit: Add student list components and refine admin page styles and functionality
+[33m73e5fdf[m HEAD@{65}: pull origin frontend: Fast-forward
+[33m49ec10b[m HEAD@{66}: checkout: moving from frontend to frontend
+[33m49ec10b[m HEAD@{67}: commit: Add ClassList and ClassDetail components to Classes tab
+[33m7d57fa9[m HEAD@{68}: commit: Refactor AddClassForm to AdminPage and add ClassesTab component
+[33m1c492e3[m HEAD@{69}: commit: Add AddClassForm component and update SidebarSearch and Admin page
+[33m3b6e9fd[m HEAD@{70}: commit: Refactor admin page layout and add SidebarSearch component
+[33mf6323ea[m HEAD@{71}: merge origin/frontend: Fast-forward
+[33mf37e6df[m HEAD@{72}: pull origin frontend: Merge made by the 'ort' strategy.
+[33m18918f4[m HEAD@{73}: commit: Edit Navbar
+[33mba2ff3e[m HEAD@{74}: commit (merge): Merge branch 'frontend' of https://github.com/locluclak/SE104-English-Center-Management-Website into frontend
+[33m314946e[m HEAD@{75}: checkout: moving from frontend to frontend
+[33m314946e[m HEAD@{76}: commit: create navbar
+[33m1c8a98c[m HEAD@{77}: checkout: moving from frontend to frontend
+[33m1c8a98c[m HEAD@{78}: pull: Fast-forward
+[33m1af6fde[m HEAD@{79}: checkout: moving from frontend to frontend
+[33m1af6fde[m HEAD@{80}: checkout: moving from dev to frontend
+[33mea71a93[m HEAD@{81}: commit (merge): Resolve merge conflicts between frontend and dev
+[33m9d766c9[m HEAD@{82}: checkout: moving from dev to dev
+[33m9d766c9[m HEAD@{83}: checkout: moving from frontend to dev
+[33m1af6fde[m HEAD@{84}: commit: Update student page layout and navigation bar of admin page
+[33m7a76f20[m HEAD@{85}: checkout: moving from backend to frontend
+[33meb2f888[m HEAD@{86}: checkout: moving from frontend to backend
+[33m7a76f20[m HEAD@{87}: reset: moving to HEAD
+[33m7a76f20[m HEAD@{88}: checkout: moving from dev to frontend
+[33m9d766c9[m HEAD@{89}: checkout: moving from backend to dev
+[33meb2f888[m HEAD@{90}: checkout: moving from dev to backend
+[33m9d766c9[m HEAD@{91}: checkout: moving from frontend to dev
+[33m7a76f20[m HEAD@{92}: checkout: moving from backend to frontend
+[33meb2f888[m HEAD@{93}: checkout: moving from main to backend
+[33mc77a691[m[33m ([m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mmain[m[33m)[m HEAD@{94}: checkout: moving from frontend to main
+[33m7a76f20[m HEAD@{95}: reset: moving to HEAD
+[33m7a76f20[m HEAD@{96}: commit: Update admin page layout and install new dependencies
+[33m05d25c4[m HEAD@{97}: pull origin frontend: Fast-forward
+[33m455db64[m HEA
