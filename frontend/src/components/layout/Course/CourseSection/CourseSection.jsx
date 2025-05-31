@@ -1,5 +1,5 @@
 import React from 'react';
-import Card from '../../common/Card/Card'; 
+import Card from '../../../common/Card/Card'; 
 import './CourseSection.css';
 
 const CourseSection = ({ title, classList, onClassClick }) => {

@@ -34,7 +34,7 @@
 
 .intro-image {
   flex: 0 0 70%;
-  background-image: url('../../assets/intro.jpg');
+  background-image: url('../../../assets/intro.jpg');
   background-size: cover;
   background-position: center;
   display: flex;
@@ -111,9 +111,9 @@
 }
 
 .cefr-image {
-  background-image: url('../../assets/CEFR.jpg');
+  background-image: url('../../../assets/CEFR.jpg');
 }
 
 .progress-image {
-  background-image: url('../../assets/study-progress.jpg');
+  background-image: url('../../../assets/study-progress.jpg');
 }

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { FaSearch } from 'react-icons/fa';
-import { itemsByRole, paymentSubItems } from '../../config/navigationConfig.jsx';
+import { itemsByRole, paymentSubItems } from '../../../config/navigationConfig.jsx';
 import './SidebarSearch.css';
 
 function SidebarSearch({ role, activeTab, onSearch, onNew }) {

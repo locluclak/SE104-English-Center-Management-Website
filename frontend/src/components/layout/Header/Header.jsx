@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FaBell, FaUserCircle } from 'react-icons/fa';
-import NotificationPopup from './NotificationPopup';
-import AccountPopup from './AccountPopup';
-import { itemsByRole } from '../../config/navigationConfig.jsx';
+import NotificationPopup from '../Notification/NotificationPopup';
+import AccountPopup from '../Account/AccountPopup';
+import { itemsByRole } from '../../../config/navigationConfig.jsx';
 import './Header.css';
 
 const Header = ({ role, activeTab, setActiveTab, onNavigateSection }) => {

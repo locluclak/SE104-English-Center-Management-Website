@@ -1,8 +1,7 @@
 import React, { useState, } from 'react';
-import CourseAd from './CourseAd';
-import CourseSection from '../StudentPage/CoursesTab/CourseSection';
-import CourseDetail from '../StudentPage/CoursesTab/CourseDetail';
-import CourseProgress from '../StudentPage/CoursesTab/CourseProgress';
+import CourseAd from '../Course/CourseAd/CourseAd';
+import CourseSection from '../Course/CourseSection/CourseSection';
+import CourseDetail from '../Course/CourseDetail/CourseDetail';
 
 import './HomeContent.css'
 

@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import Header from '../components/layout/Header';
-import SidebarSearch from "../components/layout/SidebarSearch";
+import Header from '../components/layout/Header/Header';
+import SidebarSearch from "../components/layout/Sidebar/SidebarSearch";
 
 import Table from '../components/common/Table/Table';
 import {
@@ -9,13 +9,13 @@ import {
   getAccountantTableColumns,
 } from "../config/tableConfig.jsx";
 
-import HomeContent from '../components/layout/HomeContent';
-import CourseSection from "../components/StudentPage/CoursesTab/CourseSection";
+import HomeContent from '../components/layout/HomeContent/HomeContent';
+import CourseSection from "../components/layout/Course/CourseSection/CourseSection";
 import Calendar from '../components/DashboardTab/CalendarTab';
 import Padlet from '../components/DashboardTab/PadletTab';
 
-import CourseDetail from '../components/StudentPage/CoursesTab/CourseDetail';
-import CourseProgress from '../components/StudentPage/CoursesTab/CourseProgress';
+import CourseDetail from '../components/layout/Course/CourseDetail/CourseDetail';
+import CourseProgress from '../components/layout/Course/CourseProgress/CourseProgress';
 
 import './Student.css';
 
