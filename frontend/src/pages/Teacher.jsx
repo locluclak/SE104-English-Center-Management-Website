@@ -1,6 +1,13 @@
-import React, { useEffect, useState } from 'react';
-import Navbar from '../components/Navbar';
-import SidebarSearch from '../components/SidebarSearch';
+import React, { useEffect, useState, useCallback } from 'react';
+import Header from '../components/layout/Header';
+import SidebarSearch from '../components//layout/SidebarSearch';
+
+import Table from '../components/common/Table/Table';
+import {
+  getStudentTableColumns,
+  getTeacherTableColumns,
+  getAccountantTableColumns,
+} from "../config/tableConfig.jsx";
 
 import CurrentTab from "../components/TeacherPage/ClassesTab/CurrentTab";
 import EndTab from "../components/TeacherPage/ClassesTab/EndTab";
@@ -33,13 +40,14 @@ const TeacherPage = () => {
     setSelectedClass(className);
   };
 
-  const handleFeatureSelect = (featureKey) => {
+  const handleFeatureSelect = useCallback((featureKey) => {
+    console.log('handleFeatureSelect called with:', featureKey);
     setSelectedFeature(featureKey);
-  };
+  }, []);
   
   return (
     <div className="teacher-page">
-      <Navbar role="teacher" activeTab={activeTab} setActiveTab={setActiveTab} />
+      <Header role="teacher" activeTab={activeTab} setActiveTab={setActiveTab} />
 
       <div className="teacher-content">
         <SidebarSearch

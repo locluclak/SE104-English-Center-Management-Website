@@ -1,0 +1,50 @@
+.dynamic-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 20px;
+  border-radius: 12px;
+  background-color: #f9f9f9;
+  max-width: 800px;
+  margin: auto;
+}
+
+.dynamic-form h2 {
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+  text-align: center;
+}
+
+.dynamic-form .form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.dynamic-form .form-group label {
+  font-weight: 500;
+  margin-bottom: 0.3rem;
+}
+
+.dynamic-form .form-group input,
+.dynamic-form .form-group select,
+.dynamic-form .form-group textarea {
+  padding: 0.5rem;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 1rem;
+  width: 100%;
+  min-width: 300px;
+  max-width: 600px;
+  resize: vertical;  
+}
+
+.dynamic-form .dynamic-list {
+  padding-left: 1rem;
+  border-left: 2px solid #ddd;
+}
+
+.dynamic-form .dynamic-list-item {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+}

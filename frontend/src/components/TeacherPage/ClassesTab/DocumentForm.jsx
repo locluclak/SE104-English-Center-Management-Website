@@ -1,4 +1,5 @@
 import React, { useState, useRef } from "react";
+import { FaMicrophone, FaPaperclip, FaStop } from 'react-icons/fa';
 import './DocumentForm.css'
 
 const DocumentForm = ({ onSubmit, onCancel }) => {
@@ -94,7 +95,7 @@ const DocumentForm = ({ onSubmit, onCancel }) => {
 
   return (
     <form onSubmit={handleSubmit} className="document-form">
-      <label>📄 Tên tài liệu:</label>
+      <label>Document's Name:</label>
       <input
         type="text"
         value={title}
@@ -131,13 +132,13 @@ const DocumentForm = ({ onSubmit, onCancel }) => {
               style={{ display: 'none' }}
               accept="image/*,audio/*,video/*,application/pdf"
             />
-            📎
+              < FaPaperclip />
           </label>
 
           {!isRecording ? (
-            <button type="button" onClick={startRecording} className="record-btn">🎤</button>
+            <button type="button" onClick={startRecording} className="record-btn"> < FaMicrophone /> </button>
           ) : (
-            <button type="button" onClick={stopRecording} className="stop-record-btn">⏹</button>
+            <button type="button" onClick={stopRecording} className="stop-record-btn"> < FaStop /> </button>
           )}
         </div>
       </div>

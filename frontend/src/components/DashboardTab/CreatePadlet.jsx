@@ -1,4 +1,5 @@
 import React, { useState, useRef } from "react";
+import { FaMicrophone, FaPaperclip, FaStop } from 'react-icons/fa';
 import "./CreatePadlet.css";
 
 export default function CreatePadlet({ padlet, onSubmit, onCancel }) {
@@ -137,7 +138,7 @@ export default function CreatePadlet({ padlet, onSubmit, onCancel }) {
                 style={{ display: 'none' }} 
                 accept="image/*,audio/*,video/*,application/pdf" 
               />
-              📎
+                <FaPaperclip />
             </label>
             
             {/* Audio recording */}
@@ -148,7 +149,7 @@ export default function CreatePadlet({ padlet, onSubmit, onCancel }) {
                 className="record-btn"
                 disabled={isRecording}
               >
-                🎤
+                < FaMicrophone />
               </button>
             ) : (
               <button 
@@ -156,7 +157,7 @@ export default function CreatePadlet({ padlet, onSubmit, onCancel }) {
                 onClick={stopRecording} 
                 className="stop-record-btn"
               >
-                ⏹ 
+                <FaStop />
               </button>
             )}
           </div>

@@ -1,8 +1,12 @@
 import React, { useState } from 'react';
 import './ClassDetail.css';
-import StudentTable from './StudentTable';
-import AssignmentList from './AssignmentList';
-import DocumentList from './DocumentList';
+import Table from '../../common/Table/Table';
+
+import {
+  getStudentTableColumns,
+  assignmentTableColumns,
+  documentTableColumns
+} from "../../../config/tableConfig.jsx";
 
 const ClassDetail = ({ className, onBack }) => {
   const [activeTab, setActiveTab] = useState('students');
@@ -15,14 +19,35 @@ const ClassDetail = ({ className, onBack }) => {
     endDate: '30/08/2025',
   };
 
+  // Dữ liệu mẫu
+  const studentData = [
+    { id: 'S001', name: 'Nguyễn Văn A', birthday: '01/01/2000', email: 'a@gmail.com' },
+    { id: 'S002', name: 'Trần Thị B', birthday: '02/02/2001', email: 'b@gmail.com' },
+  ];
+
+  const assignmentData = [
+    { id: 'A001', title: 'Bài tập 1', description: 'Ngữ pháp', assignedDate: '02/06/2025' },
+    { id: 'A002', title: 'Bài tập 2', description: 'Từ vựng', assignedDate: '04/06/2025' },
+  ];
+
+  const documentData = [
+    { id: 'D001', name: 'Tài liệu 1', description: 'Lý thuyết', uploadDate: '01/06/2025' },
+    { id: 'D002', name: 'Tài liệu 2', description: 'Bài tập thực hành', uploadDate: '03/06/2025' },
+  ];
+
   const renderTabContent = () => {
     switch (activeTab) {
       case 'students':
-        return <StudentTable />;
+        return (
+          <Table
+            columns={getStudentTableColumns().filter(col => col.accessor !== 'status' && col.header !== 'Action')}
+            data={studentData}
+          />
+        );
       case 'assignment':
-        return <AssignmentList />;
+        return <Table columns={assignmentTableColumns} data={assignmentData} />;
       case 'doc':
-        return <DocumentList />;
+        return <Table columns={documentTableColumns} data={documentData} />;
       default:
         return null;
     }

@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import './ClassDetail.css';
+import formConfigs from '../../../config/formConfig';
+import DynamicForm from '../../common/Form/DynamicForm';
 
 const ClassDetail = ({ className, selectedStatus, onBack }) => {
   const [activeTab, setActiveTab] = useState('students');
@@ -7,15 +9,11 @@ const ClassDetail = ({ className, selectedStatus, onBack }) => {
     { name: 'Nguyen Van A', email: 'a@example.com' },
     { name: 'Tran Thi B', email: 'b@example.com' },
   ]);
-  const [showAddStudent, setShowAddStudent] = useState(false);
-  const [newStudent, setNewStudent] = useState({ name: '', email: '' });
-  
-  const handleAddStudent = () => {
-    if (newStudent.name && newStudent.email) {
-      setStudents([...students, newStudent]);
-      setNewStudent({ name: '', email: '' });
-      setShowAddStudent(false);
-    }
+  const [showAddStudentForm, setShowAddStudentForm] = useState(false);
+
+  const handleAddStudent = (data) => {
+    setStudents([...students, data]);
+    setShowAddStudentForm(false);
   };
 
   return (
@@ -40,30 +38,12 @@ const ClassDetail = ({ className, selectedStatus, onBack }) => {
       {/* Tabs */}
       {selectedStatus === 'Waiting' ? (
         <>
-          <button className="add-student" onClick={() => setShowAddStudent(!showAddStudent)}>
-            + Add Student
-          </button>
-
-          {showAddStudent && (
-            <div style={{ marginTop: '12px' }}>
-              <input
-                type="text"
-                placeholder="Student Name"
-                value={newStudent.name}
-                onChange={(e) =>
-                  setNewStudent({ ...newStudent, name: e.target.value })
-                }
-              />
-              <input
-                type="email"
-                placeholder="Email"
-                value={newStudent.email}
-                onChange={(e) =>
-                  setNewStudent({ ...newStudent, email: e.target.value })
-                }
-              />
-              <button className="add-button" onClick={handleAddStudent}>Add</button>
-            </div>
+          {showAddStudentForm && (
+            <DynamicForm
+              formConfig={formConfigs.addStudent}
+              onSubmitSuccess={handleAddStudent}
+              onClose={() => setShowAddStudentForm(false)}
+            />
           )}
         </>
       ) : (

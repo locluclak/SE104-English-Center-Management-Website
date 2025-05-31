@@ -1,20 +1,27 @@
 import React, { useState } from 'react';
-import AddClassForm from './AddClassForm';
-import ClassList from './ClassList';
 import ClassDetail from './ClassDetail';
+import Card from '../../common/Card/Card';
+import formConfigs from '../../../config/formConfig';
+import DynamicForm from '../../common/Form/DynamicForm';
 
-const ClassesTab = ({ selectedStatus, showClassForm, setShowClassForm, classes = [] }) => {
+const ClassesTab = ({ selectedStatus, showClassForm, setShowClassForm, classes, setClasses }) => {
   const [selectedClass, setSelectedClass] = useState(null);
+  const classFormConfig = formConfigs.addClass;
 
-  // Lọc classes theo selectedStatus nếu cần (ví dụ bạn có trường status hoặc category trong class)
-  const filteredClasses = selectedStatus
-    ? classes.filter(cls => cls.status === selectedStatus) // hoặc tùy filter phù hợp dữ liệu thật
-    : classes;
+  const filteredClasses = classes.filter(cls => cls.status === selectedStatus);
 
   return (
     <div className="class-management-page">
       {showClassForm ? (
-        <AddClassForm onClose={() => setShowClassForm(false)} />
+        <DynamicForm
+          formConfig={classFormConfig}
+          onSubmit={(data) => {
+            console.log('Submitted class:', data);
+            setClasses(prev => [...prev, newClass]);
+            setShowClassForm(false);
+          }}
+          onClose={() => setShowClassForm(false)}
+        />
       ) : selectedClass ? (
         <ClassDetail
           classData={selectedClass}
@@ -29,10 +36,18 @@ const ClassesTab = ({ selectedStatus, showClassForm, setShowClassForm, classes =
               : 'Please select a category (Waiting, Current, End)'}
           </h2>
 
-          {filteredClasses.length > 0 ? (
-            <ClassList classList={filteredClasses} onSelectClass={setSelectedClass} />
-          ) : (
-            <p>No classes available.</p>
+          {selectedStatus && (
+            <div className="class-grid">
+              {filteredClasses.map(cls => (
+                <Card
+                  key={cls.id}
+                  title={cls.name}
+                  onClick={() => setSelectedClass(cls)}
+                >
+                  <p><strong>Teacher:</strong> {cls.teacher}</p>
+                </Card>
+              ))}
+            </div>
           )}
         </>
       )}
