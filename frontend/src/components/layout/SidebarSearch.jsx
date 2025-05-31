@@ -1,10 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import {
-  FaHome, FaBookOpen, FaCalendarAlt, FaStickyNote, FaChild,
-  FaMoneyCheckAlt, FaFileInvoiceDollar, FaRegClock, FaReceipt,
-  FaHourglassEnd, FaHourglassHalf, FaSearch, FaSpinner, FaUsers,
-  FaUserCheck, FaUserClock, FaChalkboardTeacher, FaDonate
-} from 'react-icons/fa';
+import { FaSearch } from 'react-icons/fa';
 import { itemsByRole, paymentSubItems } from '../../config/navigationConfig.jsx';
 import './SidebarSearch.css';
 

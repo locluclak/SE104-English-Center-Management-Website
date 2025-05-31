@@ -1,8 +1,8 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+import Home from './pages/Home';
 import Login from './pages/Login';
 import SignUp from './pages/SignUp';
-import OtpForm from './pages/Otpform';
 import ForgotPassword from './pages/Forgotpassword';
 import ResetPassword from './pages/Resetpassword';
 import StudentPage from './pages/Student'; // Đảm bảo đường dẫn chính xác
@@ -14,10 +14,10 @@ function App() {
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<Navigate to="/student" />} />
+        <Route path="/" element={<Navigate to="/home" />} />
+        <Route path="/home" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<SignUp />} />
-        <Route path="/otp" element={<OtpForm />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/forgot-password/reset" element={<ResetPassword />} />
         <Route path="/student" element={<StudentPage />} />

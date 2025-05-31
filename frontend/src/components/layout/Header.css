@@ -3,6 +3,7 @@
   background-color: #abc4ff;
   border-radius: 10px 10px 0 0;
   height: 60px; /* Cố định chiều cao */
+  position: fixed;
 }
 
 .navbar {
@@ -43,6 +44,10 @@
   padding: 5px 0;
 }
 
+.navbar-center li:hover {
+  text-decoration: underline;
+}
+
 .navbar-center li.active {
   font-weight: bold;
   border-bottom: 2px solid #1e293b;
@@ -53,4 +58,24 @@
   color: #1e293b;
   cursor: pointer;
   display: flex;
+}
+
+.auth-buttons {
+  display: flex;
+  gap: 10px;
+  margin-left: 15px;
+}
+
+.auth-button {
+  padding: 6px 12px;
+  font-size: 14px;
+  background-color: #c1d3fe;
+  color: black;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.auth-button:hover {
+  background-color: #7fa2f4;
 }

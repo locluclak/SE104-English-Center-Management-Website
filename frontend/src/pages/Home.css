@@ -1,0 +1,54 @@
+.home-container {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 100vw;
+  margin: 0;
+  padding: 0;
+  overflow: auto;
+}
+
+.home-intro{
+  display: flex;  
+  align-items: center;
+  justify-content: center; 
+  text-align: center;
+}
+
+.home-intro h2 {
+  font-size: 32px;
+  font-weight: bold;
+  color: #333;
+}
+
+.home-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0; /* Fix cho trình duyệt Firefox */
+  width: 100%;
+  padding-top: 60px;
+}
+
+.intro-image {
+  flex: 0 0 50%;
+  background-image: url('../assets/intro.jpg');
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.section {
+  padding: 20px 20px;
+  border-top: 1px solid #eee;
+}
+
+.about-section {
+  background-color: #f9f9f9;
+}
+
+.course-section {
+  background-color: #eef6fa;
+}

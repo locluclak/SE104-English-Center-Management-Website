@@ -1,5 +1,5 @@
 import React from 'react';
-import CourseAd from "./CourseAd";
+import CourseAd from "../../layout/CourseAd";
 import CourseSection from "./CourseSection";
 
 const HomeTab = ({ handleClassClick }) => {
