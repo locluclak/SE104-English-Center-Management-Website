@@ -81,20 +81,21 @@
 }
 
 .courses-left {
-  padding-left: 20px;
+  padding-left: 2%;
   flex: 1;
   display: flex;
   flex-direction: column;
-  flex: 0 0 48.2%;
+  flex: 0 0 48%;
   background: linear-gradient(to bottom, #fce4d7, #d7e3fc);
 }
 
 .courses-right {
+  padding-right: 2%;
   flex: 1;
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  flex: 0 0 50%;
+  flex: 0 0 48%;
   background: linear-gradient(to bottom, #fce4d7, #d7e3fc);
 }
 

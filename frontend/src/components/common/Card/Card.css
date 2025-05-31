@@ -6,6 +6,7 @@
   background-color: white;
   transition: box-shadow 0.3s;
   width: 150px;
+  height: 150px;
 }
 
 .custom-card:hover {

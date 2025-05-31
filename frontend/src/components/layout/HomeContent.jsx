@@ -1,9 +1,14 @@
-import React from 'react';
+import React, { useState, } from 'react';
 import CourseAd from './CourseAd';
 import CourseSection from '../StudentPage/CoursesTab/CourseSection';
+import CourseDetail from '../StudentPage/CoursesTab/CourseDetail';
+import CourseProgress from '../StudentPage/CoursesTab/CourseProgress';
+
 import './HomeContent.css'
 
 const HomeContent = ({ handleClassClick }) => {
+  const [selectedClass, setSelectedClass] = useState(null);
+
   return (
     <div className="home-container">
         <div className="home-content"> 
@@ -40,16 +45,27 @@ const HomeContent = ({ handleClassClick }) => {
           <div id="courses" className="section course-section">                     
             <div className="courses-layout">
               <div className="courses-left">
-                <CourseSection 
-                  title="Khoá học nghe đọc"
-                  classList={['Class A', 'Class B']}
-                  onClassClick={handleClassClick}
-                />
-                <CourseSection
-                  title="Khoá học nói viết"
-                  classList={['Class C', 'Class D']}
-                  onClassClick={handleClassClick}
-                />
+                {selectedClass ?(
+                  <>
+                    <CourseDetail
+                      className={selectedClass}
+                      onBack={() => setSelectedClass(null)}
+                    />
+                  </>
+                ) : (
+                  <>                  
+                    <CourseSection 
+                      title="Khoá học nghe đọc"
+                      classList={['Class A', 'Class B']}
+                      onClassClick={setSelectedClass}
+                    />
+                    <CourseSection
+                      title="Khoá học nói viết"
+                      classList={['Class C', 'Class D']}
+                      onClassClick={setSelectedClass}
+                    />
+                  </>
+                )}                
               </div>
 
               <div className="courses-right">

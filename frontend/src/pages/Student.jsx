@@ -10,8 +10,7 @@ import {
 } from "../config/tableConfig.jsx";
 
 import HomeContent from '../components/layout/HomeContent';
-import HomeTab from "../components/StudentPage/CoursesTab/HomeTab";
-import MyCoursesTab from "../components/StudentPage/CoursesTab/MyCoursesTab";
+import CourseSection from "../components/StudentPage/CoursesTab/CourseSection";
 import Calendar from '../components/DashboardTab/CalendarTab';
 import Padlet from '../components/DashboardTab/PadletTab';
 
@@ -70,19 +69,40 @@ const StudentPage = () => {
             <div className="content">          
               {activeTab === 'courses' && (
                 <div className="course-display-area"> 
-                  {selectedClass ? (
-                    <>
-                      <CourseDetail
-                        className={selectedClass}
-                        onBack={() => setSelectedClass(null)}
+                  {selectedFeature === 'my-courses' && (
+                    selectedClass ? (
+                      <>
+                        <CourseDetail
+                          className={selectedClass}
+                          onBack={() => setSelectedClass(null)}
+                        />
+                        <CourseProgress className={selectedClass} />
+                      </>
+                    ) : (
+                      <CourseSection
+                        title="Khoá học của tôi"
+                        classList={['My Class 1', 'My Class 2', 'My Class 3']}
+                        onClassClick={handleClassClick}
                       />
-                      <CourseProgress className={selectedClass} />
-                    </>
-                  ) : (
-                    <>
-                      {selectedFeature === 'home' && <HomeTab handleClassClick={handleClassClick} />}
-                      {selectedFeature === 'my-courses' && <MyCoursesTab handleClassClick={handleClassClick} />}
-                    </>
+                    )
+                  )}
+
+                  {selectedFeature === 'waiting' && (
+                    selectedClass ? (
+                      <>
+                        <CourseDetail
+                          className={selectedClass}
+                          onBack={() => setSelectedClass(null)}
+                        />
+                        <CourseProgress className={selectedClass} />
+                      </>
+                    ) : (
+                      <CourseSection
+                        title="Khoá học đang chờ"
+                        classList={['Waiting Class 1', 'Waiting Class 2']}
+                        onClassClick={handleClassClick}
+                      />
+                    )
                   )}
                 </div>
               )}

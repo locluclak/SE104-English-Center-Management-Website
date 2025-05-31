@@ -1,5 +1,5 @@
 import React from 'react';
-import CourseBox from './CourseBox';
+import Card from '../../common/Card/Card'; 
 import './CourseSection.css';
 
 const CourseSection = ({ title, classList, onClassClick }) => {
@@ -8,7 +8,7 @@ const CourseSection = ({ title, classList, onClassClick }) => {
       <h3>{title}</h3>
       <div className="course-grid">
         {classList.map((cls) => (
-          <CourseBox key={cls} name={cls} onClick={onClassClick} />
+          <Card key={cls} title={cls} onClick={() => onClassClick(cls)} />
         ))}
       </div>
     </div>
