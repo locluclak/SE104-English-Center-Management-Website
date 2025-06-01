@@ -33,6 +33,16 @@ router.post('/create', async (req, res) => {
   }
 });
 
+// Route to get all courses
+router.get('/all', async (req, res) => {
+  try {
+    const [rows] = await db.execute('SELECT * FROM COURSE');
+    res.status(200).json(rows);
+  } catch (error) {
+    console.error('Error fetching all courses:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
 
 // Route to get course information by ID
 router.get('/:id', async (req, res) => {
@@ -210,5 +220,6 @@ router.put('/update/:id', async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+
 
 module.exports = router;

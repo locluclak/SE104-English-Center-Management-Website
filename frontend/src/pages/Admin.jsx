@@ -2,23 +2,31 @@ import React, { useEffect, useState, useCallback } from "react";
 import Header from "../components/layout/Header";
 import SidebarSearch from "../components/layout/SidebarSearch";
 import Table from "../components/common/Table/Table";
-import ClassesTab from "../components/AdminPage/ClassesTab/ClassTab";
 import DynamicForm from "../components/common/Form/DynamicForm";
 import formConfigs from "../config/formConfig";
-import {
-  getStudentTableColumns,
-  getTeacherTableColumns,
-  getAccountantTableColumns,
-} from "../config/tableConfig.jsx";
-import {
-  fetchStudents,
-  fetchTeachers,
-  fetchAccountants,
-} from "../services/personService";
+import { getStudentTableColumns, getTeacherTableColumns, getAccountantTableColumns } from "../config/tableConfig.jsx";
+import { fetchStudents, fetchTeachers, fetchAccountants } from "../services/personService";
+import { getAllCourses } from "../services/courseService";
+import Card from "../components/common/Card/Card";
 
 import "./Admin.css";
 
+
+
 // Dữ liệu từ API chuẩn hóa về đúng định dạng table
+const normalizeClasses = (classes) =>
+  classes.map((cls) => ({
+    id: cls.COURSE_ID,
+    name: cls.NAME,
+    description: cls.DESCRIPTION,
+    startDate: cls.START_DATE,
+    endDate: cls.END_DATE,
+    minStu: cls.MIN_STU,
+    maxStu: cls.MAX_STU,
+    price: cls.PRICE,
+    status: cls.STATUS || "waiting",
+  }));
+
 const normalizeStudents = (students) =>
   students.map((s) => ({
     id: s.ID,
@@ -93,6 +101,25 @@ const AdminPage = () => {
 
     fetchStudentData();
   }, [activeTab]);
+
+  // Load classes
+useEffect(() => {
+  const fetchClassData = async () => {
+    if (activeTab !== "classes") return;
+    try {
+      const data = await getAllCourses();
+      const normalized = normalizeClasses(data);
+      setClasses(normalized);
+    } catch (err) {
+      console.error("Failed to fetch classes:", err);
+      setClasses([]);
+    }
+  };
+
+  fetchClassData();
+}, [activeTab]);
+
+
 
   useEffect(() => {
     setShowForm(false);
@@ -192,11 +219,27 @@ const AdminPage = () => {
             )}
 
             {!showForm && activeTab === "classes" && (
-              <ClassesTab
-                selectedStatus={selectedStatus}
-                classes={classes}
-                setClasses={setClasses}
-              />
+              <div className="class-card-list">
+                {classes.map((cls) => (
+                  <Card key={cls.id} title={cls.name}>
+                    <p>
+                      <strong>ID:</strong> {cls.id}
+                    </p>
+                    <p>
+                      <strong>Trạng thái:</strong> {cls.status}
+                    </p>
+                    <p>
+                      <strong>Ngày bắt đầu:</strong> {cls.startDate}
+                    </p>
+                    <p>
+                      <strong>Ngày kết thúc:</strong> {cls.endDate}
+                    </p>
+                    <p>
+                      <strong>Mô tả:</strong> {cls.description || "Không có"}
+                    </p>
+                  </Card>
+                ))}
+              </div>
             )}
 
             {!showForm && activeTab === "students" && (
