@@ -34,3 +34,13 @@
   box-sizing: border-box; 
   overflow-y: auto; 
 }
+
+.class-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); /* 👈 3 cột bằng nhau */
+  gap: 20px;
+  padding: 16px;
+  align-items: stretch;
+}
+
+

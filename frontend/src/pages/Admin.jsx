@@ -11,8 +11,6 @@ import Card from "../components/common/Card/Card";
 
 import "./Admin.css";
 
-
-
 // Dữ liệu từ API chuẩn hóa về đúng định dạng table
 const normalizeClasses = (classes) =>
   classes.map((cls) => ({
@@ -219,7 +217,7 @@ useEffect(() => {
             )}
 
             {!showForm && activeTab === "classes" && (
-              <div className="class-card-list">
+              <div className="class-grid">
                 {classes.map((cls) => (
                   <Card key={cls.id} title={cls.name}>
                     <p>

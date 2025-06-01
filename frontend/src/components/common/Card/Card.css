@@ -1,17 +1,33 @@
 .custom-card {
-  border: 1px solid #ccc;
-  border-radius: 10px;
-  padding: 15px;
+  width: 100%;       /* Fit vừa cột */
+  height: 100%;      /* Kéo cao bằng các card khác */
+  box-sizing: border-box;
+
+  background-color: #fff;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  transition: 0.2s ease;
   cursor: pointer;
-  background-color: white;
-  transition: box-shadow 0.3s;
-  width: 150px;
 }
+
+
+
 
 .custom-card:hover {
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  transform: translateY(-4px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
 }
 
-.card-content {
-  margin-left: 10px;
+.custom-card h3 {
+  font-size: 18px;
+  margin-bottom: 12px;
+}
+
+.card-content p {
+  font-size: 14px;
+  margin: 4px 0;
 }
