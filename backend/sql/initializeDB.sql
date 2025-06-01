@@ -47,6 +47,25 @@ CREATE TABLE COURSE (
     NUMBER_STU INT DEFAULT 0
 );
 
+-- CATEGORY table
+CREATE TABLE CATEGORY (
+    cate_id VARCHAR(50) PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    description TEXT
+);
+
+-- COURSE_CATEGORY join table
+CREATE TABLE COURSE_CATEGORY (
+    course_id INT,
+    cate_id VARCHAR(30),
+    PRIMARY KEY (course_id, cate_id),
+    FOREIGN KEY (course_id) REFERENCES COURSE(course_id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+    FOREIGN KEY (cate_id) REFERENCES CATEGORY(cate_id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+);
 -- Create TUITION table
 CREATE TABLE TUITION (
     T_ID INT PRIMARY KEY AUTO_INCREMENT,
@@ -211,3 +230,11 @@ VALUES
 ('IELTS Preparation', 10000000, 'Comprehensive IELTS preparation course.', '2023-05-15', '2023-07-15', 8, 30, 20),
 ('Business English', 7000000, 'English for business communication.', '2023-06-10', '2023-08-10', 6, 20, 12),
 ('Conversational English', 6000000, 'Focus on improving speaking skills.', '2023-07-20', '2023-09-20', 5, 15, 8);
+
+INSERT INTO CATEGORY (cate_id, name, description) VALUES
+('SPEAK', 'Speaking', 'Courses focused on improving spoken English and pronunciation.'),
+('WRITE', 'Writing', 'Courses that enhance grammar, sentence structure, and essay writing.'),
+('READ', 'Reading', 'Courses to improve reading comprehension and vocabulary.'),
+('LISTEN', 'Listening', 'Courses aimed at developing listening skills through various media.'),
+('GRAMMAR', 'Grammar', 'Courses focused on understanding and applying English grammar rules.'),
+('PRONUNCE', 'Pronunciation', 'Specialized courses for mastering English sounds and intonation.');
