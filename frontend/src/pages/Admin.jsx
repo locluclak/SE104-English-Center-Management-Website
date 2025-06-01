@@ -14,17 +14,25 @@ import "./Admin.css";
 
 // Dữ liệu từ API chuẩn hóa về đúng định dạng table
 const normalizeClasses = (classes) =>
-  classes.map((cls) => ({
-    id: cls.COURSE_ID,
-    name: cls.NAME,
-    description: cls.DESCRIPTION,
-    startDate: cls.START_DATE,
-    endDate: cls.END_DATE,
-    minStu: cls.MIN_STU,
-    maxStu: cls.MAX_STU,
-    price: cls.PRICE,
-    status: cls.STATUS || "waiting",
-  }));
+  classes.map((cls) => {
+    const match = cls.DESCRIPTION?.match(/^\[Giáo viên:\s*(.*?)\]\s*/);
+    const teacherName = match ? match[1] : "Không rõ";
+    const cleanDescription = cls.DESCRIPTION?.replace(/^\[Giáo viên:\s*.*?\]\s*/, '');
+
+    return {
+      id: cls.COURSE_ID,
+      name: cls.NAME,
+      description: cleanDescription,
+      teacherName,
+      startDate: cls.START_DATE,
+      endDate: cls.END_DATE,
+      minStu: cls.MIN_STU,
+      maxStu: cls.MAX_STU,
+      price: cls.PRICE,
+      status: cls.STATUS || "waiting",
+    };
+  });
+
 
 const normalizeStudents = (students) =>
   students.map((s) => ({

@@ -4,9 +4,9 @@ const db = require('../db'); // Import the database connection
 
 // Route to create a new course
 router.post('/create', async (req, res) => {
-  const { name, description, startDate, endDate, minStu, maxStu, price } = req.body;
+  const { name, teacherName, description, startDate, endDate, minStu, maxStu, price } = req.body;
+  const fullDescription = teacherName ? `[Giáo viên: ${teacherName}] ${description || ''}` : description;
 
-  // Validate input
   if (!name || !startDate || !endDate || !minStu || !maxStu) {
     return res.status(400).json({ error: 'Missing required fields' });
   }
@@ -18,12 +18,12 @@ router.post('/create', async (req, res) => {
     `;
     const [result] = await db.execute(query, [
       name,
-      description,
+      fullDescription,
       startDate,
       endDate,
       minStu,
       maxStu,
-      price !== undefined ? price : 0 // Default to 0 if not provided
+      price !== undefined ? price : 0
     ]);
 
     res.status(201).json({ message: 'Course created successfully', courseId: result.insertId });
@@ -32,6 +32,7 @@ router.post('/create', async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+
 
 // Route to get all courses
 router.get('/all', async (req, res) => {
@@ -178,12 +179,15 @@ router.post('/add-student', async (req, res) => {
 // Route to update a course by ID
 router.put('/update/:id', async (req, res) => {
   const courseId = req.params.id;
-  const { name, description, startDate, endDate, minStu, maxStu, price } = req.body;
+  const { name, description, startDate, endDate, minStu, maxStu, price, teacherName } = req.body;
 
-  // Validate input
-  if (!name && !description && !startDate && !endDate && !minStu && !maxStu && price === undefined) {
+  if (!name && !description && !startDate && !endDate && !minStu && !maxStu && price === undefined && !teacherName) {
     return res.status(400).json({ error: 'No fields provided for update' });
   }
+
+  const updatedDescription = teacherName
+    ? `[Giáo viên: ${teacherName}] ${description || ''}`
+    : description;
 
   try {
     const query = `
@@ -201,7 +205,7 @@ router.put('/update/:id', async (req, res) => {
 
     const [result] = await db.execute(query, [
       name || null,
-      description || null,
+      updatedDescription || null,
       startDate || null,
       endDate || null,
       minStu || null,
@@ -220,6 +224,7 @@ router.put('/update/:id', async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+
 
 
 module.exports = router;

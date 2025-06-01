@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 
-import AddButton from '../Button/AddButton';
-import CreateButton from '../Button/CreateButton';
-import SaveButton from '../Button/SaveButton';
-import DeleteButton from '../Button/DeleteButton';
-import CancelButton from '../Button/CancelButton'
+import AddButton from "../Button/AddButton";
+import CreateButton from "../Button/CreateButton";
+import SaveButton from "../Button/SaveButton";
+import DeleteButton from "../Button/DeleteButton";
+import CancelButton from "../Button/CancelButton";
 
-import './DynamicForm.css';
+import "./DynamicForm.css";
 
 const DynamicForm = ({ formConfig, initialData, onClose, onSubmitSuccess }) => {
   if (!formConfig) {
@@ -25,14 +25,14 @@ const DynamicForm = ({ formConfig, initialData, onClose, onSubmitSuccess }) => {
   }, [initialData, formConfig]);
 
   const handleChange = (name, value) => {
-    setFormData(prevData => ({
+    setFormData((prevData) => ({
       ...prevData,
-      [name]: value
+      [name]: value,
     }));
   };
 
   const handleDynamicListChange = (listName, index, fieldName, value) => {
-    setFormData(prevData => {
+    setFormData((prevData) => {
       const currentList = prevData[listName] ? [...prevData[listName]] : [];
       currentList[index] = { ...currentList[index], [fieldName]: value };
       return { ...prevData, [listName]: currentList };
@@ -40,25 +40,25 @@ const DynamicForm = ({ formConfig, initialData, onClose, onSubmitSuccess }) => {
   };
 
   const handleAddDynamicListItem = (listName, defaultItem) => {
-    setFormData(prevData => {
+    setFormData((prevData) => {
       const currentList = prevData[listName] ? [...prevData[listName]] : [];
       return { ...prevData, [listName]: [...currentList, { ...defaultItem }] };
     });
   };
 
   const handleRemoveDynamicListItem = (listName, indexToRemove) => {
-    setFormData(prevData => {
+    setFormData((prevData) => {
       const currentList = prevData[listName] ? [...prevData[listName]] : [];
       return {
         ...prevData,
-        [listName]: currentList.filter((_, idx) => idx !== indexToRemove)
+        [listName]: currentList.filter((_, idx) => idx !== indexToRemove),
       };
     });
   };
 
   const handleSubmit = (e) => {
-    e.preventDefault(); 
-    console.log('Form submitted:', formData);
+    e.preventDefault();
+    console.log("Form submitted:", formData);
     onSubmitSuccess(formData, !!initialData);
   };
 
@@ -67,7 +67,7 @@ const DynamicForm = ({ formConfig, initialData, onClose, onSubmitSuccess }) => {
       <form className="dynamic-form-container" onSubmit={handleSubmit}>
         <div className="form-grid">
           {formConfig.fields.map((field) => {
-            if (field.type === 'dynamicList') {
+            if (field.type === "dynamicList") {
               return null;
             }
 
@@ -77,38 +77,44 @@ const DynamicForm = ({ formConfig, initialData, onClose, onSubmitSuccess }) => {
                   {field.label}
                   {field.required && <span className="form-required">*</span>}
                 </label>
-                {field.type === 'textarea' ? (
+                {field.type === "textarea" ? (
                   <textarea
                     id={field.name}
                     name={field.name}
                     rows={field.rows || 3}
-                    placeholder={field.placeholder || ''}
-                    value={formData[field.name] || ''}
+                    placeholder={field.placeholder || ""}
+                    value={formData[field.name] || ""}
                     onChange={(e) => handleChange(field.name, e.target.value)}
                     required={field.required}
                     className="form-input form-textarea"
                   />
-                ) : field.type === 'select' ? (
+                ) : field.type === "select" ? (
                   <select
                     id={field.name}
                     name={field.name}
-                    value={formData[field.name] || ''}
+                    value={formData[field.name] || ""}
                     onChange={(e) => handleChange(field.name, e.target.value)}
                     required={field.required}
                     className="form-input form-select"
                   >
                     <option value="">-- Choose {field.label} --</option>
-                    {field.options && field.options.map((opt, i) => (
-                      <option key={i} value={opt}>{opt}</option>
-                    ))}
+                    {field.options &&
+                      field.options.map((opt, i) => (
+                        <option
+                          key={i}
+                          value={typeof opt === "object" ? opt.value : opt}
+                        >
+                          {typeof opt === "object" ? opt.label : opt}
+                        </option>
+                      ))}
                   </select>
                 ) : (
                   <input
                     id={field.name}
                     name={field.name}
-                    type={field.type || 'text'}
-                    placeholder={field.placeholder || ''}
-                    value={formData[field.name] || ''}
+                    type={field.type || "text"}
+                    placeholder={field.placeholder || ""}
+                    value={formData[field.name] || ""}
                     onChange={(e) => handleChange(field.name, e.target.value)}
                     required={field.required}
                     className="form-input"
@@ -120,17 +126,24 @@ const DynamicForm = ({ formConfig, initialData, onClose, onSubmitSuccess }) => {
         </div>
 
         {/* Render dynamicList fields (ví dụ: students) */}
-        {formConfig.fields.map(field => {
-          if (field.type === 'dynamicList') {
+        {formConfig.fields.map((field) => {
+          if (field.type === "dynamicList") {
             const listName = field.name; // Ví dụ: 'students'
             const listItems = formData[listName] || [];
-            const defaultNewItem = field.fields.reduce((acc, f) => ({ ...acc, [f.name]: '' }), {});
+            const defaultNewItem = field.fields.reduce(
+              (acc, f) => ({ ...acc, [f.name]: "" }),
+              {}
+            );
 
             return (
               <div key={listName} className="dynamic-list-section">
                 <div className="dynamic-list-header">
                   <label className="dynamic-list-label">{field.label}</label>
-                  <AddButton onClick={() => handleAddDynamicListItem(listName, defaultNewItem)}>
+                  <AddButton
+                    onClick={() =>
+                      handleAddDynamicListItem(listName, defaultNewItem)
+                    }
+                  >
                     Add Student
                   </AddButton>
                 </div>
@@ -151,17 +164,26 @@ const DynamicForm = ({ formConfig, initialData, onClose, onSubmitSuccess }) => {
                             {field.fields.map((f) => (
                               <td key={f.name}>
                                 <input
-                                  type={f.type || 'text'}
-                                  value={item[f.name] || ''}
-                                  onChange={(e) => handleDynamicListChange(listName, idx, f.name, e.target.value)}
-                                  placeholder={f.placeholder || ''}
+                                  type={f.type || "text"}
+                                  value={item[f.name] || ""}
+                                  onChange={(e) =>
+                                    handleDynamicListChange(
+                                      listName,
+                                      idx,
+                                      f.name,
+                                      e.target.value
+                                    )
+                                  }
+                                  placeholder={f.placeholder || ""}
                                   className="dynamic-list-input"
                                 />
                               </td>
                             ))}
                             <td>
                               <DeleteButton
-                                onClick={() => handleRemoveDynamicListItem(listName, idx)}
+                                onClick={() =>
+                                  handleRemoveDynamicListItem(listName, idx)
+                                }
                               >
                                 Delete
                               </DeleteButton>
@@ -172,7 +194,9 @@ const DynamicForm = ({ formConfig, initialData, onClose, onSubmitSuccess }) => {
                     </table>
                   </div>
                 ) : (
-                  <p className="dynamic-list-empty-message">Chưa có mục nào được thêm.</p>
+                  <p className="dynamic-list-empty-message">
+                    Chưa có mục nào được thêm.
+                  </p>
                 )}
               </div>
             );
@@ -182,9 +206,7 @@ const DynamicForm = ({ formConfig, initialData, onClose, onSubmitSuccess }) => {
 
         <div className="form-actions">
           {initialData ? (
-            <SaveButton type="submit">
-              Save
-            </SaveButton>
+            <SaveButton type="submit">Save</SaveButton>
           ) : (
             <CreateButton type="submit" />
           )}

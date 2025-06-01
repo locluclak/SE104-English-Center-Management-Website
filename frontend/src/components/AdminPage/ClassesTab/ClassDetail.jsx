@@ -3,7 +3,7 @@ import './ClassDetail.css';
 import DynamicForm from '../../common/Form/DynamicForm';
 import EditButton from '../../common/Button/EditButton';
 import { getCourseById, updateCourse } from '../../../services/courseService';
-import { fetchStudents } from '../../../services/personService';
+import { fetchStudents, fetchTeachers } from '../../../services/personService'; // 👈 NEW
 
 const ClassDetail = ({ clsId, selectedStatus, onBack }) => {
   const [classInfo, setClassInfo] = useState(null);
@@ -13,19 +13,27 @@ const ClassDetail = ({ clsId, selectedStatus, onBack }) => {
   const [showAddStudent, setShowAddStudent] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [activeTab, setActiveTab] = useState('students');
+  const [teachers, setTeachers] = useState([]); // 👈 NEW
 
-  const normalizeClassData = (data) => ({
-    id: data?.COURSE_ID || '',
-    name: data?.NAME || '',
-    description: data?.DESCRIPTION || '',
-    startDate: data?.START_DATE || '',
-    endDate: data?.END_DATE || '',
-    minStu: data?.MIN_STU || '',
-    maxStu: data?.MAX_STU || '',
-    price: data?.PRICE || '',
-    status: data?.STATUS || '',
-    students: data?.STUDENTS || [],
-  });
+  const normalizeClassData = (data) => {
+    const match = data?.DESCRIPTION?.match(/^\[Giáo viên:\s*(.*?)\]\s*/);
+    const teacherName = match ? match[1] : 'Không rõ';
+    const cleanDescription = data?.DESCRIPTION?.replace(/^\[Giáo viên:\s*.*?\]\s*/, '');
+
+    return {
+      id: data?.COURSE_ID || '',
+      name: data?.NAME || '',
+      teacherName,
+      description: cleanDescription,
+      startDate: data?.START_DATE || '',
+      endDate: data?.END_DATE || '',
+      minStu: data?.MIN_STU || '',
+      maxStu: data?.MAX_STU || '',
+      price: data?.PRICE || '',
+      status: data?.STATUS || '',
+      students: data?.STUDENTS || [],
+    };
+  };
 
   const fetchClass = async () => {
     try {
@@ -49,8 +57,18 @@ const ClassDetail = ({ clsId, selectedStatus, onBack }) => {
     }
   };
 
+  const fetchAllTeachers = async () => {
+    try {
+      const data = await fetchTeachers();
+      setTeachers(data);
+    } catch (err) {
+      console.error('Failed to fetch teachers:', err);
+    }
+  };
+
   useEffect(() => {
     fetchClass();
+    fetchAllTeachers(); // 👈 Load teachers
   }, [clsId]);
 
   useEffect(() => {
@@ -75,9 +93,14 @@ const ClassDetail = ({ clsId, selectedStatus, onBack }) => {
 
   const handleEditClick = () => setIsEditing(true);
   const handleCancelEdit = () => setIsEditing(false);
+
   const handleUpdateSuccess = async (updatedData) => {
     try {
-      await updateCourse(clsId, { ...updatedData, students });
+      await updateCourse(clsId, {
+        ...updatedData,
+        students,
+        teacherName: updatedData.teacherName,
+      });
       await fetchClass();
       setIsEditing(false);
     } catch (err) {
@@ -99,6 +122,16 @@ const ClassDetail = ({ clsId, selectedStatus, onBack }) => {
             fields: [
               { name: 'id', label: 'ID', type: 'text', disabled: true },
               { name: 'name', label: 'Name', type: 'text', required: true },
+              {
+                name: 'teacherName',
+                label: 'Teacher',
+                type: 'select',
+                required: true,
+                options: teachers.map(t => ({
+                  label: t.NAME,
+                  value: t.NAME
+                }))
+              },
               { name: 'description', label: 'Description', type: 'textarea' },
               { name: 'startDate', label: 'Start Date', type: 'datetime-local' },
               { name: 'endDate', label: 'End Date', type: 'datetime-local' },
@@ -111,7 +144,8 @@ const ClassDetail = ({ clsId, selectedStatus, onBack }) => {
           initialData={{
             ...classInfo,
             startDate: classInfo.startDate?.slice(0, 16),
-            endDate: classInfo.endDate?.slice(0, 16)
+            endDate: classInfo.endDate?.slice(0, 16),
+            teacherName: classInfo.teacherName || '',
           }}
           onSubmitSuccess={handleUpdateSuccess}
           onClose={handleCancelEdit}
@@ -123,6 +157,7 @@ const ClassDetail = ({ clsId, selectedStatus, onBack }) => {
           </div>
           <p><strong>ID:</strong> {classInfo.id}</p>
           <p><strong>Name:</strong> {classInfo.name}</p>
+          <p><strong>Giáo viên:</strong> {classInfo.teacherName}</p>
           <p><strong>Description:</strong> {classInfo.description}</p>
           <p><strong>Start Date:</strong> {classInfo.startDate}</p>
           <p><strong>End Date:</strong> {classInfo.endDate}</p>
