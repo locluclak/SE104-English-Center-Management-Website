@@ -8,9 +8,20 @@ import { getStudentTableColumns, getTeacherTableColumns, getAccountantTableColum
 import { fetchStudents, fetchTeachers, fetchAccountants } from "../services/personService";
 import { getAllCourses } from "../services/courseService";
 import ClassesTab from "../components/AdminPage/ClassesTab/ClassesTab.jsx";
-import Card from "../components/common/Card/Card";
+import { format } from "date-fns";
 
 import "./Admin.css";
+
+const formatDate = (dateStr) => {
+  if (!dateStr) return "";
+  try {
+    const date = new Date(dateStr);
+    if (isNaN(date)) return "";
+    return format(date, "dd/MM/yyyy");
+  } catch {
+    return "";
+  }
+};
 
 // Dữ liệu từ API chuẩn hóa về đúng định dạng table
 const normalizeClasses = (classes) =>
@@ -24,8 +35,8 @@ const normalizeClasses = (classes) =>
       name: cls.NAME,
       description: cleanDescription,
       teacherName,
-      startDate: cls.START_DATE,
-      endDate: cls.END_DATE,
+      startDate: formatDate(cls.START_DATE),
+      endDate: formatDate(cls.END_DATE),
       minStu: cls.MIN_STU,
       maxStu: cls.MAX_STU,
       price: cls.PRICE,
@@ -38,28 +49,31 @@ const normalizeStudents = (students) =>
   students.map((s) => ({
     id: s.ID,
     name: s.NAME,
-    birthday: s.BIRTHDAY,
+    birthday: formatDate(s.DATE_OF_BIRTH),
     email: s.EMAIL,
     status: s.STATUS,
   }));
+
 
 const normalizeTeachers = (teachers) =>
   teachers.map((t) => ({
     id: t.ID,
     name: t.NAME,
-    birthday: t.BIRTHDAY,
+    birthday: formatDate(t.DATE_OF_BIRTH),
     email: t.EMAIL,
     subject: t.SUBJECT,
   }));
+
 
 const normalizeAccountants = (accountants) =>
   accountants.map((a) => ({
     id: a.ID,
     name: a.NAME,
-    birthday: a.BIRTHDAY,
+    birthday: formatDate(a.DATE_OF_BIRTH),
     email: a.EMAIL,
     department: a.DEPARTMENT,
   }));
+
 
 const AdminPage = () => {
   const [activeTab, setActiveTab] = useState("classes");
