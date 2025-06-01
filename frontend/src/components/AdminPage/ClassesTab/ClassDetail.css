@@ -1,0 +1,194 @@
+.class-detail-container {
+  margin-top: 20px;
+  margin-left: 20px;
+  border-radius: 16px;
+  max-width: 900px;
+  font-family: 'Segoe UI', sans-serif;
+  flex-direction: column;
+  text-align: left; 
+  flex: 1;
+}
+
+.back-btn {
+  width: fit-content;
+  background-color: #abc4ff;
+  color: black;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-left: 0;
+}
+
+.class-info {
+  background-color: #fff;
+  border: 1px solid #eee;
+  padding: 16px;
+  border-radius: 12px;
+}
+.class-info p {
+  margin: 4px 0;
+  font-size: 16px;
+}
+
+.edit-btn-container {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1rem;
+}
+
+/* Tabs */
+.tabs {
+  display: block;
+  margin: 16px 0;
+}
+.tabs button {
+  padding: 8px 16px;
+  border: 1px solid #ccc;
+  background-color: #c1d3fe;
+  cursor: pointer;
+  border-radius: 8px;
+  margin-left: 10px;
+}
+.tabs button.active {
+  font-weight: bold;
+  background-color: #a3bffa;
+}
+
+/* Tab content */
+.tab-content {
+  padding: 12px;
+  background-color: #fff;
+  border: 1px solid #eee;
+  border-radius: 8px;
+}
+
+/* Add Student Button */
+.add-student,
+.add-button {
+  padding: 8px 16px;
+  border: 1px solid #ccc;
+  background-color: #c1d3fe;
+  cursor: pointer;
+  border-radius: 8px;
+  margin-left: 20px;
+}
+
+/* ----- Dynamic Form Edit Mode Styling ----- */
+
+.dynamic-list-section {
+  margin-top: 24px;
+  border-top: 1px solid #ddd;
+  padding-top: 16px;
+}
+
+.dynamic-list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.dynamic-list-label {
+  font-size: 18px;
+  font-weight: bold;
+  color: #333;
+}
+
+.dynamic-list-table-wrapper {
+  overflow-x: auto;
+}
+
+.dynamic-list-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 16px;
+}
+
+.dynamic-list-table th,
+.dynamic-list-table td {
+  border: 1px solid #ccc;
+  padding: 10px;
+  text-align: left;
+}
+
+.dynamic-list-table th {
+  background-color: #e0e7ff;
+  font-weight: 600;
+}
+
+.dynamic-list-input {
+  width: 100%;
+  padding: 6px 10px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.dynamic-list-empty-message {
+  font-style: italic;
+  color: #888;
+  margin-top: 8px;
+}
+
+/* Buttons inside dynamic list (e.g., delete) */
+.dynamic-list-table td button {
+  background-color: #ff6b6b;
+  color: white;
+  border: none;
+  padding: 6px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.dynamic-list-table td button:hover {
+  background-color: #e04848;
+}
+
+/* Form action buttons (Save/Cancel) */
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.form-actions button {
+  padding: 8px 16px;
+  font-size: 15px;
+  border-radius: 6px;
+  cursor: pointer;
+  border: none;
+}
+
+.form-actions .save-button {
+  background-color: #4caf50;
+  color: white;
+}
+
+.form-actions .cancel-button {
+  background-color: #f44336;
+  color: white;
+}
+
+.add-student-dropdown select {
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  min-width: 240px;
+}
+
+.add-button {
+  padding: 8px 16px;
+  background-color: #abc4ff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+}
+
+.add-button:disabled {
+  background-color: #ddd;
+  cursor: not-allowed;
+}
+
+

@@ -7,6 +7,7 @@ import formConfigs from "../config/formConfig";
 import { getStudentTableColumns, getTeacherTableColumns, getAccountantTableColumns } from "../config/tableConfig.jsx";
 import { fetchStudents, fetchTeachers, fetchAccountants } from "../services/personService";
 import { getAllCourses } from "../services/courseService";
+import ClassesTab from "../components/AdminPage/ClassesTab/ClassesTab.jsx";
 import Card from "../components/common/Card/Card";
 
 import "./Admin.css";
@@ -217,27 +218,10 @@ useEffect(() => {
             )}
 
             {!showForm && activeTab === "classes" && (
-              <div className="class-grid">
-                {classes.map((cls) => (
-                  <Card key={cls.id} title={cls.name}>
-                    <p>
-                      <strong>ID:</strong> {cls.id}
-                    </p>
-                    <p>
-                      <strong>Trạng thái:</strong> {cls.status}
-                    </p>
-                    <p>
-                      <strong>Ngày bắt đầu:</strong> {cls.startDate}
-                    </p>
-                    <p>
-                      <strong>Ngày kết thúc:</strong> {cls.endDate}
-                    </p>
-                    <p>
-                      <strong>Mô tả:</strong> {cls.description || "Không có"}
-                    </p>
-                  </Card>
-                ))}
-              </div>
+              <ClassesTab
+                classes={classes}
+                onSelect={(cls) => console.log("Selected class:", cls)}
+              />
             )}
 
             {!showForm && activeTab === "students" && (
