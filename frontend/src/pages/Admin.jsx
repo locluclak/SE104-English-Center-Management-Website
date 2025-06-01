@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from "react";
-import Header from "../components/layout/Header/Header.jsx";
+import Header from "../components/layout/Header/Header";
 import SidebarSearch from "../components/layout/Sidebar/SidebarSearch";
 import Table from "../components/common/Table/Table";
 import DynamicForm from "../components/common/Form/DynamicForm";
