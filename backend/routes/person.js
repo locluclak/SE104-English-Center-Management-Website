@@ -185,4 +185,59 @@ router.put('/update/:id', async (req, res) => {
     }
 });
 
+// Route to get list of ongoing course IDs by person ID
+router.get('/:id/ongoing-courses', async (req, res) => {
+  const personId = req.params.id;
+
+  try {
+    // Determine the role of the person (STUDENT or STAFF)
+    const roleQuery = `
+      SELECT ROLE FROM PERSON WHERE ID = ?
+    `;
+    const [roleResult] = await db.execute(roleQuery, [personId]);
+
+    if (roleResult.length === 0) {
+      return res.status(404).json({ error: 'Person not found' });
+    }
+
+    const role = roleResult[0].ROLE;
+
+    let query;
+    if (role === 'STUDENT') {
+      // Query for students
+      query = `
+        SELECT COURSE.COURSE_ID
+        FROM STUDENT_COURSE
+        INNER JOIN COURSE ON STUDENT_COURSE.COURSE_ID = COURSE.COURSE_ID
+        WHERE STUDENT_COURSE.STUDENT_ID = ?
+          AND COURSE.START_DATE <= CURDATE()
+          AND COURSE.END_DATE >= CURDATE()
+      `;
+    } else if (role === 'STAFF') {
+      // Query for teachers
+      query = `
+        SELECT COURSE.COURSE_ID
+        FROM TEACHER_COURSE
+        INNER JOIN COURSE ON TEACHER_COURSE.COURSE_ID = COURSE.COURSE_ID
+        WHERE TEACHER_COURSE.TEACHER_ID = ?
+          AND COURSE.START_DATE <= CURDATE()
+          AND COURSE.END_DATE >= CURDATE()
+      `;
+    } else {
+      return res.status(400).json({ error: 'Invalid role' });
+    }
+
+    const [rows] = await db.execute(query, [personId]);
+
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'No ongoing courses found for this person' });
+    }
+
+    const courseIds = rows.map(row => row.COURSE_ID);
+    res.status(200).json({ courseIds });
+  } catch (error) {
+    console.error('Error fetching ongoing courses:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
 module.exports = router;

@@ -225,11 +225,11 @@ VALUES
 -- Insert sample data into COURSE table
 INSERT INTO COURSE (NAME, PRICE, DESCRIPTION, START_DATE, END_DATE, MIN_STU, MAX_STU, NUMBER_STU)
 VALUES 
-('English Basics', 5000000, 'Introduction to English for beginners.', '2023-06-01', '2023-08-01', 5, 20, 10),
-('Advanced English', 8000000, 'Advanced English course for professionals.', '2023-07-01', '2023-09-01', 10, 25, 15),
-('IELTS Preparation', 10000000, 'Comprehensive IELTS preparation course.', '2023-05-15', '2023-07-15', 8, 30, 20),
-('Business English', 7000000, 'English for business communication.', '2023-06-10', '2023-08-10', 6, 20, 12),
-('Conversational English', 6000000, 'Focus on improving speaking skills.', '2023-07-20', '2023-09-20', 5, 15, 8);
+('English Basics', 5000000, 'Introduction to English for beginners.', '2025-06-01', '2025-08-01', 5, 20, 10),
+('Advanced English', 8000000, 'Advanced English course for professionals.', '2025-01-01', '2025-09-01', 10, 25, 15),
+('IELTS Preparation', 10000000, 'Comprehensive IELTS preparation course.', '2025-05-15', '2025-07-15', 8, 30, 20),
+('Business English', 7000000, 'English for business communication.', '2025-06-10', '2025-08-10', 6, 20, 12),
+('Conversational English', 6000000, 'Focus on improving speaking skills.', '2025-07-20', '2025-09-20', 5, 15, 8);
 
 INSERT INTO CATEGORY (cate_id, name, description) VALUES
 ('SPEAK', 'Speaking', 'Courses focused on improving spoken English and pronunciation.'),

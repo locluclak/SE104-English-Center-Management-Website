@@ -211,4 +211,28 @@ router.put('/update/:id', async (req, res) => {
   }
 });
 
+// Route to get list of assignments in a course
+router.get('/:courseId/assignments_time', async (req, res) => {
+  const courseId = req.params.courseId;
+
+  try {
+    const query = `
+      SELECT AS_ID, NAME, DESCRIPTION, START_DATE, END_DATE
+      FROM ASSIGNMENT
+      WHERE COURSE_ID = ?
+    `;
+
+    const [rows] = await db.execute(query, [courseId]);
+
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'No assignments found for this course' });
+    }
+
+    res.status(200).json({ assignments: rows });
+  } catch (error) {
+    console.error('Error fetching assignments:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 module.exports = router;
