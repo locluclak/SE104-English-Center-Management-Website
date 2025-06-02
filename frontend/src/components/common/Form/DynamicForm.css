@@ -48,3 +48,47 @@
   gap: 1rem;
   margin-bottom: 0.5rem;
 }
+
+.group-with-two {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.group-per-info {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.group-per-secret {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.group-with-three {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.group-des {
+  margin-top: 1rem;
+}
+
+.group-full-width {
+  margin-top: 1rem;
+}
+
+.form-groups {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-actions {
+  margin-top: 1rem;
+}

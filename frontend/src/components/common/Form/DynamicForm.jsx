@@ -62,68 +62,98 @@ const DynamicForm = ({ formConfig, initialData, onClose, onSubmitSuccess }) => {
     onSubmitSuccess(formData, !!initialData);
   };
 
+  const renderFormField = (field) => {
+    if (field.name === 'status' || field.type === 'hidden') {
+      return null;
+    }
+
+    const value = formData[field.name];
+
+    return (
+      <div className="form-groups" key={field.name}>
+        <label htmlFor={field.name} className="form-label">
+          {field.label}
+          {field.required && <span className="form-required"> (*) </span>}
+        </label>
+        {field.type === 'select' ? (
+          <Select
+            id={field.name}
+            name={field.name}
+            options={(field.options || [])}
+            isMulti={field.isMulti}
+            value={
+              field.isMulti
+                ? (value || []).map(valItem => (
+                    field.options.find(opt => opt.value === valItem.id) || { value: valItem.id, label: valItem.name, ...valItem }
+                  ))
+                : (field.options || []).find(opt => opt.value === value) || null
+            }
+            onChange={(selectedOption) => {
+              if (field.isMulti) {
+                handleMultiSelectChange(field.name, selectedOption);
+              } else {
+                handleChange(field.name, selectedOption?.value || '');
+              }
+            }}
+            className="react-select-container"
+            classNamePrefix="react-select"
+          />
+        ) : field.type === 'textarea' ? (
+          <textarea
+            id={field.name}
+            name={field.name}
+            rows={field.rows || 3}
+            placeholder={field.placeholder || ''}
+            value={value || ''}
+            onChange={(e) => handleChange(field.name, e.target.value)}
+            required={field.required}
+            className="form-input form-textarea"
+          />
+        ) : (
+          <input
+            id={field.name}
+            name={field.name}
+            type={field.type || 'text'}
+            placeholder={field.placeholder || ''}
+            value={value || ''}
+            onChange={(e) => handleChange(field.name, e.target.value)}
+            required={field.required}
+            className="form-input"
+          />
+        )}
+      </div>
+    );
+  };
+
   return (
     <div className="dynamic-form-overlay">
       <form className="dynamic-form-container" onSubmit={handleSubmit}>
-        <div className="form-grid">
-          {formConfig.fields.map((field) => {
-            if (field.type === "dynamicList") {
-              return null;
-            }
 
-            return (
-              <div className="form-group" key={field.name}>
-                <label htmlFor={field.name} className="form-label">
-                  {field.label}
-                  {field.required && <span className="form-required">*</span>}
-                </label>
-                {field.type === "textarea" ? (
-                  <textarea
-                    id={field.name}
-                    name={field.name}
-                    rows={field.rows || 3}
-                    placeholder={field.placeholder || ""}
-                    value={formData[field.name] || ""}
-                    onChange={(e) => handleChange(field.name, e.target.value)}
-                    required={field.required}
-                    className="form-input form-textarea"
-                  />
-                ) : field.type === "select" ? (
-                  <select
-                    id={field.name}
-                    name={field.name}
-                    value={formData[field.name] || ""}
-                    onChange={(e) => handleChange(field.name, e.target.value)}
-                    required={field.required}
-                    className="form-input form-select"
-                  >
-                    <option value="">-- Choose {field.label} --</option>
-                    {field.options &&
-                      field.options.map((opt, i) => (
-                        <option
-                          key={i}
-                          value={typeof opt === "object" ? opt.value : opt}
-                        >
-                          {typeof opt === "object" ? opt.label : opt}
-                        </option>
-                      ))}
-                  </select>
-                ) : (
-                  <input
-                    id={field.name}
-                    name={field.name}
-                    type={field.type || "text"}
-                    placeholder={field.placeholder || ""}
-                    value={formData[field.name] || ""}
-                    onChange={(e) => handleChange(field.name, e.target.value)}
-                    required={field.required}
-                    className="form-input"
-                  />
-                )}
-              </div>
-            );
-          })}
-        </div>
+        <div className="form-grid">
+          <div className="group-with-two">
+            {formConfig.fields.filter(f => ['id', 'name'].includes(f.name)).map(renderFormField)}
+          </div>
+
+          <div className="group-with-three">
+            {formConfig.fields.filter(f => ['teacher', 'startDate', 'endDate'].includes(f.name)).map(renderFormField)}
+          </div>
+
+          <div className="group-des">
+            {formConfig.fields.filter(f => f.name === 'description').map(renderFormField)}
+          </div>
+
+          <div className="group-full-width"> 
+            {formConfig.fields.filter(f => f.name === 'students').map(renderFormField)}
+          </div>
+
+          <div className="group-per-info">
+            {formConfig.fields.filter(f => ['birthday', 'specialization', 'statuses', 'department'].includes(f.name)).map(renderFormField)}
+          </div>
+
+          <div className="group-per-secret">
+            {formConfig.fields.filter(f => ['email', 'password'].includes(f.name)).map(renderFormField)}
+          </div>
+        </div> 
 
         {/* Render dynamicList fields (ví dụ: students) */}
         {formConfig.fields.map((field) => {

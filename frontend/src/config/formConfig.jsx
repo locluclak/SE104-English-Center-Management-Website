@@ -67,7 +67,8 @@ export const formConfigs = {
       { name: "name", label: "Full Name", type: "text", required: true, placeholder: "Full Name" },
       { name: "birthday", label: "Birthday", type: "date", required: true },
       { name: "email", label: "Email", type: "email", required: true, placeholder: "Email" },
-      { name: "status", label: "Status", type: "select", options: ["Enrolled", "Unenroll"], required: true }
+      { name: "password", label: "Password", type: "password", required: true, placeholder: "Password" },
+      { name: "statuses", label: "Status", type: "select", options: ["Enrolled", "Unenroll"], required: true }
     ]
   },
 
