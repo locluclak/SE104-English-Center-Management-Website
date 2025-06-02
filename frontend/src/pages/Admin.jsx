@@ -5,7 +5,7 @@ import Table from "../components/common/Table/Table";
 import DynamicForm from "../components/common/Form/DynamicForm";
 import formConfigs from "../config/formConfig";
 import { getStudentTableColumns, getTeacherTableColumns, getAccountantTableColumns } from "../config/tableConfig.jsx";
-import { fetchStudents, fetchTeachers, fetchAccountants, updatePerson} from "../services/personService";
+import { fetchStudents, fetchTeachers, fetchAccountants, updatePerson, deletePerson} from "../services/personService";
 import { signup, createTeacher, createAccountant } from "../services/authService";
 import { getAllCourses } from "../services/courseService";
 import ClassesTab from "../components/AdminPage/ClassesTab/ClassTab.jsx";
@@ -182,62 +182,55 @@ const handleFormSubmitSuccess = async (data, isEdit = false) => {
   try {
     let newData = data;
 
-    if (!isEdit) {
-  if (type === "Student") {
-    const result = await signup({
-      name: data.name,
-      email: data.email,
-      password: data.password,
-      phoneNumber: data.phoneNumber,
-      dateOfBirth: data.birthday,
-      role: "STUDENT"
-    });
-    newData = normalizeStudents([{ ...data, id: result.id }])[0];
+    if (isEdit) {
+      await updatePerson(data.id, data);
+    } else {
+      if (type === "Student") {
+        const result = await signup({
+          name: data.name,
+          email: data.email,
+          password: data.password,
+          phoneNumber: data.phoneNumber,
+          dateOfBirth: data.birthday,
+          role: "STUDENT",
+        });
+        newData = normalizeStudents([{ ...data, id: result.id }])[0];
+      } else if (type === "Teacher") {
+        const result = await createTeacher({
+          name: data.name,
+          email: data.email,
+          password: data.password,
+          phone_number: data.phoneNumber,
+          date_of_birth: data.birthday,
+          hire_day: data.hireDay,
+          staff_type: "TEACHER",
+        });
+        newData = normalizeTeachers([{ ...data }])[0];
+        alert(`Giáo viên đã được tạo.\nEmail: ${data.email}\nMật khẩu: ${data.password}`);
+      } else if (type === "Accountant") {
+        const result = await createAccountant({
+          name: data.name,
+          email: data.email,
+          password: data.password,
+          phone_number: data.phoneNumber,
+          date_of_birth: data.birthday,
+          hire_day: data.hireDay,
+          staff_type: "ACCOUNTANT",
+        });
+        newData = normalizeAccountants([{ ...data }])[0];
+        alert(`Kế toán đã được tạo.\nEmail: ${data.email}\nMật khẩu: ${data.password}`);
+      }
+    }
 
-  } else if (type === "Teacher") {
-    const result = await createTeacher({
-      name: data.name,
-      email: data.email,
-      password: data.password, // ✅ thêm password
-      phoneNumber: data.phoneNumber,
-      dateOfBirth: data.birthday,
-      hireDay: data.hireDay,
-    });
-    newData = normalizeTeachers([{ ...data }])[0];
-    alert(`Giáo viên đã được tạo.\nEmail: ${data.email}\nMật khẩu: ${data.password}`);
-
-  } else if (type === "Accountant") {
-    const result = await createAccountant({
-      name: data.name,
-      email: data.email,
-      password: data.password, // ✅ thêm password
-      phoneNumber: data.phoneNumber,
-      dateOfBirth: data.birthday,
-      hireDay: data.hireDay,
-    });
-    newData = normalizeAccountants([{ ...data }])[0];
-    alert(`Kế toán đã được tạo.\nEmail: ${data.email}\nMật khẩu: ${data.password}`);
-  }
-}
-
-    // Cập nhật lại state
     if (type === "Student") {
-      setStudents((prev) =>
-        isEdit ? prev.map((s) => (s.id === newData.id ? newData : s)) : [...prev, newData]
-      );
+      setStudents(prev => isEdit ? prev.map(s => s.id === newData.id ? newData : s) : [...prev, newData]);
     } else if (type === "Teacher") {
-      setTeachers((prev) =>
-        isEdit ? prev.map((t) => (t.id === newData.id ? newData : t)) : [...prev, newData]
-      );
+      setTeachers(prev => isEdit ? prev.map(t => t.id === newData.id ? newData : t) : [...prev, newData]);
     } else if (type === "Accountant") {
-      setAccountants((prev) =>
-        isEdit ? prev.map((a) => (a.id === newData.id ? newData : a)) : [...prev, newData]
-      );
+      setAccountants(prev => isEdit ? prev.map(a => a.id === newData.id ? newData : a) : [...prev, newData]);
     } else if (type === "Class") {
       const newClass = { ...newData, status: newData.status || "waiting" };
-      setClasses((prev) =>
-        isEdit ? prev.map((cls) => (cls.id === newClass.id ? newClass : cls)) : [...prev, newClass]
-      );
+      setClasses(prev => isEdit ? prev.map(cls => cls.id === newClass.id ? newClass : cls) : [...prev, newClass]);
     }
 
     setShowForm(false);
@@ -248,19 +241,25 @@ const handleFormSubmitSuccess = async (data, isEdit = false) => {
   }
 };
 
+const handleDelete = async (item, type) => {
+  if (!window.confirm(`Bạn có chắc chắn muốn xóa ${item.name} (ID: ${item.id})?`)) return;
+
+  try {
+    await deletePerson(item.id);
+    if (type === "Student") setStudents(prev => prev.filter(s => s.id !== item.id));
+    else if (type === "Teacher") setTeachers(prev => prev.filter(t => t.id !== item.id));
+    else if (type === "Accountant") setAccountants(prev => prev.filter(a => a.id !== item.id));
+  } catch (error) {
+    alert('Xóa không thành công.');
+    console.error(error);
+  }
+};
 
   const handleEdit = (data, type) => {
     setEditingData(data);
     setShowForm(true);
   };
 
-  const handleDelete = (item, type) => {
-    if (!window.confirm(`Bạn có chắc chắn muốn xóa ${item.name} (ID: ${item.id})?`)) return;
-
-    if (type === "Student") setStudents((prev) => prev.filter((s) => s.id !== item.id));
-    else if (type === "Teacher") setTeachers((prev) => prev.filter((t) => t.id !== item.id));
-    else if (type === "Accountant") setAccountants((prev) => prev.filter((a) => a.id !== item.id));
-  };
 
   const filteredStudents =
     selectedStatus === "all"
