@@ -3,10 +3,6 @@ export const formConfigs = {
     type: 'Class',
     title: 'Create New Class',
     fields: [
-      { 
-        name: 'id', label: 'Class ID', type: 'text', 
-        required: true, placeholder: 'ID',
-      },
       {
         name: 'name', label: 'Class Name', type: 'text',
         required: true, placeholder: 'Class Name',
@@ -17,19 +13,17 @@ export const formConfigs = {
       },
       {
         name: 'teacher', label: 'Teacher', type: 'select',
-        options: ['Mr. A', 'Ms. B', 'Mrs. C'].map(t => ({ value: t, label: t })),
+        options: []
       },
       { name: 'startDate', label: 'Start Date', type: 'date' },
       { name: 'endDate', label: 'End Date', type: 'date' },
+      { name: 'minStu', label: 'Min Students', type: 'number', required: true },
+      { name: 'maxStu', label: 'Max Students', type: 'number', required: true },
+      { name: 'price', label: 'Price', type: 'number', required: true },
       {
-        name: 'students', label: 'Students Enrolled', type: 'select', 
+        name: 'students', label: 'Students Enrolled', type: 'select',
         isMulti: true,
-        options: [
-          { value: 'S01', label: 'John Doe (S01)', id: 'S01', name: 'John Doe', email: 'john@example.com' },
-          { value: 'S02', label: 'Jane Smith (S02)', id: 'S02', name: 'Jane Smith', email: 'jane@example.com' },
-          { value: 'S03', label: 'Bob Lee (S03)', id: 'S03', name: 'Bob Lee', email: 'bob@example.com' }
-          // Thêm danh sách học viên ở đây
-        ],
+        options: [],
         displayFields: [
           { name: 'id', label: 'ID', placeholder: 'ID' },
           { name: 'name', label: 'Student Name', placeholder: 'Student Name' },
@@ -40,37 +34,38 @@ export const formConfigs = {
     ],
   },
 
-  staffs_teacher: {
-    type: 'Teacher',
-    title: "Add Teacher",
-    fields: [
-      { name: "id", label: "Teacher ID", type: "text", required: true, placeholder: "Teacher ID" },
-      { name: "name", label: "Full Name", type: "text", required: true, placeholder: "Full Name" },
-      { name: "birthday", label: "Birthday", type: "date", required: true },
-      { name: "email", label: "Email", type: "email", required: true, placeholder: "Email" },
-      { name: "password", label: "Password", type: "password", required: true, placeholder: "Password" }, 
-      { name: "specialization", label: "Specialization", type: "text", placeholder: "e.g., Math, Science" }
-    ]
-  },
+staffs_teacher: {
+  type: "Teacher",
+  title: "Add Teacher",
+  fields: [
+    { name: "name", label: "Họ tên", type: "text", required: true },
+    { name: "email", label: "Email", type: "email", required: true },
+    { name: "password", label: "Mật khẩu", type: "password", required: true },
+    { name: "phoneNumber", label: "Số điện thoại", type: "text", required: true },
+    { name: "birthday", label: "Ngày sinh", type: "date", required: true },
+    { name: "hireDay", label: "Ngày tuyển dụng", type: "date", required: true }
+  ],
+},
 
-  staffs_accountant: {
-    type: 'Accountant',
-    title: "Add Accountant",
-    fields: [
-      { name: "id", label: "Accountant ID", type: "text", required: true, placeholder: "Accountant ID" },
-      { name: "name", label: "Full Name", type: "text", required: true, placeholder: "Full Name" },
-      { name: "birthday", label: "Birthday", type: "date", required: true },
-      { name: "email", label: "Email", type: "email", required: true, placeholder: "Email" },
-      { name: "password", label: "Password", type: "password", required: true, placeholder: "Password" },
-      { name: "department", label: "Department/Role", type: "text", placeholder: "e.g., Payroll, General Ledger" }
-    ]
-  },
+
+ staffs_accountant: {
+  type: "Accountant",
+  title: "Add Accountant",
+  fields: [
+    { name: "name", label: "Họ tên", type: "text", required: true },
+    { name: "email", label: "Email", type: "email", required: true },
+    { name: "password", label: "Mật khẩu", type: "password", required: true },
+    { name: "phoneNumber", label: "Số điện thoại", type: "text", required: true },
+    { name: "birthday", label: "Ngày sinh", type: "date", required: true },
+    { name: "hireDay", label: "Ngày tuyển dụng", type: "date", required: true }
+  ],
+},
+
 
   students: {
     type: 'Student',
     title: "Add Student",
     fields: [
-      { name: "id", label: "Student ID", type: "text", required: true, placeholder: "Student ID" },
       { name: "name", label: "Full Name", type: "text", required: true, placeholder: "Full Name" },
       { name: "birthday", label: "Birthday", type: "date", required: true },
       { name: "email", label: "Email", type: "email", required: true, placeholder: "Email" },
@@ -86,7 +81,6 @@ export const formConfigs = {
       { name: 'email', label: 'Email', type: 'email', required: true, placeholder: 'a@example.com' }
     ]
   },
-
 };
 
 export default formConfigs;
