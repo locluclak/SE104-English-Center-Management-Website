@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from 'react';
+import Select from 'react-select';
 
-import AddButton from "../Button/AddButton";
-import CreateButton from "../Button/CreateButton";
-import SaveButton from "../Button/SaveButton";
-import DeleteButton from "../Button/DeleteButton";
-import CancelButton from "../Button/CancelButton";
+import CreateButton from '../Button/CreateButton';
+import SaveButton from '../Button/SaveButton';
+import CancelButton from '../Button/CancelButton';
+import Table from '../Table/Table';
 
-import "./DynamicForm.css";
+import './DynamicForm.css';
 
 const DynamicForm = ({ formConfig, initialData, onClose, onSubmitSuccess }) => {
   if (!formConfig) {
@@ -25,40 +25,36 @@ const DynamicForm = ({ formConfig, initialData, onClose, onSubmitSuccess }) => {
   }, [initialData, formConfig]);
 
   const handleChange = (name, value) => {
-    setFormData((prevData) => ({
+    setFormData(prevData => ({
       ...prevData,
-      [name]: value,
+      [name]: value
     }));
   };
 
-  const handleDynamicListChange = (listName, index, fieldName, value) => {
-    setFormData((prevData) => {
-      const currentList = prevData[listName] ? [...prevData[listName]] : [];
-      currentList[index] = { ...currentList[index], [fieldName]: value };
-      return { ...prevData, [listName]: currentList };
-    });
+  const handleMultiSelectChange = (name, selectedOptions) => {
+    setFormData(prevData => ({
+      ...prevData,
+      [name]: selectedOptions ? selectedOptions.map(option => ({
+        id: option.id,
+        name: option.name,
+        email: option.email,
+      })) : []
+    }));
   };
 
-  const handleAddDynamicListItem = (listName, defaultItem) => {
-    setFormData((prevData) => {
-      const currentList = prevData[listName] ? [...prevData[listName]] : [];
-      return { ...prevData, [listName]: [...currentList, { ...defaultItem }] };
-    });
-  };
-
-  const handleRemoveDynamicListItem = (listName, indexToRemove) => {
-    setFormData((prevData) => {
+  const handleRemoveSelectedListItem = (listName, idToRemove) => {
+    setFormData(prevData => {
       const currentList = prevData[listName] ? [...prevData[listName]] : [];
       return {
         ...prevData,
-        [listName]: currentList.filter((_, idx) => idx !== indexToRemove),
+        [listName]: currentList.filter(item => item.id !== idToRemove)
       };
     });
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("Form submitted:", formData);
+    console.log('Form submitted:', formData);
     onSubmitSuccess(formData, !!initialData);
   };
 
@@ -155,78 +151,24 @@ const DynamicForm = ({ formConfig, initialData, onClose, onSubmitSuccess }) => {
           </div>
         </div> 
 
-        {/* Render dynamicList fields (ví dụ: students) */}
-        {formConfig.fields.map((field) => {
-          if (field.type === "dynamicList") {
-            const listName = field.name; // Ví dụ: 'students'
+        {formConfig.fields.map(field => {
+          if (field.type === 'select' && field.isMulti && field.displayFields) {
+            const listName = field.name;
             const listItems = formData[listName] || [];
-            const defaultNewItem = field.fields.reduce(
-              (acc, f) => ({ ...acc, [f.name]: "" }),
-              {}
-            );
+
+            const columns = field.displayFields.map(df => ({
+              header: df.label || df.name,
+              accessor: df.name,
+            }));
 
             return (
-              <div key={listName} className="dynamic-list-section">
-                <div className="dynamic-list-header">
-                  <label className="dynamic-list-label">{field.label}</label>
-                  <AddButton
-                    onClick={() =>
-                      handleAddDynamicListItem(listName, defaultNewItem)
-                    }
-                  >
-                    Add Student
-                  </AddButton>
-                </div>
+              <div key={listName} className="dynamic-list-section group-full-width">
                 {listItems.length > 0 ? (
                   <div className="dynamic-list-table-wrapper">
-                    <table className="dynamic-list-table">
-                      <thead>
-                        <tr>
-                          {field.fields.map((f, i) => (
-                            <th key={i}>{f.placeholder || f.name}</th>
-                          ))}
-                          <th>Action</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {listItems.map((item, idx) => (
-                          <tr key={idx}>
-                            {field.fields.map((f) => (
-                              <td key={f.name}>
-                                <input
-                                  type={f.type || "text"}
-                                  value={item[f.name] || ""}
-                                  onChange={(e) =>
-                                    handleDynamicListChange(
-                                      listName,
-                                      idx,
-                                      f.name,
-                                      e.target.value
-                                    )
-                                  }
-                                  placeholder={f.placeholder || ""}
-                                  className="dynamic-list-input"
-                                />
-                              </td>
-                            ))}
-                            <td>
-                              <DeleteButton
-                                onClick={() =>
-                                  handleRemoveDynamicListItem(listName, idx)
-                                }
-                              >
-                                Delete
-                              </DeleteButton>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                    <Table columns={columns} data={listItems} />
                   </div>
                 ) : (
-                  <p className="dynamic-list-empty-message">
-                    Chưa có mục nào được thêm.
-                  </p>
+                  <p className="dynamic-list-empty-message">Chưa có học viên nào được chọn.</p>
                 )}
               </div>
             );
@@ -236,7 +178,9 @@ const DynamicForm = ({ formConfig, initialData, onClose, onSubmitSuccess }) => {
 
         <div className="form-actions">
           {initialData ? (
-            <SaveButton type="submit">Save</SaveButton>
+            <SaveButton type="submit">
+              Save
+            </SaveButton>
           ) : (
             <CreateButton type="submit" />
           )}
