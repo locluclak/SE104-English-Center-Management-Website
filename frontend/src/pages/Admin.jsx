@@ -37,12 +37,15 @@ const normalizeClasses = (classes) =>
       teacherName,
       startDate: formatDate(cls.START_DATE),
       endDate: formatDate(cls.END_DATE),
+      startDateRaw: cls.START_DATE, // thêm để lọc theo ngày
+      endDateRaw: cls.END_DATE,
       minStu: cls.MIN_STU,
       maxStu: cls.MAX_STU,
       price: cls.PRICE,
       status: cls.STATUS || "waiting",
     };
   });
+
 
 
 const normalizeStudents = (students) =>
@@ -242,6 +245,7 @@ useEffect(() => {
             {!showForm && activeTab === "classes" && (
               <ClassesTab
                 classes={classes}
+                selectedStatus={selectedStatus}
                 onSelect={(cls) => console.log("Selected class:", cls)}
               />
             )}

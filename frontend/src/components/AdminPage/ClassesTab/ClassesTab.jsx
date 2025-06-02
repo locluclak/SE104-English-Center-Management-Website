@@ -1,9 +1,21 @@
 import React, { useState, useEffect } from "react";
 import Card from "../../common/Card/Card";
 import ClassDetail from "./ClassDetail";
-import { getCourseById, getAllCourses } from "../../../services/courseService";
+import { getAllCourses } from "../../../services/courseService";
+import { format } from "date-fns";
 
-const ClassesTab = () => {
+const formatDate = (dateStr) => {
+  if (!dateStr) return "";
+  try {
+    const date = new Date(dateStr);
+    if (isNaN(date)) return "";
+    return format(date, "dd/MM/yyyy");
+  } catch {
+    return "";
+  }
+};
+
+const ClassesTab = ({ selectedStatus = "waiting" }) => {
   const [classes, setClasses] = useState([]);
   const [selectedClass, setSelectedClass] = useState(null);
 
@@ -19,7 +31,9 @@ const ClassesTab = () => {
       startDate: data.START_DATE,
       endDate: data.END_DATE,
       description: cleanDescription,
-      teacherName
+      teacherName,
+      startDateFormatted: formatDate(data.START_DATE),
+      endDateFormatted: formatDate(data.END_DATE),
     };
   };
 
@@ -39,8 +53,19 @@ const ClassesTab = () => {
 
   const handleBack = () => {
     setSelectedClass(null);
-    fetchClasses(); // 👈 Refresh list after returning from detail
+    fetchClasses();
   };
+
+  // 🔍 Lọc lớp theo trạng thái
+  const now = new Date();
+  const filteredClasses = classes.filter((cls) => {
+    const start = new Date(cls.startDate);
+    const end = new Date(cls.endDate);
+    if (selectedStatus === "waiting") return start > now;
+    if (selectedStatus === "current") return start <= now && end >= now;
+    if (selectedStatus === "end") return end < now;
+    return true;
+  });
 
   return (
     <>
@@ -52,20 +77,24 @@ const ClassesTab = () => {
         />
       ) : (
         <div className="class-grid">
-          {classes.map((cls) => (
-            <Card
-              key={cls.id}
-              title={cls.name}
-              onClick={() => setSelectedClass(cls)}
-            >
-              <p><strong>ID:</strong> {cls.id}</p>
-              <p><strong>Giáo viên:</strong> {cls.teacherName}</p>
-              <p><strong>Trạng thái:</strong> {cls.status}</p>
-              <p><strong>Ngày bắt đầu:</strong> {cls.startDate}</p>
-              <p><strong>Ngày kết thúc:</strong> {cls.endDate}</p>
-              <p><strong>Mô tả:</strong> {cls.description || "Không có"}</p>
-            </Card>
-          ))}
+          {filteredClasses.length > 0 ? (
+            filteredClasses.map((cls) => (
+              <Card
+                key={cls.id}
+                title={cls.name}
+                onClick={() => setSelectedClass(cls)}
+              >
+                <p><strong>ID:</strong> {cls.id}</p>
+                <p><strong>Giáo viên:</strong> {cls.teacherName}</p>
+                <p><strong>Trạng thái:</strong> {cls.status}</p>
+                <p><strong>Ngày bắt đầu:</strong> {cls.startDateFormatted}</p>
+                <p><strong>Ngày kết thúc:</strong> {cls.endDateFormatted}</p>
+                <p><strong>Mô tả:</strong> {cls.description || "Không có"}</p>
+              </Card>
+            ))
+          ) : (
+            <p>Không có lớp nào thuộc trạng thái "{selectedStatus}".</p>
+          )}
         </div>
       )}
     </>
