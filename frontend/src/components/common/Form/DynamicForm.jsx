@@ -141,7 +141,15 @@ const DynamicForm = ({ formConfig, initialData, onClose, onSubmitSuccess }) => {
           <div className="group-full-width"> 
             {formConfig.fields.filter(f => f.name === 'students').map(renderFormField)}
           </div>
-        </div>
+
+          <div className="group-per-info">
+            {formConfig.fields.filter(f => ['birthday', 'specialization', 'statuses', 'department'].includes(f.name)).map(renderFormField)}
+          </div>
+
+          <div className="group-per-secret">
+            {formConfig.fields.filter(f => ['email', 'password'].includes(f.name)).map(renderFormField)}
+          </div>
+        </div> 
 
         {formConfig.fields.map(field => {
           if (field.type === 'select' && field.isMulti && field.displayFields) {
