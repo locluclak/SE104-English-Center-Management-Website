@@ -7,7 +7,7 @@ import formConfigs from "../config/formConfig";
 import { getStudentTableColumns, getTeacherTableColumns, getAccountantTableColumns } from "../config/tableConfig.jsx";
 import { fetchStudents, fetchTeachers, fetchAccountants, updatePerson} from "../services/personService";
 import { signup, createTeacher, createAccountant } from "../services/authService";
-import { getAllCourses } from "../services/courseService";
+import { getAllCourses, createCourse, updateCourse, } from "../services/courseService";
 import ClassesTab from "../components/AdminPage/ClassesTab/ClassTab.jsx";
 import { format } from "date-fns";
 
@@ -47,8 +47,6 @@ const normalizeClasses = (classes) =>
     };
   });
 
-
-
 const normalizeStudents = (students) =>
   students.map((s) => ({
     id: s.ID,
@@ -57,7 +55,6 @@ const normalizeStudents = (students) =>
     email: s.EMAIL,
     status: s.STATUS,
   }));
-
 
 const normalizeTeachers = (teachers) =>
   teachers.map((t) => ({
@@ -68,7 +65,6 @@ const normalizeTeachers = (teachers) =>
     subject: t.SUBJECT,
   }));
 
-
 const normalizeAccountants = (accountants) =>
   accountants.map((a) => ({
     id: a.ID,
@@ -77,7 +73,6 @@ const normalizeAccountants = (accountants) =>
     email: a.EMAIL,
     department: a.DEPARTMENT,
   }));
-
 
 const AdminPage = () => {
   const [activeTab, setActiveTab] = useState("classes");
@@ -88,6 +83,23 @@ const AdminPage = () => {
   const [teachers, setTeachers] = useState([]);
   const [accountants, setAccountants] = useState([]);
   const [students, setStudents] = useState([]);
+
+  // Load classes
+  useEffect(() => {
+    const fetchClassData = async () => {
+      if (activeTab !== "classes") return;
+      try {
+        const data = await getAllCourses();
+        const normalized = normalizeClasses(data);
+        setClasses(normalized);
+      } catch (err) {
+        console.error("Failed to fetch classes:", err);
+        setClasses([]);
+      }
+    };
+
+    fetchClassData();
+  }, [activeTab]);
 
   // Load staffs
   useEffect(() => {
@@ -144,8 +156,6 @@ useEffect(() => {
   fetchClassData();
 }, [activeTab]);
 
-
-
   useEffect(() => {
     setShowForm(false);
     setEditingData(null);
@@ -178,47 +188,62 @@ const handleFormSubmitSuccess = async (data, isEdit = false) => {
   const formConfig = getCurrentFormConfig();
   const type = formConfig?.type;
   if (!type) return;
-
   try {
     let newData = data;
-
     if (!isEdit) {
-  if (type === "Student") {
-    const result = await signup({
-      name: data.name,
-      email: data.email,
-      password: data.password,
-      phoneNumber: data.phoneNumber,
-      dateOfBirth: data.birthday,
-      role: "STUDENT"
-    });
-    newData = normalizeStudents([{ ...data, id: result.id }])[0];
+      if (type === "Student") {
+        const result = await signup({
+          name: data.name,
+          email: data.email,
+          password: data.password,
+          phoneNumber: data.phoneNumber,
+          dateOfBirth: data.birthday,
+          role: "STUDENT"
+        });
+        newData = normalizeStudents([{ ...data, id: result.id }])[0];
+      } else if (type === "Teacher") {
+        const result = await createTeacher({
+          name: data.name,
+          email: data.email,
+          password: data.password, // ✅ thêm password
+          phoneNumber: data.phoneNumber,
+          dateOfBirth: data.birthday,
+          hireDay: data.hireDay,
+        });
+        newData = normalizeTeachers([{ ...data }])[0];
+        alert(`Giáo viên đã được tạo.\nEmail: ${data.email}\nMật khẩu: ${data.password}`);
+      } else if (type === "Accountant") {
+        const result = await createAccountant({
+          name: data.name,
+          email: data.email,
+          password: data.password, // ✅ thêm password
+          phoneNumber: data.phoneNumber,
+          dateOfBirth: data.birthday,
+          hireDay: data.hireDay,
+        });
+        newData = normalizeAccountants([{ ...data }])[0];
+        alert(`Kế toán đã được tạo.\nEmail: ${data.email}\nMật khẩu: ${data.password}`);
+      } else if (type === "Class") {
+        const teacherName =
+          teachers.find((t) => t.ID === data.teacher)?.NAME || ""; // Giả sử `teachers` state đã được fetch
+        const description = `[Giáo viên: ${teacherName}] ${data.description}`;
 
-  } else if (type === "Teacher") {
-    const result = await createTeacher({
-      name: data.name,
-      email: data.email,
-      password: data.password, // ✅ thêm password
-      phoneNumber: data.phoneNumber,
-      dateOfBirth: data.birthday,
-      hireDay: data.hireDay,
-    });
-    newData = normalizeTeachers([{ ...data }])[0];
-    alert(`Giáo viên đã được tạo.\nEmail: ${data.email}\nMật khẩu: ${data.password}`);
-
-  } else if (type === "Accountant") {
-    const result = await createAccountant({
-      name: data.name,
-      email: data.email,
-      password: data.password, // ✅ thêm password
-      phoneNumber: data.phoneNumber,
-      dateOfBirth: data.birthday,
-      hireDay: data.hireDay,
-    });
-    newData = normalizeAccountants([{ ...data }])[0];
-    alert(`Kế toán đã được tạo.\nEmail: ${data.email}\nMật khẩu: ${data.password}`);
-  }
-}
+        const classPayload = {
+          name: data.name,
+          description,
+          startDate: data.startDate,
+          endDate: data.endDate,
+          minStu: Number(data.minStu) || 0,
+          maxStu: Number(data.maxStu) || 0,
+          price: Number(data.price) || 0,
+          status: data.status || "Waiting",
+        };
+        console.log("Creating new class with payload:", classPayload);
+        const result = await createCourse(classPayload);
+        newData = normalizeClasses([{ ...classPayload, COURSE_ID: result.id }])[0]; // ✅ Use COURSE_ID consistent with normalizeClasses
+        alert("Tạo lớp thành công!");
+      }
+    }
 
     // Cập nhật lại state
     if (type === "Student") {
@@ -247,7 +272,6 @@ const handleFormSubmitSuccess = async (data, isEdit = false) => {
     alert(`Không thể ${isEdit ? "cập nhật" : "tạo mới"} ${type.toLowerCase()}!`);
   }
 };
-
 
   const handleEdit = (data, type) => {
     setEditingData(data);

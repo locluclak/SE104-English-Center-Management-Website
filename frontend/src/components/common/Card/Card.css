@@ -1,6 +1,6 @@
 .custom-card {
-  width: 100%;       /* Fit vừa cột */
-  height: 100%;      /* Kéo cao bằng các card khác */
+  width: 22%;       
+  height: 100%;      
   box-sizing: border-box;
 
   background-color: #fff;
@@ -14,12 +14,14 @@
   cursor: pointer;
 }
 
-
-
-
 .custom-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+}
+
+.card-header {
+  display: grid;
+  grid-template-columns: 6fr 1fr;
 }
 
 .custom-card h3 {

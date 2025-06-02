@@ -25,8 +25,7 @@
 }
 
 .admin-display-area {
-  gap: 20px;
-  padding-left: 20px;
+  padding: 20px 20px;
   box-sizing: border-box;
 }
 
@@ -38,9 +37,7 @@
 
 .class-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr); /* 👈 3 cột bằng nhau */
   gap: 20px;
-  padding: 16px;
   align-items: stretch;
 }
 

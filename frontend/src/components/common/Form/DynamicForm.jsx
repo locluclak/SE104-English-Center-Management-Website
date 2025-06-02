@@ -23,8 +23,15 @@ const DynamicForm = ({ formConfig, initialData, onClose, onSubmitSuccess }) => {
   const [fields, setFields] = useState(formConfig.fields);
 
   useEffect(() => {
-    setFormData(initialData || {});
-  }, [initialData, formConfig]);
+    const defaultData = {};
+    formConfig.fields.forEach((field) => {
+      if (field.type === "hidden" && field.defaultValue !== undefined) {
+        defaultData[field.name] = field.defaultValue;
+      }
+    });
+  
+    setFormData({ ...defaultData, ...(initialData || {}) });
+  }, [initialData, formConfig]);  
 
   // ✅ Fetch dynamic student options if needed
   useEffect(() => {
@@ -109,6 +116,7 @@ const DynamicForm = ({ formConfig, initialData, onClose, onSubmitSuccess }) => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    console.log("Dữ liệu gửi đi:", formData);
     onSubmitSuccess(formData, !!initialData);
   };
 

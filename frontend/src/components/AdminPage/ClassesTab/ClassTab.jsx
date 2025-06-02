@@ -22,6 +22,7 @@ const ClassesTab = ({ selectedStatus = "waiting" }) => {
   const [classes, setClasses] = useState([]);
   const [selectedClass, setSelectedClass] = useState(null);
   const [originalClassData, setOriginalClassData] = useState(null);
+  const [editMode, setEditMode] = useState(false);
 
   const normalizeClass = (data) => {
     const match = data?.DESCRIPTION?.match(/^\[Giáo viên:\s*(.*?)\]/);
@@ -61,15 +62,22 @@ const ClassesTab = ({ selectedStatus = "waiting" }) => {
 
   const handleBack = () => {
     setSelectedClass(null);
+    setEditMode(false);
     fetchClasses();
   };
 
   const handleSelectClass = (cls) => {
     setOriginalClassData(cls.raw);
     setSelectedClass(cls);
+    setEditMode(false); // chỉ xem, không chỉnh sửa
   };
 
-  // 🔍 Lọc lớp theo trạng thái
+  const handleEditClass = (cls) => {
+    setOriginalClassData(cls.raw);
+    setSelectedClass(cls);
+    setEditMode(true); // vào chế độ chỉnh sửa
+  };
+
   const now = new Date();
   const filteredClasses = classes.filter((cls) => {
     const start = new Date(cls.startDate);
@@ -89,6 +97,7 @@ const ClassesTab = ({ selectedStatus = "waiting" }) => {
           onBack={handleBack}
           addStudentToCourse={addStudentToCourse}
           originalData={classes.find((cls) => cls.id === selectedClass.id)}
+          isEditing={editMode}
         />
       ) : (
         <div className="class-grid">
@@ -98,25 +107,14 @@ const ClassesTab = ({ selectedStatus = "waiting" }) => {
                 key={cls.id}
                 title={cls.name}
                 onClick={() => handleSelectClass(cls)}
+                onEdit={() => handleEditClass(cls)}
               >
-                <p>
-                  <strong>ID:</strong> {cls.id}
-                </p>
-                <p>
-                  <strong>Giáo viên:</strong> {cls.teacherName}
-                </p>
-                <p>
-                  <strong>Trạng thái:</strong> {cls.status}
-                </p>
-                <p>
-                  <strong>Ngày bắt đầu:</strong> {cls.startDateFormatted}
-                </p>
-                <p>
-                  <strong>Ngày kết thúc:</strong> {cls.endDateFormatted}
-                </p>
-                <p>
-                  <strong>Mô tả:</strong> {cls.description || "Không có"}
-                </p>
+                <p><strong>ID:</strong> {cls.id}</p>
+                <p><strong>Giáo viên:</strong> {cls.teacherName}</p>
+                <p><strong>Trạng thái:</strong> {cls.status}</p>
+                <p><strong>Ngày bắt đầu:</strong> {cls.startDateFormatted}</p>
+                <p><strong>Ngày kết thúc:</strong> {cls.endDateFormatted}</p>
+                <p><strong>Mô tả:</strong> {cls.description || "Không có"}</p>
               </Card>
             ))
           ) : (

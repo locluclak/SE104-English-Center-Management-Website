@@ -1,6 +1,4 @@
 .class-detail-container {
-  margin-top: 20px;
-  margin-left: 20px;
   border-radius: 16px;
   max-width: 900px;
   font-family: 'Segoe UI', sans-serif;
@@ -9,24 +7,14 @@
   flex: 1;
 }
 
-.back-btn {
-  width: fit-content;
-  background-color: #abc4ff;
-  color: black;
-  border: none;
-  padding: 8px 14px;
-  border-radius: 4px;
-  cursor: pointer;
-  margin-left: 0;
-  margin-bottom: 10px;
-}
-
 .class-info {
   background-color: #fff;
   border: 1px solid #eee;
   padding: 16px;
   border-radius: 12px;
+  margin-top: 20px;
 }
+
 .class-info p {
   margin: 4px 0;
   font-size: 16px;
@@ -145,30 +133,11 @@
   background-color: #e04848;
 }
 
-/* Form action buttons (Save/Cancel) */
 .form-actions {
   display: flex;
   justify-content: flex-end;
   gap: 12px;
   margin-top: 24px;
-}
-
-.form-actions button {
-  padding: 8px 16px;
-  font-size: 15px;
-  border-radius: 6px;
-  cursor: pointer;
-  border: none;
-}
-
-.form-actions .save-button {
-  background-color: #4caf50;
-  color: white;
-}
-
-.form-actions .cancel-button {
-  background-color: #f44336;
-  color: white;
 }
 
 .add-student-dropdown select {

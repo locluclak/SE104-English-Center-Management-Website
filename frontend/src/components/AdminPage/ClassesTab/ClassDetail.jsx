@@ -1,21 +1,29 @@
 import React, { useEffect, useState } from "react";
 import "./ClassDetail.css";
+import BackButton from "../../common/Button/BackButton"
 import DynamicForm from "../../common/Form/DynamicForm";
-import EditButton from "../../common/Button/EditButton";
 import {
   getCourseById,
+  createCourse,
   updateCourse,
   addStudentToCourse,
 } from "../../../services/courseService";
 import { fetchStudents, fetchTeachers } from "../../../services/personService";
 import { formConfigs } from "../../../config/formConfig";
 
-const ClassDetail = ({ clsId, selectedStatus, onBack, originalData }) => {
-  const [classInfo, setClassInfo] = useState(null);
-  const [students, setStudents] = useState([]);
-  const [teachers, setTeachers] = useState([]);
-  const [isEditing, setIsEditing] = useState(false);
-  const [activeTab, setActiveTab] = useState("students");
+const ClassDetail = ({
+    clsId,
+    selectedStatus,
+    onBack,
+    originalData,
+    isEditing: initialEditMode = false,
+    isNew = false,
+  }) => {
+    const [classInfo, setClassInfo] = useState(null);
+    const [students, setStudents] = useState([]);
+    const [teachers, setTeachers] = useState([]);
+    const [isEditing, setIsEditing] = useState(initialEditMode);
+    const [activeTab, setActiveTab] = useState("students");
 
   const formatDate = (isoString) => {
     if (!isoString) return "";
@@ -67,9 +75,12 @@ const ClassDetail = ({ clsId, selectedStatus, onBack, originalData }) => {
   };
 
   useEffect(() => {
-    fetchClass();
+    if (clsId) {
+      fetchClass();
+    }
     fetchAllTeachers();
-  }, [clsId]);
+    setIsEditing(initialEditMode);
+  }, [clsId, initialEditMode]);
 
   const handleEditClick = () => setIsEditing(true);
   const handleCancelEdit = () => setIsEditing(false);
@@ -120,15 +131,16 @@ const ClassDetail = ({ clsId, selectedStatus, onBack, originalData }) => {
     }
   };
 
+  if (!clsId && !isEditing) {
+    return <div>Không có thông tin lớp học.</div>;
+  }
+
   if (!classInfo) return <div>Đang tải thông tin lớp học...</div>;
 
   return (
     <div className="class-detail-container">
-      <button className="back-btn" onClick={onBack}>
-        ← Back
-      </button>
-
-      {isEditing ? (
+      <BackButton type="button" onClick={onBack}>← Back</BackButton>
+      {isEditing || !clsId ? (
         <DynamicForm
           formConfig={{
             ...formConfigs.classes,
@@ -167,7 +179,7 @@ const ClassDetail = ({ clsId, selectedStatus, onBack, originalData }) => {
             maxStu: classInfo.maxStu,
             price: classInfo.price,
           }}
-          onSubmitSuccess={handleUpdateSuccess}
+          onSubmitSuccess={isNew ? handleCreateClass : handleUpdateSuccess}
           onClose={handleCancelEdit}
         />
       ) : (
@@ -199,12 +211,6 @@ const ClassDetail = ({ clsId, selectedStatus, onBack, originalData }) => {
           <p>
             <strong>Price:</strong> {classInfo.price}đ
           </p>
-          <p>
-            <strong>Status:</strong> {classInfo.status || "Chưa cập nhật"}
-          </p>
-          <div className="edit-btn-container">
-            <EditButton onClick={handleEditClick} />
-          </div>
         </div>
       )}
 

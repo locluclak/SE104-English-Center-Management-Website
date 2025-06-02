@@ -47,8 +47,7 @@ staffs_teacher: {
   ],
 },
 
-
- staffs_accountant: {
+staffs_accountant: {
   type: "Accountant",
   title: "Add Accountant",
   fields: [
