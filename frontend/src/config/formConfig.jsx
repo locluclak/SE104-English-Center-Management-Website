@@ -17,16 +17,23 @@ export const formConfigs = {
       },
       {
         name: 'teacher', label: 'Teacher', type: 'select',
-        options: ['Mr. A', 'Ms. B', 'Mrs. C'],
+        options: ['Mr. A', 'Ms. B', 'Mrs. C'].map(t => ({ value: t, label: t })),
       },
       { name: 'startDate', label: 'Start Date', type: 'date' },
       { name: 'endDate', label: 'End Date', type: 'date' },
       {
-        name: 'students', label: 'Students Enrolled', type: 'dynamicList',
-        fields: [
-          { name: 'studentId', placeholder: 'ID', type: 'text' },
-          { name: 'name', placeholder: 'Student Name', type: 'text' },
-          { name: 'email', placeholder: 'Email', type: 'email' },
+        name: 'students', label: 'Students Enrolled', type: 'select', 
+        isMulti: true,
+        options: [
+          { value: 'S01', label: 'John Doe (S01)', id: 'S01', name: 'John Doe', email: 'john@example.com' },
+          { value: 'S02', label: 'Jane Smith (S02)', id: 'S02', name: 'Jane Smith', email: 'jane@example.com' },
+          { value: 'S03', label: 'Bob Lee (S03)', id: 'S03', name: 'Bob Lee', email: 'bob@example.com' }
+          // Thêm danh sách học viên ở đây
+        ],
+        displayFields: [
+          { name: 'id', label: 'ID', placeholder: 'ID' },
+          { name: 'name', label: 'Student Name', placeholder: 'Student Name' },
+          { name: 'email', label: 'Email', placeholder: 'Email' },
         ],
       },
       { name: "status", type: "hidden", defaultValue: "waiting" },
