@@ -33,7 +33,7 @@ export const login = async (email, password) => {
 };
 
 export const createTeacher = async (data) => {
-  const response = await fetch(`${API_URL}/staff/allocate`, {
+  const response = await fetch(`${API_URL}/allocate`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -41,7 +41,7 @@ export const createTeacher = async (data) => {
       email: data.email,
       password: data.password,
       phone_number: data.phoneNumber,
-      date_of_birth: data.birthday,
+      date_of_birth: data.dateOfBirth,
       hire_day: data.hireDay,
       staff_type: 'TEACHER',
     }),
@@ -54,7 +54,7 @@ export const createTeacher = async (data) => {
 
 
 export const createAccountant = async (data) => {
-  const response = await fetch(`${API_URL}/staff/allocate`, {
+  const response = await fetch(`${API_URL}/allocate`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -62,7 +62,7 @@ export const createAccountant = async (data) => {
       email: data.email,
       password: data.password,
       phone_number: data.phoneNumber,
-      date_of_birth: data.birthday,
+      date_of_birth: data.dateOfBirth,
       hire_day: data.hireDay,
       staff_type: 'ACCOUNTANT',
     }),

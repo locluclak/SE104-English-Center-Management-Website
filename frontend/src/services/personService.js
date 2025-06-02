@@ -43,4 +43,3 @@ export const deletePerson = async (id) => {
   if (!response.ok) throw new Error('Failed to delete person');
   return response.json();
 };
-

@@ -41,8 +41,8 @@ staffs_teacher: {
     { name: "name", label: "Họ tên", type: "text", required: true },
     { name: "email", label: "Email", type: "email", required: true },
     { name: "password", label: "Mật khẩu", type: "password", required: true },
-    { name: "phoneNumber", label: "Số điện thoại", type: "text", required: true },
-    { name: "birthday", label: "Ngày sinh", type: "date", required: true },
+    { name: "phone_number", label: "Số điện thoại", type: "text", required: true },
+    { name: "date_of_birth", label: "Ngày sinh", type: "date", required: true },
     { name: "hireDay", label: "Ngày tuyển dụng", type: "date", required: true }
   ],
 },
@@ -54,9 +54,9 @@ staffs_accountant: {
     { name: "name", label: "Họ tên", type: "text", required: true },
     { name: "email", label: "Email", type: "email", required: true },
     { name: "password", label: "Mật khẩu", type: "password", required: true },
-    { name: "phoneNumber", label: "Số điện thoại", type: "text", required: true },
-    { name: "birthday", label: "Ngày sinh", type: "date", required: true },
-    { name: "hireDay", label: "Ngày tuyển dụng", type: "date", required: true }
+    { name: "phone_number", label: "Số điện thoại", type: "text", required: true },
+    { name: "date_of_birth", label: "Ngày sinh", type: "date", required: true },
+    { name: "hireDay", label: "Hire Day", type: "date", required: true }
   ],
 },
 
