@@ -19,11 +19,19 @@ export const fetchAccountants = async () => {
 };
 
 export const updatePerson = async (id, data) => {
+  const payload = {
+    name: data.name,
+    email: data.email,
+    phone_number: data.phoneNumber || "",
+    date_of_birth: data.birthday || "",
+  };
+
   const response = await fetch(`${API_BASE_URL}/update/${id}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
+    body: JSON.stringify(payload),
   });
+
   if (!response.ok) throw new Error('Failed to update person');
   return response.json();
 };
@@ -35,3 +43,4 @@ export const deletePerson = async (id) => {
   if (!response.ok) throw new Error('Failed to delete person');
   return response.json();
 };
+

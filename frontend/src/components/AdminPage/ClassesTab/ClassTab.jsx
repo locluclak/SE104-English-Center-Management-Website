@@ -1,7 +1,10 @@
 import React, { useState, useEffect } from "react";
 import Card from "../../common/Card/Card";
 import ClassDetail from "./ClassDetail";
-import { getAllCourses } from "../../../services/courseService";
+import {
+  getAllCourses,
+  addStudentToCourse,
+} from "../../../services/courseService";
 import { format } from "date-fns";
 
 const formatDate = (dateStr) => {
@@ -18,11 +21,15 @@ const formatDate = (dateStr) => {
 const ClassesTab = ({ selectedStatus = "waiting" }) => {
   const [classes, setClasses] = useState([]);
   const [selectedClass, setSelectedClass] = useState(null);
+  const [originalClassData, setOriginalClassData] = useState(null);
 
   const normalizeClass = (data) => {
     const match = data?.DESCRIPTION?.match(/^\[Giáo viên:\s*(.*?)\]/);
-    const teacherName = match ? match[1] : 'Không rõ';
-    const cleanDescription = data?.DESCRIPTION?.replace(/^\[Giáo viên:\s*.*?\]\s*/, '');
+    const teacherName = match ? match[1] : "Không rõ";
+    const cleanDescription = data?.DESCRIPTION?.replace(
+      /^\[Giáo viên:\s*.*?\]\s*/,
+      ""
+    );
 
     return {
       id: data.COURSE_ID,
@@ -34,6 +41,7 @@ const ClassesTab = ({ selectedStatus = "waiting" }) => {
       teacherName,
       startDateFormatted: formatDate(data.START_DATE),
       endDateFormatted: formatDate(data.END_DATE),
+      raw: data,
     };
   };
 
@@ -56,6 +64,11 @@ const ClassesTab = ({ selectedStatus = "waiting" }) => {
     fetchClasses();
   };
 
+  const handleSelectClass = (cls) => {
+    setOriginalClassData(cls.raw);
+    setSelectedClass(cls);
+  };
+
   // 🔍 Lọc lớp theo trạng thái
   const now = new Date();
   const filteredClasses = classes.filter((cls) => {
@@ -74,6 +87,8 @@ const ClassesTab = ({ selectedStatus = "waiting" }) => {
           clsId={selectedClass.id}
           selectedStatus={selectedClass.status}
           onBack={handleBack}
+          addStudentToCourse={addStudentToCourse}
+          originalData={classes.find((cls) => cls.id === selectedClass.id)}
         />
       ) : (
         <div className="class-grid">
@@ -82,14 +97,26 @@ const ClassesTab = ({ selectedStatus = "waiting" }) => {
               <Card
                 key={cls.id}
                 title={cls.name}
-                onClick={() => setSelectedClass(cls)}
+                onClick={() => handleSelectClass(cls)}
               >
-                <p><strong>ID:</strong> {cls.id}</p>
-                <p><strong>Giáo viên:</strong> {cls.teacherName}</p>
-                <p><strong>Trạng thái:</strong> {cls.status}</p>
-                <p><strong>Ngày bắt đầu:</strong> {cls.startDateFormatted}</p>
-                <p><strong>Ngày kết thúc:</strong> {cls.endDateFormatted}</p>
-                <p><strong>Mô tả:</strong> {cls.description || "Không có"}</p>
+                <p>
+                  <strong>ID:</strong> {cls.id}
+                </p>
+                <p>
+                  <strong>Giáo viên:</strong> {cls.teacherName}
+                </p>
+                <p>
+                  <strong>Trạng thái:</strong> {cls.status}
+                </p>
+                <p>
+                  <strong>Ngày bắt đầu:</strong> {cls.startDateFormatted}
+                </p>
+                <p>
+                  <strong>Ngày kết thúc:</strong> {cls.endDateFormatted}
+                </p>
+                <p>
+                  <strong>Mô tả:</strong> {cls.description || "Không có"}
+                </p>
               </Card>
             ))
           ) : (

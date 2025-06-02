@@ -2,35 +2,37 @@ import React, { useEffect, useState } from "react";
 import "./ClassDetail.css";
 import DynamicForm from "../../common/Form/DynamicForm";
 import EditButton from "../../common/Button/EditButton";
-import { getCourseById, updateCourse } from "../../../services/courseService";
+import {
+  getCourseById,
+  updateCourse,
+  addStudentToCourse,
+} from "../../../services/courseService";
 import { fetchStudents, fetchTeachers } from "../../../services/personService";
+import { formConfigs } from "../../../config/formConfig";
 
-const ClassDetail = ({ clsId, selectedStatus, onBack }) => {
+const ClassDetail = ({ clsId, selectedStatus, onBack, originalData }) => {
   const [classInfo, setClassInfo] = useState(null);
   const [students, setStudents] = useState([]);
-  const [availableStudents, setAvailableStudents] = useState([]);
-  const [selectedStudentId, setSelectedStudentId] = useState("");
-  const [showAddStudent, setShowAddStudent] = useState(false);
+  const [teachers, setTeachers] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
   const [activeTab, setActiveTab] = useState("students");
-  const [teachers, setTeachers] = useState([]);
 
   const formatDate = (isoString) => {
     if (!isoString) return "";
     const date = new Date(isoString);
-    return new Intl.DateTimeFormat("vi-VN").format(date); // Format to dd/MM/yyyy
+    return new Intl.DateTimeFormat("vi-VN").format(date);
   };
 
   const normalizeClassData = (data) => {
-    const match = data?.DESCRIPTION?.match(/^\[Giáo viên:\s*(.*?)\]\s*/);
-    const teacherName = match ? match[1] : "Không rõ";
+    const match = data?.DESCRIPTION?.match(
+      /^[\u005B\u005D\u005C\s\u005C\w\u005C\u00E0-\u1EF9]+:(.*?)\]\s*/
+    );
+    const teacherName = match ? match[1].trim() : "Không rõ";
     const cleanDescription = data?.DESCRIPTION?.replace(
-      /^\[Giáo viên:\s*.*?\]\s*/,
+      /^[\u005B\u005D\u005C\s\u005C\w\u005C\u00E0-\u1EF9]+:.*?\]\s*/,
       ""
     );
-
     return {
-      id: data?.COURSE_ID || "",
       name: data?.NAME || "",
       teacherName,
       description: cleanDescription,
@@ -55,17 +57,6 @@ const ClassDetail = ({ clsId, selectedStatus, onBack }) => {
     }
   };
 
-  const fetchAvailableStudents = async () => {
-    try {
-      const all = await fetchStudents();
-      const currentIds = students.map((s) => s.ID);
-      const filtered = all.filter((s) => !currentIds.includes(s.ID));
-      setAvailableStudents(filtered);
-    } catch (err) {
-      console.error("Failed to fetch students:", err);
-    }
-  };
-
   const fetchAllTeachers = async () => {
     try {
       const data = await fetchTeachers();
@@ -80,36 +71,47 @@ const ClassDetail = ({ clsId, selectedStatus, onBack }) => {
     fetchAllTeachers();
   }, [clsId]);
 
-  useEffect(() => {
-    fetchAvailableStudents();
-  }, [students]);
-
-  const handleSelectStudent = async () => {
-    const selected = availableStudents.find((s) => s.ID === selectedStudentId);
-    if (selected && !students.find((s) => s.ID === selected.ID)) {
-      const updatedStudents = [...students, selected];
-      try {
-        await updateCourse(clsId, { ...classInfo, students: updatedStudents });
-        setStudents(updatedStudents);
-        setSelectedStudentId("");
-        setShowAddStudent(false);
-      } catch (err) {
-        console.error("Failed to add student:", err);
-        alert("Không thể thêm học viên vào lớp.");
-      }
-    }
-  };
-
   const handleEditClick = () => setIsEditing(true);
   const handleCancelEdit = () => setIsEditing(false);
 
   const handleUpdateSuccess = async (updatedData) => {
     try {
-      await updateCourse(clsId, {
-        ...updatedData,
-        students,
-        teacherName: updatedData.teacherName,
-      });
+      const teacherName =
+        teachers.find((t) => t.ID === updatedData.teacher)?.NAME ||
+        updatedData.teacher;
+      const description = `[Giáo viên: ${teacherName}] ${
+        updatedData.description || ""
+      }`;
+
+      const payload = {
+        name: updatedData.name,
+        description,
+        startDate: updatedData.startDate,
+        endDate: updatedData.endDate,
+        minStu: Number(updatedData.minStu) || 0,
+        maxStu: Number(updatedData.maxStu) || 0,
+        price: Number(updatedData.price) || 0,
+        teacherName,
+      };
+
+      console.log("Sending update payload:", payload);
+      await updateCourse(clsId, payload);
+
+      const newStudents = updatedData.students || [];
+      const oldStudents = originalData?.raw?.STUDENTS || [];
+      const added = newStudents.filter(
+        (ns) => !oldStudents.some((os) => os.ID === ns.id)
+      );
+
+      for (const stu of added) {
+        await addStudentToCourse({
+          studentId: stu.id,
+          courseId: clsId,
+          paymentType: "UNPAID",
+          paymentDescription: "Auto added during update",
+        });
+      }
+
       await fetchClass();
       setIsEditing(false);
     } catch (err) {
@@ -129,38 +131,41 @@ const ClassDetail = ({ clsId, selectedStatus, onBack }) => {
       {isEditing ? (
         <DynamicForm
           formConfig={{
-            type: "Class",
-            fields: [
-              { name: "id", label: "ID", type: "text", disabled: true },
-              { name: "name", label: "Name", type: "text", required: true },
-              {
-                name: "teacherName",
-                label: "Teacher",
-                type: "select",
-                required: true,
-                options: teachers.map((t) => ({
-                  label: t.NAME,
-                  value: t.NAME,
-                })),
-              },
-              { name: "description", label: "Description", type: "textarea" },
-              {
-                name: "startDate",
-                label: "Start Date",
-                type: "datetime-local",
-              },
-              { name: "endDate", label: "End Date", type: "datetime-local" },
-              { name: "minStu", label: "Min Students", type: "number" },
-              { name: "maxStu", label: "Max Students", type: "number" },
-              { name: "price", label: "Price", type: "number" },
-              { name: "status", label: "Status", type: "text" },
-            ],
+            ...formConfigs.classes,
+            title: `Edit Class: ${classInfo.name}`,
+            fields: formConfigs.classes.fields.map((f) => {
+              if (f.name === "teacher") {
+                return {
+                  ...f,
+                  options: teachers.map((t) => ({
+                    value: t.ID,
+                    label: `${t.NAME} (${t.ID})`,
+                    id: t.ID,
+                    name: t.NAME,
+                    email: t.EMAIL,
+                  })),
+                };
+              }
+              return f;
+            }),
           }}
           initialData={{
-            ...classInfo,
-            startDate: classInfo.startDate?.slice(0, 16),
-            endDate: classInfo.endDate?.slice(0, 16),
-            teacherName: classInfo.teacherName || "",
+            name: classInfo.name,
+            description: classInfo.description,
+            teacher:
+              teachers.find((t) => t.NAME === classInfo.teacherName)?.ID ||
+              "",
+            startDate: classInfo.startDate?.slice(0, 10),
+            endDate: classInfo.endDate?.slice(0, 10),
+            students: classInfo.students.map((s) => ({
+              id: s.ID,
+              name: s.NAME,
+              email: s.EMAIL,
+            })),
+            status: classInfo.status,
+            minStu: classInfo.minStu,
+            maxStu: classInfo.maxStu,
+            price: classInfo.price,
           }}
           onSubmitSuccess={handleUpdateSuccess}
           onClose={handleCancelEdit}
@@ -170,9 +175,6 @@ const ClassDetail = ({ clsId, selectedStatus, onBack }) => {
           <div className="info-header">
             <h2>{classInfo.name}</h2>
           </div>
-          <p>
-            <strong>ID:</strong> {classInfo.id}
-          </p>
           <p>
             <strong>Name:</strong> {classInfo.name}
           </p>
@@ -188,7 +190,6 @@ const ClassDetail = ({ clsId, selectedStatus, onBack }) => {
           <p>
             <strong>End Date:</strong> {formatDate(classInfo.endDate)}
           </p>
-
           <p>
             <strong>Min Students:</strong> {classInfo.minStu}
           </p>

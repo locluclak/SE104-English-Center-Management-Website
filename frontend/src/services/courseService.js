@@ -69,3 +69,5 @@ export const updateCourse = async (courseId, updateData) => {
   if (!response.ok) throw new Error('Failed to update course');
   return response.json();
 };
+
+

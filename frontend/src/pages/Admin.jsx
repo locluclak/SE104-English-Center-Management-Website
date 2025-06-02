@@ -5,9 +5,10 @@ import Table from "../components/common/Table/Table";
 import DynamicForm from "../components/common/Form/DynamicForm";
 import formConfigs from "../config/formConfig";
 import { getStudentTableColumns, getTeacherTableColumns, getAccountantTableColumns } from "../config/tableConfig.jsx";
-import { fetchStudents, fetchTeachers, fetchAccountants } from "../services/personService";
+import { fetchStudents, fetchTeachers, fetchAccountants, updatePerson} from "../services/personService";
+import { signup, createTeacher, createAccountant } from "../services/authService";
 import { getAllCourses } from "../services/courseService";
-import ClassesTab from "../components/AdminPage/ClassesTab/ClassesTab.jsx";
+import ClassesTab from "../components/AdminPage/ClassesTab/ClassTab.jsx";
 import { format } from "date-fns";
 
 import "./Admin.css";
@@ -173,25 +174,67 @@ useEffect(() => {
     return formConfigs[activeTab];
   }, [activeTab, selectedStatus]);
 
-  const handleFormSubmitSuccess = (data, isEdit = false) => {
-    const formConfig = getCurrentFormConfig();
-    const type = formConfig?.type;
-    if (!type) return;
+const handleFormSubmitSuccess = async (data, isEdit = false) => {
+  const formConfig = getCurrentFormConfig();
+  const type = formConfig?.type;
+  if (!type) return;
 
+  try {
+    let newData = data;
+
+    if (!isEdit) {
+  if (type === "Student") {
+    const result = await signup({
+      name: data.name,
+      email: data.email,
+      password: data.password,
+      phoneNumber: data.phoneNumber,
+      dateOfBirth: data.birthday,
+      role: "STUDENT"
+    });
+    newData = normalizeStudents([{ ...data, id: result.id }])[0];
+
+  } else if (type === "Teacher") {
+    const result = await createTeacher({
+      name: data.name,
+      email: data.email,
+      password: data.password, // ✅ thêm password
+      phoneNumber: data.phoneNumber,
+      dateOfBirth: data.birthday,
+      hireDay: data.hireDay,
+    });
+    newData = normalizeTeachers([{ ...data }])[0];
+    alert(`Giáo viên đã được tạo.\nEmail: ${data.email}\nMật khẩu: ${data.password}`);
+
+  } else if (type === "Accountant") {
+    const result = await createAccountant({
+      name: data.name,
+      email: data.email,
+      password: data.password, // ✅ thêm password
+      phoneNumber: data.phoneNumber,
+      dateOfBirth: data.birthday,
+      hireDay: data.hireDay,
+    });
+    newData = normalizeAccountants([{ ...data }])[0];
+    alert(`Kế toán đã được tạo.\nEmail: ${data.email}\nMật khẩu: ${data.password}`);
+  }
+}
+
+    // Cập nhật lại state
     if (type === "Student") {
       setStudents((prev) =>
-        isEdit ? prev.map((s) => (s.id === data.id ? data : s)) : [...prev, data]
+        isEdit ? prev.map((s) => (s.id === newData.id ? newData : s)) : [...prev, newData]
       );
     } else if (type === "Teacher") {
       setTeachers((prev) =>
-        isEdit ? prev.map((t) => (t.id === data.id ? data : t)) : [...prev, data]
+        isEdit ? prev.map((t) => (t.id === newData.id ? newData : t)) : [...prev, newData]
       );
     } else if (type === "Accountant") {
       setAccountants((prev) =>
-        isEdit ? prev.map((a) => (a.id === data.id ? data : a)) : [...prev, data]
+        isEdit ? prev.map((a) => (a.id === newData.id ? newData : a)) : [...prev, newData]
       );
     } else if (type === "Class") {
-      const newClass = { ...data, status: data.status || "waiting" };
+      const newClass = { ...newData, status: newData.status || "waiting" };
       setClasses((prev) =>
         isEdit ? prev.map((cls) => (cls.id === newClass.id ? newClass : cls)) : [...prev, newClass]
       );
@@ -199,7 +242,12 @@ useEffect(() => {
 
     setShowForm(false);
     setEditingData(null);
-  };
+  } catch (err) {
+    console.error(`Lỗi khi xử lý ${type}:`, err);
+    alert(`Không thể ${isEdit ? "cập nhật" : "tạo mới"} ${type.toLowerCase()}!`);
+  }
+};
+
 
   const handleEdit = (data, type) => {
     setEditingData(data);
