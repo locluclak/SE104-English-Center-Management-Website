@@ -6,7 +6,7 @@ const BaseButton = ({
   children,
   className = '',
   disabled = false,
-  type = 'button', // ⚠️ tránh bị mặc định là "submit" trong form
+  type = 'button',
 }) => {
   return (
     <button
