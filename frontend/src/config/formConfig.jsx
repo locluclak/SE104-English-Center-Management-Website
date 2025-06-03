@@ -34,32 +34,31 @@ export const formConfigs = {
     ],
   },
 
-staffs_teacher: {
-  type: "Teacher",
-  title: "Add Teacher",
-  fields: [
-    { name: "name", label: "Họ tên", type: "text", required: true },
-    { name: "email", label: "Email", type: "email", required: true },
-    { name: "password", label: "Mật khẩu", type: "password", required: true },
-    { name: "phoneNumber", label: "Số điện thoại", type: "text", required: true },
-    { name: "birthday", label: "Ngày sinh", type: "date", required: true },
-    { name: "hireDay", label: "Ngày tuyển dụng", type: "date", required: true }
-  ],
-},
+  staffs_teacher: {
+    type: "Teacher",
+    title: "Add Teacher",
+    fields: [
+      { name: "name", label: "Họ tên", type: "text", required: true },
+      { name: "email", label: "Email", type: "email", required: true },
+      { name: "password", label: "Mật khẩu", type: "password", required: true },
+      { name: "phone_number", label: "Số điện thoại", type: "text", required: true },
+      { name: "date_of_birth", label: "Ngày sinh", type: "date", required: true },
+      { name: "hireDay", label: "Ngày tuyển dụng", type: "date", required: true }
+    ],
+  },
 
-
- staffs_accountant: {
-  type: "Accountant",
-  title: "Add Accountant",
-  fields: [
-    { name: "name", label: "Họ tên", type: "text", required: true },
-    { name: "email", label: "Email", type: "email", required: true },
-    { name: "password", label: "Mật khẩu", type: "password", required: true },
-    { name: "phoneNumber", label: "Số điện thoại", type: "text", required: true },
-    { name: "birthday", label: "Ngày sinh", type: "date", required: true },
-    { name: "hireDay", label: "Ngày tuyển dụng", type: "date", required: true }
-  ],
-},
+  staffs_accountant: {
+    type: "Accountant",
+    title: "Add Accountant",
+    fields: [
+      { name: "name", label: "Họ tên", type: "text", required: true },
+      { name: "email", label: "Email", type: "email", required: true },
+      { name: "password", label: "Mật khẩu", type: "password", required: true },
+      { name: "phone_number", label: "Số điện thoại", type: "text", required: true },
+      { name: "date_of_birth", label: "Ngày sinh", type: "date", required: true },
+      { name: "hireDay", label: "Hire Day", type: "date", required: true }
+    ],
+  },
 
 
   students: {
@@ -67,9 +66,10 @@ staffs_teacher: {
     title: "Add Student",
     fields: [
       { name: "name", label: "Full Name", type: "text", required: true, placeholder: "Full Name" },
-      { name: "birthday", label: "Birthday", type: "date", required: true },
+      { name: "date_of_birth", label: "Birthday", type: "date", required: true },
       { name: "email", label: "Email", type: "email", required: true, placeholder: "Email" },
       { name: "password", label: "Password", type: "password", required: true, placeholder: "Password" },
+      { name: "phone_number", label: "Số điện thoại", type: "text", required: true },
       { name: "statuses", label: "Status", type: "select", options: ["Enrolled", "Unenroll"], required: true }
     ]
   },

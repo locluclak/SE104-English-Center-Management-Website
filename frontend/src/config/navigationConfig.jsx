@@ -1,4 +1,3 @@
-import React from 'react';
 import {
   FaHome, FaBookOpen, FaCalendarAlt, FaStickyNote, FaChild,
   FaMoneyCheckAlt, FaFileInvoiceDollar, FaRegClock, FaReceipt,
@@ -33,11 +32,9 @@ export const itemsByRole = {
     ],
   },
   student: {
-    home: [
-    ],
     courses: [
+      { key: 'home', name: 'Home', icon: <FaHome /> },
       { key: 'my-courses', name: 'My Courses', icon: <FaBookOpen /> },
-      { key: 'waiting', name: 'Waiting', icon: <FaSpinner /> },
     ],
     dashboard: [
       { key: 'calendar', name: 'Calendar', icon: <FaCalendarAlt /> },

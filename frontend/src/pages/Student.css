@@ -1,3 +1,4 @@
+/* Student.css - Full màn hình */
 .student-page {
   display: flex;
   flex-direction: column;
@@ -13,7 +14,6 @@
   flex: 1;
   min-height: 0; /* Fix cho trình duyệt Firefox */
   width: 100%;
-  padding-top: 60px;
 }
 
 .content {

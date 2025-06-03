@@ -9,24 +9,24 @@ import {
   getAccountantTableColumns,
 } from "../config/tableConfig.jsx";
 
-import HomeContent from '../components/layout/HomeContent/HomeContent';
-import CourseSection from "../components/layout/Course/CourseSection/CourseSection";
+import HomeTab from "../components/StudentPage/CoursesTab/HomeTab";
+import MyCoursesTab from "../components/StudentPage/CoursesTab/MyCoursesTab";
 import Calendar from '../components/DashboardTab/CalendarTab';
 import Padlet from '../components/DashboardTab/PadletTab';
 
-import CourseDetail from '../components/layout/Course/CourseDetail/CourseDetail';
-import CourseProgress from '../components/layout/Course/CourseProgress/CourseProgress';
+import CourseDetail from '../components/StudentPage/CoursesTab/CourseDetail';
+import CourseProgress from '../components/StudentPage/CoursesTab/CourseProgress';
 
 import './Student.css';
 
 const StudentPage = () => {
-  const [activeTab, setActiveTab] = useState('home');
+  const [activeTab, setActiveTab] = useState('courses');
   const [selectedClass, setSelectedClass] = useState(null);
-  const [selectedFeature, setSelectedFeature] = useState('my-course');
+  const [selectedFeature, setSelectedFeature] = useState('home');
 
   useEffect(() => {
     if (activeTab === 'courses') {
-      setSelectedFeature('my-course');
+      setSelectedFeature('home');
     } else if (activeTab === 'dashboard') {
       setSelectedFeature('calendar');
     }
@@ -51,71 +51,40 @@ const StudentPage = () => {
       <Header role="student" activeTab={activeTab} setActiveTab={setActiveTab} />
 
       <div className="student-body">
-        {activeTab === 'home' && (
-          <div className="home-container">
-            <HomeContent handleClassClick={handleClassClick} />
-          </div>
-        )}
+        <SidebarSearch 
+          role="student"
+          activeTab={activeTab}
+          onSearch={handleFeatureSelect}
+          onNew={handleNew}
+        />
 
-        {activeTab !== 'home' && (
-          <>
-            <SidebarSearch 
-              role="student"
-              activeTab={activeTab}
-              onSearch={handleFeatureSelect}
-              onNew={handleNew}
-            />
-
-            <div className="content">          
-              {activeTab === 'courses' && (
-                <div className="course-display-area"> 
-                  {selectedFeature === 'my-courses' && (
-                    selectedClass ? (
-                      <>
-                        <CourseDetail
-                          className={selectedClass}
-                          onBack={() => setSelectedClass(null)}
-                        />
-                        <CourseProgress className={selectedClass} />
-                      </>
-                    ) : (
-                      <CourseSection
-                        title="Khoá học của tôi"
-                        classList={['My Class 1', 'My Class 2', 'My Class 3']}
-                        onClassClick={handleClassClick}
-                      />
-                    )
-                  )}
-
-                  {selectedFeature === 'waiting' && (
-                    selectedClass ? (
-                      <>
-                        <CourseDetail
-                          className={selectedClass}
-                          onBack={() => setSelectedClass(null)}
-                        />
-                        <CourseProgress className={selectedClass} />
-                      </>
-                    ) : (
-                      <CourseSection
-                        title="Khoá học đang chờ"
-                        classList={['Waiting Class 1', 'Waiting Class 2']}
-                        onClassClick={handleClassClick}
-                      />
-                    )
-                  )}
-                </div>
-              )}
-
-              {activeTab === 'dashboard' && (
-                <div>
-                  {selectedFeature === 'calendar' && <Calendar />}
-                  {selectedFeature === 'padlet' && <Padlet />}
-                </div>
+        <div className="content">
+          {activeTab === 'courses' && (
+          <div className="course-display-area"> 
+              {selectedClass ? (
+                <>
+                  <CourseDetail
+                    className={selectedClass}
+                    onBack={() => setSelectedClass(null)}
+                  />
+                  <CourseProgress className={selectedClass} />
+                </>
+              ) : (
+                <>
+                  {selectedFeature === 'home' && <HomeTab handleClassClick={handleClassClick} />}
+                  {selectedFeature === 'my-courses' && <MyCoursesTab handleClassClick={handleClassClick} />}
+                </>
               )}
             </div>
-          </>
-        )}
+          )}
+
+          {activeTab === 'dashboard' && (
+            <div>
+              {selectedFeature === 'calendar' && <Calendar />}
+              {selectedFeature === 'padlet' && <Padlet />}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

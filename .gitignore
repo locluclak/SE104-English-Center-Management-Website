@@ -4,7 +4,7 @@
 /frontend/dist
 
 # Backend
-/backend
-
+/backend/node_modules
+/backend/package-lock.json
 # General
 .env

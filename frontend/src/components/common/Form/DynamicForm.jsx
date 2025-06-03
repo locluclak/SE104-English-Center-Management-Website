@@ -1,12 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import Select from 'react-select';
+import React, { useState, useEffect } from "react";
+import Select from "react-select";
 
-import CreateButton from '../Button/CreateButton';
-import SaveButton from '../Button/SaveButton';
-import CancelButton from '../Button/CancelButton';
-import Table from '../Table/Table';
+import CreateButton from "../Button/CreateButton";
+import SaveButton from "../Button/SaveButton";
+import CancelButton from "../Button/CancelButton";
+import Table from "../Table/Table";
 
-import './DynamicForm.css';
+import "./DynamicForm.css";
+import { fetchStudents, fetchTeachers } from "../../../services/personService";
 
 const DynamicForm = ({ formConfig, initialData, onClose, onSubmitSuccess }) => {
   if (!formConfig) {
@@ -19,49 +20,108 @@ const DynamicForm = ({ formConfig, initialData, onClose, onSubmitSuccess }) => {
   }
 
   const [formData, setFormData] = useState(initialData || {});
+  const [fields, setFields] = useState(formConfig.fields);
 
   useEffect(() => {
-    setFormData(initialData || {});
-  }, [initialData, formConfig]);
+    const defaultData = {};
+    formConfig.fields.forEach((field) => {
+      if (field.type === "hidden" && field.defaultValue !== undefined) {
+        defaultData[field.name] = field.defaultValue;
+      }
+    });
+  
+    setFormData({ ...defaultData, ...(initialData || {}) });
+  }, [initialData, formConfig]);  
+
+  // ✅ Fetch dynamic student options if needed
+  useEffect(() => {
+    const fetchDynamicOptions = async () => {
+      const updated = await Promise.all(
+        formConfig.fields.map(async (field) => {
+          // ✅ Fetch học viên
+          if (
+            field.name === "students" &&
+            field.type === "select" &&
+            field.isMulti &&
+            field.options.length === 0
+          ) {
+            try {
+              const students = await fetchStudents();
+              return {
+                ...field,
+                options: students.map((s) => ({
+                  value: s.ID,
+                  label: `${s.NAME} (${s.ID})`,
+                  id: s.ID,
+                  name: s.NAME,
+                  email: s.EMAIL,
+                })),
+              };
+            } catch (err) {
+              console.error("Lỗi khi fetch học viên:", err);
+            }
+          }
+
+          // ✅ Fetch giáo viên
+          if (
+            field.name === "teacher" &&
+            field.type === "select" &&
+            field.options.length === 0
+          ) {
+            try {
+              const teachers = await fetchTeachers();
+              return {
+                ...field,
+                options: teachers.map((t) => ({
+                  value: t.ID,
+                  label: `${t.NAME} (${t.ID})`,
+                  id: t.ID,
+                  name: t.NAME,
+                  email: t.EMAIL,
+                })),
+              };
+            } catch (err) {
+              console.error("Lỗi khi fetch giáo viên:", err);
+            }
+          }
+
+          return field;
+        })
+      );
+      setFields(updated);
+    };
+
+    fetchDynamicOptions();
+  }, [formConfig]);
 
   const handleChange = (name, value) => {
-    setFormData(prevData => ({
+    setFormData((prevData) => ({
       ...prevData,
-      [name]: value
+      [name]: value,
     }));
   };
 
   const handleMultiSelectChange = (name, selectedOptions) => {
-    setFormData(prevData => ({
+    setFormData((prevData) => ({
       ...prevData,
-      [name]: selectedOptions ? selectedOptions.map(option => ({
-        id: option.id,
-        name: option.name,
-        email: option.email,
-      })) : []
+      [name]: selectedOptions
+        ? selectedOptions.map((option) => ({
+            id: option.id,
+            name: option.name,
+            email: option.email,
+          }))
+        : [],
     }));
-  };
-
-  const handleRemoveSelectedListItem = (listName, idToRemove) => {
-    setFormData(prevData => {
-      const currentList = prevData[listName] ? [...prevData[listName]] : [];
-      return {
-        ...prevData,
-        [listName]: currentList.filter(item => item.id !== idToRemove)
-      };
-    });
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log('Form submitted:', formData);
+    console.log("Dữ liệu gửi đi:", formData);
     onSubmitSuccess(formData, !!initialData);
   };
 
   const renderFormField = (field) => {
-    if (field.name === 'status' || field.type === 'hidden') {
-      return null;
-    }
+    if (field.name === "status" || field.type === "hidden") return null;
 
     const value = formData[field.name];
 
@@ -71,36 +131,42 @@ const DynamicForm = ({ formConfig, initialData, onClose, onSubmitSuccess }) => {
           {field.label}
           {field.required && <span className="form-required"> (*) </span>}
         </label>
-        {field.type === 'select' ? (
+
+        {field.type === "select" ? (
           <Select
             id={field.name}
             name={field.name}
-            options={(field.options || [])}
+            options={field.options || []}
             isMulti={field.isMulti}
             value={
               field.isMulti
-                ? (value || []).map(valItem => (
-                    field.options.find(opt => opt.value === valItem.id) || { value: valItem.id, label: valItem.name, ...valItem }
-                  ))
-                : (field.options || []).find(opt => opt.value === value) || null
+                ? (value || []).map(
+                    (valItem) =>
+                      field.options.find((opt) => opt.value === valItem.id) || {
+                        value: valItem.id,
+                        label: valItem.name,
+                        ...valItem,
+                      }
+                  )
+                : field.options.find((opt) => opt.value === value) || null
             }
             onChange={(selectedOption) => {
               if (field.isMulti) {
                 handleMultiSelectChange(field.name, selectedOption);
               } else {
-                handleChange(field.name, selectedOption?.value || '');
+                handleChange(field.name, selectedOption?.value || "");
               }
             }}
             className="react-select-container"
             classNamePrefix="react-select"
           />
-        ) : field.type === 'textarea' ? (
+        ) : field.type === "textarea" ? (
           <textarea
             id={field.name}
             name={field.name}
             rows={field.rows || 3}
-            placeholder={field.placeholder || ''}
-            value={value || ''}
+            placeholder={field.placeholder || ""}
+            value={value || ""}
             onChange={(e) => handleChange(field.name, e.target.value)}
             required={field.required}
             className="form-input form-textarea"
@@ -109,9 +175,9 @@ const DynamicForm = ({ formConfig, initialData, onClose, onSubmitSuccess }) => {
           <input
             id={field.name}
             name={field.name}
-            type={field.type || 'text'}
-            placeholder={field.placeholder || ''}
-            value={value || ''}
+            type={field.type || "text"}
+            placeholder={field.placeholder || ""}
+            value={value || ""}
             onChange={(e) => handleChange(field.name, e.target.value)}
             required={field.required}
             className="form-input"
@@ -124,51 +190,77 @@ const DynamicForm = ({ formConfig, initialData, onClose, onSubmitSuccess }) => {
   return (
     <div className="dynamic-form-overlay">
       <form className="dynamic-form-container" onSubmit={handleSubmit}>
-
         <div className="form-grid">
           <div className="group-with-two">
-            {formConfig.fields.filter(f => ['id', 'name'].includes(f.name)).map(renderFormField)}
+            {fields
+              .filter((f) => ["name", "phone_number"].includes(f.name))
+              .map(renderFormField)}
           </div>
-
           <div className="group-with-three">
-            {formConfig.fields.filter(f => ['teacher', 'startDate', 'endDate'].includes(f.name)).map(renderFormField)}
+            {fields
+              .filter((f) =>
+                [
+                  "teacher",
+                  "startDate",
+                  "endDate",
+                  "minStu",
+                  "maxStu",
+                  "price",
+                ].includes(f.name)
+              )
+              .map(renderFormField)}
           </div>
 
           <div className="group-des">
-            {formConfig.fields.filter(f => f.name === 'description').map(renderFormField)}
+            {fields
+              .filter((f) => f.name === "description")
+              .map(renderFormField)}
           </div>
-
-          <div className="group-full-width"> 
-            {formConfig.fields.filter(f => f.name === 'students').map(renderFormField)}
+          <div className="group-full-width">
+            {fields.filter((f) => f.name === "students").map(renderFormField)}
           </div>
-
           <div className="group-per-info">
-            {formConfig.fields.filter(f => ['birthday', 'specialization', 'statuses', 'department'].includes(f.name)).map(renderFormField)}
+            {fields
+              .filter((f) =>
+                [
+                  "date_of_birth",
+                  "specialization",
+                  "hireDay", 
+                ].includes(f.name)
+              )
+              .map(renderFormField)}
           </div>
 
           <div className="group-per-secret">
-            {formConfig.fields.filter(f => ['email', 'password'].includes(f.name)).map(renderFormField)}
+            {fields
+              .filter((f) => ["email", "password"].includes(f.name))
+              .map(renderFormField)}
           </div>
-        </div> 
+        </div>
 
-        {formConfig.fields.map(field => {
-          if (field.type === 'select' && field.isMulti && field.displayFields) {
+        {fields.map((field) => {
+          if (field.type === "select" && field.isMulti && field.displayFields) {
             const listName = field.name;
             const listItems = formData[listName] || [];
 
-            const columns = field.displayFields.map(df => ({
+            const columns = field.displayFields.map((df) => ({
               header: df.label || df.name,
               accessor: df.name,
             }));
 
             return (
-              <div key={listName} className="dynamic-list-section group-full-width">
+              <div
+                key={listName}
+                className="dynamic-list-section group-full-width"
+              >
                 {listItems.length > 0 ? (
                   <div className="dynamic-list-table-wrapper">
                     <Table columns={columns} data={listItems} />
                   </div>
                 ) : (
-                  <p className="dynamic-list-empty-message">Chưa có học viên nào được chọn.</p>
+                  <p className="dynamic-list-empty-message">
+                    Chưa có học viên nào được chọn.
+                  </p>
                 )}
               </div>
             );
@@ -178,9 +270,7 @@ const DynamicForm = ({ formConfig, initialData, onClose, onSubmitSuccess }) => {
 
         <div className="form-actions">
           {initialData ? (
-            <SaveButton type="submit">
-              Save
-            </SaveButton>
+            <SaveButton type="submit">Save</SaveButton>
           ) : (
             <CreateButton type="submit" />
           )}

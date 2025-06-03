@@ -9,19 +9,41 @@ function Login() {
   const [error, setError] = useState('');
   const navigate = useNavigate();
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setError('');
 
-    try {
-      const data = await login(email, password);
-      localStorage.setItem('token', data.token);
-      alert('Login successful!');
-      navigate('/courses');
-    } catch (err) {
-      setError(err.message);
+  try {
+    const data = await login(email, password);
+    let role = "";
+    if (data.staff && data.staff.staff_type) {
+      role = data.staff.staff_type.toUpperCase();
+    } else if (data.role) {
+      role = data.role.toUpperCase();
+    } else {
+      throw new Error("Missing role in response");
     }
-  };
+
+    localStorage.setItem("role", role);
+    localStorage.setItem("token", data.token);
+
+    console.log('Role saved to localStorage:', role);  // <-- Check đây
+
+    if (role === 'ADMIN') {
+      navigate('/admin');
+    } else if (role === 'TEACHER') {
+      navigate('/teacher');
+    } else if (role === 'ACCOUNTANT') {
+      navigate('/accountant');
+    } else if (role === 'STUDENT') {
+      navigate('/student');
+    } else {
+      navigate('/login'); // fallback
+    }
+  } catch (err) {
+    setError(err.message || 'Login failed');
+  }
+};
 
   return (
     <div className="login-container">

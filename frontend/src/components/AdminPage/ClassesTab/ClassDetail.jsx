@@ -1,22 +1,36 @@
 import React, { useEffect, useState } from "react";
 import "./ClassDetail.css";
+import BackButton from "../../common/Button/BackButton";
 import DynamicForm from "../../common/Form/DynamicForm";
-import EditButton from "../../common/Button/EditButton";
+import Table from "../../common/Table/Table";
 import {
   getCourseById,
+  createCourse,
   updateCourse,
   addStudentToCourse,
 } from "../../../services/courseService";
 import { fetchStudents, fetchTeachers } from "../../../services/personService";
 import { formConfigs } from "../../../config/formConfig";
 
-const ClassDetail = ({ clsId, selectedStatus, onBack, originalData }) => {
+const ClassDetail = ({
+  clsId,
+  selectedStatus,
+  onBack,
+  originalData,
+  isEditing: initialEditMode = false,
+  isNew = false,
+}) => {
   const [classInfo, setClassInfo] = useState(null);
   const [students, setStudents] = useState([]);
   const [teachers, setTeachers] = useState([]);
-  const [isEditing, setIsEditing] = useState(false);
+  const [isEditing, setIsEditing] = useState(initialEditMode);
   const [activeTab, setActiveTab] = useState("students");
 
+  const studentTableColumns = [
+    { header: "ID", accessor: "ID" },
+    { header: "Tên", accessor: "NAME" },
+    { header: "Email", accessor: "EMAIL" },
+  ];
   const formatDate = (isoString) => {
     if (!isoString) return "";
     const date = new Date(isoString);
@@ -67,9 +81,12 @@ const ClassDetail = ({ clsId, selectedStatus, onBack, originalData }) => {
   };
 
   useEffect(() => {
-    fetchClass();
+    if (clsId) {
+      fetchClass();
+    }
     fetchAllTeachers();
-  }, [clsId]);
+    setIsEditing(initialEditMode);
+  }, [clsId, initialEditMode]);
 
   const handleEditClick = () => setIsEditing(true);
   const handleCancelEdit = () => setIsEditing(false);
@@ -94,7 +111,6 @@ const ClassDetail = ({ clsId, selectedStatus, onBack, originalData }) => {
         teacherName,
       };
 
-      console.log("Sending update payload:", payload);
       await updateCourse(clsId, payload);
 
       const newStudents = updatedData.students || [];
@@ -120,15 +136,16 @@ const ClassDetail = ({ clsId, selectedStatus, onBack, originalData }) => {
     }
   };
 
+  if (!clsId && !isEditing) {
+    return <div>Không có thông tin lớp học.</div>;
+  }
+
   if (!classInfo) return <div>Đang tải thông tin lớp học...</div>;
 
   return (
     <div className="class-detail-container">
-      <button className="back-btn" onClick={onBack}>
-        ← Back
-      </button>
-
-      {isEditing ? (
+      <BackButton type="button" onClick={onBack}>← Back</BackButton>
+      {isEditing || !clsId ? (
         <DynamicForm
           formConfig={{
             ...formConfigs.classes,
@@ -150,24 +167,25 @@ const ClassDetail = ({ clsId, selectedStatus, onBack, originalData }) => {
             }),
           }}
           initialData={{
-            name: classInfo.name,
-            description: classInfo.description,
+            name: classInfo?.name || "",
+            description: classInfo?.description || "",
             teacher:
-              teachers.find((t) => t.NAME === classInfo.teacherName)?.ID ||
+              teachers.find((t) => t.NAME === classInfo?.teacherName)?.ID ||
               "",
-            startDate: classInfo.startDate?.slice(0, 10),
-            endDate: classInfo.endDate?.slice(0, 10),
-            students: classInfo.students.map((s) => ({
-              id: s.ID,
-              name: s.NAME,
-              email: s.EMAIL,
-            })),
-            status: classInfo.status,
-            minStu: classInfo.minStu,
-            maxStu: classInfo.maxStu,
-            price: classInfo.price,
+            startDate: classInfo?.startDate?.slice(0, 10) || "",
+            endDate: classInfo?.endDate?.slice(0, 10) || "",
+            students:
+              classInfo?.students?.map((s) => ({
+                id: s.ID,
+                name: s.NAME,
+                email: s.EMAIL,
+              })) || [],
+            status: classInfo?.status || "",
+            minStu: classInfo?.minStu || "",
+            maxStu: classInfo?.maxStu || "",
+            price: classInfo?.price || "",
           }}
-          onSubmitSuccess={handleUpdateSuccess}
+          onSubmitSuccess={isNew ? handleCreateClass : handleUpdateSuccess}
           onClose={handleCancelEdit}
         />
       ) : (
@@ -175,36 +193,14 @@ const ClassDetail = ({ clsId, selectedStatus, onBack, originalData }) => {
           <div className="info-header">
             <h2>{classInfo.name}</h2>
           </div>
-          <p>
-            <strong>Name:</strong> {classInfo.name}
-          </p>
-          <p>
-            <strong>Giáo viên:</strong> {classInfo.teacherName}
-          </p>
-          <p>
-            <strong>Description:</strong> {classInfo.description}
-          </p>
-          <p>
-            <strong>Start Date:</strong> {formatDate(classInfo.startDate)}
-          </p>
-          <p>
-            <strong>End Date:</strong> {formatDate(classInfo.endDate)}
-          </p>
-          <p>
-            <strong>Min Students:</strong> {classInfo.minStu}
-          </p>
-          <p>
-            <strong>Max Students:</strong> {classInfo.maxStu}
-          </p>
-          <p>
-            <strong>Price:</strong> {classInfo.price}đ
-          </p>
-          <p>
-            <strong>Status:</strong> {classInfo.status || "Chưa cập nhật"}
-          </p>
-          <div className="edit-btn-container">
-            <EditButton onClick={handleEditClick} />
-          </div>
+          <p><strong>Name:</strong> {classInfo.name}</p>
+          <p><strong>Giáo viên:</strong> {classInfo.teacherName}</p>
+          <p><strong>Description:</strong> {classInfo.description}</p>
+          <p><strong>Start Date:</strong> {formatDate(classInfo.startDate)}</p>
+          <p><strong>End Date:</strong> {formatDate(classInfo.endDate)}</p>
+          <p><strong>Min Students:</strong> {classInfo.minStu}</p>
+          <p><strong>Max Students:</strong> {classInfo.maxStu}</p>
+          <p><strong>Price:</strong> {classInfo.price}đ</p>
         </div>
       )}
 
@@ -238,11 +234,7 @@ const ClassDetail = ({ clsId, selectedStatus, onBack, originalData }) => {
               <h3>Student List</h3>
               <ul>
                 {students.length > 0 ? (
-                  students.map((s, i) => (
-                    <li key={i}>
-                      {s.NAME} (ID: {s.ID})
-                    </li>
-                  ))
+                  <Table columns={studentTableColumns} data={students} />
                 ) : (
                   <li>Chưa có học viên.</li>
                 )}

@@ -22,7 +22,7 @@ const Table = ({ columns, data }) => {
               {columns.map((column, colIndex) => (
                 <td key={colIndex}>
                   {/* Nếu có hàm render, sử dụng nó, ngược lại hiển thị giá trị trực tiếp */}
-                  {column.render ? column.render(row) : row[column.accessor]}
+                  {column.render ? column.render(row) : row[column.accessor] || "-"}
                 </td>
               ))}
             </tr>
