@@ -193,7 +193,7 @@ const DynamicForm = ({ formConfig, initialData, onClose, onSubmitSuccess }) => {
         <div className="form-grid">
           <div className="group-with-two">
             {fields
-              .filter((f) => ["id", "name"].includes(f.name))
+              .filter((f) => ["name", "phone_number"].includes(f.name))
               .map(renderFormField)}
           </div>
           <div className="group-with-three">
@@ -223,11 +223,9 @@ const DynamicForm = ({ formConfig, initialData, onClose, onSubmitSuccess }) => {
             {fields
               .filter((f) =>
                 [
-                  "birthday",
+                  "date_of_birth",
                   "specialization",
-                  "statuses",
-                  "department",
-                  "hireDay", // ✅ thêm dòng này
+                  "hireDay", 
                 ].includes(f.name)
               )
               .map(renderFormField)}
