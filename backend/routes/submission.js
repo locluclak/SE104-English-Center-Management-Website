@@ -206,4 +206,38 @@ router.put('/update/:student_id/:assignment_id', async (req, res) => {
   });
 });
 
+router.get('/submissions_byassignment/:assignmentId', async (req, res) => {
+  const { assignmentId } = req.params;
+
+  try {
+    const conn = await db.getConnection();
+
+    // Query to fetch submissions and student details for the given assignment ID
+    const query = `
+      SELECT 
+        s.STUDENT_ID, 
+        p.NAME AS STUDENT_NAME, 
+        s.SUBMIT_DATE, 
+        s.DESCRIPTION AS SUBMISSION_DESCRIPTION, 
+        s.FILE AS SUBMISSION_FILE, 
+        s.SCORE
+      FROM SUBMITION s
+      JOIN PERSON p ON s.STUDENT_ID = p.ID
+      WHERE s.AS_ID = ?
+    `;
+    const [rows] = await conn.query(query, [assignmentId]);
+
+    conn.release();
+
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'No submissions found for this assignment' });
+    }
+
+    res.status(200).json({ submissions: rows });
+  } catch (err) {
+    console.error('Error fetching submissions:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 module.exports = router;
