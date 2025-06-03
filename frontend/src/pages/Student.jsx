@@ -9,24 +9,22 @@ import {
   getAccountantTableColumns,
 } from "../config/tableConfig.jsx";
 
-import HomeTab from "../components/StudentPage/CoursesTab/HomeTab";
-import MyCoursesTab from "../components/StudentPage/CoursesTab/MyCoursesTab";
+import CourseDetail from "../components/layout/Course/CourseDetail/CourseDetail";
+import CourseProgress from "../components/layout/Course/CourseProgress/CourseProgress";
+import HomeContent from '../components/layout/HomeContent/HomeContent';
 import Calendar from '../components/DashboardTab/CalendarTab';
 import Padlet from '../components/DashboardTab/PadletTab';
-
-import CourseDetail from '../components/StudentPage/CoursesTab/CourseDetail';
-import CourseProgress from '../components/StudentPage/CoursesTab/CourseProgress';
 
 import './Student.css';
 
 const StudentPage = () => {
-  const [activeTab, setActiveTab] = useState('courses');
+  const [activeTab, setActiveTab] = useState('home');
   const [selectedClass, setSelectedClass] = useState(null);
-  const [selectedFeature, setSelectedFeature] = useState('home');
+  const [selectedFeature, setSelectedFeature] = useState('my-course');
 
   useEffect(() => {
     if (activeTab === 'courses') {
-      setSelectedFeature('home');
+      setSelectedFeature('my-course');
     } else if (activeTab === 'dashboard') {
       setSelectedFeature('calendar');
     }
@@ -51,40 +49,49 @@ const StudentPage = () => {
       <Header role="student" activeTab={activeTab} setActiveTab={setActiveTab} />
 
       <div className="student-body">
-        <SidebarSearch 
-          role="student"
-          activeTab={activeTab}
-          onSearch={handleFeatureSelect}
-          onNew={handleNew}
-        />
+        {activeTab === 'home' && (
+          <div className="home-container">
+            <HomeContent handleClassClick={handleClassClick} />
+          </div>
+        )}
 
-        <div className="content">
-          {activeTab === 'courses' && (
-          <div className="course-display-area"> 
-              {selectedClass ? (
-                <>
-                  <CourseDetail
-                    className={selectedClass}
-                    onBack={() => setSelectedClass(null)}
-                  />
-                  <CourseProgress className={selectedClass} />
-                </>
-              ) : (
-                <>
-                  {selectedFeature === 'home' && <HomeTab handleClassClick={handleClassClick} />}
-                  {selectedFeature === 'my-courses' && <MyCoursesTab handleClassClick={handleClassClick} />}
-                </>
+        {activeTab !== 'home' && (
+          <>
+            <SidebarSearch 
+              role="student"
+              activeTab={activeTab}
+              onSearch={handleFeatureSelect}
+              onNew={handleNew}
+            />
+
+            <div className="content">          
+              {activeTab === 'courses' && (
+                <div className="course-display-area"> 
+                  {selectedClass ? (
+                    <>
+                      <CourseDetail
+                        className={selectedClass}
+                        onBack={() => setSelectedClass(null)}
+                      />
+                      <CourseProgress className={selectedClass} />
+                    </>
+                  ) : (
+                    <>
+                      {/* {selectedFeature === 'my-courses' && <MyCoursesTab handleClassClick={handleClassClick} />} */}
+                    </>
+                  )}
+                </div>
+              )}
+            
+              {activeTab === 'dashboard' && (
+                <div>
+                  {selectedFeature === 'calendar' && <Calendar />}
+                  {selectedFeature === 'padlet' && <Padlet />}
+                </div>
               )}
             </div>
-          )}
-
-          {activeTab === 'dashboard' && (
-            <div>
-              {selectedFeature === 'calendar' && <Calendar />}
-              {selectedFeature === 'padlet' && <Padlet />}
-            </div>
-          )}
-        </div>
+         </>
+        )}
       </div>
     </div>
   );
