@@ -240,4 +240,26 @@ router.get('/:id/ongoing-courses', async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+
+// Route to get all students who are not enrolled in any course
+router.get('/students/no-course', async (req, res) => {
+  try {
+    const conn = await db.getConnection();
+    const query = `
+      SELECT p.ID, p.NAME, p.EMAIL, p.PHONE_NUMBER, p.DATE_OF_BIRTH
+      FROM PERSON p
+      JOIN STUDENT s ON p.ID = s.ID
+      LEFT JOIN STUDENT_COURSE sc ON s.ID = sc.STUDENT_ID
+      WHERE sc.STUDENT_ID IS NULL
+    `;
+    const [rows] = await conn.query(query);
+
+    conn.release();
+    res.status(200).json(rows);
+  } catch (err) {
+    console.error('DB error:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 module.exports = router;
