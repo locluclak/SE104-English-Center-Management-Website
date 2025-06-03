@@ -238,3 +238,21 @@ INSERT INTO CATEGORY (cate_id, name, description) VALUES
 ('LISTEN', 'Listening', 'Courses aimed at developing listening skills through various media.'),
 ('GRAMMAR', 'Grammar', 'Courses focused on understanding and applying English grammar rules.'),
 ('PRONUNCE', 'Pronunciation', 'Specialized courses for mastering English sounds and intonation.');
+
+-- Insert sample data into TUITION table
+INSERT INTO TUITION (PRICE, TYPE, DESCRIPTION, PAID_DATE, STATUS)
+VALUES 
+(5000000, 'CASH', 'Payment for English Basics course.', '2025-06-01', 'PAID'),
+(8000000, 'TRANSFER', 'Payment for Advanced English course.', '2025-01-05', 'PAID'),
+(10000000, 'CARD', 'Payment for IELTS Preparation course.', '2025-05-20', 'PAID'),
+(7000000, 'CASH', 'Payment for Business English course.', NULL, 'UNPAID'),
+(6000000, 'TRANSFER', 'Payment for Conversational English course.', '2025-07-25', 'PAID');
+
+-- Insert sample data into STUDENT_COURSE table
+INSERT INTO STUDENT_COURSE (STUDENT_ID, COURSE_ID, PAYMENT_ID)
+VALUES 
+(1, 1, 1), -- Alice Johnson enrolled in English Basics
+(3, 2, 2), -- Charlie Davis enrolled in Advanced English
+(5, 3, 3), -- Edward Blake enrolled in IELTS Preparation
+(7, 4, 4), -- George King enrolled in Business English
+(9, 5, 5); -- Ian Sharp enrolled in Conversational English
