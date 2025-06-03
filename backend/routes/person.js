@@ -262,4 +262,24 @@ router.get('/students/no-course', async (req, res) => {
   }
 });
 
+// Route to get students enrolled in at least one course
+router.get('/students/enrolled', async (req, res) => {
+  try {
+    const conn = await db.getConnection();
+    const query = `
+      SELECT DISTINCT p.ID, p.NAME, p.EMAIL, p.PHONE_NUMBER, p.DATE_OF_BIRTH
+      FROM PERSON p
+      JOIN STUDENT s ON p.ID = s.ID
+      JOIN STUDENT_COURSE sc ON s.ID = sc.STUDENT_ID
+    `;
+    const [rows] = await conn.query(query);
+
+    conn.release();
+    res.status(200).json(rows);
+  } catch (err) {
+    console.error('DB error:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 module.exports = router;
