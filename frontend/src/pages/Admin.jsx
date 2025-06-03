@@ -53,6 +53,7 @@ const normalizeStudents = (students) =>
     name: s.NAME,
     birthday: formatDate(s.DATE_OF_BIRTH),
     email: s.EMAIL,
+    phone: s.PHONE_NUMBER,
     status: s.STATUS,
   }));
 
@@ -62,6 +63,7 @@ const normalizeTeachers = (teachers) =>
     name: t.NAME,
     birthday: formatDate(t.DATE_OF_BIRTH),
     email: t.EMAIL,
+    phone: t.PHONE_NUMBER,
     subject: t.SUBJECT,
   }));
 
@@ -71,6 +73,7 @@ const normalizeAccountants = (accountants) =>
     name: a.NAME,
     birthday: formatDate(a.DATE_OF_BIRTH),
     email: a.EMAIL,
+    phone: a.PHONE_NUMBER,
     department: a.DEPARTMENT,
   }));
 
@@ -196,8 +199,8 @@ const handleFormSubmitSuccess = async (data, isEdit = false) => {
           name: data.name,
           email: data.email,
           password: data.password,
-          phoneNumber: data.phoneNumber,
-          dateOfBirth: data.birthday,
+          phoneNumber: data.phone_number,
+          dateOfBirth: data.date_of_birth,
           role: "STUDENT"
         });
         newData = normalizeStudents([{ ...data, id: result.id }])[0];
@@ -246,14 +249,17 @@ const handleFormSubmitSuccess = async (data, isEdit = false) => {
     }
 
     if (type === "Student") {
-      setStudents(prev => isEdit ? prev.map(s => s.id === newData.id ? newData : s) : [...prev, newData]);
+      const updatedStudents = await fetchStudents();
+      setStudents(normalizeStudents(updatedStudents));
     } else if (type === "Teacher") {
-      setTeachers(prev => isEdit ? prev.map(t => t.id === newData.id ? newData : t) : [...prev, newData]);
+      const updatedTeachers = await fetchTeachers();
+      setTeachers(normalizeTeachers(updatedTeachers));
     } else if (type === "Accountant") {
-      setAccountants(prev => isEdit ? prev.map(a => a.id === newData.id ? newData : a) : [...prev, newData]);
+      const updatedAccountants = await fetchAccountants();
+      setAccountants(normalizeAccountants(updatedAccountants));
     } else if (type === "Class") {
-      const newClass = { ...newData, status: newData.status || "waiting" };
-      setClasses(prev => isEdit ? prev.map(cls => cls.id === newClass.id ? newClass : cls) : [...prev, newClass]);
+      const updatedClasses = await getAllCourses();
+      setClasses(normalizeClasses(updatedClasses));
     }
 
     setShowForm(false);
@@ -282,7 +288,6 @@ const handleDelete = async (item, type) => {
     setEditingData(data);
     setShowForm(true);
   };
-
 
   const filteredStudents =
     selectedStatus === "all"
