@@ -45,23 +45,66 @@ router.get('/all', async (req, res) => {
   }
 });
 
-// Route to get course information by ID
+// Route to get course information by ID AND its students
 router.get('/:id', async (req, res) => {
+  const courseId = req.params.id;
+  try {
+      // Lấy thông tin cơ bản của khóa học
+      const courseQuery = `
+          SELECT * FROM COURSE WHERE COURSE_ID = ?
+      `;
+      const [courseRows] = await db.execute(courseQuery, [courseId]);
+
+      if (courseRows.length === 0) {
+          return res.status(404).json({ error: 'Course not found' });
+      }
+      const courseInfo = courseRows[0];
+      // Lấy danh sách học viên của khóa học
+      const studentsQuery = `
+          SELECT
+              P.ID, P.NAME, P.EMAIL, P.PHONE_NUMBER, P.DATE_OF_BIRTH, S.ENROLL_DATE
+          FROM STUDENT_COURSE SC
+          JOIN STUDENT S ON SC.STUDENT_ID = S.ID
+          JOIN PERSON P ON S.ID = P.ID
+          WHERE SC.COURSE_ID = ?
+      `;
+      const [studentsInCourse] = await db.execute(studentsQuery, [courseId]);
+      // Gộp thông tin khóa học và danh sách học viên lại
+      const responseData = {
+          ...courseInfo,
+          STUDENTS: studentsInCourse.map(student => ({
+              ID: student.ID,
+              NAME: student.NAME,
+              EMAIL: student.EMAIL,
+              // Thêm các trường khác của học viên nếu cần
+          })),
+      };
+      res.status(200).json(responseData);
+  } catch (error) {
+      console.error('Error fetching course and students:', error);
+      res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Route to get list of students in a course
+router.get('/:id/students', async (req, res) => {
   const courseId = req.params.id;
 
   try {
     const query = `
-      SELECT * FROM COURSE WHERE COURSE_ID = ?
+      SELECT 
+        P.ID, P.NAME, P.EMAIL, P.PHONE_NUMBER, P.DATE_OF_BIRTH, S.ENROLL_DATE, T.STATUS AS PAYMENT_STATUS
+      FROM STUDENT_COURSE SC
+      JOIN STUDENT S ON SC.STUDENT_ID = S.ID
+      JOIN PERSON P ON S.ID = P.ID
+      LEFT JOIN TUITION T ON SC.PAYMENT_ID = T.PAYMENT_ID
+      WHERE SC.COURSE_ID = ?
     `;
-    const [rows] = await db.execute(query, [courseId]);
+    const [students] = await db.execute(query, [courseId]);
 
-    if (rows.length === 0) {
-      return res.status(404).json({ error: 'Course not found' });
-    }
-
-    res.status(200).json(rows[0]);
+    res.status(200).json(students);
   } catch (error) {
-    console.error('Error fetching course:', error);
+    console.error('Error fetching students in course:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -224,7 +267,5 @@ router.put('/update/:id', async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
-
-
 
 module.exports = router;

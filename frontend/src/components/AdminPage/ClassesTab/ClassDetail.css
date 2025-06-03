@@ -52,21 +52,7 @@
   border-radius: 8px;
 }
 
-/* Add Student Button */
-.add-student,
-.add-button {
-  padding: 8px 16px;
-  border: 1px solid #ccc;
-  background-color: #c1d3fe;
-  cursor: pointer;
-  border-radius: 8px;
-  margin-left: 20px;
-}
-
-/* ----- Dynamic Form Edit Mode Styling ----- */
-
 .dynamic-list-section {
-  margin-top: 24px;
   border-top: 1px solid #ddd;
   padding-top: 16px;
 }
@@ -118,19 +104,6 @@
   font-style: italic;
   color: #888;
   margin-top: 8px;
-}
-
-/* Buttons inside dynamic list (e.g., delete) */
-.dynamic-list-table td button {
-  background-color: #ff6b6b;
-  color: white;
-  border: none;
-  padding: 6px 10px;
-  border-radius: 4px;
-  cursor: pointer;
-}
-.dynamic-list-table td button:hover {
-  background-color: #e04848;
 }
 
 .form-actions {
