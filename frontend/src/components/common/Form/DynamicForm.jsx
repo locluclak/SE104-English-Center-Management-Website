@@ -223,9 +223,7 @@ const DynamicForm = ({ formConfig, initialData, onClose, onSubmitSuccess }) => {
             {fields
               .filter((f) =>
                 [
-                  "date_of_birth",
-                  "specialization",
-                  "hireDay", 
+                  "date_of_birth"
                 ].includes(f.name)
               )
               .map(renderFormField)}

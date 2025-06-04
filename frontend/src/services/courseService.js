@@ -1,6 +1,14 @@
 // src/services/courseService.js
 const API_BASE_URL = 'http://localhost:3000/course';
 
+// Lấy danh sách tất cả khóa học
+export const getAllCourses = async () => {
+  const response = await fetch(`${API_BASE_URL}/all`);
+  if (!response.ok) throw new Error('Failed to fetch courses');
+  return response.json();
+};
+
+
 // Tạo khóa học mới
 export const createCourse = async (courseData) => {
   const response = await fetch(`${API_BASE_URL}/create`, {
@@ -12,12 +20,6 @@ export const createCourse = async (courseData) => {
   return response.json();
 };
 
-// Lấy danh sách tất cả khóa học
-export const getAllCourses = async () => {
-  const response = await fetch(`${API_BASE_URL}/all`);
-  if (!response.ok) throw new Error('Failed to fetch courses');
-  return response.json();
-};
 
 // Lấy thông tin khóa học theo ID
 export const getCourseById = async (courseId) => {
@@ -25,6 +27,7 @@ export const getCourseById = async (courseId) => {
   if (!response.ok) throw new Error('Failed to fetch course');
   return response.json();
 };
+
 
 // Thêm giáo viên vào khóa học
 export const addTeacherToCourse = async ({ teacherId, courseId, role }) => {

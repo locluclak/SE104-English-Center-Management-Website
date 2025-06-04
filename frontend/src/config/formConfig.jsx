@@ -3,6 +3,10 @@ export const formConfigs = {
     type: 'Class',
     title: 'Create New Class',
     fields: [
+      { 
+        name: 'id', label: 'Class ID', type: 'text', 
+        required: true, placeholder: 'ID',
+      },
       {
         name: 'name', label: 'Class Name', type: 'text',
         required: true, placeholder: 'Class Name',
@@ -17,11 +21,8 @@ export const formConfigs = {
       },
       { name: 'startDate', label: 'Start Date', type: 'date' },
       { name: 'endDate', label: 'End Date', type: 'date' },
-      { name: 'minStu', label: 'Min Students', type: 'number', required: true },
-      { name: 'maxStu', label: 'Max Students', type: 'number', required: true },
-      { name: 'price', label: 'Price', type: 'number', required: true },
       {
-        name: 'students', label: 'Students Enrolled', type: 'select',
+        name: 'students', label: 'Students Enrolled', type: 'select', 
         isMulti: true,
         options: [],
         displayFields: [
@@ -35,41 +36,43 @@ export const formConfigs = {
   },
 
   staffs_teacher: {
-    type: "Teacher",
+    type: 'Teacher',
     title: "Add Teacher",
     fields: [
-      { name: "name", label: "Họ tên", type: "text", required: true },
-      { name: "email", label: "Email", type: "email", required: true },
-      { name: "password", label: "Mật khẩu", type: "password", required: true },
-      { name: "phone_number", label: "Số điện thoại", type: "text", required: true },
-      { name: "date_of_birth", label: "Ngày sinh", type: "date", required: true },
-      { name: "hireDay", label: "Ngày tuyển dụng", type: "date", required: true }
-    ],
+      { name: "id", label: "Teacher ID", type: "text", required: true, placeholder: "Teacher ID" },
+      { name: "name", label: "Full Name", type: "text", required: true, placeholder: "Full Name" },
+      { name: "date_of_birth", label: "Birthday", type: "date", required: true },
+      { name: "phone_number", label: "Phone Number", type: "text", required: true, placeholder: "Phone Number"},
+      { name: "email", label: "Email", type: "email", required: true, placeholder: "Email" },
+      { name: "password", label: "Password", type: "password", required: true, placeholder: "Password" }, 
+      { name: "hireDay", lable: "hireDay", type: "date", required: true}
+    ]
   },
 
   staffs_accountant: {
-    type: "Accountant",
+    type: 'Accountant',
     title: "Add Accountant",
     fields: [
-      { name: "name", label: "Họ tên", type: "text", required: true },
-      { name: "email", label: "Email", type: "email", required: true },
-      { name: "password", label: "Mật khẩu", type: "password", required: true },
-      { name: "phone_number", label: "Số điện thoại", type: "text", required: true },
-      { name: "date_of_birth", label: "Ngày sinh", type: "date", required: true },
-      { name: "hireDay", label: "Hire Day", type: "date", required: true }
-    ],
+      { name: "id", label: "Accountant ID", type: "text", required: true, placeholder: "Accountant ID" },
+      { name: "name", label: "Full Name", type: "text", required: true, placeholder: "Full Name" },
+      { name: "date_of_birth", label: "Birthday", type: "date", required: true },
+      { name: "phone_number", label: "Phone Number", type: "text", required: true, placeholder: "Phone Number"},
+      { name: "email", label: "Email", type: "email", required: true, placeholder: "Email" },
+      { name: "password", label: "Password", type: "password", required: true, placeholder: "Password" },
+      { name: "hireDay", lable: "hireDay", type: "date", required: true}
+    ]
   },
-
 
   students: {
     type: 'Student',
     title: "Add Student",
     fields: [
+      { name: "id", label: "Student ID", type: "text", required: true, placeholder: "Student ID" },
       { name: "name", label: "Full Name", type: "text", required: true, placeholder: "Full Name" },
       { name: "date_of_birth", label: "Birthday", type: "date", required: true },
+      { name: "phone_number", label: "Phone Number", type: "text", required: true, placeholder: "Phone Number"},
       { name: "email", label: "Email", type: "email", required: true, placeholder: "Email" },
       { name: "password", label: "Password", type: "password", required: true, placeholder: "Password" },
-      { name: "phone_number", label: "Số điện thoại", type: "text", required: true },
       { name: "statuses", label: "Status", type: "select", options: ["Enrolled", "Unenroll"], required: true }
     ]
   },
@@ -81,6 +84,8 @@ export const formConfigs = {
       { name: 'email', label: 'Email', type: 'email', required: true, placeholder: 'a@example.com' }
     ]
   },
+
 };
 
 export default formConfigs;
+

@@ -7,7 +7,7 @@ import formConfigs from "../config/formConfig";
 import { getStudentTableColumns, getTeacherTableColumns, getAccountantTableColumns } from "../config/tableConfig.jsx";
 import { fetchStudents, fetchTeachers, fetchAccountants, updatePerson, deletePerson} from "../services/personService";
 import { signup, createTeacher, createAccountant } from "../services/authService";
-import { getAllCourses, createCourse, updateCourse, } from "../services/courseService";
+import { getAllCourses } from "../services/courseService";
 import ClassesTab from "../components/AdminPage/ClassesTab/ClassTab.jsx";
 import { format } from "date-fns";
 
@@ -38,7 +38,7 @@ const normalizeClasses = (classes) =>
       teacherName,
       startDate: formatDate(cls.START_DATE),
       endDate: formatDate(cls.END_DATE),
-      startDateRaw: cls.START_DATE, // thêm để lọc theo ngày
+      startDateRaw: cls.START_DATE, 
       endDateRaw: cls.END_DATE,
       minStu: cls.MIN_STU,
       maxStu: cls.MAX_STU,
@@ -47,34 +47,38 @@ const normalizeClasses = (classes) =>
     };
   });
 
+// Admin.jsx
 const normalizeStudents = (students) =>
   students.map((s) => ({
     id: s.ID,
     name: s.NAME,
-    birthday: formatDate(s.DATE_OF_BIRTH),
+    birthday: formatDate(s.DATE_OF_BIRTH), 
     email: s.EMAIL,
-    phone: s.PHONE_NUMBER,
     status: s.STATUS,
+    phone_number: s.PHONE_NUMBER || "", 
+    date_of_birth: s.DATE_OF_BIRTH, 
   }));
 
 const normalizeTeachers = (teachers) =>
   teachers.map((t) => ({
     id: t.ID,
     name: t.NAME,
-    birthday: formatDate(t.DATE_OF_BIRTH),
+    birthday: formatDate(t.DATE_OF_BIRTH), 
     email: t.EMAIL,
-    phone: t.PHONE_NUMBER,
     subject: t.SUBJECT,
+    phone_number: t.PHONE_NUMBER || "", 
+    date_of_birth: t.DATE_OF_BIRTH, 
   }));
 
 const normalizeAccountants = (accountants) =>
   accountants.map((a) => ({
     id: a.ID,
     name: a.NAME,
-    birthday: formatDate(a.DATE_OF_BIRTH),
+    birthday: formatDate(a.DATE_OF_BIRTH), 
     email: a.EMAIL,
-    phone: a.PHONE_NUMBER,
     department: a.DEPARTMENT,
+    phone_number: a.PHONE_NUMBER || "", 
+    date_of_birth: a.DATE_OF_BIRTH, 
   }));
 
 const AdminPage = () => {
@@ -86,23 +90,6 @@ const AdminPage = () => {
   const [teachers, setTeachers] = useState([]);
   const [accountants, setAccountants] = useState([]);
   const [students, setStudents] = useState([]);
-
-  // Load classes
-  useEffect(() => {
-    const fetchClassData = async () => {
-      if (activeTab !== "classes") return;
-      try {
-        const data = await getAllCourses();
-        const normalized = normalizeClasses(data);
-        setClasses(normalized);
-      } catch (err) {
-        console.error("Failed to fetch classes:", err);
-        setClasses([]);
-      }
-    };
-
-    fetchClassData();
-  }, [activeTab]);
 
   // Load staffs
   useEffect(() => {
@@ -187,79 +174,96 @@ useEffect(() => {
     return formConfigs[activeTab];
   }, [activeTab, selectedStatus]);
 
+
 const handleFormSubmitSuccess = async (data, isEdit = false) => {
   const formConfig = getCurrentFormConfig();
   const type = formConfig?.type;
   if (!type) return;
+
   try {
     let newData = data;
-    if (!isEdit) {
+
+    // Admin.jsx
+const formatDateForAPI = (dateStr) => {
+  if (!dateStr) return null;
+
+  // ✅ Bổ sung kiểm tra định dạng YYYY-MM-DD
+  // Nếu chuỗi ngày đã ở định dạng 'yyyy-mm-dd', trả về nguyên bản
+  if (dateStr.match(/^\d{4}-\d{2}-\d{2}$/)) {
+    return dateStr;
+  }
+
+  // Nếu không phải định dạng 'yyyy-mm-dd', tiến hành chuyển đổi từ 'dd/MM/yyyy'
+  const parts = dateStr.split("/");
+  if (parts.length !== 3) {
+    console.error("Invalid date format:", dateStr); // Thêm log để dễ debug
+    return null;
+  }
+
+  const [day, month, year] = parts;
+  return `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}`;
+};
+
+
+
+    if (isEdit) {
+
+      await updatePerson(data.id, {
+        name: data.name,
+        birthday: formatDateForAPI(data.date_of_birth),
+        phone_number: data.phone_number,
+        email: data.email,
+        password: data.password || ""
+      });
+      
+      newData = { ...data, date_of_birth: formatDateForAPI(data.date_of_birth) }; // Cập nhật lại state UI
+    } else {
+      // Tạo mới
       if (type === "Student") {
         const result = await signup({
           name: data.name,
           email: data.email,
           password: data.password,
           phoneNumber: data.phone_number,
-          dateOfBirth: data.date_of_birth,
-          role: "STUDENT"
+          dateOfBirth: formatDateForAPI(data.date_of_birth), // Chuyển đổi cho backend
+          role: "STUDENT",
         });
         newData = normalizeStudents([{ ...data, id: result.id }])[0];
+        setStudents((prev) => [...prev, newData]);
       } else if (type === "Teacher") {
         const result = await createTeacher({
           name: data.name,
           email: data.email,
-          password: data.password, // ✅ thêm password
-          phoneNumber: data.phoneNumber,
-          dateOfBirth: data.birthday,
-          hireDay: data.hireDay,
+          password: data.password,
+          phoneNumber: data.phone_number,
+          birthday: formatDateForAPI(data.date_of_birth), // Chuyển đổi cho backend
+          hireDay: formatDateForAPI(data.hireDay), // Chuyển đổi hireDay cho backend
         });
         newData = normalizeTeachers([{ ...data }])[0];
         alert(`Giáo viên đã được tạo.\nEmail: ${data.email}\nMật khẩu: ${data.password}`);
+        setTeachers((prev) => [...prev, newData]);
       } else if (type === "Accountant") {
         const result = await createAccountant({
           name: data.name,
           email: data.email,
-          password: data.password, // ✅ thêm password
-          phoneNumber: data.phoneNumber,
-          dateOfBirth: data.birthday,
-          hireDay: data.hireDay,
+          password: data.password,
+          phoneNumber: data.phone_number,
+          birthday: formatDateForAPI(data.date_of_birth), // Chuyển đổi cho backend
+          hireDay: formatDateForAPI(data.hireDay), // Chuyển đổi hireDay cho backend
         });
         newData = normalizeAccountants([{ ...data }])[0];
         alert(`Kế toán đã được tạo.\nEmail: ${data.email}\nMật khẩu: ${data.password}`);
-      } else if (type === "Class") {
-        const teacherName =
-          teachers.find((t) => t.ID === data.teacher)?.NAME || ""; // Giả sử `teachers` state đã được fetch
-        const description = `[Giáo viên: ${teacherName}] ${data.description}`;
-
-        const classPayload = {
-          name: data.name,
-          description,
-          startDate: data.startDate,
-          endDate: data.endDate,
-          minStu: Number(data.minStu) || 0,
-          maxStu: Number(data.maxStu) || 0,
-          price: Number(data.price) || 0,
-          status: data.status || "Waiting",
-        };
-        console.log("Creating new class with payload:", classPayload);
-        const result = await createCourse(classPayload);
-        newData = normalizeClasses([{ ...classPayload, COURSE_ID: result.id }])[0]; // ✅ Use COURSE_ID consistent with normalizeClasses
-        alert("Tạo lớp thành công!");
+        setAccountants((prev) => [...prev, newData]);
       }
     }
 
+    // Cập nhật lại state cho UI
     if (type === "Student") {
-      const updatedStudents = await fetchStudents();
-      setStudents(normalizeStudents(updatedStudents));
+      setStudents((prev) => isEdit ? prev.map((s) => (s.id === newData.id ? newData : s)) : [...prev, newData]);
     } else if (type === "Teacher") {
-      const updatedTeachers = await fetchTeachers();
-      setTeachers(normalizeTeachers(updatedTeachers));
+      setTeachers((prev) => isEdit ? prev.map((t) => (t.id === newData.id ? newData : t)) : [...prev, newData]);
     } else if (type === "Accountant") {
-      const updatedAccountants = await fetchAccountants();
-      setAccountants(normalizeAccountants(updatedAccountants));
-    } else if (type === "Class") {
-      const updatedClasses = await getAllCourses();
-      setClasses(normalizeClasses(updatedClasses));
+      setAccountants((prev) => isEdit ? prev.map((a) => (a.id === newData.id ? newData : a)) : [...prev, newData]);
     }
 
     setShowForm(false);
@@ -269,6 +273,7 @@ const handleFormSubmitSuccess = async (data, isEdit = false) => {
     alert(`Không thể ${isEdit ? "cập nhật" : "tạo mới"} ${type.toLowerCase()}!`);
   }
 };
+
 
 const handleDelete = async (item, type) => {
   if (!window.confirm(`Bạn có chắc chắn muốn xóa ${item.name} (ID: ${item.id})?`)) return;
@@ -288,6 +293,7 @@ const handleDelete = async (item, type) => {
     setEditingData(data);
     setShowForm(true);
   };
+
 
   const filteredStudents =
     selectedStatus === "all"

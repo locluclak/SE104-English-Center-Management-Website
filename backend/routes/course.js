@@ -2,6 +2,17 @@ const express = require('express');
 const router = express.Router();
 const db = require('../db'); // Import the database connection
 
+router.get('/all', async (req, res) => {
+  try {
+    const query = `SELECT * FROM COURSE`;
+    const [rows] = await db.execute(query);
+    res.status(200).json(rows);
+  } catch (error) {
+    console.error('Error fetching all courses:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // Route to create a new course
 router.post('/create', async (req, res) => {
   const { name, description, startDate, endDate, minStu, maxStu, price } = req.body;
@@ -54,6 +65,8 @@ router.get('/:id', async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+
+
 
 // Route to add a teacher to a course
 router.post('/add-teacher', async (req, res) => {
