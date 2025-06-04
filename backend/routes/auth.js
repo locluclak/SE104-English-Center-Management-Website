@@ -18,9 +18,10 @@ function generatePassword(length = 8) {
 
 // POST /staff/allocate
 router.post('/allocate', async (req, res) => {
-    const { name, email, phone_number, date_of_birth, hire_day, staff_type, password} = req.body;
+      console.log("Received data:", req.body);
+    const { name, email, phone_number, date_of_birth, hire_day, staff_type } = req.body;
 
-    if (!name || !email || !phone_number || !date_of_birth || !hire_day || !staff_type||!password) {
+    if (!name || !email || !phone_number || !date_of_birth || !hire_day || !staff_type) {
         return res.status(400).json({ error: 'Missing required fields' });
     }
 
@@ -35,7 +36,7 @@ router.post('/allocate', async (req, res) => {
         }
 
         // Generate and hash password
-        const rawPassword = password;//generatePassword();
+        const rawPassword = generatePassword();
         const hashedPassword = await bcrypt.hash(rawPassword, 10);
 
         // Insert into PERSON

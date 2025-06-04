@@ -185,4 +185,64 @@ router.put('/update/:id', async (req, res) => {
     }
 });
 
+router.delete('/:id', async (req, res) => {
+    const { id } = req.params;
+
+    if (!id) {
+        return res.status(400).json({ error: 'ID parameter is required' });
+    }
+
+    let conn;
+    try {
+        conn = await db.getConnection();
+        await conn.beginTransaction(); 
+        const [personRoleRows] = await conn.query('SELECT ROLE FROM PERSON WHERE ID = ?', [id]);
+
+        if (personRoleRows.length === 0) {
+            await conn.rollback();
+            conn.release();
+            return res.status(404).json({ error: 'Person not found' });
+        }
+
+        const role = personRoleRows[0].ROLE;
+
+        if (role === 'STUDENT') {
+            // Xoá các bản ghi liên quan đến STUDENT trước, ví dụ: ENROLLMENT
+            // await conn.query('DELETE FROM ENROLLMENT WHERE STUDENT_ID = ?', [id]); // Ví dụ
+            await conn.query('DELETE FROM STUDENT WHERE ID = ?', [id]);
+        } else if (role === 'STAFF') {
+            // Xoá các bản ghi liên quan đến STAFF trước
+            await conn.query('DELETE FROM STAFF WHERE ID = ?', [id]);
+        }
+        // Bạn có thể cần thêm các logic xoá khác nếu có các bảng liên quan khác
+
+        // Cuối cùng, xoá từ bảng PERSON
+        const [result] = await conn.query('DELETE FROM PERSON WHERE ID = ?', [id]);
+
+        if (result.affectedRows === 0) {
+            // Điều này không nên xảy ra nếu đã tìm thấy ở trên, nhưng là một kiểm tra an toàn
+            await conn.rollback();
+            conn.release();
+            // Có thể người dùng đã bị xoá trong một request khác
+            return res.status(404).json({ error: 'Person not found or already deleted from PERSON table' });
+        }
+
+        await conn.commit(); // Hoàn tất transaction
+        conn.release();
+        res.json({ message: 'Person deleted successfully' });
+
+    } catch (err) {
+        if (conn) {
+            await conn.rollback(); // Hoàn tác transaction nếu có lỗi
+            conn.release();
+        }
+        console.error('DB error on delete person:', err);
+        // Kiểm tra lỗi cụ thể, ví dụ lỗi ràng buộc khoá ngoại
+        if (err.code === 'ER_ROW_IS_REFERENCED_2' || err.errno === 1451 /* MySQL error code for foreign key constraint */) {
+             return res.status(409).json({ error: 'Cannot delete this person because they are referenced in other records (e.g., enrolled in a course, assigned as a teacher). Please remove those dependencies first.' });
+        }
+        res.status(500).json({ error: 'Internal server error while deleting person' });
+    }
+});
+
 module.exports = router;
