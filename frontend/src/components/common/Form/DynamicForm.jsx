@@ -123,6 +123,8 @@ const DynamicForm = ({ formConfig, initialData, onClose, onSubmitSuccess }) => {
   const renderFormField = (field) => {
     if (field.name === "status" || field.type === "hidden") return null;
 
+    if (field.name === "hire_day" && initialData) return null;
+
     const value = formData[field.name];
 
     return (
@@ -223,7 +225,8 @@ const DynamicForm = ({ formConfig, initialData, onClose, onSubmitSuccess }) => {
             {fields
               .filter((f) =>
                 [
-                  "date_of_birth"
+                  "date_of_birth",
+                  "hire_day",
                 ].includes(f.name)
               )
               .map(renderFormField)}

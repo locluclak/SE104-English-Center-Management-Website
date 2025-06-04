@@ -45,7 +45,7 @@ export const formConfigs = {
       { name: "phone_number", label: "Phone Number", type: "text", required: true, placeholder: "Phone Number"},
       { name: "email", label: "Email", type: "email", required: true, placeholder: "Email" },
       { name: "password", label: "Password", type: "password", required: true, placeholder: "Password" }, 
-      { name: "hireDay", lable: "hireDay", type: "date", required: true}
+      { name: "hire_day", lable: "HireDay", type: "date", required: true}
     ]
   },
 
@@ -59,7 +59,7 @@ export const formConfigs = {
       { name: "phone_number", label: "Phone Number", type: "text", required: true, placeholder: "Phone Number"},
       { name: "email", label: "Email", type: "email", required: true, placeholder: "Email" },
       { name: "password", label: "Password", type: "password", required: true, placeholder: "Password" },
-      { name: "hireDay", lable: "hireDay", type: "date", required: true}
+      { name: "hire_day", lable: "HireDay", type: "date", required: true}
     ]
   },
 
