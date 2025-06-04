@@ -195,24 +195,26 @@ const AdminPage = () => {
     const formConfig = getCurrentFormConfig();
     const type = formConfig?.type;
     if (!data.staff_type) {
-    data.staff_type = selectedStatus.toUpperCase(); // Gán staff_type từ selectedStatus
-  }
+      data.staff_type = selectedStatus.toUpperCase(); // Gán staff_type từ selectedStatus
+    }
 
-   console.log("Form data before submit:", data); // In ra dữ liệu form trước khi gửi
+    const missingFields = [];
 
-  // Kiểm tra các trường bắt buộc
-  const missingFields = [];
-  if (!data.name) missingFields.push('name');
-  if (!data.email) missingFields.push('email');
-  if (!data.phone_number) missingFields.push('phone_number');
-  if (!data.date_of_birth) missingFields.push('date_of_birth');
-  if (!data.hire_day) missingFields.push('hire_day');
-  if (!data.staff_type) missingFields.push('staff_type');
+    // Kiểm tra từng trường dữ liệu
+    if (!isEdit && !data.hire_day) {
+      missingFields.push("hire_day");
+    }
+    if (!data.name) missingFields.push("name");
+    if (!data.email) missingFields.push("email");
+    if (!data.phone_number) missingFields.push("phone_number");
+    if (!data.date_of_birth) missingFields.push("date_of_birth");
+    if (!data.staff_type) missingFields.push("staff_type");
 
-  if (missingFields.length > 0) {
-    alert(`Thiếu các trường thông tin: ${missingFields.join(', ')}`);
-    return;
-  }
+    // Nếu có trường thiếu, hiển thị thông báo lỗi
+    if (missingFields.length > 0) {
+      alert(`Thiếu các trường thông tin: ${missingFields.join(", ")}`);
+      return;
+    }
     if (!type) return;
 
     try {
@@ -270,7 +272,7 @@ const AdminPage = () => {
             phoneNumber: data.phone_number,
             dateOfBirth: formatDateForAPI(data.date_of_birth),
             hire_day: formatDateForAPI(data.hire_day),
-            staff_type: data.staff_type
+            staff_type: data.staff_type,
           });
           newData = normalizeTeachers([{ ...data }])[0];
           alert(
@@ -285,7 +287,7 @@ const AdminPage = () => {
             phoneNumber: data.phone_number,
             dateOfBirth: formatDateForAPI(data.date_of_birth),
             hire_day: formatDateForAPI(data.hire_day),
-            staff_type: data.staff_type
+            staff_type: data.staff_type,
           });
           newData = normalizeAccountants([{ ...data }])[0];
           alert(
@@ -324,8 +326,6 @@ const AdminPage = () => {
         `Không thể ${isEdit ? "cập nhật" : "tạo mới"} ${type.toLowerCase()}!`
       );
     }
-
-    
   };
 
   const handleDelete = async (item, type) => {
