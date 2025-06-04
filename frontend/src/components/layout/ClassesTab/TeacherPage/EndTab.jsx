@@ -1,5 +1,5 @@
 import React from 'react';
-import CourseSection from "./ClassSection";
+import CourseSection from "../../Course/CourseSection/CourseSection";
 
 const EndTab = ({ handleClassClick }) => {
   return (

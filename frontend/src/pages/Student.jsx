@@ -9,6 +9,7 @@ import {
   getAccountantTableColumns,
 } from "../config/tableConfig.jsx";
 
+import MyCoursesTab from "../components/layout/ClassesTab/StudentPage/MyCoursesTab";
 import CourseDetail from "../components/layout/Course/CourseDetail/CourseDetail";
 import CourseProgress from "../components/layout/Course/CourseProgress/CourseProgress";
 import HomeContent from '../components/layout/HomeContent/HomeContent';
@@ -77,7 +78,7 @@ const StudentPage = () => {
                     </>
                   ) : (
                     <>
-                      {/* {selectedFeature === 'my-courses' && <MyCoursesTab handleClassClick={handleClassClick} />} */}
+                      {selectedFeature === 'my-courses' && <MyCoursesTab handleClassClick={handleClassClick} />}
                     </>
                   )}
                 </div>
