@@ -1,0 +1,50 @@
+/* components/StudentPage/CoursesTab/CourseProgress.css */
+.course-progress {
+  width: 250px;
+  padding: 15px;
+  background-color: #edf2fb;
+  border-left: 1px solid #fff;
+  overflow-y: auto;
+  flex-shrink: 0;
+}
+
+.course-progress h3 {
+  font-size: 16px;
+  margin-bottom: 15px;
+  color: #333;
+}
+
+.progress-container {
+  margin-top: 10px;
+}
+
+.month-section {
+  margin-bottom: 15px;
+}
+
+.month-header {
+  font-weight: bold;
+  font-size: 14px;
+  color: #495057;
+  padding: 5px 0;
+  margin-bottom: 8px;
+}
+
+.stages-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.stage-item {
+  padding: 6px 10px;
+  background-color: #d7e3fc;
+  border-radius: 4px;
+  font-size: 13px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.stage-item:hover {
+  background-color: #ccdbfd;
+}
