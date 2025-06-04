@@ -63,7 +63,7 @@ const TeacherPage = () => {
               {selectedClass ? (
                 <>
                   <CourseDetail
-                  className={selectedClass}
+                  clsId={selectedClass}
                   onBack={() => setSelectedClass(null)}
                 />
               </>

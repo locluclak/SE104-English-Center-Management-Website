@@ -17,12 +17,10 @@
   margin-top: 60px;
 }
 
-.content {
+.stu-content {
   flex: 1;
   overflow: hidden;
   width: 100%;
-  padding: 0;
-  margin: 0;
 }
 
 .course-display-area {

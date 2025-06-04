@@ -1,8 +1,8 @@
 .course-detail-container {
-  display: flex;
   gap: 0;
   flex: 1;
   min-width: 400px;
+  padding: 20px;
 }
 
 .course-detail-main {

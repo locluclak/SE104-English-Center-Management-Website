@@ -54,13 +54,15 @@ export const assignmentTableColumns = [
   { header: 'ID', accessor: 'id' },
   { header: 'Name', accessor: 'title' },
   { header: 'Description', accessor: 'description' },
-  { header: 'Date Start', accessor: 'assignedDate' },
+  { header: 'File', accessor: 'file' },
+  { header: 'Start Date', accessor: 'startDate' },
+  { header: 'End Date', accessor: 'endDate' },
   {
     header: 'Action',
     render: (row) => (
       <>
-        <EditButton onClick={() => alert(`Xem ${row.title}`)} />
-        <DeleteButton onClick={() => alert(`Xoá ${row.title}`)} />
+        <EditButton onClick={() => alert(`Edit ${row.title}`)} />
+        <DeleteButton onClick={() => alert(`Delete ${row.title}`)} />
       </>
     ),
   },
@@ -70,13 +72,13 @@ export const documentTableColumns = [
   { header: 'ID', accessor: 'id' },
   { header: 'Name', accessor: 'name' },
   { header: 'Description', accessor: 'description' },
-  { header: 'Upload Date', accessor: 'uploadDate' },
+  { header: 'File', accessor: 'file' },
   {
     header: 'Action',
     render: (row) => (
       <>
-        <EditButton onClick={() => alert(`Xem ${row.name}`)} />
-        <DeleteButton onClick={() => alert(`Xoá ${row.name}`)} />
+        <EditButton onClick={() => alert(`Edit ${row.name}`)} />
+        <DeleteButton onClick={() => alert(`Delete ${row.name}`)} />
       </>
     ),
   },
