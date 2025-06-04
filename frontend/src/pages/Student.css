@@ -14,6 +14,7 @@
   flex: 1;
   min-height: 0; /* Fix cho trình duyệt Firefox */
   width: 100%;
+  margin-top: 60px;
 }
 
 .content {

@@ -9,9 +9,9 @@ import {
   getAccountantTableColumns,
 } from "../config/tableConfig.jsx";
 
-import CurrentTab from "../components/TeacherPage/ClassesTab/CurrentTab";
-import EndTab from "../components/TeacherPage/ClassesTab/EndTab";
-import ClassDetail from "../components/TeacherPage/ClassesTab/ClassDetail";
+import CurrentTab from "../components/layout/ClassesTab/TeacherPage/CurrentTab";
+import EndTab from "../components/layout/ClassesTab/TeacherPage/EndTab";
+import CourseDetail from "../components/layout/Course/CourseDetail/CourseDetail";
 
 import Calendar from '../components/DashboardTab/CalendarTab';
 import Padlet from '../components/DashboardTab/PadletTab';
@@ -62,7 +62,7 @@ const TeacherPage = () => {
             <div className="class-display-area"> {/* Thêm class mới để styling */}
               {selectedClass ? (
                 <>
-                  <ClassDetail
+                  <CourseDetail
                   className={selectedClass}
                   onBack={() => setSelectedClass(null)}
                 />
