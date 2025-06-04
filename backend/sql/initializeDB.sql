@@ -126,7 +126,7 @@ CREATE TABLE SUBMITION (
     SUBMIT_DATE DATETIME,
     DESCRIPTION TEXT,
     FILE VARCHAR(255),  
-    SCORE DECIMAL(5,2),  
+    SCORE DECIMAL(5,2) DEFAULT NULL,  
     PRIMARY KEY (STUDENT_ID, AS_ID),
     FOREIGN KEY (STUDENT_ID) REFERENCES STUDENT(ID),
     FOREIGN KEY (AS_ID) REFERENCES ASSIGNMENT(AS_ID) ON DELETE CASCADE
@@ -227,7 +227,7 @@ INSERT INTO COURSE (NAME, PRICE, DESCRIPTION, START_DATE, END_DATE, MIN_STU, MAX
 VALUES 
 ('English Basics', 5000000, 'Introduction to English for beginners.', '2025-06-01', '2025-08-01', 5, 20, 10),
 ('Advanced English', 8000000, 'Advanced English course for professionals.', '2025-01-01', '2025-09-01', 10, 25, 15),
-('IELTS Preparation', 10000000, 'Comprehensive IELTS preparation course.', '2025-05-15', '2025-07-15', 8, 30, 20),
+('TOEIC Preparation', 10000000, 'Comprehensive TOEIC preparation course.', '2025-05-15', '2025-07-15', 8, 30, 20),
 ('Business English', 7000000, 'English for business communication.', '2025-06-10', '2025-08-10', 6, 20, 12),
 ('Conversational English', 6000000, 'Focus on improving speaking skills.', '2025-07-20', '2025-09-20', 5, 15, 8);
 
@@ -256,3 +256,13 @@ VALUES
 (5, 3, 3), -- Edward Blake enrolled in IELTS Preparation
 (7, 4, 4), -- George King enrolled in Business English
 (9, 5, 5); -- Ian Sharp enrolled in Conversational English
+
+-- Insert sample data into ASSIGNMENT table without file
+INSERT INTO ASSIGNMENT (NAME, DESCRIPTION, START_DATE, END_DATE, COURSE_ID)
+VALUES 
+('Essay Writing', 'Write an essay on a given topic.', '2025-01-05 09:00:00', '2025-12-15 23:59:59', 1),
+('Grammar Test', 'Complete the grammar test.', '2025-01-10 09:00:00', '2025-12-20 23:59:59', 2),
+('Mock Test', 'Take a full-length IELTS mock test.', '2025-01-15 09:00:00', '2025-12-25 23:59:59', 3),
+('Business Presentation', 'Prepare a business presentation.', '2025-01-20 09:00:00', '2025-12-30 23:59:59', 4),
+('Conversational Practice', 'Record a conversation with a partner.', '2025-01-25 09:00:00', '2025-12-05 23:59:59', 5);
+
