@@ -32,8 +32,10 @@ export const itemsByRole = {
     ],
   },
   student: {
-    courses: [
+    home: [
       { key: 'home', name: 'Home', icon: <FaHome /> },
+    ],
+    courses: [
       { key: 'my-courses', name: 'My Courses', icon: <FaBookOpen /> },
     ],
     dashboard: [
