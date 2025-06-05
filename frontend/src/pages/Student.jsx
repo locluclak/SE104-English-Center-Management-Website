@@ -3,11 +3,7 @@ import Header from '../components/layout/Header/Header';
 import SidebarSearch from "../components/layout/Sidebar/SidebarSearch";
 
 import Table from '../components/common/Table/Table';
-import {
-  getStudentTableColumns,
-  getTeacherTableColumns,
-  getAccountantTableColumns,
-} from "../config/tableConfig.jsx";
+import { getStudentTableColumns, getTeacherTableColumns, getAccountantTableColumns } from "../config/tableConfig.jsx";
 
 import HomeTab from "../components/StudentPage/CoursesTab/HomeTab";
 import MyCoursesTab from "../components/StudentPage/CoursesTab/MyCoursesTab";
