@@ -3,6 +3,7 @@
   gap: 16px;
   flex-wrap: wrap;
   margin-top: 10px;
+  overflow: hidden;
 }
 
 .class-box {

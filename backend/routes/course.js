@@ -295,5 +295,28 @@ router.delete('/remove-student', async (req, res) => {
   }
 });
 
+// Route to get all courses by student ID
+router.get('/student/:studentId', async (req, res) => {
+  const studentId = req.params.studentId;
+
+  try {
+    const query = `
+      SELECT 
+        C.COURSE_ID, C.NAME, C.DESCRIPTION, C.START_DATE, C.END_DATE, C.PRICE,
+        T.STATUS AS PAYMENT_STATUS
+      FROM STUDENT_COURSE SC
+      JOIN COURSE C ON SC.COURSE_ID = C.COURSE_ID
+      LEFT JOIN TUITION T ON SC.PAYMENT_ID = T.T_ID
+      WHERE SC.STUDENT_ID = ?
+    `;
+    const [courses] = await db.execute(query, [studentId]);
+
+    res.status(200).json(courses);
+  } catch (error) {
+    console.error('Error fetching courses by student ID:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 
 module.exports = router;
