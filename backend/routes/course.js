@@ -2,22 +2,11 @@ const express = require('express');
 const router = express.Router();
 const db = require('../db'); // Import the database connection
 
-router.get('/all', async (req, res) => {
-  try {
-    const query = `SELECT * FROM COURSE`;
-    const [rows] = await db.execute(query);
-    res.status(200).json(rows);
-  } catch (error) {
-    console.error('Error fetching all courses:', error);
-    res.status(500).json({ error: 'Internal server error' });
-  }
-});
-
 // Route to create a new course
 router.post('/create', async (req, res) => {
-  const { name, description, startDate, endDate, minStu, maxStu, price } = req.body;
+  const { name, teacherName, description, startDate, endDate, minStu, maxStu, price } = req.body;
+  const fullDescription = teacherName ? `[Giáo viên: ${teacherName}] ${description || ''}` : description;
 
-  // Validate input
   if (!name || !startDate || !endDate || !minStu || !maxStu) {
     return res.status(400).json({ error: 'Missing required fields' });
   }
@@ -29,12 +18,12 @@ router.post('/create', async (req, res) => {
     `;
     const [result] = await db.execute(query, [
       name,
-      description,
+      fullDescription,
       startDate,
       endDate,
       minStu,
       maxStu,
-      price !== undefined ? price : 0 // Default to 0 if not provided
+      price !== undefined ? price : 0
     ]);
 
     res.status(201).json({ message: 'Course created successfully', courseId: result.insertId });
@@ -45,28 +34,80 @@ router.post('/create', async (req, res) => {
 });
 
 
-// Route to get course information by ID
-router.get('/:id', async (req, res) => {
-  const courseId = req.params.id;
-
+// Route to get all courses
+router.get('/all', async (req, res) => {
   try {
-    const query = `
-      SELECT * FROM COURSE WHERE COURSE_ID = ?
-    `;
-    const [rows] = await db.execute(query, [courseId]);
-
-    if (rows.length === 0) {
-      return res.status(404).json({ error: 'Course not found' });
-    }
-
-    res.status(200).json(rows[0]);
+    const [rows] = await db.execute('SELECT * FROM COURSE');
+    res.status(200).json(rows);
   } catch (error) {
-    console.error('Error fetching course:', error);
+    console.error('Error fetching all courses:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
 
+// Route to get course information by ID AND its students
+router.get('/:id', async (req, res) => {
+  const courseId = req.params.id;
+  try {
+      // Lấy thông tin cơ bản của khóa học
+      const courseQuery = `
+          SELECT * FROM COURSE WHERE COURSE_ID = ?
+      `;
+      const [courseRows] = await db.execute(courseQuery, [courseId]);
 
+      if (courseRows.length === 0) {
+          return res.status(404).json({ error: 'Course not found' });
+      }
+      const courseInfo = courseRows[0];
+      // Lấy danh sách học viên của khóa học
+      const studentsQuery = `
+          SELECT
+              P.ID, P.NAME, P.EMAIL, P.PHONE_NUMBER, P.DATE_OF_BIRTH, S.ENROLL_DATE
+          FROM STUDENT_COURSE SC
+          JOIN STUDENT S ON SC.STUDENT_ID = S.ID
+          JOIN PERSON P ON S.ID = P.ID
+          WHERE SC.COURSE_ID = ?
+      `;
+      const [studentsInCourse] = await db.execute(studentsQuery, [courseId]);
+      // Gộp thông tin khóa học và danh sách học viên lại
+      const responseData = {
+          ...courseInfo,
+          STUDENTS: studentsInCourse.map(student => ({
+              ID: student.ID,
+              NAME: student.NAME,
+              EMAIL: student.EMAIL,
+              // Thêm các trường khác của học viên nếu cần
+          })),
+      };
+      res.status(200).json(responseData);
+  } catch (error) {
+      console.error('Error fetching course and students:', error);
+      res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Route to get list of students in a course
+router.get('/:id/students', async (req, res) => {
+  const courseId = req.params.id;
+
+  try {
+    const query = `
+      SELECT 
+        P.ID, P.NAME, P.EMAIL, P.PHONE_NUMBER, P.DATE_OF_BIRTH, S.ENROLL_DATE, T.STATUS AS PAYMENT_STATUS
+      FROM STUDENT_COURSE SC
+      JOIN STUDENT S ON SC.STUDENT_ID = S.ID
+      JOIN PERSON P ON S.ID = P.ID
+      LEFT JOIN TUITION T ON SC.PAYMENT_ID = T.PAYMENT_ID
+      WHERE SC.COURSE_ID = ?
+    `;
+    const [students] = await db.execute(query, [courseId]);
+
+    res.status(200).json(students);
+  } catch (error) {
+    console.error('Error fetching students in course:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
 
 // Route to add a teacher to a course
 router.post('/add-teacher', async (req, res) => {
@@ -181,12 +222,15 @@ router.post('/add-student', async (req, res) => {
 // Route to update a course by ID
 router.put('/update/:id', async (req, res) => {
   const courseId = req.params.id;
-  const { name, description, startDate, endDate, minStu, maxStu, price } = req.body;
+  const { name, description, startDate, endDate, minStu, maxStu, price, teacherName } = req.body;
 
-  // Validate input
-  if (!name && !description && !startDate && !endDate && !minStu && !maxStu && price === undefined) {
+  if (!name && !description && !startDate && !endDate && !minStu && !maxStu && price === undefined && !teacherName) {
     return res.status(400).json({ error: 'No fields provided for update' });
   }
+
+  const updatedDescription = teacherName
+    ? `[Giáo viên: ${teacherName}] ${description || ''}`
+    : description;
 
   try {
     const query = `
@@ -204,7 +248,7 @@ router.put('/update/:id', async (req, res) => {
 
     const [result] = await db.execute(query, [
       name || null,
-      description || null,
+      updatedDescription || null,
       startDate || null,
       endDate || null,
       minStu || null,
@@ -223,5 +267,33 @@ router.put('/update/:id', async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+
+// Route to remove a student from a course
+router.delete('/remove-student', async (req, res) => {
+  const { studentId, courseId } = req.body;
+
+  // Validate input
+  if (!studentId || !courseId) {
+    return res.status(400).json({ error: 'Missing required fields' });
+  }
+
+  try {
+    const query = `
+      DELETE FROM STUDENT_COURSE
+      WHERE STUDENT_ID = ? AND COURSE_ID = ?
+    `;
+    const [result] = await db.execute(query, [studentId, courseId]);
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: 'Student not found in this course' });
+    }
+
+    res.status(200).json({ message: 'Student removed from course successfully' });
+  } catch (error) {
+    console.error('Error removing student from course:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 
 module.exports = router;

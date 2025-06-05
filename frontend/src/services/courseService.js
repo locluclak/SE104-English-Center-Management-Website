@@ -73,4 +73,12 @@ export const updateCourse = async (courseId, updateData) => {
   return response.json();
 };
 
-
+export const removeStudentFromCourse = async ({ studentId, courseId }) => {
+  const response = await fetch(`${API_BASE_URL}/remove-student`, {
+    method: 'DELETE',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ studentId, courseId }),
+  });
+  if (!response.ok) throw new Error('Failed to remove student from course');
+  return response.json();
+};
