@@ -37,6 +37,7 @@ export const itemsByRole = {
     ],
     courses: [
       { key: 'my-courses', name: 'My Courses', icon: <FaBookOpen /> },
+      { key: 'waiting', name: 'Waiting', icon: <FaSpinner /> },
     ],
     dashboard: [
       { key: 'calendar', name: 'Calendar', icon: <FaCalendarAlt /> },

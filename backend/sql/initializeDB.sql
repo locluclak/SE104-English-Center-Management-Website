@@ -47,6 +47,25 @@ CREATE TABLE COURSE (
     NUMBER_STU INT DEFAULT 0
 );
 
+-- CATEGORY table
+CREATE TABLE CATEGORY (
+    cate_id VARCHAR(50) PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    description TEXT
+);
+
+-- COURSE_CATEGORY join table
+CREATE TABLE COURSE_CATEGORY (
+    course_id INT,
+    cate_id VARCHAR(30),
+    PRIMARY KEY (course_id, cate_id),
+    FOREIGN KEY (course_id) REFERENCES COURSE(course_id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+    FOREIGN KEY (cate_id) REFERENCES CATEGORY(cate_id)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
+);
 -- Create TUITION table
 CREATE TABLE TUITION (
     T_ID INT PRIMARY KEY AUTO_INCREMENT,
@@ -107,7 +126,7 @@ CREATE TABLE SUBMITION (
     SUBMIT_DATE DATETIME,
     DESCRIPTION TEXT,
     FILE VARCHAR(255),  
-    SCORE DECIMAL(5,2),  
+    SCORE DECIMAL(5,2) DEFAULT NULL,  
     PRIMARY KEY (STUDENT_ID, AS_ID),
     FOREIGN KEY (STUDENT_ID) REFERENCES STUDENT(ID),
     FOREIGN KEY (AS_ID) REFERENCES ASSIGNMENT(AS_ID) ON DELETE CASCADE
@@ -206,8 +225,44 @@ VALUES
 -- Insert sample data into COURSE table
 INSERT INTO COURSE (NAME, PRICE, DESCRIPTION, START_DATE, END_DATE, MIN_STU, MAX_STU, NUMBER_STU)
 VALUES 
-('English Basics', 5000000, 'Introduction to English for beginners.', '2023-06-01', '2023-08-01', 5, 20, 10),
-('Advanced English', 8000000, 'Advanced English course for professionals.', '2023-07-01', '2023-09-01', 10, 25, 15),
-('IELTS Preparation', 10000000, 'Comprehensive IELTS preparation course.', '2023-05-15', '2023-07-15', 8, 30, 20),
-('Business English', 7000000, 'English for business communication.', '2023-06-10', '2023-08-10', 6, 20, 12),
-('Conversational English', 6000000, 'Focus on improving speaking skills.', '2023-07-20', '2023-09-20', 5, 15, 8);
+('English Basics', 5000000, 'Introduction to English for beginners.', '2025-06-01', '2025-08-01', 5, 20, 10),
+('Advanced English', 8000000, 'Advanced English course for professionals.', '2025-01-01', '2025-09-01', 10, 25, 15),
+('TOEIC Preparation', 10000000, 'Comprehensive TOEIC preparation course.', '2025-05-15', '2025-07-15', 8, 30, 20),
+('Business English', 7000000, 'English for business communication.', '2025-06-10', '2025-08-10', 6, 20, 12),
+('Conversational English', 6000000, 'Focus on improving speaking skills.', '2025-07-20', '2025-09-20', 5, 15, 8);
+
+INSERT INTO CATEGORY (cate_id, name, description) VALUES
+('SPEAK', 'Speaking', 'Courses focused on improving spoken English and pronunciation.'),
+('WRITE', 'Writing', 'Courses that enhance grammar, sentence structure, and essay writing.'),
+('READ', 'Reading', 'Courses to improve reading comprehension and vocabulary.'),
+('LISTEN', 'Listening', 'Courses aimed at developing listening skills through various media.'),
+('GRAMMAR', 'Grammar', 'Courses focused on understanding and applying English grammar rules.'),
+('PRONUNCE', 'Pronunciation', 'Specialized courses for mastering English sounds and intonation.');
+
+-- Insert sample data into TUITION table
+INSERT INTO TUITION (PRICE, TYPE, DESCRIPTION, PAID_DATE, STATUS)
+VALUES 
+(5000000, 'CASH', 'Payment for English Basics course.', '2025-06-01', 'PAID'),
+(8000000, 'TRANSFER', 'Payment for Advanced English course.', '2025-01-05', 'PAID'),
+(10000000, 'CARD', 'Payment for IELTS Preparation course.', '2025-05-20', 'PAID'),
+(7000000, 'CASH', 'Payment for Business English course.', NULL, 'UNPAID'),
+(6000000, 'TRANSFER', 'Payment for Conversational English course.', '2025-07-25', 'PAID');
+
+-- Insert sample data into STUDENT_COURSE table
+INSERT INTO STUDENT_COURSE (STUDENT_ID, COURSE_ID, PAYMENT_ID)
+VALUES 
+(1, 1, 1), -- Alice Johnson enrolled in English Basics
+(3, 2, 2), -- Charlie Davis enrolled in Advanced English
+(5, 3, 3), -- Edward Blake enrolled in IELTS Preparation
+(7, 4, 4), -- George King enrolled in Business English
+(9, 5, 5); -- Ian Sharp enrolled in Conversational English
+
+-- Insert sample data into ASSIGNMENT table without file
+INSERT INTO ASSIGNMENT (NAME, DESCRIPTION, START_DATE, END_DATE, COURSE_ID)
+VALUES 
+('Essay Writing', 'Write an essay on a given topic.', '2025-01-05 09:00:00', '2025-12-15 23:59:59', 1),
+('Grammar Test', 'Complete the grammar test.', '2025-01-10 09:00:00', '2025-12-20 23:59:59', 2),
+('Mock Test', 'Take a full-length IELTS mock test.', '2025-01-15 09:00:00', '2025-12-25 23:59:59', 3),
+('Business Presentation', 'Prepare a business presentation.', '2025-01-20 09:00:00', '2025-12-30 23:59:59', 4),
+('Conversational Practice', 'Record a conversation with a partner.', '2025-01-25 09:00:00', '2025-12-05 23:59:59', 5);
+

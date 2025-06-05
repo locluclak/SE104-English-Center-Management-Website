@@ -36,3 +36,10 @@
 .account-popup li:last-child {
   border-bottom: none;
 }
+
+.user-info {
+  margin-top: 10px;
+  background-color: #f4f4f4;
+  padding: 10px;
+  border-radius: 8px;
+}

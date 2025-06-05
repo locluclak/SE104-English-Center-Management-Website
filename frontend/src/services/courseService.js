@@ -1,4 +1,3 @@
-// src/services/courseService.js
 const API_BASE_URL = 'http://localhost:3000/course';
 
 // Lấy danh sách tất cả khóa học
@@ -8,6 +7,26 @@ export const getAllCourses = async () => {
   return response.json();
 };
 
+// Lấy thông tin khóa học theo ID
+export const getCourseById = async (courseId) => {
+  const response = await fetch(`${API_BASE_URL}/${courseId}`);
+  if (!response.ok) throw new Error('Failed to fetch course');
+  return response.json();
+};
+
+// Lấy danh sách học viên trong một khóa học
+export const getStudentsInCourse = async (courseId) => {
+  const response = await fetch(`${API_BASE_URL}/${courseId}/students`);
+  if (!response.ok) throw new Error('Failed to fetch students in course');
+  return response.json();
+};
+
+// Lấy tất cả khóa học của một học viên
+export const getCoursesByStudentId = async (studentId) => {
+  const response = await fetch(`${API_BASE_URL}/student/${studentId}`);
+  if (!response.ok) throw new Error('Failed to fetch student courses');
+  return response.json();
+};
 
 // Tạo khóa học mới
 export const createCourse = async (courseData) => {
@@ -20,14 +39,16 @@ export const createCourse = async (courseData) => {
   return response.json();
 };
 
-
-// Lấy thông tin khóa học theo ID
-export const getCourseById = async (courseId) => {
-  const response = await fetch(`${API_BASE_URL}/${courseId}`);
-  if (!response.ok) throw new Error('Failed to fetch course');
+// Cập nhật khóa học theo ID
+export const updateCourse = async (courseId, updateData) => {
+  const response = await fetch(`${API_BASE_URL}/update/${courseId}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(updateData),
+  });
+  if (!response.ok) throw new Error('Failed to update course');
   return response.json();
 };
-
 
 // Thêm giáo viên vào khóa học
 export const addTeacherToCourse = async ({ teacherId, courseId, role }) => {
@@ -62,15 +83,13 @@ export const addStudentToCourse = async ({ studentId, courseId, paymentType, pay
   return response.json();
 };
 
-// Cập nhật khóa học theo ID
-export const updateCourse = async (courseId, updateData) => {
-  const response = await fetch(`${API_BASE_URL}/update/${courseId}`, {
-    method: 'PUT',
+// Xóa học viên khỏi khóa học
+export const removeStudentFromCourse = async ({ studentId, courseId }) => {
+  const response = await fetch(`${API_BASE_URL}/remove-student`, {
+    method: 'DELETE',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(updateData),
+    body: JSON.stringify({ studentId, courseId }),
   });
-  if (!response.ok) throw new Error('Failed to update course');
+  if (!response.ok) throw new Error('Failed to remove student from course');
   return response.json();
 };
-
-

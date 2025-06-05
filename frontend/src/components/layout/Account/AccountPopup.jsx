@@ -1,34 +1,68 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import ProfileModal from './ProfileModal';
 import './AccountPopup.css';
 
 const AccountPopup = ({ visible, onClose }) => {
-  const ref = useRef(null);
+  const popupRef = useRef(null);
+  const navigate = useNavigate();
+  const [showProfile, setShowProfile] = useState(false);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (ref.current && !ref.current.contains(event.target)) {
+      if (
+        popupRef.current &&
+        !popupRef.current.contains(event.target) &&
+        !showProfile // chỉ đóng khi không mở profile
+      ) {
         onClose();
       }
     };
+
     if (visible) {
       document.addEventListener('mousedown', handleClickOutside);
     }
+
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [visible, onClose]);
+  }, [visible, onClose, showProfile]);
 
-  if (!visible) return null;
+  const handleLogout = () => {
+    localStorage.removeItem('userToken');
+    localStorage.removeItem('user');
+    navigate('/login');
+  };
+
+  const handleViewProfile = () => {
+    setShowProfile(true);
+    onClose(); // đóng popup menu
+  };
+
+  const handleCloseProfile = () => {
+    setShowProfile(false); // đóng modal profile
+  };
 
   return (
-    <div className="account-popup" ref={ref}>
-      <h4>Tài khoản</h4>
-      <ul>
-        <li>Thông tin cá nhân</li>
-        <li>Cài đặt</li>
-        <li>Đăng xuất</li>
-      </ul>
-    </div>
+    <>
+      {visible && (
+        <div className="account-popup" ref={popupRef}>
+          <h4>Tài khoản</h4>
+          <ul>
+            <li onClick={handleViewProfile}>Thông tin cá nhân</li>
+            <li>Cài đặt</li>
+            <li onClick={handleLogout}>Đăng xuất</li>
+          </ul>
+        </div>
+      )}
+
+      {showProfile && (
+        <ProfileModal
+          visible={showProfile}
+          onClose={handleCloseProfile}
+        />
+      )}
+    </>
   );
 };
 

@@ -10,6 +10,7 @@ import {
 } from "../config/tableConfig.jsx";
 
 import MyCoursesTab from "../components/layout/ClassesTab/StudentPage/MyCoursesTab";
+import WaitingTab from "../components/layout/ClassesTab/StudentPage/WaitingTab";
 import CourseDetail from "../components/layout/Course/CourseDetail/CourseDetail";
 import CourseProgress from "../components/layout/Course/CourseProgress/CourseProgress";
 import HomeContent from '../components/layout/HomeContent/HomeContent';
@@ -22,10 +23,21 @@ const StudentPage = () => {
   const [activeTab, setActiveTab] = useState('home');
   const [selectedClass, setSelectedClass] = useState(null);
   const [selectedFeature, setSelectedFeature] = useState('my-course');
+  const [currentStudentId, setCurrentStudentId] = useState('your_student_id_here');
+
+  useEffect(() => {
+    const storedStudentId = localStorage.getItem('studentId');
+    console.log("Stored studentId from localStorage:", storedStudentId); 
+    if (storedStudentId) {
+        setCurrentStudentId(storedStudentId);
+    } else {
+      console.warn("Student ID not found in localStorage. MyCoursesTab might not display correctly.");
+    }
+  }, []);
 
   useEffect(() => {
     if (activeTab === 'courses') {
-      setSelectedFeature('my-course');
+      setSelectedFeature('my-courses');
     } else if (activeTab === 'dashboard') {
       setSelectedFeature('calendar');
     }
@@ -35,9 +47,9 @@ const StudentPage = () => {
     console.log('StudentPage: handleNew called');
   };
 
-  const handleClassClick = (className) => {
-    console.log(`Clicked class: ${className}`);
-    setSelectedClass(className);
+  const handleClassClick = (classId) => {
+    console.log(`Clicked class ID: ${classId}`);
+    setSelectedClass(classId);
   };
 
   const handleFeatureSelect = useCallback((featureKey) => {
@@ -78,7 +90,21 @@ const StudentPage = () => {
                     </>
                   ) : (
                     <>
-                      {selectedFeature === 'my-courses' && <MyCoursesTab handleClassClick={handleClassClick} />}
+                      {selectedFeature === 'my-courses' && 
+                        <>
+                          {console.log("Passing studentId to MyCoursesTab:", currentStudentId)} 
+                          <MyCoursesTab 
+                            studentId={currentStudentId} 
+                            handleClassClick={handleClassClick} 
+                          />
+                        </>
+                      }
+                      {selectedFeature === 'waiting' && 
+                        <WaitingTab 
+                          studentId={currentStudentId}
+                          handleClassClick={handleClassClick} 
+                        />
+                      }
                     </>
                   )}
                 </div>

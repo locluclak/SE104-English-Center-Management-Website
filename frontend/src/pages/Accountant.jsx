@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
-import Header from '../components/layout/Header';
-import SidebarSearch from '../components/layout/SidebarSearch';
+import Header from '../components/layout/Header/Header';
+import SidebarSearch from '../components/layout/Sidebar/SidebarSearch';
 
 import Table from '../components/common/Table/Table';
 import {
@@ -92,7 +92,7 @@ const AccountantPage = () => {
     <div className="accountant-page">
       <Header role="accountant" activeTab={activeTab} setActiveTab={setActiveTab} />
 
-      <div className="accountant-content">
+      <div className="accountant-body">
         <SidebarSearch
           role="accountant"
           activeTab={activeTab}

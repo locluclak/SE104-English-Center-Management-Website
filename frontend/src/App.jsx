@@ -10,6 +10,7 @@ import ResetPassword from './pages/ResetPassword';
 import StudentPage from './pages/Student';
 import AdminPage from './pages/Admin';
 import TeacherPage from './pages/Teacher';
+import AccountantPage from './pages/Accountant';
 import RoleProtectedRoute from './routes/PrivateRoutes';
 
 function App() {
@@ -46,6 +47,14 @@ function App() {
           element={
             <RoleProtectedRoute allowedRoles={['TEACHER']}>
               <TeacherPage />
+            </RoleProtectedRoute>
+          }
+        />
+        <Route
+          path="/accountant"
+          element={
+            <RoleProtectedRoute allowedRoles={['ACCOUNTANT']}>
+              <AccountantPage />
             </RoleProtectedRoute>
           }
         />

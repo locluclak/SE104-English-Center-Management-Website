@@ -3,12 +3,7 @@ import "./ClassDetail.css";
 import BackButton from "../../common/Button/BackButton";
 import DynamicForm from "../../common/Form/DynamicForm";
 import Table from "../../common/Table/Table";
-import {
-  getCourseById,
-  createCourse,
-  updateCourse,
-  addStudentToCourse,
-} from "../../../services/courseService";
+import { getCourseById, createCourse, updateCourse, addStudentToCourse, removeStudentFromCourse } from "../../../services/courseService";
 import { fetchStudents, fetchTeachers } from "../../../services/personService";
 import { formConfigs } from "../../../config/formConfig";
 
@@ -38,12 +33,10 @@ const ClassDetail = ({
   };
 
   const normalizeClassData = (data) => {
-    const match = data?.DESCRIPTION?.match(
-      /^[\u005B\u005D\u005C\s\u005C\w\u005C\u00E0-\u1EF9]+:(.*?)\]\s*/
-    );
+    const match = data?.DESCRIPTION?.match(/^\[Giáo viên:\s*(.*?)\]\s*/);
     const teacherName = match ? match[1].trim() : "Không rõ";
     const cleanDescription = data?.DESCRIPTION?.replace(
-      /^[\u005B\u005D\u005C\s\u005C\w\u005C\u00E0-\u1EF9]+:.*?\]\s*/,
+      /^\[Giáo viên:\s*.*?\]\s*/,
       ""
     );
     return {
@@ -92,49 +85,69 @@ const ClassDetail = ({
   const handleCancelEdit = () => setIsEditing(false);
 
   const handleUpdateSuccess = async (updatedData) => {
-    try {
-      const teacherName =
-        teachers.find((t) => t.ID === updatedData.teacher)?.NAME ||
-        updatedData.teacher;
-      const description = `[Giáo viên: ${teacherName}] ${
-        updatedData.description || ""
-      }`;
+  try {
+    // Update class basic info
+    const teacherName = teachers.find((t) => t.ID === updatedData.teacher)?.NAME || updatedData.teacher;
+    const description = `[Giáo viên: ${teacherName}] ${updatedData.description || ""}`;
 
-      const payload = {
-        name: updatedData.name,
-        description,
-        startDate: updatedData.startDate,
-        endDate: updatedData.endDate,
-        minStu: Number(updatedData.minStu) || 0,
-        maxStu: Number(updatedData.maxStu) || 0,
-        price: Number(updatedData.price) || 0,
-        teacherName,
-      };
+    const payload = {
+      name: updatedData.name,
+      description,
+      startDate: updatedData.startDate,
+      endDate: updatedData.endDate,
+      minStu: Number(updatedData.minStu) || 0,
+      maxStu: Number(updatedData.maxStu) || 0,
+      price: Number(updatedData.price) || 0,
+      teacherName,
+    };
 
-      await updateCourse(clsId, payload);
+    await updateCourse(clsId, payload);
 
-      const newStudents = updatedData.students || [];
-      const oldStudents = originalData?.raw?.STUDENTS || [];
-      const added = newStudents.filter(
-        (ns) => !oldStudents.some((os) => os.ID === ns.id)
-      );
+    // Handle student list updates
+    const currentStudents = classInfo?.students || [];
+    const newStudents = updatedData.students || [];
 
-      for (const stu of added) {
-        await addStudentToCourse({
-          studentId: stu.id,
-          courseId: clsId,
-          paymentType: "UNPAID",
-          paymentDescription: "Auto added during update",
-        });
-      }
+    // Find students to add (in new list but not in current)
+    const studentsToAdd = newStudents.filter(
+      newStudent => !currentStudents.some(
+        currentStudent => currentStudent.ID === newStudent.id
+      )
+    );
 
-      await fetchClass();
-      setIsEditing(false);
-    } catch (err) {
-      console.error("Failed to update course:", err);
-      alert("Không thể cập nhật lớp học.");
+    // Find students to remove (in current but not in new)
+    const studentsToRemove = currentStudents.filter(
+      currentStudent => !newStudents.some(
+        newStudent => newStudent.id === currentStudent.ID
+      )
+    );
+
+    // Process additions
+    for (const student of studentsToAdd) {
+      await addStudentToCourse({
+        studentId: student.id,
+        courseId: clsId,
+        paymentType: "UNPAID",
+        paymentDescription: "Added during course update",
+      });
     }
-  };
+
+    // Process removals
+    for (const student of studentsToRemove) {
+      await removeStudentFromCourse({
+        studentId: student.ID,
+        courseId: clsId,
+      });
+    }
+
+    // Refresh class data
+    await fetchClass();
+    setIsEditing(false);
+
+  } catch (err) {
+    console.error("Failed to update course:", err);
+    alert("Không thể cập nhật lớp học.");
+  }
+};
 
   if (!clsId && !isEditing) {
     return <div>Không có thông tin lớp học.</div>;
@@ -144,7 +157,9 @@ const ClassDetail = ({
 
   return (
     <div className="class-detail-container">
-      <BackButton type="button" onClick={onBack}>← Back</BackButton>
+      <BackButton type="button" onClick={onBack}>
+        ← Back
+      </BackButton>
       {isEditing || !clsId ? (
         <DynamicForm
           formConfig={{
@@ -170,8 +185,7 @@ const ClassDetail = ({
             name: classInfo?.name || "",
             description: classInfo?.description || "",
             teacher:
-              teachers.find((t) => t.NAME === classInfo?.teacherName)?.ID ||
-              "",
+              teachers.find((t) => t.NAME === classInfo?.teacherName)?.ID || "",
             startDate: classInfo?.startDate?.slice(0, 10) || "",
             endDate: classInfo?.endDate?.slice(0, 10) || "",
             students:
@@ -193,14 +207,30 @@ const ClassDetail = ({
           <div className="info-header">
             <h2>{classInfo.name}</h2>
           </div>
-          <p><strong>Name:</strong> {classInfo.name}</p>
-          <p><strong>Giáo viên:</strong> {classInfo.teacherName}</p>
-          <p><strong>Description:</strong> {classInfo.description}</p>
-          <p><strong>Start Date:</strong> {formatDate(classInfo.startDate)}</p>
-          <p><strong>End Date:</strong> {formatDate(classInfo.endDate)}</p>
-          <p><strong>Min Students:</strong> {classInfo.minStu}</p>
-          <p><strong>Max Students:</strong> {classInfo.maxStu}</p>
-          <p><strong>Price:</strong> {classInfo.price}đ</p>
+          <p>
+            <strong>Name:</strong> {classInfo.name}
+          </p>
+          <p>
+            <strong>Giáo viên:</strong> {classInfo.teacherName}
+          </p>
+          <p>
+            <strong>Description:</strong> {classInfo.description}
+          </p>
+          <p>
+            <strong>Start Date:</strong> {formatDate(classInfo.startDate)}
+          </p>
+          <p>
+            <strong>End Date:</strong> {formatDate(classInfo.endDate)}
+          </p>
+          <p>
+            <strong>Min Students:</strong> {classInfo.minStu}
+          </p>
+          <p>
+            <strong>Max Students:</strong> {classInfo.maxStu}
+          </p>
+          <p>
+            <strong>Price:</strong> {classInfo.price}đ
+          </p>
         </div>
       )}
 

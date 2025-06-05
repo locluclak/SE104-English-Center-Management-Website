@@ -20,10 +20,10 @@ export const signup = async ({
   email,
   password,
   phoneNumber,
-  dateOfBirth,
+  date_of_birth,
   role,
 }) => {
-  const formattedDateOfBirth = formatDateToYMD(dateOfBirth); // Format the date here
+  const formattedDateOfBirth = formatDateToYMD(date_of_birth); // Format the date here
 
   const response = await fetch(`${API_URL}/signup`, {
     method: "POST",
@@ -33,7 +33,7 @@ export const signup = async ({
       email,
       password,
       phoneNumber,
-      dateOfBirth: formattedDateOfBirth,
+      date_of_birth: formattedDateOfBirth,
       role,
     }),
   });
