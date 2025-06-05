@@ -8,16 +8,31 @@
   overflow: hidden;
 }
 
-.accountant-content {
+.accountant-body {
   display: flex;
   flex: 1;
-  background-color: #f5f5f5;
+  min-height: 0; /* Fix cho trình duyệt Firefox */
+  width: 100%;
+  margin-top: 60px;
 }
 
-.accountant-main {
+.accountant-content {
   flex: 1;
-  padding: 20px;
-  background-color: #ffffff;
-  border-left: 1px solid #ddd;
-  overflow-y: auto;
+  overflow: hidden;
+  width: 100%;
+}
+
+.accountant-display-area {
+  display: flex;
+  gap: 20px;
+  flex: 1;
+  padding-left: 20px;
+  overflow: hidden;
+}
+
+.accountant-tab-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 20px;
 }
