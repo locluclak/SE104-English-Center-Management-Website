@@ -129,20 +129,24 @@ router.post('/add-student', async (req, res) => {
     }
     const coursePrice = courseRows[0].PRICE;
 
-    // Create payment record
-    const tuitionQuery = `
-      INSERT INTO TUITION (PRICE, TYPE, DESCRIPTION, STATUS)
-      VALUES (?, ?, ?, 'UNPAID')
-    `;
-    const [tuitionResult] = await connection.execute(
-      tuitionQuery,
-      [
-        coursePrice,
-        paymentType || 'UNPAID',
-        paymentDescription || ''
-      ]
-    );
-    const paymentId = tuitionResult.insertId;
+    let paymentId = null;
+
+    // Create payment record only if course price is greater than 0
+    if (coursePrice > 0) {
+      const tuitionQuery = `
+        INSERT INTO TUITION (PRICE, TYPE, DESCRIPTION, STATUS)
+        VALUES (?, ?, ?, 'UNPAID')
+      `;
+      const [tuitionResult] = await connection.execute(
+        tuitionQuery,
+        [
+          coursePrice,
+          paymentType || 'UNPAID',
+          paymentDescription || ''
+        ]
+      );
+      paymentId = tuitionResult.insertId;
+    }
 
     // Add student to course
     const studentCourseQuery = `
@@ -152,7 +156,7 @@ router.post('/add-student', async (req, res) => {
     await connection.execute(studentCourseQuery, [studentId, courseId, paymentId]);
 
     await connection.commit();
-    res.status(201).json({ message: 'Student added to course and payment created successfully' });
+    res.status(201).json({ message: 'Student added to course successfully' });
   } catch (error) {
     await connection.rollback();
     if (error.code === 'ER_DUP_ENTRY') {
@@ -208,6 +212,66 @@ router.put('/update/:id', async (req, res) => {
   } catch (error) {
     console.error('Error updating course:', error);
     res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Route to get list of assignments in a course
+router.get('/:courseId/assignments_time', async (req, res) => {
+  const courseId = req.params.courseId;
+
+  try {
+    const query = `
+      SELECT AS_ID, NAME, DESCRIPTION, START_DATE, END_DATE
+      FROM ASSIGNMENT
+      WHERE COURSE_ID = ?
+    `;
+
+    const [rows] = await db.execute(query, [courseId]);
+
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'No assignments found for this course' });
+    }
+
+    res.status(200).json({ assignments: rows });
+  } catch (error) {
+    console.error('Error fetching assignments:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Route to remove a student from a course
+router.delete('/remove-student', async (req, res) => {
+  const { studentId, courseId } = req.body;
+
+  // Validate input
+  if (!studentId || !courseId) {
+    return res.status(400).json({ error: 'Missing required fields' });
+  }
+
+  const connection = await db.getConnection();
+  try {
+    await connection.beginTransaction();
+
+    // Remove student from course
+    const query = `
+      DELETE FROM STUDENT_COURSE
+      WHERE STUDENT_ID = ? AND COURSE_ID = ?
+    `;
+    const [result] = await connection.execute(query, [studentId, courseId]);
+
+    if (result.affectedRows === 0) {
+      await connection.rollback();
+      return res.status(404).json({ error: 'Student not found in this course' });
+    }
+
+    await connection.commit();
+    res.status(200).json({ message: 'Student removed from course successfully' });
+  } catch (error) {
+    await connection.rollback();
+    console.error('Error removing student from course:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  } finally {
+    connection.release();
   }
 });
 

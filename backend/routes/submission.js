@@ -3,6 +3,7 @@ const multer = require('multer');
 const path = require('path');
 const db = require('../db');
 const fs = require('fs');
+const { Parser } = require('json2csv');
 
 const router = express.Router();
 
@@ -204,6 +205,204 @@ router.put('/update/:student_id/:assignment_id', async (req, res) => {
       res.status(500).json({ error: 'Internal server error' });
     }
   });
+});
+
+router.get('/submissions_byassignment/:assignmentId', async (req, res) => {
+  const { assignmentId } = req.params;
+
+  try {
+    const conn = await db.getConnection();
+
+    // Query to fetch submissions and student details for the given assignment ID
+    const query = `
+      SELECT 
+        s.STUDENT_ID, 
+        p.NAME AS STUDENT_NAME, 
+        s.SUBMIT_DATE, 
+        s.DESCRIPTION AS SUBMISSION_DESCRIPTION, 
+        s.FILE AS SUBMISSION_FILE, 
+        s.SCORE
+      FROM SUBMITION s
+      JOIN PERSON p ON s.STUDENT_ID = p.ID
+      WHERE s.AS_ID = ?
+    `;
+    const [rows] = await conn.query(query, [assignmentId]);
+
+    conn.release();
+
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'No submissions found for this assignment' });
+    }
+
+    res.status(200).json({ submissions: rows });
+  } catch (err) {
+    console.error('Error fetching submissions:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// PUT /submission/score/:student_id/:assignment_id - Score a submission
+router.put('/score/:student_id/:assignment_id', async (req, res) => {
+  const { student_id, assignment_id } = req.params;
+  const { score } = req.body;
+
+  // Validate the score
+  if (score === undefined || isNaN(score) || score < 0 || score > 100) {
+    return res.status(400).json({ error: 'Invalid score. Score must be a number between 0 and 100.' });
+  }
+
+  try {
+    const conn = await db.getConnection();
+
+    // Check if the submission exists
+    const [rows] = await conn.query(
+      'SELECT * FROM SUBMITION WHERE STUDENT_ID = ? AND AS_ID = ?',
+      [student_id, assignment_id]
+    );
+
+    if (rows.length === 0) {
+      conn.release();
+      return res.status(404).json({ error: 'Submission not found' });
+    }
+
+    // Update the score for the submission
+    const sql = `
+      UPDATE SUBMITION
+      SET SCORE = ?
+      WHERE STUDENT_ID = ? AND AS_ID = ?
+    `;
+    await conn.query(sql, [score, student_id, assignment_id]);
+
+    conn.release();
+    res.status(200).json({ message: 'Score updated successfully' });
+  } catch (err) {
+    console.error('Error scoring submission:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// GET /submission/report/:assignment_id - Get report of submissions for an assignment
+router.get('/report/:assignment_id', async (req, res) => {
+  const { assignment_id } = req.params;
+
+  try {
+    const conn = await db.getConnection();
+
+    // Query to fetch submission details along with student information (excluding phone number)
+    const query = `
+      SELECT 
+        s.SUBMIT_DATE, 
+        s.SCORE, 
+        p.NAME AS STUDENT_NAME, 
+        p.EMAIL AS STUDENT_EMAIL
+      FROM SUBMITION s
+      JOIN PERSON p ON s.STUDENT_ID = p.ID
+      WHERE s.AS_ID = ?
+    `;
+    const [rows] = await conn.query(query, [assignment_id]);
+
+    conn.release();
+
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'No submissions found for this assignment' });
+    }
+
+    res.status(200).json({ report: rows });
+  } catch (err) {
+    console.error('Error fetching assignment report:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// GET /submission/course_report/:course_id - Get report of a course including scores of all assignments for all students
+router.get('/course_report/:course_id', async (req, res) => {
+  const { course_id } = req.params;
+
+  try {
+    const conn = await db.getConnection();
+
+    // Query to fetch student names and scores for all assignments in the course
+    const query = `
+      SELECT 
+        p.NAME AS STUDENT_NAME, 
+        a.NAME AS ASSIGNMENT_NAME, 
+        s.SCORE
+      FROM SUBMITION s
+      JOIN PERSON p ON s.STUDENT_ID = p.ID
+      JOIN ASSIGNMENT a ON s.AS_ID = a.AS_ID
+      WHERE a.COURSE_ID = ?
+    `;
+
+    const [rows] = await conn.query(query, [course_id]);
+
+    conn.release();
+
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'No data found for this course' });
+    }
+
+    res.status(200).json({ report: rows });
+  } catch (err) {
+    console.error('Error fetching course report:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// GET /submission/export_csv_course/:course_id - Export course report as CSV with each row representing a student and their scores
+router.get('/export_csv_course/:course_id', async (req, res) => {
+  const { course_id } = req.params;
+
+  try {
+    const conn = await db.getConnection();
+
+    // Query to fetch student names and scores for all assignments in the course
+    const query = `
+      SELECT 
+        p.NAME AS STUDENT_NAME, 
+        a.NAME AS ASSIGNMENT_NAME, 
+        s.SCORE
+      FROM SUBMITION s
+      JOIN PERSON p ON s.STUDENT_ID = p.ID
+      JOIN ASSIGNMENT a ON s.AS_ID = a.AS_ID
+      WHERE a.COURSE_ID = ?
+      ORDER BY p.NAME, a.NAME
+    `;
+
+    const [rows] = await conn.query(query, [course_id]);
+
+    conn.release();
+
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'No data found for this course' });
+    }
+
+    // Group scores by student
+    const groupedData = {};
+    rows.forEach(row => {
+      if (!groupedData[row.STUDENT_NAME]) {
+        groupedData[row.STUDENT_NAME] = { STUDENT_NAME: row.STUDENT_NAME };
+      }
+      groupedData[row.STUDENT_NAME][row.ASSIGNMENT_NAME] = row.SCORE;
+    });
+
+    // Convert grouped data to an array for CSV export
+    const csvData = Object.values(groupedData);
+
+    // Extract assignment names for dynamic CSV headers
+    const assignmentNames = [...new Set(rows.map(row => row.ASSIGNMENT_NAME))];
+    const fields = ['STUDENT_NAME', ...assignmentNames];
+
+    const json2csvParser = new Parser({ fields });
+    const csv = json2csvParser.parse(csvData);
+
+    // Set headers and send the CSV file
+    res.header('Content-Type', 'text/csv');
+    res.attachment(`course_${course_id}_report.csv`);
+    res.send(csv);
+  } catch (err) {
+    console.error('Error exporting course report as CSV:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
 });
 
 module.exports = router;
