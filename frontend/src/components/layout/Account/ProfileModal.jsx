@@ -42,6 +42,7 @@ const ProfileModal = ({ visible, onClose }) => {
           role: storedUser.role || ''
         });
       } catch (error) {
+        console.error('Lỗi khi tải thông tin người dùng:', error);
         alert('Không thể tải thông tin người dùng. Vui lòng thử lại sau.');
       } finally {
         setIsLoading(false);

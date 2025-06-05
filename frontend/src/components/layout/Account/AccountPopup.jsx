@@ -4,52 +4,62 @@ import ProfileModal from './ProfileModal';
 import './AccountPopup.css';
 
 const AccountPopup = ({ visible, onClose }) => {
-  const ref = useRef(null);
+  const popupRef = useRef(null);
   const navigate = useNavigate();
   const [showProfile, setShowProfile] = useState(false);
 
-
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (ref.current && !ref.current.contains(event.target)) {
+      if (
+        popupRef.current &&
+        !popupRef.current.contains(event.target) &&
+        !showProfile // chỉ đóng khi không mở profile
+      ) {
         onClose();
       }
     };
+
     if (visible) {
       document.addEventListener('mousedown', handleClickOutside);
     }
+
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [visible, onClose]);
+  }, [visible, onClose, showProfile]);
 
   const handleLogout = () => {
-    // Example: Clear local storage token or user session
     localStorage.removeItem('userToken');
-    // Redirect to login page
+    localStorage.removeItem('user');
     navigate('/login');
   };
 
   const handleViewProfile = () => {
     setShowProfile(true);
-    onClose();
+    onClose(); // đóng popup menu
+  };
+
+  const handleCloseProfile = () => {
+    setShowProfile(false); // đóng modal profile
   };
 
   return (
     <>
-      <div className="account-popup" ref={ref}>
-        <h4>Tài khoản</h4>
-        <ul>
-          <li onClick={handleViewProfile}>Thông tin cá nhân</li>
-          <li>Cài đặt</li>
-          <li onClick={handleLogout}>Đăng xuất</li>
-        </ul>
-      </div>
+      {visible && (
+        <div className="account-popup" ref={popupRef}>
+          <h4>Tài khoản</h4>
+          <ul>
+            <li onClick={handleViewProfile}>Thông tin cá nhân</li>
+            <li>Cài đặt</li>
+            <li onClick={handleLogout}>Đăng xuất</li>
+          </ul>
+        </div>
+      )}
 
       {showProfile && (
-        <ProfileModal 
-          onClose={() => setShowProfile(false)}
+        <ProfileModal
           visible={showProfile}
+          onClose={handleCloseProfile}
         />
       )}
     </>
