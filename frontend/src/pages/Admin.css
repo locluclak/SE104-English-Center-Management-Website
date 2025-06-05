@@ -25,7 +25,8 @@
 }
 
 .admin-display-area {
-  padding: 20px 20px;
+  gap: 20px;
+  padding-left: 20px;
   box-sizing: border-box;
 }
 
@@ -37,7 +38,9 @@
 
 .class-grid {
   display: grid;
+  grid-template-columns: repeat(4, 1fr); 
   gap: 20px;
+  padding: 16px;
   align-items: stretch;
 }
 
