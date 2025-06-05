@@ -3,22 +3,18 @@ import Header from '../components/layout/Header/Header';
 import SidebarSearch from '../components/layout/Sidebar/SidebarSearch';
 
 import Table from '../components/common/Table/Table';
-import {
-  getStudentTableColumns,
-  getTeacherTableColumns,
-  getAccountantTableColumns,
-} from "../config/tableConfig.jsx";
-
 import Calendar from '../components/DashboardTab/CalendarTab';
 import Padlet from '../components/DashboardTab/PadletTab';
 import ClassesTab from '../components/AccountantPage/TuitionFeeTab/ClassesTab';
+import TimeReportTab from '../components/AccountantPage/ReportsTab/TimeReportTab';
+import ClassReportTab from '../components/AccountantPage/ReportsTab/ClassReportTab';
 
 import './Accountant.css';
 
 const AccountantPage = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
-  const [selectedFeature, setSelectedFeature] = useState('calendar'); // default for dashboard
-  const [tuitionSubTab, setTuitionSubTab] = useState('students'); // 'students' or 'classes'
+  const [selectedFeature, setSelectedFeature] = useState('calendar');
+  const [tuitionSubTab, setTuitionSubTab] = useState('students');
 
   const [studentsTuition, setStudentsTuition] = useState([
     { id: 'S001', name: 'Alice Nguyen', class: 'Toeic A1', totalFee: 3000000, paid: 2000000, status: 'unpaid' },
@@ -33,8 +29,8 @@ const AccountantPage = () => {
       if (activeTab === 'dashboard') {
         setSelectedFeature('calendar');
       } else if (activeTab === 'tuition') {
-        setTuitionSubTab('students'); // Mặc định là 'students' khi vào tab 'tuition'
-        setSelectedFeature('transfer'); // Mặc định cho sub-tab students
+        setTuitionSubTab('students');
+        setSelectedFeature('transfer');
       } else if (activeTab === 'reports') {
         setSelectedFeature('time');
       }
@@ -47,21 +43,20 @@ const AccountantPage = () => {
   };
 
   const handleFeatureSelect = useCallback((featureKey) => {
+  if (activeTab === 'tuition') {
     if (featureKey === 'students' || featureKey === 'classes') {
       setTuitionSubTab(featureKey);
-      if (featureKey === 'students') {
-        setSelectedFeature('transfer');
-      } else if (featureKey === 'classes') {
-        console.log('handleFeatureSelect called with:', featureKey);
-        setSelectedFeature('current');
-      }
-    } else if (activeTab === 'tuition' && (featureKey === 'transfer' || featureKey === 'paid' || featureKey === 'unpaid')) {
-      setSelectedFeature(featureKey);
-    } else {
-      console.log('handleFeatureSelect called with:', featureKey);
+      setSelectedFeature(featureKey === 'students' ? 'transfer' : 'current');
+    } else if (['transfer', 'paid', 'unpaid'].includes(featureKey)) {
       setSelectedFeature(featureKey);
     }
-  }, [activeTab]);
+  } else if (activeTab === 'reports') {
+    setSelectedFeature(featureKey); // <<< this is what you need
+  } else {
+    setSelectedFeature(featureKey);
+  }
+}, [activeTab]);
+
 
   const studentTuitionColumns = [
     { header: 'ID', accessor: 'id' },
@@ -86,21 +81,20 @@ const AccountantPage = () => {
     if (selectedFeature === 'unpaid') return student.status === 'unpaid';
     return true;
   });
-
-
-  return (
-    <div className="accountant-page">
-      <Header role="accountant" activeTab={activeTab} setActiveTab={setActiveTab} />
-
-      <div className="accountant-body">
-        <SidebarSearch
-          role="accountant"
-          activeTab={activeTab}
-          onSearch={handleFeatureSelect}
-          onNew={handleNew}
-        />
-
-        <div className="content">
+return (
+  <div className="accountant-page">
+    <Header role="accountant" activeTab={activeTab} setActiveTab={setActiveTab} />
+    
+    <div className="accountant-body">
+      <SidebarSearch
+        role="accountant"
+        activeTab={activeTab}
+        onSearch={handleFeatureSelect}
+        onNew={handleNew}
+      />
+      
+      <div className="accountant-display-area">
+        <div className="accountant-tab-content">
           {activeTab === 'dashboard' && (
             <>
               {selectedFeature === 'calendar' && <Calendar />}
@@ -113,7 +107,7 @@ const AccountantPage = () => {
               {tuitionSubTab === 'students' && (
                 <Table
                   columns={studentTuitionColumns}
-                  data={filteredStudentsTuition} // Sử dụng dữ liệu đã lọc
+                  data={filteredStudentsTuition}
                 />
               )}
               {tuitionSubTab === 'classes' && <ClassesTab status={selectedFeature} />}
@@ -122,14 +116,15 @@ const AccountantPage = () => {
 
           {activeTab === 'reports' && (
             <>
-              {selectedFeature === 'time' && <div>Reports - Time (add component here)</div>}
-              {selectedFeature === 'classes' && <div>Reports - Classes (add component here)</div>}
+              {selectedFeature === 'time' && <TimeReportTab />}
+              {selectedFeature === 'classes' && <ClassReportTab />}
             </>
           )}
         </div>
       </div>
     </div>
-  );
+  </div>
+);
 };
 
 export default AccountantPage;
