@@ -92,7 +92,7 @@ const AccountantPage = () => {
     <div className="accountant-page">
       <Header role="accountant" activeTab={activeTab} setActiveTab={setActiveTab} />
 
-      <div className="accountant-content">
+      <div className="accountant-body">
         <SidebarSearch
           role="accountant"
           activeTab={activeTab}
