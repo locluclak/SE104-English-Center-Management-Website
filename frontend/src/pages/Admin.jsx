@@ -201,21 +201,21 @@ const AdminPage = () => {
     const missingFields = [];
 
     // Kiểm tra từng trường dữ liệu
-    if (!isEdit && !data.hire_day) {
-      missingFields.push("hire_day");
-    }
-    if (!data.name) missingFields.push("name");
-    if (!data.email) missingFields.push("email");
-    if (!data.phone_number) missingFields.push("phone_number");
-    if (!data.date_of_birth) missingFields.push("date_of_birth");
-    if (!data.staff_type) missingFields.push("staff_type");
+    // if (!isEdit && !data.hire_day) {
+    //   missingFields.push("hire_day");
+    // }
+    // if (!data.name) missingFields.push("name");
+    // if (!data.email) missingFields.push("email");
+    // if (!data.phone_number) missingFields.push("phone_number");
+    // if (!data.date_of_birth) missingFields.push("date_of_birth");
+    // if (!data.staff_type) missingFields.push("staff_type");
 
-    // Nếu có trường thiếu, hiển thị thông báo lỗi
-    if (missingFields.length > 0) {
-      alert(`Thiếu các trường thông tin: ${missingFields.join(", ")}`);
-      return;
-    }
-    if (!type) return;
+    // // Nếu có trường thiếu, hiển thị thông báo lỗi
+    // if (missingFields.length > 0) {
+    //   alert(`Thiếu các trường thông tin: ${missingFields.join(", ")}`);
+    //   return;
+    // }
+    // if (!type) return;
 
     try {
       let newData = data;
@@ -259,7 +259,7 @@ const AdminPage = () => {
             email: data.email,
             password: data.password,
             phoneNumber: data.phone_number,
-            dateOfBirth: formatDateForAPI(data.date_of_birth), // Chuyển đổi cho backend
+            date_of_birth: formatDateForAPI(data.date_of_birth), // Chuyển đổi cho backend
             role: "STUDENT",
           });
           newData = normalizeStudents([{ ...data, id: result.id }])[0];
