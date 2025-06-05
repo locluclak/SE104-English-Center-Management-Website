@@ -1,5 +1,12 @@
 const API_BASE_URL = 'http://localhost:3000/person';
 
+// get persons with id (adding after editing for 3 features at admin)
+export const fetchPersonById = async (id) => {
+  const response = await fetch(`http://localhost:3000/person/${id}`);
+  if (!response.ok) throw new Error('Failed to fetch person by ID');
+  return response.json();
+};
+
 export const fetchStudents = async () => {
   const response = await fetch(`${API_BASE_URL}/students`);
   if (!response.ok) throw new Error('Failed to fetch students');
