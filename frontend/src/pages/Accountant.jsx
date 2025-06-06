@@ -51,7 +51,7 @@ const AccountantPage = () => {
       setSelectedFeature(featureKey);
     }
   } else if (activeTab === 'reports') {
-    setSelectedFeature(featureKey); // <<< this is what you need
+    setSelectedFeature(featureKey); 
   } else {
     setSelectedFeature(featureKey);
   }
