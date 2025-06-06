@@ -106,6 +106,7 @@ const ClassesTab = ({ selectedStatus = "waiting" }) => {
               <Card
                 key={cls.id}
                 title={cls.name}
+                role="admin"
                 onClick={() => handleSelectClass(cls)}
                 onEdit={() => handleEditClass(cls)}
               >
