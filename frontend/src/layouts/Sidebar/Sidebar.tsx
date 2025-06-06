@@ -23,9 +23,8 @@ const Sidebar: React.FC = () => {
   useEffect(() => {
     let storedRole = localStorage.getItem('role');
 
-    // Nếu chưa login, set tạm để test
     if (!storedRole) {
-      storedRole = 'ROLE_ADMIN'; // đổi sang ROLE_ACCOUNTANT nếu muốn test kế toán
+      storedRole = 'ROLE_ADMIN'; 
       localStorage.setItem('role', storedRole);
     }
 
@@ -34,14 +33,13 @@ const Sidebar: React.FC = () => {
 
     const roleRoutes: Record<string, Route[]> = {
       ROLE_ADMIN: [
-        { title: 'KHOÁ HỌC', link: '/admin/courses', icon: 'fas fa-book', roles: ['ROLE_ADMIN'] },
-        { title: 'HỌC VIÊN', link: '/admin/students', icon: 'fas fa-user-graduate', roles: ['ROLE_ADMIN'] },
-        { title: 'GIÁO VIÊN', link: '/admin/teachers', icon: 'fas fa-chalkboard-teacher', roles: ['ROLE_ADMIN'] },
-        { title: 'KẾ TOÁN', link: '/admin/accountants', icon: 'fas fa-money-bill', roles: ['ROLE_ADMIN'] },
+        { title: 'COURSES', link: '/admin/courses', icon: 'fas fa-book', roles: ['ROLE_ADMIN'] },
+        { title: 'STUDENTS', link: '/admin/students', icon: 'fas fa-user-graduate', roles: ['ROLE_ADMIN'] },
+        { title: 'TEACHERS', link: '/admin/teachers', icon: 'fas fa-chalkboard-teacher', roles: ['ROLE_ADMIN'] },
+        { title: 'ACCOUNTANTS', link: '/admin/accountants', icon: 'fas fa-money-bill', roles: ['ROLE_ADMIN'] },
       ],
       ROLE_ACCOUNTANT: [
-        { title: 'BẢNG ĐIỀU KHIỂN', link: '/accountant/dashboard', icon: 'fas fa-tachometer-alt', roles: ['ROLE_ACCOUNTANT'] },
-        { title: 'HỌC PHÍ', link: '/accountant/tuition', icon: 'fas fa-money-check-alt', roles: ['ROLE_ACCOUNTANT'] },
+        { title: 'HÓA ĐƠN', link: '/accountant/invoices', icon: 'fas fa-file-invoice-dollar', roles: ['ROLE_ACCOUNTANT'] },
         { title: 'BÁO CÁO', link: '/accountant/reports', icon: 'fas fa-chart-line', roles: ['ROLE_ACCOUNTANT'] },
       ],
       ROLE_TEACHER: [

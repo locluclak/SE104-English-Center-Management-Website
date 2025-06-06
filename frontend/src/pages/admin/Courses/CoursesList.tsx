@@ -1,131 +1,161 @@
 import React, { useEffect, useState } from 'react';
-import { Button, Form, Input, DatePicker, Modal, Table, Space, Popconfirm, message, Select } from 'antd';
+import { Button, Form, Modal, Table, Space, Popconfirm, message } from 'antd';
 import moment from 'moment';
 import './CoursesList.scss';
 import { MainApiRequest } from '@/services/MainApiRequest';
 import SearchInput from '@/components/SearchInput/SearchInput';
+import FloatingLabelInput from '@/components/FloatingInput/FloatingLabelInput';
 
-interface Student {
+interface Course {
   id: number;
   name: string;
-  birthday: string;
-  email: string;
-  phone_number: string;
+  description: string;
+  teacherName: string;
+  startDate: string;
+  endDate: string;
+  minStu: number;
+  maxStu: number;
+  price: number;
   status: string;
-  date_of_birth: string;
 }
 
-const formatDate = (dateString: string): string | null => {
-  if (!dateString) return null;
-  return moment(dateString).format('YYYY-MM-DD');
-};
+const normalizeCourses = (courses: any[]): Course[] =>
+  courses.map((cls: any) => {
+    const match = cls.DESCRIPTION?.match(/^\[Giáo viên:\s*(.*?)\]\s*/);
+    const teacherName = match ? match[1] : 'Unknown';
+    const cleanDescription = cls.DESCRIPTION?.replace(/^\[Giáo viên:\s*.*?\]\s*/, '');
 
-const normalizeStudents = (students: any[]): Student[] =>
-  students.map((s: any) => ({
-    id: s.ID,
-    name: s.NAME,
-    birthday: formatDate(s.DATE_OF_BIRTH) || '',
-    email: s.EMAIL,
-    status: s.STATUS,
-    phone_number: s.PHONE_NUMBER || '',
-    date_of_birth: s.DATE_OF_BIRTH,
-  }));
+    return {
+      id: cls.COURSE_ID,
+      name: cls.NAME,
+      description: cleanDescription,
+      teacherName,
+      startDate: cls.START_DATE,
+      endDate: cls.END_DATE,
+      minStu: cls.MIN_STU,
+      maxStu: cls.MAX_STU,
+      price: cls.PRICE,
+      status: cls.STATUS || 'waiting',
+    };
+  });
 
-const StudentsList = () => {
+const CoursesList = () => {
   const [form] = Form.useForm();
-  const [studentsList, setStudentsList] = useState<Student[]>([]);
-  const [openModal, setOpenModal] = useState(false);
-  const [editingStudent, setEditingStudent] = useState<Student | null>(null);
+  const [coursesList, setCoursesList] = useState<Course[]>([]);
+  const [openCreateCoursesModal, setOpenCreateCoursesModal] = useState(false);
+  const [editingCourses, setEditingCourses] = useState<Course | null>(null);
   const [searchKeyword, setSearchKeyword] = useState('');
+  const [teacherOptions, setTeacherOptions] = useState<{ label: string; value: string }[]>([]);
 
-  const fetchStudents = async () => {
+  const fetchCoursesList = async () => {
     try {
-      const res = await MainApiRequest.get('/students/all');
-      setStudentsList(normalizeStudents(res.data));
+      const res = await MainApiRequest.get('/course/all');
+      const normalized = normalizeCourses(res.data);
+      setCoursesList(normalized);
     } catch (error) {
-      console.error('Lỗi khi lấy danh sách học viên:', error);
-      message.error('Không thể lấy danh sách học viên.');
+      console.error('Failed to fetch courses:', error);
+      message.error('Unable to load courses.');
+    }
+  };
+
+  const fetchTeachers = async () => {
+    try {
+      const res = await MainApiRequest.get('/person/teachers');
+      const options = res.data.map((t: any) => ({
+        label: t.NAME,
+        value: t.NAME,
+      }));
+      setTeacherOptions(options);
+    } catch (error) {
+      console.error('Failed to fetch teachers:', error);
     }
   };
 
   useEffect(() => {
-    fetchStudents();
+    fetchCoursesList();
   }, []);
 
-  const onOK = async () => {
+  const openCourseModal = (course: Course | null = null) => {
+    setEditingCourses(course);
+    if (course) {
+      form.setFieldsValue({
+        ...course,
+        startDate: moment(course.startDate),
+        endDate: moment(course.endDate),
+      });
+    } else {
+      form.resetFields();
+    }
+    fetchTeachers();
+    setOpenCreateCoursesModal(true);
+  };
+
+  const onOKCreateCourses = async () => {
     try {
       const values = await form.validateFields();
       const payload = {
         name: values.name,
-        email: values.email,
-        phone_number: values.phone_number,
-        date_of_birth: values.date_of_birth.format('YYYY-MM-DD'),
+        teacherName: values.teacherName,
+        description: values.description,
+        startDate: values.startDate.format('YYYY-MM-DD'),
+        endDate: values.endDate.format('YYYY-MM-DD'),
+        minStu: values.minStu,
+        maxStu: values.maxStu,
+        price: values.price,
         status: values.status,
       };
 
-      if (editingStudent) {
-        await MainApiRequest.put(`/students/update/${editingStudent.id}`, payload);
-        message.success('Cập nhật học viên thành công!');
+      if (editingCourses) {
+        await MainApiRequest.put(`/course/update/${editingCourses.id}`, payload);
+        message.success('Course updated successfully!');
       } else {
-        await MainApiRequest.post('/students/create', payload);
-        message.success('Thêm học viên thành công!');
+        await MainApiRequest.post('/course/create', payload);
+        message.success('Course created successfully!');
       }
 
-      fetchStudents();
-      setOpenModal(false);
+      fetchCoursesList();
+      setOpenCreateCoursesModal(false);
       form.resetFields();
     } catch (error) {
-      console.error('Lỗi khi lưu học viên:', error);
-      message.error('Không thể lưu học viên.');
+      console.error('Failed to save course:', error);
+      message.error('Failed to save course information.');
     }
   };
 
-  const onEdit = (record: Student) => {
-    setEditingStudent(record);
-    form.setFieldsValue({
-      ...record,
-      date_of_birth: moment(record.date_of_birth),
-    });
-    setOpenModal(true);
-  };
-
-  const onDelete = async (id: number) => {
+  const onDeleteCourses = async (id: number) => {
     try {
-      await MainApiRequest.delete(`/students/${id}`);
-      fetchStudents();
-      message.success('Xóa học viên thành công!');
+      await MainApiRequest.delete(`/courses/${id}`);
+      fetchCoursesList();
+      message.success('Course deleted successfully!');
     } catch (error) {
-      console.error('Lỗi khi xóa học viên:', error);
-      message.error('Không thể xóa học viên.');
+      console.error('Delete failed:', error);
+      message.error('Unable to delete course.');
     }
   };
 
   const handleSearch = (value: string) => {
     const keyword = value.trim().toLowerCase();
     setSearchKeyword(keyword);
-
     if (!keyword) {
-      fetchStudents();
+      fetchCoursesList();
       return;
     }
-
-    const filtered = studentsList.filter(student =>
-      (student.name || '').toLowerCase().includes(keyword) ||
-      (student.email || '').toLowerCase().includes(keyword)
+    const filtered = coursesList.filter((course) =>
+      course.name.toLowerCase().includes(keyword) ||
+      course.teacherName.toLowerCase().includes(keyword)
     );
-
-    setStudentsList(filtered);
+    setCoursesList(filtered);
   };
 
   return (
     <div className="container-fluid m-2">
       <div className="sticky-header-wrapper">
-        <h2 className="h2 header-custom">QUẢN LÝ HỌC VIÊN</h2>
+        <h2 className="h2 header-custom">COURSE MANAGEMENT</h2>
         <div className="header-actions d-flex me-3 py-2 align-items-center justify-content-between">
           <div className="flex-grow-1 d-flex justify-content-center">
             <Form layout="inline" className="search-form d-flex">
               <SearchInput
-                placeholder="Tìm kiếm học viên..."
+                placeholder="Search courses..."
                 value={searchKeyword}
                 onChange={(e) => handleSearch(e.target.value)}
                 onSearch={() => handleSearch(searchKeyword)}
@@ -133,71 +163,126 @@ const StudentsList = () => {
               />
             </Form>
           </div>
-          <Button type="primary" icon={<i className="fas fa-plus"></i>} onClick={() => {
-            setEditingStudent(null);
-            form.resetFields();
-            setOpenModal(true);
-          }} />
+          <Button type="primary" icon={<i className="fas fa-plus"></i>} onClick={() => openCourseModal()} />
         </div>
       </div>
 
       <Modal
-        className="students-modal"
-        title={editingStudent ? 'Chỉnh sửa' : 'Thêm mới'}
-        open={openModal}
-        onOk={onOK}
+        className="courses-modal"
+        title={editingCourses ? 'Edit Course' : 'Add New Course'}
+        open={openCreateCoursesModal}
+        onOk={onOKCreateCourses}
         onCancel={() => {
-          setOpenModal(false);
+          setOpenCreateCoursesModal(false);
           form.resetFields();
         }}
       >
         <Form form={form} layout="vertical">
-          <Form.Item label="Tên học viên" name="name" rules={[{ required: true }]}>
-            <Input />
-          </Form.Item>
-          <Form.Item label="Email" name="email" rules={[{ required: true, type: 'email' }]}>
-            <Input />
-          </Form.Item>
-          <Form.Item label="Số điện thoại" name="phone_number" rules={[{ required: true }]}>
-            <Input />
-          </Form.Item>
-          <Form.Item label="Ngày sinh" name="date_of_birth" rules={[{ required: true }]}>
-            <DatePicker format="DD-MM-YYYY" style={{ width: '100%' }} />
-          </Form.Item>
-          <Form.Item label="Trạng thái" name="status" rules={[{ required: true }]}>
-            <Select>
-              <Select.Option value="active">Đang học</Select.Option>
-              <Select.Option value="inactive">Nghỉ</Select.Option>
-            </Select>
-          </Form.Item>
+          <FloatingLabelInput label="Course Name" name="name" required component="input" />
+          <FloatingLabelInput
+            label="Description"
+            name="description"
+            required
+            component="input"
+            componentProps={{ type: 'text', rows: 3 }}
+          />
+          <FloatingLabelInput
+            label="Teacher"
+            name="teacherName"
+            required
+            component="select"
+            options={teacherOptions}
+          />
+          <FloatingLabelInput
+            label="Start Date"
+            name="startDate"
+            required
+            component="date"
+            componentProps={{ format: 'DD-MM-YYYY' }}
+          />
+          <FloatingLabelInput
+            label="End Date"
+            name="endDate"
+            required
+            component="date"
+            componentProps={{ format: 'DD-MM-YYYY' }}
+          />
+          <FloatingLabelInput
+            label="Minimum Students"
+            name="minStu"
+            required
+            component="input"
+            type="number"
+          />
+          <FloatingLabelInput
+            label="Maximum Students"
+            name="maxStu"
+            required
+            component="input"
+            type="number"
+          />
+          <FloatingLabelInput
+            label="Price"
+            name="price"
+            required
+            component="input"
+            type="number"
+          />
+          <FloatingLabelInput
+            label="Status"
+            name="status"
+            required
+            component="select"
+            options={[
+              { label: 'Waiting', value: 'waiting' },
+              { label: 'Ongoing', value: 'active' },
+              { label: 'Finished', value: 'finished' },
+            ]}
+          />
         </Form>
       </Modal>
 
       <Table
-        dataSource={studentsList}
+        dataSource={coursesList}
         rowKey="id"
         pagination={{ pageSize: 5, showSizeChanger: true }}
         columns={[
           { title: 'ID', dataIndex: 'id' },
-          { title: 'Tên', dataIndex: 'name' },
-          { title: 'Email', dataIndex: 'email' },
-          { title: 'SĐT', dataIndex: 'phone_number' },
+          { title: 'Course Name', dataIndex: 'name' },
+          { title: 'Description', dataIndex: 'description' },
+          { title: 'Teacher', dataIndex: 'teacherName' },
           {
-            title: 'Ngày sinh',
-            dataIndex: 'birthday',
+            title: 'Start Date',
+            dataIndex: 'startDate',
             render: (text) => moment(text).format('DD-MM-YYYY'),
           },
-          { title: 'Trạng thái', dataIndex: 'status' },
           {
-            title: 'Hành động',
-            render: (_, record: Student) => (
+            title: 'End Date',
+            dataIndex: 'endDate',
+            render: (text) => moment(text).format('DD-MM-YYYY'),
+          },
+          { title: 'Min Students', dataIndex: 'minStu' },
+          { title: 'Max Students', dataIndex: 'maxStu' },
+          {
+            title: 'Price',
+            dataIndex: 'price',
+            render: (text) =>
+              new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'VND',
+              }).format(text),
+          },
+          { title: 'Status', dataIndex: 'status' },
+          {
+            title: 'Actions',
+            render: (_, record: Course) => (
               <Space>
-                <Button onClick={() => onEdit(record)}>
+                <Button onClick={() => openCourseModal(record)}>
                   <i className="fas fa-edit"></i>
                 </Button>
                 <Popconfirm
-                  title="Xóa học viên?"
-                  onConfirm={() => onDelete(record.id)}
+                  title="Delete this course?"
+                  onConfirm={() => onDeleteCourses(record.id)}
                 >
                   <Button danger>
                     <i className="fas fa-trash"></i>
@@ -212,4 +297,4 @@ const StudentsList = () => {
   );
 };
 
-export default StudentsList;
+export default CoursesList;

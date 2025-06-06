@@ -1,92 +1,88 @@
 import React, { useEffect, useState } from 'react';
 import { Button, Form, Modal, Table, Space, Popconfirm, message } from 'antd';
 import moment from 'moment';
-import './StudentList.scss';
+import './AccountantsList.scss';
 import { MainApiRequest } from '@/services/MainApiRequest';
 import SearchInput from '@/components/SearchInput/SearchInput';
 import FloatingLabelInput from '@/components/FloatingInput/FloatingLabelInput';
 
-interface Student {
+interface Accountant {
   id: number;
   name: string;
-  birthday: string;
   email: string;
-  status: string;
   phone_number: string;
   date_of_birth: string;
+  hire_day: string;
   password?: string;
 }
 
-const formatDate = (dateString: string): string =>
-  dateString ? moment(dateString).format('YYYY-MM-DD') : '';
-
-const normalizeStudents = (students: any[]): Student[] =>
-  students.map((s: any) => ({
-    id: s.ID,
-    name: s.NAME,
-    birthday: formatDate(s.DATE_OF_BIRTH),
-    email: s.EMAIL,
-    status: 'active',
-    phone_number: s.PHONE_NUMBER || '',
-    date_of_birth: s.DATE_OF_BIRTH,
+const normalizeAccountants = (data: any[]): Accountant[] =>
+  data.map((item: any) => ({
+    id: item.ID,
+    name: item.NAME,
+    email: item.EMAIL,
+    phone_number: item.PHONE_NUMBER || '',
+    date_of_birth: item.DATE_OF_BIRTH,
+    hire_day: item.HIRE_DAY,
   }));
 
-const StudentsList = () => {
+const AccountantsList = () => {
   const [form] = Form.useForm();
-  const [studentsList, setStudentsList] = useState<Student[]>([]);
+  const [accountants, setAccountants] = useState<Accountant[]>([]);
   const [openModal, setOpenModal] = useState(false);
-  const [editingStudent, setEditingStudent] = useState<Student | null>(null);
+  const [editingAccountant, setEditingAccountant] = useState<Accountant | null>(null);
   const [searchKeyword, setSearchKeyword] = useState('');
 
-  const fetchStudentsList = async () => {
+  const fetchAccountants = async () => {
     try {
-      const res = await MainApiRequest.get('/person/students');
-      setStudentsList(normalizeStudents(res.data));
+      const res = await MainApiRequest.get('/person/accountants');
+      setAccountants(normalizeAccountants(res.data));
     } catch (error) {
-      console.error('Lỗi khi lấy danh sách học viên:', error);
-      message.error('Không thể lấy danh sách học viên.');
+      console.error('Failed to fetch accountants:', error);
+      message.error('Failed to load accountants.');
     }
   };
 
   useEffect(() => {
-    fetchStudentsList();
+    fetchAccountants();
   }, []);
 
   const onOKSubmit = async () => {
     try {
       const values = await form.validateFields();
-      const payload = {
+
+      const payload: any = {
         name: values.name,
         email: values.email,
         phone_number: values.phone_number,
         date_of_birth: values.date_of_birth.format('YYYY-MM-DD'),
-        password: values.password || undefined,
-        role: 'STUDENT',
+        password: values.password,
       };
 
-      if (editingStudent) {
-        await MainApiRequest.put(`/person/update/${editingStudent.id}`, payload);
-        message.success('Cập nhật học viên thành công!');
+      if (editingAccountant) {
+        await MainApiRequest.put(`/person/update/${editingAccountant.id}`, payload);
+        message.success('Accountant updated successfully!');
       } else {
-        await MainApiRequest.post('/auth/signup', {
+        await MainApiRequest.post('/person/allocate', {
           ...payload,
-          password: payload.password || 'student123',
+          hire_day: values.hire_day.format('YYYY-MM-DD'),
+          role: 'ACCOUNTANT',
         });
-        message.success('Tạo học viên mới thành công!');
+        message.success('New accountant created successfully!');
       }
 
-      fetchStudentsList();
+      fetchAccountants();
       setOpenModal(false);
       form.resetFields();
-      setEditingStudent(null);
+      setEditingAccountant(null);
     } catch (error) {
-      console.error('Lỗi khi lưu học viên:', error);
-      message.error('Không thể lưu học viên.');
+      console.error('Failed to save accountant:', error);
+      message.error('Unable to save accountant.');
     }
   };
 
-  const onEdit = (record: Student) => {
-    setEditingStudent(record);
+  const onEdit = (record: Accountant) => {
+    setEditingAccountant(record);
     form.setFieldsValue({
       ...record,
       date_of_birth: moment(record.date_of_birth),
@@ -97,11 +93,11 @@ const StudentsList = () => {
   const onDelete = async (id: number) => {
     try {
       await MainApiRequest.delete(`/person/delete/${id}`);
-      fetchStudentsList();
-      message.success('Xóa học viên thành công!');
+      fetchAccountants();
+      message.success('Accountant deleted successfully!');
     } catch (error) {
-      console.error('Lỗi khi xóa học viên:', error);
-      message.error('Không thể xóa học viên.');
+      console.error('Failed to delete accountant:', error);
+      message.error('Unable to delete accountant.');
     }
   };
 
@@ -109,25 +105,25 @@ const StudentsList = () => {
     const keyword = value.trim().toLowerCase();
     setSearchKeyword(keyword);
     if (!keyword) {
-      fetchStudentsList();
+      fetchAccountants();
       return;
     }
-    const filtered = studentsList.filter((student) =>
-      (student.name || '').toLowerCase().includes(keyword) ||
-      (student.email || '').toLowerCase().includes(keyword)
+    const filtered = accountants.filter((acc) =>
+      acc.name.toLowerCase().includes(keyword) ||
+      acc.email.toLowerCase().includes(keyword)
     );
-    setStudentsList(filtered);
+    setAccountants(filtered);
   };
 
   return (
     <div className="container-fluid m-2">
       <div className="sticky-header-wrapper">
-        <h2 className="h2 header-custom">QUẢN LÝ HỌC VIÊN</h2>
+        <h2 className="h2 header-custom">ACCOUNTANT MANAGEMENT</h2>
         <div className="header-actions d-flex me-3 py-2 align-items-center justify-content-between">
           <div className="flex-grow-1 d-flex justify-content-center">
             <Form layout="inline" className="search-form d-flex">
               <SearchInput
-                placeholder="Search students..."
+                placeholder="Search accountant..."
                 value={searchKeyword}
                 onChange={(e) => handleSearch(e.target.value)}
                 onSearch={() => handleSearch(searchKeyword)}
@@ -136,7 +132,7 @@ const StudentsList = () => {
             </Form>
           </div>
           <Button type="primary" icon={<i className="fas fa-plus"></i>} onClick={() => {
-            setEditingStudent(null);
+            setEditingAccountant(null);
             form.resetFields();
             setOpenModal(true);
           }} />
@@ -144,8 +140,8 @@ const StudentsList = () => {
       </div>
 
       <Modal
-        className="students-modal"
-        title={editingStudent ? 'Edit Student' : 'Add New Student'}
+        className="accountants-modal"
+        title={editingAccountant ? 'Edit Accountant' : 'Add New Accountant'}
         open={openModal}
         onOk={onOKSubmit}
         onCancel={() => {
@@ -164,19 +160,27 @@ const StudentsList = () => {
             component="date"
             componentProps={{ format: 'DD-MM-YYYY' }}
           />
+          {!editingAccountant && (
+            <FloatingLabelInput
+              label="Hire Date"
+              name="hire_day"
+              required
+              component="date"
+              componentProps={{ format: 'DD-MM-YYYY' }}
+            />
+          )}
           <FloatingLabelInput
             label="Password"
             name="password"
             required
             component="input"
             type="password"
-            componentProps={{ autoComplete: 'new-password' }}
           />
         </Form>
       </Modal>
 
       <Table
-        dataSource={studentsList}
+        dataSource={accountants}
         rowKey="id"
         pagination={{ pageSize: 5, showSizeChanger: true }}
         columns={[
@@ -186,19 +190,23 @@ const StudentsList = () => {
           { title: 'Phone Number', dataIndex: 'phone_number' },
           {
             title: 'Date of Birth',
-            dataIndex: 'birthday',
+            dataIndex: 'date_of_birth',
             render: (text) => moment(text).format('DD-MM-YYYY'),
           },
-          { title: 'Status', dataIndex: 'status' },
+          {
+            title: 'Hire Date',
+            dataIndex: 'hire_day',
+            render: (text) => moment(text).format('DD-MM-YYYY'),
+          },
           {
             title: 'Actions',
-            render: (_, record: Student) => (
+            render: (_, record: Accountant) => (
               <Space>
                 <Button onClick={() => onEdit(record)}>
                   <i className="fas fa-edit"></i>
                 </Button>
                 <Popconfirm
-                  title="Delete student?"
+                  title="Delete this accountant?"
                   onConfirm={() => onDelete(record.id)}
                 >
                   <Button danger>
@@ -214,4 +222,4 @@ const StudentsList = () => {
   );
 };
 
-export default StudentsList;
+export default AccountantsList;
