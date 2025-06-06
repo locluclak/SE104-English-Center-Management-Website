@@ -1,0 +1,181 @@
+@import "../../scss/_variables.scss";
+
+.sidebar {
+  width: 100%;
+  max-width: 340px;
+  min-width: 250px;
+  background-color: get-color($background, "100");
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 0;
+  left: 0;
+  overflow-y: auto;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  z-index: 1000;
+  padding: 0 0 20px 0;
+
+  @media (max-width: 1024px) {
+    max-width: 280px;
+  }
+
+  @media (max-width: 768px) {
+    max-width: 250px;
+  }
+
+  @media (max-width: 576px) {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    z-index: 9999;
+    box-shadow: none;
+    padding: 10px;
+  }
+
+  .logo {
+    font-family: $font-family;
+    font-weight: bold;
+    color: get-color($primary, "100");
+    font-size: 24px;
+    margin: 20px;
+    text-align: center;
+
+    @media (max-width: 576px) {
+      font-size: 20px;
+      margin: 10px auto;
+    }
+  }
+
+  .nav {
+    justify-content: center;
+  }
+
+  .title {
+    font-size: 16px;
+    margin-inline: 15px;
+    padding: 8px 0px 8px 4px;
+    border-radius: 5px;
+
+    &:hover {
+      color: get-color($primary, "100");
+    }
+
+    &.title-active {
+      color: get-color($accent, "100");
+      font-weight: bold;
+    }
+  }
+
+  .nav-item {
+    margin: 0 10px;
+    padding: 8px 5px;
+
+    &.nav-item-active {
+      font-weight: bold;
+    }
+
+    .nav-link {
+      padding: 12px 0px 12px 8px;
+      display: flex;
+      align-items: center;
+      margin-bottom: 5px;
+      border-radius: 10px;
+      color: get-color($primary, "100");
+      background-color: get-color($accent, "100");
+      border: 1px solid get-color($primary, "100");
+
+      &:hover {
+        background-color: lightcyan;
+        color: get-color($primary, "100");
+        border: 1.5px solid get-color($primary, "200");
+      }
+
+      &.nav-link-active {
+        background-color: get-color($primary, "200");
+        color: get-color($neutral, "100");
+        border: 1.5px solid get-color($primary, "100");
+      }
+
+      .icon {
+        margin-left: 10px;
+        font-size: 20px;
+      }
+
+      .arrow {
+        margin-left: auto;
+        transition: transform 0.3s;
+        color: get-color($primary, "100");
+      }
+
+      &.up {
+        transform: rotate(0deg);
+      }
+
+      &.down {
+        transform: rotate(180deg);
+      }
+    }
+
+    .nav-children {
+      width: 100%;
+      border-radius: 10px;
+      background-color: get-color($accent, "100");
+
+      .nav-link {
+        padding-left: 20px;
+        color: get-color($primary, "200");
+
+        &:hover {
+          background-color: get-color($secondary, "100");
+          color: get-color($primary, "100");
+        }
+
+        &.nav-link-active {
+          background-color: get-color($primary, "100");
+          color: get-color($neutral, "100");
+        }
+      }
+    }
+  }
+
+  .logout-box {
+    width: 80%;
+    font-weight: bold;
+    padding: 15px;
+    background-color: linen;
+    color: lightcoral;
+    border-radius: 20px;
+    border: 1px solid lightcoral;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-decoration: none;
+    position: sticky;
+    bottom: 0;
+    margin: 20px auto;
+
+    i {
+      margin-right: 10px;
+      font-size: 24px;
+      color: lightcoral;
+    }
+
+    &:hover {
+      background: linear-gradient(0deg, lightcoral, lightpink);
+      color: get-color($accent, "100");
+
+      i {
+        color: get-color($accent, "100");
+      }
+    }
+
+    @media (max-width: 576px) {
+      width: 100%;
+      padding: 10px;
+    }
+  }
+}

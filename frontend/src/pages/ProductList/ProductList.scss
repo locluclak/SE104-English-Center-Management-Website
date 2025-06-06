@@ -1,0 +1,214 @@
+@import "../../scss/variables.scss";
+
+.container-fluid {
+
+    .header-custom{
+      display: flex;
+      flex-direction: column; 
+      align-items: center; 
+      width: 100%;
+      padding: 20px 32px;
+      background-color: get-color($background, "100");
+
+    .h2, .h4 {
+      font-weight: bold !important;
+      color: get-color($primary, "100");
+      margin: 20px 0;
+      display: flex;
+      justify-content: center ;
+    }
+  }
+  
+    button {
+      margin: 5px 10px;
+      border-radius: 5px;
+      font-size: 14px;
+      padding: 5px 15px;
+      transition: background-color;
+
+      &.ant-btn-primary {
+        padding: 20px 10px;
+        background-color: get-color($primary, "100");
+        color: #fff;
+
+        &:hover {
+          background-color: get-color($primary, "200") !important;
+          color: get-color($secondary, "200") !important;
+        }
+      } 
+  
+      &:hover {
+
+        &.ant-btn-dafault {
+          background-color: get-color($secondary, "100") !important;
+          color: #fff;
+        }
+        &.ant-btn-danger {
+          background-color: get-color($accent, "200") !important;
+          color: get-color($secondary, "200") !important;
+        }
+      }
+    }
+  
+    .ant-modal {
+      
+      .ant-modal-header {
+        justify-self: center;
+        background-color: #f0f8ff;
+        border-bottom: 1px solid #e0e0e0;
+        font-weight: bold;
+      }
+  
+      .ant-modal-title {
+        display: flex !important;
+        justify-content: center !important;
+        color: get-color($primary, "100") !important;
+      }
+  
+      .ant-modal-footer {
+        display: flex;
+        justify-content: space-between;
+  
+        button {
+          width: 100px;
+        }
+      }
+  
+      .ant-form-item {
+  
+        label {
+          font-weight: 500;
+          color: #555;
+        }
+        .ant-picker-input{
+          border: none !important;
+        }
+  
+        input, textarea{
+          border-radius: 5px;
+          //border: 1px solid #ccc;
+          padding: 8px;
+  
+          &:focus {
+            border-color: #1890ff;
+            box-shadow: 0 0 5px rgba(24, 144, 255, 0.5);
+          }
+          .ant-picker-input{
+            border: none !important;
+          }
+        }
+      }
+    }
+  
+    .ant-table {
+      margin-top: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+  
+      .ant-table-thead > tr > th {
+        text-align: center;
+        background-color: get-color($primary, "100") !important;
+        color: get-color($accent, "100") !important;        
+        font-weight: bold !important;
+        
+      }
+  
+      .ant-table-tbody {
+        background-color: $lightblue !important;
+
+        .ant-table-row {
+
+          &:nth-child(odd) {
+            background-color:  get-color($background,'100') !important;// Màu nền cho hàng chẵn
+          }
+          &:nth-child(even) {
+            background-color: get-color($secondary,'100') !important; // Màu nền cho hàng lẻ
+          }
+
+          &:hover {
+            cursor: pointer;
+            
+          }
+        }
+      }
+      .ant-table-tbody > tr > td {
+        text-align: center;
+        
+  
+        .ant-space-item {
+          button {
+            margin: 0 5px;
+          }
+        }
+      }
+    }
+  }
+  
+  /* Modal Form Styling */
+  .product-modal {
+    .ant-form-item {
+
+      label {
+        font-size: 14px;
+        font-weight: 500;
+        color: #444;
+
+      }.ant-picker-input{
+        border: none !important;
+      }
+  
+      input, textarea {
+        border-radius: 8px;
+        transition: border-color 0.3s ease;
+  
+        &:focus {
+          border-color: #40a9ff;
+          box-shadow: 0 0 8px rgba(64, 169, 255, 0.2);
+        }
+
+        .ant-picker-input{
+          border: none !important;
+        }
+      }
+    }
+  
+    .field-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+  
+      .ant-form-item {
+        flex: 1;
+      }
+    }
+  
+    textarea {
+      resize: none;
+      min-height: 80px;
+    }
+  
+    .ant-modal-footer {
+      button {
+        width: 120px;
+        height: 40px;
+        font-size: 14px;
+      }
+    }
+  }
+  .checkbox-group {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); // Số cột tự động thay đổi dựa vào kích thước màn hình
+    gap: 8px; // Khoảng cách giữa các feature
+    margin-top: 10px;
+  }
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 4rem); // Chia thành 2 cột
+    justify-content: space-evenly; // Căn giữa các cột
+  }
+  
+  .feature-item {
+    display: flex;
+    align-items: center; // Căn giữa icon và text
+    white-space: nowrap; // Giữ text trên một dòng
+  }

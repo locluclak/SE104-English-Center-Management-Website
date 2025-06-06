@@ -1,0 +1,169 @@
+@import "../../scss/variables";
+.container-fluid {
+    padding: 20px;
+  
+    .h3, .h4 {
+      color: get-color($primary, "100");
+      font-weight: bold;
+      margin-top: 10px;
+    }
+  
+    button {
+      border-radius: 5px;
+      font-size: 14px;
+      padding: 5px 15px;
+      transition: background-color 0.3s ease;
+  
+      &:hover {
+        background-color: get-color($primary, "200");
+        color: #fff;
+      }
+    }
+  
+    .ant-modal {
+      
+      .ant-modal-header {
+        justify-self: center;
+        background-color: #f0f8ff;
+        border-bottom: 1px solid #e0e0e0;
+        font-weight: bold;
+      }
+  
+      .ant-modal-title {
+        justify-self: center;
+        color: #333;
+      }
+  
+      .ant-modal-footer {
+        display: flex;
+        justify-content: space-between;
+  
+        button {
+          width: 100px;
+        }
+      }
+  
+      .ant-form-item {
+  
+        label {
+          font-weight: 500;
+          color: #555;
+        }
+        .ant-picker-input{
+          border: none !important;
+        }
+  
+        input, textarea{
+          border-radius: 5px;
+          border: 1px solid #ccc;
+          padding: 8px;
+  
+          &:focus {
+            border-color: get-color($primary, "200");
+            box-shadow: 0 0 5px rgba(24, 144, 255, 0.5);
+          }
+          .ant-picker-input{
+            border: none !important;
+          }
+        }
+      }
+    }
+  
+    .ant-table {
+      margin-top: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+  
+      .ant-table-thead > tr > th {
+        background-color: #f0f8ff;
+        font-weight: bold;
+        text-align: center;
+      }
+  
+      .ant-table-tbody > tr > td {
+        text-align: center;
+
+        .ant-table-tbody > tr:nth-child(odd) {
+          background-color: #f9f9f9; // Màu nền cho các hàng lẻ
+        }
+        
+        .ant-table-tbody > tr:nth-child(even) {
+          background-color: #ffffff; // Màu nền cho các hàng chẵn
+        }
+        
+        .ant-table-tbody > tr:hover {
+          background-color: #e6f7ff; // Màu nền khi hover
+        }
+  
+        .ant-space-item {
+          button {
+            margin: 0 5px;
+          }
+        }
+      }
+    }
+  
+  }
+  
+  /* Modal Form Styling */
+  .booking-modal {
+    .ant-form-item {
+      margin-bottom: 10px;
+      label {
+        font-size: 14px;
+        font-weight: 500;
+        color: #444;
+
+      }
+  
+      input, textarea {
+        border-radius: 8px;
+        border: 1px solid #ccc;
+        transition: border-color 0.3s ease;
+  
+        &:focus {
+          border-color: get-color($primary, "200");
+          box-shadow: 0 0 8px rgba(64, 169, 255, 0.2);
+        }
+
+        .ant-picker-input{
+          border: none !important;
+        }
+      }
+    }
+  
+    .field-row {
+      display: flex;
+      margin-top: 10px;
+      justify-content: space-between;
+      gap: 20px;
+  
+      .ant-form-item {
+        flex: 1;
+      }
+    }
+  
+    textarea {
+      resize: none;
+      min-height: 80px;
+    }
+  
+    .ant-modal-footer {
+      button {
+        width: 120px;
+        height: 40px;
+        font-size: 14px;
+      }
+    }
+    .field-row1 {
+      display: flex;
+      margin-top: 10px;
+      justify-content: flex-start;
+      gap: 20px;
+      margin-bottom: 10px;
+  
+      .ant-form-item {
+        flex: 1;
+      }
+    }
+  }
