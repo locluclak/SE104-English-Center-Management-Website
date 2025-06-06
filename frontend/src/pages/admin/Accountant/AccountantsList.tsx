@@ -118,7 +118,7 @@ const AccountantsList = () => {
   return (
     <div className="container-fluid m-2">
       <div className="sticky-header-wrapper">
-        <h2 className="h2 header-custom">ACCOUNTANT MANAGEMENT</h2>
+        <h2 className="h2 header-custom">ACCOUNTANTS MANAGEMENT</h2>
         <div className="header-actions d-flex me-3 py-2 align-items-center justify-content-between">
           <div className="flex-grow-1 d-flex justify-content-center">
             <Form layout="inline" className="search-form d-flex">
