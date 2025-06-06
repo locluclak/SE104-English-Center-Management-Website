@@ -1,0 +1,35 @@
+@import "../../scss/variables.scss";  
+
+.custom-search-input .ant-input {
+  background: transparent;
+  box-shadow: none;
+  color: #2F4156;
+}
+
+.custom-search-input .ant-input-outlined {
+  box-shadow: none;
+  color: #2F4156;
+  border: 1px solid get-color($primary, "200");
+  border-radius: 20px;
+
+  &:hover {
+    border-color: get-color($primary, "100");
+  }
+
+  &.ant-input-focused {
+    border-color: get-color($primary, "200");
+    box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+  }
+}
+
+
+
+.custom-search-input .search-icon {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 16px;
+  transition: color 0.2s;
+
+  &:hover {
+    color: white;
+  }
+}
