@@ -1,12 +1,99 @@
-import React, { useState, } from 'react';
+import React, { useState, useEffect } from 'react';
 import CourseAd from '../Course/CourseAd/CourseAd';
 import CourseSection from '../Course/CourseSection/CourseSection';
-import CourseDetail from '../Course/CourseDetail/CourseDetail';
+import ClassDetail from '../../AdminPage/ClassesTab/ClassDetail';
+import { getOpenCoursesForHome } from '../../../services/homeService';
+import { addStudentToCourse } from '../../../services/courseService';
 
 import './HomeContent.css'
 
 const HomeContent = ({ handleClassClick }) => {
   const [selectedClass, setSelectedClass] = useState(null);
+  const [openCourses, setOpenCourses] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);const [isRegistering, setIsRegistering] = useState(false);
+  const [registrationError, setRegistrationError] = useState(null);
+  const [showRegistrationForm, setShowRegistrationForm] = useState(false); 
+  const [tempStudentId, setTempStudentId] = useState(''); 
+  const [tempStudentName, setTempStudentName] = useState('');
+
+  const fetchOpenCourses = async () => {
+    try {
+      setLoading(true);
+      const courses = await getOpenCoursesForHome();
+      console.log("Fetched open courses:", courses);
+      setOpenCourses(courses);
+    } catch (err) {
+      setError("Failed to load courses. Please try again later.");
+      console.error("Error fetching open courses:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchOpenCourses();
+  }, []);
+
+  const handleCourseClick = (course) => {
+    console.log("Course clicked:", course);
+    if (course && course.id) {
+      setSelectedClass(course);
+      setRegistrationError(null);
+      setShowRegistrationForm(false); // Hide form when a new class is selected
+      setTempStudentId(''); // Clear form fields
+      setTempStudentName('');
+    } else {
+      console.error("Clicked course has no ID:", course);
+      setSelectedClass(null);
+    }
+  };
+
+  const handleInitiateRegistration = () => {
+    setShowRegistrationForm(true);
+    setRegistrationError(null);
+  };
+
+  const handleConfirmRegistration = async (event) => {
+    event.preventDefault(); // Prevent default form submission
+
+    if (!tempStudentId || !tempStudentName) {
+      setRegistrationError("Vui lòng điền đầy đủ ID và tên học viên.");
+      return;
+    }
+    if (!selectedClass || !selectedClass.id) {
+      setRegistrationError("Không có khóa học được chọn. Không thể đăng ký.");
+      return;
+    }
+
+    setIsRegistering(true);
+    setRegistrationError(null);
+    try {
+      await addStudentToCourse({ 
+        studentId: tempStudentId, 
+        courseId: selectedClass.id,
+        paymentType: 'Chưa thanh toán',
+        paymentDescription: `Đăng ký khóa học từ trang chủ bởi ${tempStudentName}`
+      });
+      alert(`Đăng ký khóa học thành công cho ${tempStudentName} (ID: ${tempStudentId})!`);
+      setSelectedClass(null); 
+      setShowRegistrationForm(false); 
+      setTempStudentId('');
+      setTempStudentName('');
+    } catch (err) {
+      setRegistrationError("Đăng ký thất bại. Vui lòng thử lại. Lỗi: " + err.message);
+      console.error("Error during registration:", err);
+    } finally {
+      setIsRegistering(false);
+    }
+  };
+
+  const handleCancelRegistration = () => {
+    setShowRegistrationForm(false);
+    setRegistrationError(null);
+    setTempStudentId('');
+    setTempStudentName('');
+  };
 
   return (
     <div className="home-container">
@@ -46,22 +133,61 @@ const HomeContent = ({ handleClassClick }) => {
               <div className="courses-left">
                 {selectedClass ?(
                   <>
-                    <CourseDetail
-                      className={selectedClass}
+                    <div className="registration-area">
+                      {!showRegistrationForm ? (
+                        <button
+                          onClick={handleInitiateRegistration}
+                          className="register-button"
+                          disabled={isRegistering} // Disable if already registering (shouldn't happen here)
+                        >
+                          Đăng ký khóa học này
+                        </button>
+                      ) : (
+                        <form onSubmit={handleConfirmRegistration} className="registration-form">
+                          <h4>Xác nhận thông tin đăng ký:</h4>
+                          <div className="form-group">
+                            <label htmlFor="studentId">ID học viên:</label>
+                            <input
+                              type="text"
+                              id="studentId"
+                              value={tempStudentId}
+                              onChange={(e) => setTempStudentId(e.target.value)}
+                              placeholder="Nhập ID học viên"
+                              required
+                            />
+                          </div>
+                          <div className="form-group">
+                            <label htmlFor="studentName">Tên học viên:</label>
+                            <input
+                              type="text"
+                              id="studentName"
+                              value={tempStudentName}
+                              onChange={(e) => setTempStudentName(e.target.value)}
+                              placeholder="Nhập tên của bạn"
+                              required
+                            />
+                          </div>
+                          {registrationError && <p className="error-message">{registrationError}</p>}
+                          <button type="submit" className="confirm-register-button" disabled={isRegistering}>
+                            {isRegistering ? 'Đang gửi...' : 'Xác nhận Đăng ký'}
+                          </button>
+                          <button type="button" className="cancel-register-button" onClick={handleCancelRegistration} disabled={isRegistering}>
+                            Hủy
+                          </button>
+                        </form>
+                      )}
+                    </div>
+                    <ClassDetail
+                      clsId={selectedClass.id}
                       onBack={() => setSelectedClass(null)}
                     />
                   </>
                 ) : (
-                  <>                  
-                    <CourseSection 
-                      title="Khoá học nghe đọc"
-                      classList={['Class A', 'Class B']}
-                      onClassClick={setSelectedClass}
-                    />
+                  <>   
                     <CourseSection
-                      title="Khoá học nói viết"
-                      classList={['Class C', 'Class D']}
-                      onClassClick={setSelectedClass}
+                      title="Khoá học đang mở"
+                      classList={openCourses}
+                      onClassClick={handleCourseClick}
                     />
                   </>
                 )}                

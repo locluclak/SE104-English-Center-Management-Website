@@ -117,3 +117,36 @@
 .progress-image {
   background-image: url('../../../assets/study-progress.jpg');
 }
+
+.registration-area {
+  padding-bottom: 20px;
+}
+
+.register-button {
+  margin-left: auto;
+  background-color: #c688eb;
+  color: black;
+}
+
+.register-button:hover:not(:disabled) {
+  background-color: #8a49af;
+}
+
+.confirm-register-button {
+  background-color: #6c7ee1;
+  color: black;
+  margin-right: 20px;
+}
+
+.confirm-register-button:hover:not(:disabled) {
+  background-color: #3e4a8d;
+}
+
+.cancel-register-button {
+  background-color: #9e9e9e;
+  color: black;
+}
+
+.cancel-register-button:hover:not(:disabled) {
+  background-color: #7e7e7e;
+}

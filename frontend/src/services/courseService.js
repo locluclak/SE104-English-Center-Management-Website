@@ -79,7 +79,12 @@ export const addStudentToCourse = async ({ studentId, courseId, paymentType, pay
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ studentId, courseId, paymentType, paymentDescription }),
   });
-  if (!response.ok) throw new Error('Failed to add student to course');
+  if (!response.ok) {
+    const errorData = await response.json();
+    // It's good practice to log the full error if possible during development
+    console.error('Backend error on addStudentToCourse:', errorData);
+    throw new Error(errorData.message || 'Failed to add student to course');
+  }
   return response.json();
 };
 

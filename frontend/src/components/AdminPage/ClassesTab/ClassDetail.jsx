@@ -65,6 +65,7 @@ const ClassDetail = ({
   };
 
   const fetchAllTeachers = async () => {
+    console.log("ClassDetail useEffect - received clsId:", clsId); 
     try {
       const data = await fetchTeachers();
       setTeachers(data);

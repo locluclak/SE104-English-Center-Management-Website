@@ -81,13 +81,13 @@ const StudentPage = () => {
               {activeTab === 'courses' && (
                 <div className="course-display-area"> 
                   {selectedClass ? (
-                    <>
+                    <div className="course-inside">
                       <CourseDetail
                         clsId={selectedClass}
                         onBack={() => setSelectedClass(null)}
                       />
                       <CourseProgress className={selectedClass} />
-                    </>
+                    </div>
                   ) : (
                     <>
                       {selectedFeature === 'my-courses' && 

@@ -146,21 +146,7 @@ const CourseDetail = ({ clsId, onBack }) => {
                     <p><strong>Số học viên tối thiểu:</strong> {classInfo.minStu}</p>
                     <p><strong>Số học viên tối đa:</strong> {classInfo.maxStu}</p>
                     <p><strong>Học phí:</strong> {classInfo.price?.toLocaleString('vi-VN')}đ</p>
-                    <div className="register-btn-wrapper">
-                        <button className="register-btn" onClick={handleRegister}>Đăng ký</button>
-                    </div>
                 </div>
-                {showConfirm && (
-                    <div className="confirm-modal">
-                        <div className="confirm-box">
-                            <p>Bạn có chắc muốn đăng ký khóa học này?</p>
-                            <div className="modal-buttons">
-                                <button onClick={handleConfirm}>Xác nhận</button>
-                                <button onClick={handleCancel}>Hủy</button>
-                            </div>
-                        </div>
-                    </div>
-                )}
 
                 <div className="tabs">
                     <button
