@@ -318,5 +318,25 @@ router.get('/student/:studentId', async (req, res) => {
   }
 });
 
+// GET /course/teacher/:teacherId
+router.get('/teacher/:teacherId', async (req, res) => {
+  const teacherId = req.params.teacherId;
+
+  try {
+    const [rows] = await db.execute(
+      `SELECT C.*
+       FROM TEACHER_COURSE TC
+       JOIN COURSE C ON TC.COURSE_ID = C.COURSE_ID
+       WHERE TC.TEACHER_ID = ?`,
+      [teacherId]
+    );
+
+    res.status(200).json(rows);
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Failed to get courses by teacher ID' });
+  }
+});
+
 
 module.exports = router;

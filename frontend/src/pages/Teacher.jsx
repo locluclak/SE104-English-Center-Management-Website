@@ -22,8 +22,16 @@ const TeacherPage = () => {
   const [activeTab, setActiveTab] = useState('classes');
   const [selectedClass, setSelectedClass] = useState(null);
   const [selectedFeature, setSelectedFeature] = useState('home');
+  const [teacherId, setTeacherId] = useState(null);
 
   useEffect(() => {
+    const storedTeacherId = localStorage.getItem('userId');
+    if (storedTeacherId) {
+      setTeacherId(storedTeacherId);
+    } else {
+      console.warn("User ID (formerly Teacher ID) not found in localStorage. User might not be logged in or ID not saved.");
+    }
+
     if (activeTab === 'classes') {
       setSelectedFeature('current');
     } else if (activeTab === 'dashboard') {
@@ -44,7 +52,7 @@ const TeacherPage = () => {
     console.log('handleFeatureSelect called with:', featureKey);
     setSelectedFeature(featureKey);
   }, []);
-  
+
   return (
     <div className="teacher-page">
       <Header role="teacher" activeTab={activeTab} setActiveTab={setActiveTab} />
@@ -59,18 +67,24 @@ const TeacherPage = () => {
 
         <div className="content">
           {activeTab === 'classes' && (
-            <div className="class-display-area"> {/* Thêm class mới để styling */}
+            <div className="class-display-area">
               {selectedClass ? (
                 <>
                   <CourseDetail
-                  clsId={selectedClass}
-                  onBack={() => setSelectedClass(null)}
-                />
-              </>
+                    clsId={selectedClass}
+                    onBack={() => setSelectedClass(null)}
+                  />
+                </>
               ) : (
                 <>
-                  {selectedFeature === 'current' && <CurrentTab handleClassClick={handleClassClick} />}
-                  {selectedFeature === 'end' && <EndTab handleClassClick={handleClassClick} />}
+                  {teacherId ? (
+                    <>
+                      {selectedFeature === 'current' && <CurrentTab handleClassClick={handleClassClick} teacherId={teacherId} />}
+                      {selectedFeature === 'end' && <EndTab handleClassClick={handleClassClick} teacherId={teacherId} />}
+                    </>
+                  ) : (
+                    <p>Đang tải thông tin giáo viên...</p> 
+                  )}
                 </>
               )}
             </div>

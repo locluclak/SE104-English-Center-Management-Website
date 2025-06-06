@@ -28,8 +28,8 @@ function Login() {
       localStorage.setItem("token", data.token);
 
       if (data.userId) { 
-        localStorage.setItem("studentId", data.userId); 
-        console.log('Student ID saved to localStorage:', data.userId);
+        localStorage.setItem("userId", data.userId); 
+        console.log('User ID saved to localStorage:', data.userId);
       } else {
         console.warn("User ID not found in login response.");
     }

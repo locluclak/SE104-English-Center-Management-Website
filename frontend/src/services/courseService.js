@@ -98,3 +98,10 @@ export const removeStudentFromCourse = async ({ studentId, courseId }) => {
   if (!response.ok) throw new Error('Failed to remove student from course');
   return response.json();
 };
+
+// Lấy tất cả khóa học của một giáo viên
+export const getCoursesByTeacherId = async (teacherId) => {
+  const response = await fetch(`${API_BASE_URL}/teacher/${teacherId}`);
+  if (!response.ok) throw new Error('Failed to fetch teacher courses');
+  return response.json();
+};

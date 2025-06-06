@@ -26,7 +26,7 @@ const StudentPage = () => {
   const [currentStudentId, setCurrentStudentId] = useState('your_student_id_here');
 
   useEffect(() => {
-    const storedStudentId = localStorage.getItem('studentId');
+    const storedStudentId = localStorage.getItem('userId');
     console.log("Stored studentId from localStorage:", storedStudentId); 
     if (storedStudentId) {
         setCurrentStudentId(storedStudentId);
