@@ -9,8 +9,8 @@ import {
   getAccountantTableColumns,
 } from "../config/tableConfig.jsx";
 
-import Calendar from '../components/DashboardTab/CalendarTab';
-import Padlet from '../components/DashboardTab/PadletTab';
+import Calendar from '../components/layout/Calendar/CalendarTab';
+import Padlet from '../components/layout/Padlet/PadletTab';
 import ClassesTab from '../components/AccountantPage/TuitionFeeTab/ClassesTab';
 
 import './Accountant.css';

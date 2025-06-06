@@ -14,8 +14,8 @@ import WaitingTab from "../components/layout/ClassesTab/StudentPage/WaitingTab";
 import CourseDetail from "../components/layout/Course/CourseDetail/CourseDetail";
 import CourseProgress from "../components/layout/Course/CourseProgress/CourseProgress";
 import HomeContent from '../components/layout/HomeContent/HomeContent';
-import Calendar from '../components/DashboardTab/CalendarTab';
-import Padlet from '../components/DashboardTab/PadletTab';
+import Calendar from '../components/layout/Calendar/CalendarTab';
+import Padlet from '../components/layout/Padlet/PadletTab';
 
 import './Student.css';
 

@@ -13,8 +13,8 @@ import CurrentTab from "../components/layout/ClassesTab/TeacherPage/CurrentTab";
 import EndTab from "../components/layout/ClassesTab/TeacherPage/EndTab";
 import CourseDetail from "../components/layout/Course/CourseDetail/CourseDetail";
 
-import Calendar from '../components/DashboardTab/CalendarTab';
-import Padlet from '../components/DashboardTab/PadletTab';
+import Calendar from '../components/layout/Calendar/CalendarTab.jsx';
+import Padlet from '../components/layout/Padlet/PadletTab.jsx';
 
 import './Teacher.css';
 
