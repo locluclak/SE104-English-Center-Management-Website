@@ -106,11 +106,11 @@ router.get('/getbycourse/:id', async (req, res) => {
       [courseId]
     );
 
-    if (rows.length === 0) {
-      return res.status(404).json({ message: 'No documents found for this course' });
-    }
+    // if (rows.length === 0) {
+    //   return res.status(404).json({ message: 'No documents found for this course' });
+    // }
 
-    res.json(rows);
+    res.status(200).json(rows);
   } catch (err) {
     console.error('Error fetching documents:', err);
     res.status(500).json({ error: 'Internal server error' });

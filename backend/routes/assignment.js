@@ -132,9 +132,9 @@ router.get('/getbycourse/:courseId', async (req, res) => {
       [courseId]
     );
 
-    if (rows.length === 0) {
-      return res.status(404).json({ error: 'No assignments found for this course' });
-    }
+    // if (rows.length === 0) {
+    //   return res.status(404).json({ error: 'No assignments found for this course' });
+    // }
 
     res.status(200).json({ assignments: rows });
   } catch (err) {
