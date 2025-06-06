@@ -185,6 +185,7 @@ router.put('/update/:id', async (req, res) => {
     }
 });
 
+<<<<<<< HEAD
 router.delete('/:id', async (req, res) => {
     const { id } = req.params;
 
@@ -245,4 +246,6 @@ router.delete('/:id', async (req, res) => {
     }
 });
 
+=======
+>>>>>>> beebbb895 (update backend)
 module.exports = router;

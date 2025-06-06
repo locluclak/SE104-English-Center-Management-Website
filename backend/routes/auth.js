@@ -18,7 +18,10 @@ function generatePassword(length = 8) {
 
 // POST /staff/allocate
 router.post('/allocate', async (req, res) => {
+<<<<<<< HEAD
       console.log("Received data:", req.body);
+=======
+>>>>>>> beebbb895 (update backend)
     const { name, email, phone_number, date_of_birth, hire_day, staff_type } = req.body;
 
     if (!name || !email || !phone_number || !date_of_birth || !hire_day || !staff_type) {

@@ -4,9 +4,15 @@ const db = require('../db'); // Import the database connection
 
 // Route to create a new course
 router.post('/create', async (req, res) => {
+<<<<<<< HEAD
   const { name, teacherName, description, startDate, endDate, minStu, maxStu, price } = req.body;
   const fullDescription = teacherName ? `[Giáo viên: ${teacherName}] ${description || ''}` : description;
 
+=======
+  const { name, description, startDate, endDate, minStu, maxStu, price } = req.body;
+
+  // Validate input
+>>>>>>> beebbb895 (update backend)
   if (!name || !startDate || !endDate || !minStu || !maxStu) {
     return res.status(400).json({ error: 'Missing required fields' });
   }
@@ -18,12 +24,20 @@ router.post('/create', async (req, res) => {
     `;
     const [result] = await db.execute(query, [
       name,
+<<<<<<< HEAD
       fullDescription,
+=======
+      description,
+>>>>>>> beebbb895 (update backend)
       startDate,
       endDate,
       minStu,
       maxStu,
+<<<<<<< HEAD
       price !== undefined ? price : 0
+=======
+      price !== undefined ? price : 0 // Default to 0 if not provided
+>>>>>>> beebbb895 (update backend)
     ]);
 
     res.status(201).json({ message: 'Course created successfully', courseId: result.insertId });
@@ -34,6 +48,7 @@ router.post('/create', async (req, res) => {
 });
 
 
+<<<<<<< HEAD
 // Route to get all courses
 router.get('/all', async (req, res) => {
   try {
@@ -105,6 +120,25 @@ router.get('/:id/students', async (req, res) => {
     res.status(200).json(students);
   } catch (error) {
     console.error('Error fetching students in course:', error);
+=======
+// Route to get course information by ID
+router.get('/:id', async (req, res) => {
+  const courseId = req.params.id;
+
+  try {
+    const query = `
+      SELECT * FROM COURSE WHERE COURSE_ID = ?
+    `;
+    const [rows] = await db.execute(query, [courseId]);
+
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'Course not found' });
+    }
+
+    res.status(200).json(rows[0]);
+  } catch (error) {
+    console.error('Error fetching course:', error);
+>>>>>>> beebbb895 (update backend)
     res.status(500).json({ error: 'Internal server error' });
   }
 });
@@ -222,6 +256,7 @@ router.post('/add-student', async (req, res) => {
 // Route to update a course by ID
 router.put('/update/:id', async (req, res) => {
   const courseId = req.params.id;
+<<<<<<< HEAD
   const { name, description, startDate, endDate, minStu, maxStu, price, teacherName } = req.body;
 
   if (!name && !description && !startDate && !endDate && !minStu && !maxStu && price === undefined && !teacherName) {
@@ -232,6 +267,15 @@ router.put('/update/:id', async (req, res) => {
     ? `[Giáo viên: ${teacherName}] ${description || ''}`
     : description;
 
+=======
+  const { name, description, startDate, endDate, minStu, maxStu, price } = req.body;
+
+  // Validate input
+  if (!name && !description && !startDate && !endDate && !minStu && !maxStu && price === undefined) {
+    return res.status(400).json({ error: 'No fields provided for update' });
+  }
+
+>>>>>>> beebbb895 (update backend)
   try {
     const query = `
       UPDATE COURSE
@@ -248,7 +292,11 @@ router.put('/update/:id', async (req, res) => {
 
     const [result] = await db.execute(query, [
       name || null,
+<<<<<<< HEAD
       updatedDescription || null,
+=======
+      description || null,
+>>>>>>> beebbb895 (update backend)
       startDate || null,
       endDate || null,
       minStu || null,
@@ -268,6 +316,7 @@ router.put('/update/:id', async (req, res) => {
   }
 });
 
+<<<<<<< HEAD
 // Route to remove a student from a course
 router.delete('/remove-student', async (req, res) => {
   const { studentId, courseId } = req.body;
@@ -296,4 +345,6 @@ router.delete('/remove-student', async (req, res) => {
 });
 
 
+=======
+>>>>>>> beebbb895 (update backend)
 module.exports = router;
