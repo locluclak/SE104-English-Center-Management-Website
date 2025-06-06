@@ -24,7 +24,7 @@ const normalizeStudents = (students: any[]): Student[] =>
   students.map((s: any) => ({
     id: s.ID,
     name: s.NAME,
-    birthday: formatDate(s.DATE_OF_BIRTH) || '',
+    birthday: formatDate(s.DATE_OF_BIRTH),
     email: s.EMAIL,
     status: s.STATUS,
     phone_number: s.PHONE_NUMBER || '',
