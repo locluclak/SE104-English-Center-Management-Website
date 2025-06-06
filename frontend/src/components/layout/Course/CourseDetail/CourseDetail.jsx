@@ -132,20 +132,18 @@ const CourseDetail = ({ clsId, onBack }) => {
 
     return (
         <div className="course-detail-container">
-            <BackButton type="button" onClick={onBack}>← Quay lại</BackButton>
+            <BackButton type="button" onClick={onBack}>← Back</BackButton>
             <div className="course-detail-main">
                 <div className="course-info">
                     <div className="info-header">
                         <h2>{classInfo.name}</h2>
                     </div>
-                    <p><strong>Tên khóa học:</strong> {classInfo.name}</p>
-                    <p><strong>Giáo viên:</strong> {classInfo.teacherName}</p>
-                    <p><strong>Mô tả:</strong> {classInfo.description}</p>
-                    <p><strong>Ngày bắt đầu:</strong> {formatDate(classInfo.startDate)}</p>
-                    <p><strong>Ngày kết thúc:</strong> {formatDate(classInfo.endDate)}</p>
-                    <p><strong>Số học viên tối thiểu:</strong> {classInfo.minStu}</p>
-                    <p><strong>Số học viên tối đa:</strong> {classInfo.maxStu}</p>
-                    <p><strong>Học phí:</strong> {classInfo.price?.toLocaleString('vi-VN')}đ</p>
+                    <p><strong>Name:</strong> {classInfo.name}</p>
+                    <p><strong>Teacher:</strong> {classInfo.teacherName}</p>
+                    <p><strong>Description:</strong> {classInfo.description}</p>
+                    <p><strong>Start Date:</strong> {formatDate(classInfo.startDate)}</p>
+                    <p><strong>End Date:</strong> {formatDate(classInfo.endDate)}</p>
+                    <p><strong>Price:</strong> {classInfo.price?.toLocaleString('vi-VN')}đ</p>
                 </div>
 
                 <div className="tabs">
@@ -153,19 +151,19 @@ const CourseDetail = ({ clsId, onBack }) => {
                         className={activeTab === "students" ? "active" : ""}
                         onClick={() => setActiveTab("students")}
                     >
-                        Học viên
+                        Students
                     </button>
                     <button
                         className={activeTab === "assignment" ? "active" : ""}
                         onClick={() => setActiveTab("assignment")}
                     >
-                        Bài tập
+                        Assigments
                     </button>
                     <button
                         className={activeTab === "doc" ? "active" : ""}
                         onClick={() => setActiveTab("doc")}
                     >
-                        Tài liệu
+                        Docucments
                     </button>
                 </div>
 
