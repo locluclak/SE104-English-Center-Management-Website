@@ -22,7 +22,7 @@ import {
   createAccountant,
 } from "../services/authService";
 import { getAllCourses } from "../services/courseService";
-import ClassesTab from "../components/AdminPage/ClassesTab/ClassTab.jsx";
+import ClassesTab from "../components/layout/ClassesTab/AdminPage/ClassTab.jsx";
 import { format } from "date-fns";
 
 import "./Admin.css";

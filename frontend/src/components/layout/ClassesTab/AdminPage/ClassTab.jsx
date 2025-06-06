@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
-import Card from "../../common/Card/Card";
+import Card from "../../../common/Card/Card";
 import ClassDetail from "./ClassDetail";
 import {
   getAllCourses,
   addStudentToCourse,
-} from "../../../services/courseService";
+} from "../../../../services/courseService";
 import { format } from "date-fns";
 
 const formatDate = (dateStr) => {

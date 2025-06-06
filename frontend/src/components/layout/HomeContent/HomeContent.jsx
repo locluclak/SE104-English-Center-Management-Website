@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import CourseAd from '../Course/CourseAd/CourseAd';
 import CourseSection from '../Course/CourseSection/CourseSection';
-import ClassDetail from '../../AdminPage/ClassesTab/ClassDetail';
+import ClassDetail from '../ClassesTab/AdminPage/ClassDetail';
 import { getOpenCoursesForHome } from '../../../services/homeService';
 import { addStudentToCourse } from '../../../services/courseService';
 
