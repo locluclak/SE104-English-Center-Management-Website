@@ -130,7 +130,7 @@ router.get('/:id/students', async (req, res) => {
       FROM STUDENT_COURSE SC
       JOIN STUDENT S ON SC.STUDENT_ID = S.ID
       JOIN PERSON P ON S.ID = P.ID
-      LEFT JOIN TUITION T ON SC.PAYMENT_ID = T.PAYMENT_ID
+      LEFT JOIN TUITION T ON SC.PAYMENT_ID = T.T_ID
       WHERE SC.COURSE_ID = ?
     `;
     const [students] = await db.execute(query, [courseId]);
