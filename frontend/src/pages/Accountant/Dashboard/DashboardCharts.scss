@@ -1,0 +1,98 @@
+@import "../../../scss/variables";
+
+.container-fluid {
+  padding: 20px;
+
+  .sticky-header-wrapper {
+    position: sticky;
+    top: 0;
+    z-index: 999;
+    background-color: #fff;
+    padding: 10px 20px;
+    border-bottom: 1px solid #ddd;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+
+    .header-custom {
+      font-size: 24px;
+      font-weight: bold;
+      flex: 1;
+
+      @media (max-width: 768px) {
+        font-size: 20px;
+        width: 100%;
+        text-align: center;
+      }
+    }
+
+    .header-actions {
+      display: flex;
+      justify-content: flex-end;
+      flex-wrap: wrap;
+      gap: 8px;
+
+      @media (max-width: 768px) {
+        justify-content: center;
+        width: 100%;
+      }
+    }
+  }
+
+  .dashboard-charts-content {
+    margin-top: 30px;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+  }
+
+  .ant-modal {
+    .ant-modal-header {
+      justify-self: center;
+      background-color: #f0f8ff;
+      border-bottom: 1px solid #e0e0e0;
+      font-weight: bold;
+    }
+
+    .ant-modal-footer {
+      display: flex;
+      justify-content: space-between;
+      button {
+        width: 100px;
+      }
+    }
+  }
+
+  .ant-table {
+    margin-top: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+
+    .ant-table-thead > tr > th {
+      background-color: #f0f8ff;
+      font-weight: bold;
+      text-align: center;
+    }
+
+    .ant-table-tbody > tr > td {
+      text-align: center;
+    }
+  }
+
+  .ant-btn {
+    border-radius: 8px;
+    font-size: 14px;
+    width: 40px !important;
+    height: 40px !important;
+    margin: 0px 10px;
+    transition: background-color 0.3s ease;
+
+    &.ant-btn-primary {
+      background-color: get-color($neutral, "100");
+      color: get-color($primary, "100");
+      border: 1px solid get-color($primary, "100");
+    }
+  }
+}

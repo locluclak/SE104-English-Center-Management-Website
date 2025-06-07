@@ -11,7 +11,9 @@ import Login from "@/pages/Login/Login";
 import CoursesList from "@/pages/Admin/Courses/CoursesList";
 import StudentsList from "@/pages/Admin/Students/StudentsList";
 import TeachersList from "@/pages/Admin/Teachers/TeachersList";
-import AccountantList from "@/pages/Admin/Accountant/AccountantsList";
+import AccountantList from "@/pages/Admin/Accountants/AccountantsList";
+import DashboardCharts from "@/pages/Accountant/Dashboard/DashboardCharts";
+import Reports from "@/pages/Accountant/Reports/Report";
 
 
 
@@ -45,12 +47,14 @@ export default function MainRoutes() {
       <Routes>
         {/* <Route path="/login" element={<Login />}/> */}
         <Route path="/" element={<Layout />}>
-          <Route path="/admin/courses" element={<CoursesList />}/>
-          <Route path="/admin/students" element={<StudentsList />}/>
-          <Route path="/admin/teachers" element={<TeachersList />}/>
-          <Route path="/admin/accountants" element={<AccountantList />} />
+          {/* <Route path="/admin/courses" element={<CoursesList />} />
+          <Route path="/admin/students" element={<StudentsList />} />
+          <Route path="/admin/teachers" element={<TeachersList />} />
+          <Route path="/admin/accountants" element={<AccountantList />} /> */}
 
-          {/* <Route path="/accountant/" element={<Accountant />}/> */}
+          <Route path="/accountant/dashboard" element={<DashboardCharts />} />
+          {/* <Route path="/accountant/studentfees" element={<StudentFeeList />} /> */}
+          <Route path="/accountant/reports" element={<Reports />} />
 
           <Route path="*" element={<PageNotFound />} />
         </Route>

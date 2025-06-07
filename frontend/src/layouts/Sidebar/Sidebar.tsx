@@ -24,7 +24,7 @@ const Sidebar: React.FC = () => {
     let storedRole = localStorage.getItem('role');
 
     if (!storedRole) {
-      storedRole = 'ROLE_ADMIN'; 
+      storedRole = 'ROLE_ACCOUNTANT'; 
       localStorage.setItem('role', storedRole);
     }
 
@@ -39,18 +39,19 @@ const Sidebar: React.FC = () => {
         { title: 'ACCOUNTANTS', link: '/admin/accountants', icon: 'fas fa-money-bill', roles: ['ROLE_ADMIN'] },
       ],
       ROLE_ACCOUNTANT: [
-        { title: 'HÓA ĐƠN', link: '/accountant/invoices', icon: 'fas fa-file-invoice-dollar', roles: ['ROLE_ACCOUNTANT'] },
-        { title: 'BÁO CÁO', link: '/accountant/reports', icon: 'fas fa-chart-line', roles: ['ROLE_ACCOUNTANT'] },
+        { title: 'DASHBOARD', link: '/accountant/dashboard', icon: 'fas fa-tachometer-alt', roles: ['ROLE_ACCOUNTANT'] },
+        { title: 'STUDENT FEES', link: '/accountant/studentfees', icon: 'fas fa-file-invoice-dollar', roles: ['ROLE_ACCOUNTANT'] },
+        { title: 'REPORTS', link: '/accountant/reports', icon: 'fas fa-chart-line', roles: ['ROLE_ACCOUNTANT'] },
       ],
+
       ROLE_TEACHER: [
-        { title: 'BẢNG ĐIỀU KHIỂN', link: '/teacher/dashboard', icon: 'fas fa-tachometer-alt', roles: ['ROLE_TEACHER'] },
-        { title: 'HỌC SINH', link: '/teacher/students', icon: 'fas fa-user-graduate', roles: ['ROLE_TEACHER'] },
-        { title: 'BÁO CÁO', link: '/teacher/reports', icon: 'fas fa-chart-line', roles: ['ROLE_TEACHER'] },
+        { title: 'DASHBOARD', link: '/teacher/dashboard', icon: 'fas fa-tachometer-alt', roles: ['ROLE_TEACHER'] },
+        { title: 'STUDENTS', link: '/teacher/students', icon: 'fas fa-user-graduate', roles: ['ROLE_TEACHER'] },
+        { title: 'REPORT', link: '/teacher/reports', icon: 'fas fa-chart-line', roles: ['ROLE_TEACHER'] },
       ],
       ROLE_STUDENT: [
-        { title: 'BẢNG ĐIỀU KHIỂN', link: '/student/dashboard', icon: 'fas fa-tachometer-alt', roles: ['ROLE_STUDENT'] },
-        { title: 'HỌC TẬP', link: '/student/study', icon: 'fas fa-book', roles: ['ROLE_STUDENT'] },
-        { title: 'BÁO CÁO', link: '/student/reports', icon: 'fas fa-chart-line', roles: ['ROLE_STUDENT'] },
+        { title: 'COURSES', link: '/student/courses', icon: 'fas fa-book', roles: ['ROLE_STUDENT'] },
+        { title: 'STUDY', link: '/student/study', icon: 'fas fa-book', roles: ['ROLE_STUDENT'] },
       ],
     };
 
