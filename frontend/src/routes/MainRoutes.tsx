@@ -7,10 +7,13 @@ import Layout from "@/layouts/Layout/Layout";
 import { routePath } from "@/layouts/Navbar/Navbar";
 import PageNotFound from "@/layouts/PageNotFound";
 import Login from "@/pages/Login/Login";
-import CoursesList from "@/pages/admin/Courses/CoursesList";
-import StudentsList from "@/pages/admin/Students/StudentsList";
-import TeachersList from "@/pages/admin/Teachers/TeachersList";
-import AccountantList from "@/pages/admin/Accountant/AccountantsList";
+
+import CoursesList from "@/pages/Admin/Courses/CoursesList";
+import StudentsList from "@/pages/Admin/Students/StudentsList";
+import TeachersList from "@/pages/Admin/Teachers/TeachersList";
+import AccountantList from "@/pages/Admin/Accountant/AccountantsList";
+
+
 
 export default function MainRoutes() {
   const navigate = useNavigate();
@@ -42,10 +45,11 @@ export default function MainRoutes() {
       <Routes>
         {/* <Route path="/login" element={<Login />}/> */}
         <Route path="/" element={<Layout />}>
-          <Route path= "/admin/courses" element={<CoursesList />}/>
-          <Route path= "/admin/students" element={<StudentsList />}/>
-          <Route path="admin/teachers" element={<TeachersList />}/>
+          <Route path="/admin/courses" element={<CoursesList />}/>
+          <Route path="/admin/students" element={<StudentsList />}/>
+          <Route path="/admin/teachers" element={<TeachersList />}/>
           <Route path="/admin/accountants" element={<AccountantList />} />
+
           {/* <Route path="/accountant/" element={<Accountant />}/> */}
 
           <Route path="*" element={<PageNotFound />} />
