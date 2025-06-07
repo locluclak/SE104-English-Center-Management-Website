@@ -26,9 +26,9 @@ app.use('/', authRoutes);
 app.use('/person', personRoutes);
 app.use('/course', courseRoutes); // Mount course routes
 app.use('/payment', paymentRoutes); // Mount payment routes
-app.use('/documents', documentRoutes);
-app.use('/assignments', assignmentRoutes); // Mount assignment routes
-app.use('/submissions', submissionRoutes); // Mount submission routes
+app.use('/document', documentRoutes);
+app.use('/assignment', assignmentRoutes); // Mount assignment routes
+app.use('/submission', submissionRoutes); // Mount submission routes
 app.use('/category', categoryRoutes); // Mount category routes
 // Set the port from environment variable or default to 3000
 const PORT = process.env.PORT || 3000;

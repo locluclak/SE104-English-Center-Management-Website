@@ -46,6 +46,16 @@ const CoursesList = () => {
   const [selectedStudentToAdd, setSelectedStudentToAdd] = useState<
     number | null
   >(null);
+  const [reportModalVisible, setReportModalVisible] = useState(false);
+  const [reportMode, setReportMode] = useState<"course" | "assignment">(
+    "course"
+  );
+  const [courseReport, setCourseReport] = useState<any[]>([]);
+  const [assignmentReport, setAssignmentReport] = useState<any[]>([]);
+  const [assignments, setAssignments] = useState<any[]>([]);
+  const [selectedAssignmentId, setSelectedAssignmentId] = useState<
+    number | null
+  >(null);
 
   const fetchCoursesList = async () => {
     try {
@@ -165,17 +175,17 @@ const CoursesList = () => {
   };
 
   const fetchStudentsInCourse = async (courseId: number) => {
-  try {
-    setSelectedCourseId(courseId); 
-    const res = await MainApiRequest.get(`/course/${courseId}/students`);
-    const students = res.data;
-    setStudentsInCourse(students);
-    setStudentModalVisible(true);
-  } catch (error: any) {
-    console.error("Failed to fetch students:", error);
-    message.error("Unable to load students.");
-  }
-};
+    try {
+      setSelectedCourseId(courseId);
+      const res = await MainApiRequest.get(`/course/${courseId}/students`);
+      const students = res.data;
+      setStudentsInCourse(students);
+      setStudentModalVisible(true);
+    } catch (error: any) {
+      console.error("Failed to fetch students:", error);
+      message.error("Unable to load students.");
+    }
+  };
 
   const addStudentToCourse = async (studentId: number) => {
     if (!selectedCourseId) return;
@@ -208,6 +218,63 @@ const CoursesList = () => {
       message.error("Failed to remove student.");
     }
   };
+
+  const fetchAssignmentsByCourse = async (courseId: number) => {
+    try {
+      const res = await MainApiRequest.get(`/submission/by_course/${courseId}`);
+
+      // Nếu response dạng { report: [], message: '...' }
+      if (Array.isArray(res.data)) {
+        setAssignments(res.data);
+      } else if (Array.isArray(res.data.report)) {
+        setAssignments(res.data.report);
+        if (res.data.report.length === 0) {
+          message.info(
+            res.data.message || "Chưa có bài tập nào trong khóa học này."
+          );
+        }
+      } else {
+        message.warning("Phản hồi không hợp lệ từ server.");
+      }
+    } catch (error: any) {
+      const serverMsg =
+        error?.response?.data?.message || error?.response?.data?.error;
+      message.error(serverMsg || "Không thể tải danh sách bài tập.");
+    }
+  };
+
+  const fetchAssignmentReport = async (assignmentId: number) => {
+    try {
+      const res = await MainApiRequest.get(
+        `/submission/report/${assignmentId}`
+      );
+      setAssignmentReport(res.data.report);
+      setReportMode("assignment");
+    } catch (error) {
+      message.error("Không thể tải báo cáo bài tập.");
+    }
+  };
+
+  const handleViewCourseReport = async (courseId: number) => {
+  try {
+    setSelectedCourseId(courseId);
+    const res = await MainApiRequest.get(`/submission/course_report/${courseId}`);
+    const reportData = res.data?.report || [];
+
+    setCourseReport(reportData);
+    setReportMode("course");
+    setReportModalVisible(true);
+
+    if (reportData.length === 0) {
+      message.info(res.data?.message || "Chưa có học viên nào nộp bài cho khóa học này.");
+    }
+
+    await fetchAssignmentsByCourse(courseId);
+  } catch (err) {
+    message.error("Không thể tải báo cáo khoá học.");
+  }
+};
+
 
   const onOKCreateCourses = async () => {
     try {
@@ -447,6 +514,9 @@ const CoursesList = () => {
                 <Button onClick={() => fetchStudentsInCourse(record.id)}>
                   <i className="fas fa-users"></i>
                 </Button>
+                <Button onClick={() => handleViewCourseReport(record.id)}>
+                  <i className="fas fa-chart-bar"></i>
+                </Button>
                 <Popconfirm
                   title="Delete this course?"
                   onConfirm={() => onDeleteCourses(record.id)}
@@ -481,7 +551,7 @@ const CoursesList = () => {
         >
           <Select
             style={{ width: 300 }}
-            placeholder="Chọn học viên để thêm"
+            placeholder="Select Student to Add"
             value={selectedStudentToAdd}
             onChange={(value) => setSelectedStudentToAdd(value)}
           >
@@ -501,42 +571,135 @@ const CoursesList = () => {
         </div>
 
         <Table
-  rowKey="ID"
-  dataSource={studentsInCourse.map((s) => ({
-    ...s,
-    NAME: s.NAME?.trim() || "(No Name)",
-    EMAIL: s.EMAIL || "-",
-    PHONE_NUMBER: s.PHONE_NUMBER || "N/A",
-    DATE_OF_BIRTH: s.DATE_OF_BIRTH
-      ? moment(s.DATE_OF_BIRTH).format("DD-MM-YYYY")
-      : "-",
-    ENROLL_DATE: s.ENROLL_DATE
-      ? moment(s.ENROLL_DATE).format("DD-MM-YYYY")
-      : "-",
-    PAYMENT_STATUS: s.PAYMENT_STATUS || "UNPAID",
-  }))}
-  columns={[
-    { title: "Name", dataIndex: "NAME" },
-    { title: "Email", dataIndex: "EMAIL" },
-    { title: "Phone", dataIndex: "PHONE_NUMBER" },
-    { title: "DOB", dataIndex: "DATE_OF_BIRTH" },
-    { title: "Enroll Date", dataIndex: "ENROLL_DATE" },
-    { title: "Payment", dataIndex: "PAYMENT_STATUS" },
-    {
-      title: "Actions",
-      render: (_, record) => (
-        <Space>
-          <Popconfirm
-            title="Remove this student?"
-            onConfirm={() => removeStudentFromCourse(record.ID)}
-          >
-            <Button danger>Delete</Button>
-          </Popconfirm>
-        </Space>
-      ),
-    },
-  ]}
-/>
+          rowKey="ID"
+          dataSource={studentsInCourse.map((s) => ({
+            ...s,
+            NAME: s.NAME?.trim() || "(No Name)",
+            EMAIL: s.EMAIL || "-",
+            PHONE_NUMBER: s.PHONE_NUMBER || "N/A",
+            DATE_OF_BIRTH: s.DATE_OF_BIRTH
+              ? moment(s.DATE_OF_BIRTH).format("DD-MM-YYYY")
+              : "-",
+            ENROLL_DATE: s.ENROLL_DATE
+              ? moment(s.ENROLL_DATE).format("DD-MM-YYYY")
+              : "-",
+            PAYMENT_STATUS: s.PAYMENT_STATUS || "UNPAID",
+          }))}
+          columns={[
+            { title: "Name", dataIndex: "NAME" },
+            { title: "Email", dataIndex: "EMAIL" },
+            { title: "Phone", dataIndex: "PHONE_NUMBER" },
+            { title: "DOB", dataIndex: "DATE_OF_BIRTH" },
+            { title: "Enroll Date", dataIndex: "ENROLL_DATE" },
+            { title: "Payment", dataIndex: "PAYMENT_STATUS" },
+            {
+              title: "Actions",
+              render: (_, record) => (
+                <Space>
+                  <Popconfirm
+                    title="Remove this student?"
+                    onConfirm={() => removeStudentFromCourse(record.ID)}
+                  >
+                    <Button danger>Delete</Button>
+                  </Popconfirm>
+                </Space>
+              ),
+            },
+          ]}
+        />
+      </Modal>
+      <Modal
+        title={`Grade Report for Course #${selectedCourseId}`}
+        open={reportModalVisible}
+        onCancel={() => setReportModalVisible(false)}
+        footer={null}
+        width={800}
+      >
+        {reportMode === "course" && (
+          <>
+            <Table
+              dataSource={courseReport}
+              rowKey={(r) => `${r.STUDENT_NAME}-${r.ASSIGNMENT_NAME}`}
+              columns={[
+                { title: "Student", dataIndex: "STUDENT_NAME" },
+                { title: "Assignment", dataIndex: "ASSIGNMENT_NAME" },
+                { title: "Score", dataIndex: "SCORE" },
+              ]}
+              pagination={false}
+            />
+
+            <div style={{ marginTop: 20 }}>
+              <Button
+                type="primary"
+                onClick={() =>
+                  window.open(
+                    `/api/submission/export_csv_course/${selectedCourseId}`,
+                    "_blank"
+                  )
+                }
+              >
+                Export All Assignments CSV
+              </Button>
+            </div>
+
+            <div style={{ marginTop: 30 }}>
+              <h4>Xem báo cáo theo bài tập</h4>
+              <Select
+                style={{ width: 300 }}
+                placeholder="Select Assignment"
+                value={selectedAssignmentId}
+                onChange={(id) => {
+                  setSelectedAssignmentId(id);
+                  fetchAssignmentReport(id);
+                }}
+              >
+                {assignments.map((a) => (
+                  <Select.Option key={a.AS_ID} value={a.AS_ID}>
+                    {a.NAME}
+                  </Select.Option>
+                ))}
+              </Select>
+            </div>
+          </>
+        )}
+
+        {reportMode === "assignment" && (
+          <>
+            <Table
+              style={{ marginTop: 20 }}
+              dataSource={assignmentReport}
+              rowKey={(r) => `${r.STUDENT_NAME}-${r.STUDENT_EMAIL}`}
+              columns={[
+                { title: "Student", dataIndex: "STUDENT_NAME" },
+                { title: "Email", dataIndex: "STUDENT_EMAIL" },
+                { title: "Submit Date", dataIndex: "SUBMIT_DATE" },
+                { title: "Score", dataIndex: "SCORE" },
+              ]}
+              pagination={false}
+            />
+            <div style={{ marginTop: 20 }}>
+              <Button
+                type="primary"
+                onClick={() =>
+                  window.open(
+                    `/api/submission/export_csv_assignment/${selectedAssignmentId}`,
+                    "_blank"
+                  )
+                }
+                disabled={!selectedAssignmentId}
+              >
+                Export Assignment CSV
+              </Button>
+
+              <Button
+                style={{ marginLeft: 10 }}
+                onClick={() => setReportMode("course")}
+              >
+                ← Back to Course Report
+              </Button>
+            </div>
+          </>
+        )}
       </Modal>
     </div>
   );
