@@ -25,36 +25,32 @@ const ClassesTab = ({ selectedStatus = "waiting" }) => {
   const [editMode, setEditMode] = useState(false);
 
   const normalizeClass = (data) => {
-    const match = data?.DESCRIPTION?.match(/^\[Giáo viên:\s*(.*?)\]/);
-    const teacherName = match ? match[1] : "Không rõ";
-    const cleanDescription = data?.DESCRIPTION?.replace(
-      /^\[Giáo viên:\s*.*?\]\s*/,
-      ""
-    );
-
     return {
       id: data.COURSE_ID,
       name: data.NAME,
       status: data.STATUS,
       startDate: data.START_DATE,
       endDate: data.END_DATE,
-      description: cleanDescription,
-      teacherName,
+      description: data.DESCRIPTION,
+      teacherName: data.TEACHER_NAME_FROM_DB || "Không rõ",
       startDateFormatted: formatDate(data.START_DATE),
       endDateFormatted: formatDate(data.END_DATE),
       raw: data,
     };
-  };
+  };  
 
   const fetchClasses = async () => {
     try {
+      console.log("Đang gọi API getAllCourses");  // <-- Dòng này giúp bạn xác định khi nào API được gọi
       const data = await getAllCourses();
+      console.log("Dữ liệu từ API:", data);        // <-- Dòng này in ra dữ liệu nhận được
       const normalized = data.map(normalizeClass);
       setClasses(normalized);
     } catch (err) {
       console.error("Failed to fetch classes:", err);
     }
   };
+  
 
   useEffect(() => {
     fetchClasses();
@@ -112,7 +108,6 @@ const ClassesTab = ({ selectedStatus = "waiting" }) => {
               >
                 <p><strong>ID:</strong> {cls.id}</p>
                 <p><strong>Giáo viên:</strong> {cls.teacherName}</p>
-                <p><strong>Trạng thái:</strong> {cls.status}</p>
                 <p><strong>Ngày bắt đầu:</strong> {cls.startDateFormatted}</p>
                 <p><strong>Ngày kết thúc:</strong> {cls.endDateFormatted}</p>
                 <p><strong>Mô tả:</strong> {cls.description || "Không có"}</p>

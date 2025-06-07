@@ -1,12 +1,8 @@
 export const formConfigs = {
   classes: {
-    type: 'Class',
+    type: 'Course',
     title: 'Create New Class',
     fields: [
-      { 
-        name: 'id', label: 'Class ID', type: 'text', 
-        required: true, placeholder: 'ID',
-      },
       {
         name: 'name', label: 'Class Name', type: 'text',
         required: true, placeholder: 'Class Name',
@@ -17,12 +13,16 @@ export const formConfigs = {
       },
       {
         name: 'teacher', label: 'Teacher', type: 'select',
-        options: []
+        options: [],
+        required: true,
       },
-      { name: 'startDate', label: 'Start Date', type: 'date' },
-      { name: 'endDate', label: 'End Date', type: 'date' },
+      { name: 'startDate', label: 'Start Date', type: 'date', required: true },
+      { name: 'endDate', label: 'End Date', type: 'date', required: true },
+      { name: 'minStu', label: 'Min Students', type: 'number', required: true, placeholder: 'Minimum Students' },
+      { name: 'maxStu', label: 'Max Students', type: 'number', required: true, placeholder: 'Maximum Students' },
+      { name: 'price', label: 'Price', type: 'number', required: true, placeholder: 'Price' },
       {
-        name: 'students', label: 'Students Enrolled', type: 'select', 
+        name: 'students', label: 'Students Enrolled', type: 'select',
         isMulti: true,
         options: [],
         displayFields: [
@@ -39,13 +39,12 @@ export const formConfigs = {
     type: 'Teacher',
     title: "Add Teacher",
     fields: [
-      { name: "id", label: "Teacher ID", type: "text", required: true, placeholder: "Teacher ID" },
       { name: "name", label: "Full Name", type: "text", required: true, placeholder: "Full Name" },
       { name: "date_of_birth", label: "Birthday", type: "date", required: true },
       { name: "phone_number", label: "Phone Number", type: "text", required: true, placeholder: "Phone Number"},
       { name: "email", label: "Email", type: "email", required: true, placeholder: "Email" },
       { name: "password", label: "Password", type: "password", required: true, placeholder: "Password" }, 
-      { name: "hire_day", lable: "HireDay", type: "date", required: true}
+      { name: "hire_day", label: "Hire Day", type: "date", required: true}
     ]
   },
 
@@ -53,13 +52,12 @@ export const formConfigs = {
     type: 'Accountant',
     title: "Add Accountant",
     fields: [
-      { name: "id", label: "Accountant ID", type: "text", required: true, placeholder: "Accountant ID" },
       { name: "name", label: "Full Name", type: "text", required: true, placeholder: "Full Name" },
       { name: "date_of_birth", label: "Birthday", type: "date", required: true },
       { name: "phone_number", label: "Phone Number", type: "text", required: true, placeholder: "Phone Number"},
       { name: "email", label: "Email", type: "email", required: true, placeholder: "Email" },
       { name: "password", label: "Password", type: "password", required: true, placeholder: "Password" },
-      { name: "hire_day", lable: "HireDay", type: "date", required: true}
+      { name: "hire_day", label: "Hire Day", type: "date", required: true}
     ]
   },
 
@@ -67,13 +65,11 @@ export const formConfigs = {
     type: 'Student',
     title: "Add Student",
     fields: [
-      { name: "id", label: "Student ID", type: "text", required: true, placeholder: "Student ID" },
       { name: "name", label: "Full Name", type: "text", required: true, placeholder: "Full Name" },
       { name: "date_of_birth", label: "Birthday", type: "date", required: true },
       { name: "phone_number", label: "Phone Number", type: "text", required: true, placeholder: "Phone Number"},
       { name: "email", label: "Email", type: "email", required: true, placeholder: "Email" },
       { name: "password", label: "Password", type: "password", required: true, placeholder: "Password" },
-      { name: "statuses", label: "Status", type: "select", options: ["Enrolled", "Unenroll"], required: true }
     ]
   },
 
@@ -88,4 +84,3 @@ export const formConfigs = {
 };
 
 export default formConfigs;
-

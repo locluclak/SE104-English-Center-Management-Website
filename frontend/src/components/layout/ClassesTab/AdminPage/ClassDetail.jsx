@@ -33,16 +33,10 @@ const ClassDetail = ({
   };
 
   const normalizeClassData = (data) => {
-    const match = data?.DESCRIPTION?.match(/^\[Giáo viên:\s*(.*?)\]\s*/);
-    const teacherName = match ? match[1].trim() : "Không rõ";
-    const cleanDescription = data?.DESCRIPTION?.replace(
-      /^\[Giáo viên:\s*.*?\]\s*/,
-      ""
-    );
     return {
       name: data?.NAME || "",
-      teacherName,
-      description: cleanDescription,
+      teacherName: data?.TEACHER_NAME_FROM_DB || "Không rõ",
+      description: data?.DESCRIPTION || "",
       startDate: data?.START_DATE || "",
       endDate: data?.END_DATE || "",
       minStu: data?.MIN_STU || "",
@@ -51,7 +45,7 @@ const ClassDetail = ({
       status: data?.STATUS || "",
       students: data?.STUDENTS || [],
     };
-  };
+  };  
 
   const fetchClass = async () => {
     try {

@@ -29,21 +29,26 @@ const DynamicForm = ({ formConfig, initialData, onClose, onSubmitSuccess }) => {
         defaultData[field.name] = field.defaultValue;
       }
     });
-  
-    setFormData({ ...defaultData, ...(initialData || {}) });
-  }, [initialData, formConfig]);  
+    
+    let processedInitialData = { ...initialData };
+    if (formConfig.type === "Course" && initialData?.teacherId) {
+        processedInitialData.teacher = initialData.teacherId;
+    }
 
-  // ✅ Fetch dynamic student options if needed
+    setFormData({ ...defaultData, ...processedInitialData });
+  }, [initialData, formConfig]); 
+
+  // Fetch dynamic student and teacher options if needed
   useEffect(() => {
     const fetchDynamicOptions = async () => {
       const updated = await Promise.all(
         formConfig.fields.map(async (field) => {
-          // ✅ Fetch học viên
+          // Fetch học viên
           if (
             field.name === "students" &&
             field.type === "select" &&
-            field.isMulti &&
-            field.options.length === 0
+            field.isMulti
+            // Không cần kiểm tra field.options.length === 0 ở đây, luôn fetch mới
           ) {
             try {
               const students = await fetchStudents();
@@ -51,7 +56,7 @@ const DynamicForm = ({ formConfig, initialData, onClose, onSubmitSuccess }) => {
                 ...field,
                 options: students.map((s) => ({
                   value: s.ID,
-                  label: `${s.NAME} (${s.ID})`,
+                  label: `${s.NAME} (${s.EMAIL})`, // Có thể hiển thị email để dễ phân biệt
                   id: s.ID,
                   name: s.NAME,
                   email: s.EMAIL,
@@ -62,11 +67,11 @@ const DynamicForm = ({ formConfig, initialData, onClose, onSubmitSuccess }) => {
             }
           }
 
-          // ✅ Fetch giáo viên
+          // Fetch giáo viên
           if (
             field.name === "teacher" &&
             field.type === "select" &&
-            field.options.length === 0
+            !field.isMulti
           ) {
             try {
               const teachers = await fetchTeachers();
@@ -74,7 +79,7 @@ const DynamicForm = ({ formConfig, initialData, onClose, onSubmitSuccess }) => {
                 ...field,
                 options: teachers.map((t) => ({
                   value: t.ID,
-                  label: `${t.NAME} (${t.ID})`,
+                  label: `${t.NAME} (${t.EMAIL})`,
                   id: t.ID,
                   name: t.NAME,
                   email: t.EMAIL,
@@ -106,26 +111,44 @@ const DynamicForm = ({ formConfig, initialData, onClose, onSubmitSuccess }) => {
       ...prevData,
       [name]: selectedOptions
         ? selectedOptions.map((option) => ({
-            id: option.id,
-            name: option.name,
-            email: option.email,
-          }))
+              id: option.id,
+              name: option.name,
+              email: option.email,
+            }))
         : [],
     }));
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log("Dữ liệu gửi đi:", formData);
+    console.log("Dữ liệu gửi đi từ DynamicForm:", formData); // Log chi tiết hơn
     onSubmitSuccess(formData, !!initialData);
   };
 
   const renderFormField = (field) => {
     if (field.name === "status" || field.type === "hidden") return null;
 
-    if (field.name === "hire_day" && initialData) return null;
+    // Trong form tạo mới nhân sự, không có hire_day mặc định, người dùng nhập
+    // Trong form edit nhân sự, không cho sửa hire_day (nếu bạn muốn)
+    // if (field.name === "hire_day" && initialData) return null; // Logic này có thể gây nhầm lẫn.
+    // Tùy thuộc vào thiết kế: nếu bạn muốn ẩn trường "hire_day" khi EDIT, thì giữ lại.
 
     const value = formData[field.name];
+
+    // Xử lý giá trị cho select box (đặc biệt là 'teacher')
+    let selectValue = null;
+    if (field.type === "select") {
+        if (field.isMulti) {
+            // Đối với multi-select (ví dụ: students)
+            selectValue = (value || []).map(valItem => 
+                field.options.find(opt => opt.value === valItem.id) || { value: valItem.id, label: valItem.name, ...valItem }
+            );
+        } else {
+            // Đối với single-select (ví dụ: teacher)
+            selectValue = field.options.find(opt => opt.value === value) || null;
+        }
+    }
+
 
     return (
       <div className="form-groups" key={field.name}>
@@ -140,18 +163,7 @@ const DynamicForm = ({ formConfig, initialData, onClose, onSubmitSuccess }) => {
             name={field.name}
             options={field.options || []}
             isMulti={field.isMulti}
-            value={
-              field.isMulti
-                ? (value || []).map(
-                    (valItem) =>
-                      field.options.find((opt) => opt.value === valItem.id) || {
-                        value: valItem.id,
-                        label: valItem.name,
-                        ...valItem,
-                      }
-                  )
-                : field.options.find((opt) => opt.value === value) || null
-            }
+            value={selectValue} // Sử dụng selectValue đã tính toán
             onChange={(selectedOption) => {
               if (field.isMulti) {
                 handleMultiSelectChange(field.name, selectedOption);
@@ -193,52 +205,53 @@ const DynamicForm = ({ formConfig, initialData, onClose, onSubmitSuccess }) => {
     <div className="dynamic-form-overlay">
       <form className="dynamic-form-container" onSubmit={handleSubmit}>
         <div className="form-grid">
-          <div className="group-with-two">
-            {fields
-              .filter((f) => ["name", "phone_number"].includes(f.name))
-              .map(renderFormField)}
-          </div>
-          <div className="group-with-three">
-            {fields
-              .filter((f) =>
-                [
-                  "teacher",
-                  "startDate",
-                  "endDate",
-                  "minStu",
-                  "maxStu",
-                  "price",
-                ].includes(f.name)
-              )
-              .map(renderFormField)}
-          </div>
-
-          <div className="group-des">
-            {fields
-              .filter((f) => f.name === "description")
-              .map(renderFormField)}
-          </div>
-          <div className="group-full-width">
-            {fields.filter((f) => f.name === "students").map(renderFormField)}
-          </div>
-          <div className="group-per-info">
-            {fields
-              .filter((f) =>
-                [
-                  "date_of_birth",
-                  "hire_day",
-                ].includes(f.name)
-              )
-              .map(renderFormField)}
-          </div>
-
-          <div className="group-per-secret">
-            {fields
-              .filter((f) => ["email", "password"].includes(f.name))
-              .map(renderFormField)}
-          </div>
+          {/* Các nhóm trường để hiển thị form theo layout */}
+          {formConfig.type === "Course" ? (
+            <>
+              <div className="group-with-two">
+                {fields
+                  .filter((f) => ["name", "teacher"].includes(f.name)) // Thêm teacher vào nhóm này hoặc nhóm khác tùy layout
+                  .map(renderFormField)}
+              </div>
+              <div className="group-with-three">
+                {fields
+                  .filter((f) =>
+                    ["startDate", "endDate", "minStu", "maxStu", "price"].includes(f.name)
+                  )
+                  .map(renderFormField)}
+              </div>
+              <div className="group-des">
+                {fields.filter((f) => f.name === "description").map(renderFormField)}
+              </div>
+              <div className="group-full-width">
+                {fields.filter((f) => f.name === "students").map(renderFormField)}
+              </div>
+            </>
+          ) : (
+            // Các nhóm trường cho Student, Teacher, Accountant
+            <>
+              <div className="group-with-two">
+                {fields
+                  .filter((f) => ["name", "phone_number"].includes(f.name))
+                  .map(renderFormField)}
+              </div>
+              <div className="group-per-info">
+                {fields
+                  .filter((f) =>
+                    ["date_of_birth", "hire_day"].includes(f.name)
+                  )
+                  .map(renderFormField)}
+              </div>
+              <div className="group-per-secret">
+                {fields
+                  .filter((f) => ["email", "password"].includes(f.name))
+                  .map(renderFormField)}
+              </div>
+            </>
+          )}
         </div>
 
+        {/* Hiển thị danh sách học viên đã chọn (nếu có trường students và là multi-select) */}
         {fields.map((field) => {
           if (field.type === "select" && field.isMulti && field.displayFields) {
             const listName = field.name;
@@ -260,7 +273,7 @@ const DynamicForm = ({ formConfig, initialData, onClose, onSubmitSuccess }) => {
                   </div>
                 ) : (
                   <p className="dynamic-list-empty-message">
-                    Chưa có học viên nào được chọn.
+                    {field.name === "students" ? "Chưa có học viên nào được chọn." : "Chưa có dữ liệu."}
                   </p>
                 )}
               </div>

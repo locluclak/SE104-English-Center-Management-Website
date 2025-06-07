@@ -4,44 +4,59 @@ const db = require('../db'); // Import the database connection
 
 // Route to create a new course
 router.post('/create', async (req, res) => {
-  const { name, teacherName, description, startDate, endDate, minStu, maxStu, price } = req.body;
-  const fullDescription = teacherName ? `[Giáo viên: ${teacherName}] ${description || ''}` : description;
+  const { name, teacherId, description, startDate, endDate, minStu, maxStu, price } = req.body;
+  const fullDescription = description;
 
-  if (!name || !startDate || !endDate || !minStu || !maxStu) {
-    return res.status(400).json({ error: 'Missing required fields' });
+  if (!name || !startDate || !endDate || !minStu || !maxStu || !teacherId) {
+      return res.status(400).json({ error: 'Missing required fields' });
   }
 
   try {
-    const query = `
-      INSERT INTO COURSE (NAME, DESCRIPTION, START_DATE, END_DATE, MIN_STU, MAX_STU, PRICE)
-      VALUES (?, ?, ?, ?, ?, ?, ?)
-    `;
-    const [result] = await db.execute(query, [
-      name,
-      fullDescription,
-      startDate,
-      endDate,
-      minStu,
-      maxStu,
-      price !== undefined ? price : 0
-    ]);
+      const query = `
+          INSERT INTO COURSE (NAME, DESCRIPTION, START_DATE, END_DATE, MIN_STU, MAX_STU, PRICE, TEACHER_ID)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      `;
+      const [result] = await db.execute(query, [
+          name,
+          fullDescription,
+          startDate,
+          endDate,
+          minStu,
+          maxStu,
+          price !== undefined ? price : 0,
+          teacherId
+      ]);
 
-    res.status(201).json({ message: 'Course created successfully', courseId: result.insertId });
+      res.status(201).json({ message: 'Course created successfully', courseId: result.insertId });
   } catch (error) {
-    console.error('Error creating course:', error);
-    res.status(500).json({ error: 'Internal server error' });
+      console.error('Error creating course:', error);
+      res.status(500).json({ error: 'Internal server error' });
   }
 });
-
 
 // Route to get all courses
 router.get('/all', async (req, res) => {
   try {
-    const [rows] = await db.execute('SELECT * FROM COURSE');
-    res.status(200).json(rows);
+      const query = `
+          SELECT
+              C.COURSE_ID,
+              C.NAME,
+              C.DESCRIPTION,
+              C.START_DATE,
+              C.END_DATE,
+              C.MIN_STU,
+              C.MAX_STU,
+              C.PRICE,
+              C.TEACHER_ID,
+              P.NAME AS TEACHER_NAME_FROM_DB
+          FROM COURSE C
+          LEFT JOIN PERSON P ON C.TEACHER_ID = P.ID;
+      `;
+      const [rows] = await db.execute(query);
+      res.status(200).json(rows);
   } catch (error) {
-    console.error('Error fetching all courses:', error);
-    res.status(500).json({ error: 'Internal server error' });
+      console.error('Error fetching all courses:', error);
+      res.status(500).json({ error: 'Internal server error' });
   }
 });
 
@@ -49,10 +64,18 @@ router.get('/all', async (req, res) => {
 router.get('/:id', async (req, res) => {
   const courseId = req.params.id;
   try {
-      // Lấy thông tin cơ bản của khóa học
+      // Lấy thông tin cơ bản của khóa học và tên giáo viên
       const courseQuery = `
-          SELECT * FROM COURSE WHERE COURSE_ID = ?
+          SELECT C.*, P.NAME AS TEACHER_NAME_FROM_DB
+          FROM COURSE C
+          LEFT JOIN PERSON P ON C.TEACHER_ID = P.ID
+          WHERE C.COURSE_ID = ?
       `;
+      // Chú ý: SELECT C.* sẽ tự động lấy tất cả các cột của bảng COURSE
+      // nếu bảng COURSE của bạn không có cột STATUS, thì dòng này vẫn sẽ ổn.
+      // Tuy nhiên, nếu bạn muốn kiểm soát rõ ràng hơn, bạn có thể liệt kê từng cột
+      // như trong route /all và bỏ qua STATUS.
+
       const [courseRows] = await db.execute(courseQuery, [courseId]);
 
       if (courseRows.length === 0) {
@@ -222,49 +245,51 @@ router.post('/add-student', async (req, res) => {
 // Route to update a course by ID
 router.put('/update/:id', async (req, res) => {
   const courseId = req.params.id;
-  const { name, description, startDate, endDate, minStu, maxStu, price, teacherName } = req.body;
+  const { name, description, startDate, endDate, minStu, maxStu, price, teacherId } = req.body;
 
-  if (!name && !description && !startDate && !endDate && !minStu && !maxStu && price === undefined && !teacherName) {
-    return res.status(400).json({ error: 'No fields provided for update' });
+  if (!name && !description && !startDate && !endDate && !minStu && !maxStu && price === undefined && teacherId === undefined) {
+      return res.status(400).json({ error: 'No fields provided for update' });
   }
 
-  const updatedDescription = teacherName
-    ? `[Giáo viên: ${teacherName}] ${description || ''}`
-    : description;
+  const updatedDescription = description;
 
   try {
-    const query = `
-      UPDATE COURSE
-      SET 
-        NAME = COALESCE(?, NAME),
-        DESCRIPTION = COALESCE(?, DESCRIPTION),
-        START_DATE = COALESCE(?, START_DATE),
-        END_DATE = COALESCE(?, END_DATE),
-        MIN_STU = COALESCE(?, MIN_STU),
-        MAX_STU = COALESCE(?, MAX_STU),
-        PRICE = COALESCE(?, PRICE)
-      WHERE COURSE_ID = ?
-    `;
+      const query = `
+          UPDATE COURSE
+          SET
+              NAME = COALESCE(?, NAME),
+              DESCRIPTION = COALESCE(?, DESCRIPTION),
+              START_DATE = COALESCE(?, START_DATE),
+              END_DATE = COALESCE(?, END_DATE),
+              MIN_STU = COALESCE(?, MIN_STU),
+              MAX_STU = COALESCE(?, MAX_STU),
+              PRICE = COALESCE(?, PRICE),
+              TEACHER_ID = COALESCE(?, TEACHER_ID)
+              -- STATUS = COALESCE(?, STATUS) -- Nếu bạn có trường STATUS trong DB và muốn update thì giữ lại, nếu không thì xóa
+          WHERE COURSE_ID = ?
+      `;
 
-    const [result] = await db.execute(query, [
-      name || null,
-      updatedDescription || null,
-      startDate || null,
-      endDate || null,
-      minStu || null,
-      maxStu || null,
-      price !== undefined ? price : null,
-      courseId
-    ]);
+      const [result] = await db.execute(query, [
+          name || null,
+          updatedDescription || null,
+          startDate || null,
+          endDate || null,
+          minStu || null,
+          maxStu || null,
+          price !== undefined ? price : null,
+          teacherId || null,
+          // status || null, // Nếu bạn có trường STATUS trong DB và muốn update thì giữ lại, nếu không thì xóa
+          courseId
+      ]);
 
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ error: 'Course not found' });
-    }
+      if (result.affectedRows === 0) {
+          return res.status(404).json({ error: 'Course not found' });
+      }
 
-    res.status(200).json({ message: 'Course updated successfully' });
+      res.status(200).json({ message: 'Course updated successfully' });
   } catch (error) {
-    console.error('Error updating course:', error);
-    res.status(500).json({ error: 'Internal server error' });
+      console.error('Error updating course:', error);
+      res.status(500).json({ error: 'Internal server error' });
   }
 });
 

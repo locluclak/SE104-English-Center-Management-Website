@@ -32,7 +32,7 @@ export const signup = async ({
       name,
       email,
       password,
-      phoneNumber,
+      phone_number: phoneNumber,
       date_of_birth: formattedDateOfBirth,
       role,
     }),
