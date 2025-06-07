@@ -48,38 +48,58 @@ const AccountantsList = () => {
   }, []);
 
   const onOKSubmit = async () => {
-    try {
-      const values = await form.validateFields();
+  try {
+    const values = await form.validateFields();
 
-      const payload: any = {
-        name: values.name,
-        email: values.email,
-        phone_number: values.phone_number,
-        date_of_birth: values.date_of_birth.format('YYYY-MM-DD'),
+    const basePayload = {
+      name: values.name,
+      email: values.email,
+      phone_number: values.phone_number,
+      date_of_birth: values.date_of_birth.format('YYYY-MM-DD'),
+    };
+
+    if (editingAccountant) {
+      // Cập nhật thông tin
+      await MainApiRequest.put(`/person/update/${editingAccountant.id}`, basePayload);
+
+      // Reset mật khẩu nếu có nhập mới
+      if (values.password && editingAccountant.email) {
+        await MainApiRequest.post('/reset-password', {
+          email: editingAccountant.email,
+          newPassword: values.password,
+        });
+      }
+
+      message.success('Cập nhật kế toán thành công!');
+    } else {
+      // Tạo mới kế toán
+      const payload = {
+        ...basePayload,
+        hire_day: values.hire_day.format('YYYY-MM-DD'),
+        staff_type: 'ACCOUNTANT',
         password: values.password,
       };
 
-      if (editingAccountant) {
-        await MainApiRequest.put(`/person/update/${editingAccountant.id}`, payload);
-        message.success('Accountant updated successfully!');
-      } else {
-        await MainApiRequest.post('/person/allocate', {
-          ...payload,
-          hire_day: values.hire_day.format('YYYY-MM-DD'),
-          role: 'ACCOUNTANT',
-        });
-        message.success('New accountant created successfully!');
-      }
-
-      fetchAccountants();
-      setOpenModal(false);
-      form.resetFields();
-      setEditingAccountant(null);
-    } catch (error) {
-      console.error('Failed to save accountant:', error);
-      message.error('Unable to save accountant.');
+      await MainApiRequest.post('/allocate', payload);
+      message.success('Thêm kế toán mới thành công!');
     }
-  };
+
+    await fetchAccountants();
+    setOpenModal(false);
+    form.resetFields();
+    setEditingAccountant(null);
+  } catch (error: any) {
+    console.error('Lỗi khi lưu kế toán:', error);
+
+    if (error.response?.data?.error || error.response?.data?.message) {
+      message.error(error.response.data.error || error.response.data.message);
+    } else if (error.response?.status === 409) {
+      message.error('Email đã tồn tại trong hệ thống!');
+    } else {
+      message.error('Không thể lưu kế toán. Vui lòng kiểm tra lại thông tin!');
+    }
+  }
+};
 
   const onEdit = (record: Accountant) => {
     setEditingAccountant(record);

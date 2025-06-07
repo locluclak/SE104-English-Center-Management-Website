@@ -68,9 +68,9 @@ const StudentsList = () => {
         await MainApiRequest.put(`/person/update/${editingStudent.id}`, payload);
         message.success('Cập nhật học viên thành công!');
       } else {
-        await MainApiRequest.post('/auth/signup', {
+        await MainApiRequest.post('/signup', {
           ...payload,
-          password: payload.password || 'student123',
+          password: payload.password || '',
         });
         message.success('Tạo học viên mới thành công!');
       }

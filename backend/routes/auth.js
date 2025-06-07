@@ -19,9 +19,13 @@ function generatePassword(length = 8) {
 // POST /staff/allocate
 router.post('/allocate', async (req, res) => {
 <<<<<<< HEAD
+<<<<<<< HEAD
       console.log("Received data:", req.body);
 =======
 >>>>>>> beebbb895 (update backend)
+=======
+      console.log("Received data:", req.body);
+>>>>>>> 271e02b3b (feat: add reset password functionality and enhance accountant, student, and teacher management with improved error handling and success messages)
     const { name, email, phone_number, date_of_birth, hire_day, staff_type } = req.body;
 
     if (!name || !email || !phone_number || !date_of_birth || !hire_day || !staff_type) {
@@ -155,7 +159,8 @@ router.post('/login', async (req, res) => {
         res.json({
             message: 'Login successful',
             token,
-            role
+            role,
+            userId: user.ID
         });
     } catch (err) {
         console.error(err);
@@ -204,5 +209,35 @@ router.post('/change-password', async (req, res) => {
         res.status(500).json({ message: 'Server error' });
     }
 });
+router.post('/reset-password', async (req, res) => {
+  const { email, newPassword } = req.body;
+
+  if (!email || !newPassword) {
+    return res.status(400).json({ message: 'Missing required fields' });
+  }
+
+  try {
+    const conn = await db.getConnection();
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    const [result] = await conn.query(
+      'UPDATE PERSON SET PASSWORD = ? WHERE EMAIL = ?',
+      [hashedPassword, email]
+    );
+
+    conn.release();
+
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    res.status(200).json({ message: 'Password reset successfully' });
+  } catch (err) {
+    console.error('Error resetting password:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
 
 module.exports = router;

@@ -51,38 +51,60 @@ const TeachersList = () => {
   }, []);
 
   const onOKSubmit = async () => {
-    try {
-      const values = await form.validateFields();
+  try {
+    const values = await form.validateFields();
 
-      const payload: any = {
-        name: values.name,
-        email: values.email,
-        phone_number: values.phone_number,
-        date_of_birth: values.date_of_birth.format('YYYY-MM-DD'),
+    const basePayload = {
+      name: values.name,
+      email: values.email,
+      phone_number: values.phone_number,
+      date_of_birth: values.date_of_birth.format('YYYY-MM-DD'),
+    };
+
+    if (editingTeacher) {
+      // Update profile
+      await MainApiRequest.put(`/person/update/${editingTeacher.id}`, basePayload);
+
+      // Optional: Reset password if changed
+      if (values.password && editingTeacher?.email) {
+        await MainApiRequest.post('/reset-password', {
+          email: editingTeacher.email,
+          newPassword: values.password,
+        });
+      }
+
+      message.success('Cập nhật giáo viên thành công!');
+    } else {
+      // Create new teacher
+      const payload = {
+        ...basePayload,
+        hire_day: values.hire_day.format('YYYY-MM-DD'),
+        staff_type: 'TEACHER',
         password: values.password,
       };
 
-      if (editingTeacher) {
-        await MainApiRequest.put(`/person/update/${editingTeacher.id}`, payload);
-        message.success('Cập nhật giáo viên thành công!');
-      } else {
-        await MainApiRequest.post('/person/allocate', {
-          ...payload,
-          hire_day: values.hire_day.format('YYYY-MM-DD'),
-          role: 'TEACHER',
-        });
-        message.success('Tạo giáo viên mới thành công!');
-      }
+      const res = await MainApiRequest.post('/allocate', payload);
 
-      fetchTeachers();
-      setOpenModal(false);
-      form.resetFields();
-      setEditingTeacher(null);
-    } catch (error) {
-      console.error('Lỗi khi lưu giáo viên:', error);
-      message.error('Không thể lưu giáo viên.');
+      message.success('Tạo giáo viên mới thành công!');
     }
-  };
+
+    await fetchTeachers();
+    setOpenModal(false);
+    form.resetFields();
+    setEditingTeacher(null);
+  } catch (error: any) {
+    console.error('Lỗi khi lưu giáo viên:', error);
+
+    if (error.response?.data?.error) {
+      message.error(error.response.data.error);
+    } else if (error.response?.status === 409) {
+      message.error('Email đã tồn tại trong hệ thống!');
+    } else {
+      message.error('Không thể lưu giáo viên. Vui lòng kiểm tra lại thông tin!');
+    }
+  }
+};
+
 
   const onEdit = (record: Teacher) => {
     setEditingTeacher(record);
