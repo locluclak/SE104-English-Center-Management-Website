@@ -23,11 +23,6 @@ const Sidebar: React.FC = () => {
   useEffect(() => {
     let storedRole = localStorage.getItem('role');
 
-    if (!storedRole) {
-      storedRole = 'ROLE_ACCOUNTANT'; 
-      localStorage.setItem('role', storedRole);
-    }
-
     setRole(storedRole);
     setCurrentPath(location.pathname);
 

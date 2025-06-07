@@ -4,6 +4,47 @@ const db = require('../db');
 const { Parser } = require('json2csv'); // Import json2csv library
 const fs = require('fs'); // File system module
 
+// Lấy danh sách sinh viên với trạng thái học phí theo yêu cầu
+router.get('/students/fees', async (req, res) => {
+  const { status } = req.query; // Trạng thái học phí (unpaid, paid, hoặc all)
+
+  let query = `
+    SELECT 
+      PERSON.NAME AS student_name, 
+      PERSON.EMAIL AS student_email, 
+      TUITION.T_ID AS tuition_id, 
+      TUITION.PRICE AS tuition_price, 
+      TUITION.TYPE AS tuition_type, 
+      TUITION.STATUS AS tuition_status, 
+      TUITION.PAID_DATE AS tuition_paid_date
+    FROM TUITION
+    JOIN PERSON ON TUITION.PERSON_ID = PERSON.ID
+  `;
+
+  // Nếu có filter theo status, thêm điều kiện vào câu truy vấn
+  if (status && status !== 'all') {
+    query += ` WHERE TUITION.STATUS = ?`;
+  }
+
+  try {
+    // Thực thi câu truy vấn và lấy dữ liệu
+    const studentsFees = await db.query(query, [status === 'all' ? null : status]);
+
+    // Nếu không tìm thấy dữ liệu
+    if (studentsFees.length === 0) {
+      return res.status(404).json({ message: 'No students found with the specified fee status.' });
+    }
+
+    // Trả về dữ liệu
+    res.json(studentsFees);
+  } catch (err) {
+    console.error('Error fetching student fees:', err);
+    res.status(500).json({ message: 'Database error', error: err });
+  }
+});
+
+
+
 // Update tuition information by T_ID
 router.put('/tuition/:id', async (req, res) => {
   const tuitionId = req.params.id;
