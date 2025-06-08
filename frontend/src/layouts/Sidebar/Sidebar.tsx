@@ -39,15 +39,15 @@ const Sidebar: React.FC = () => {
         { title: 'REPORTS', link: '/accountant/reports', icon: 'fas fa-chart-line', roles: ['ROLE_ACCOUNTANT'] },
       ],
 
-      ROLE_TEACHER: [
-        { title: 'DASHBOARD', link: '/teacher/dashboard', icon: 'fas fa-tachometer-alt', roles: ['ROLE_TEACHER'] },
-        { title: 'STUDENTS', link: '/teacher/students', icon: 'fas fa-user-graduate', roles: ['ROLE_TEACHER'] },
-        { title: 'REPORT', link: '/teacher/reports', icon: 'fas fa-chart-line', roles: ['ROLE_TEACHER'] },
-      ],
-      ROLE_STUDENT: [
-        { title: 'COURSES', link: '/student/courses', icon: 'fas fa-book', roles: ['ROLE_STUDENT'] },
-        { title: 'STUDY', link: '/student/study', icon: 'fas fa-book', roles: ['ROLE_STUDENT'] },
-      ],
+      // ROLE_TEACHER: [
+      //   { title: 'DASHBOARD', link: '/teacher/dashboard', icon: 'fas fa-tachometer-alt', roles: ['ROLE_TEACHER'] },
+      //   { title: 'STUDENTS', link: '/teacher/students', icon: 'fas fa-user-graduate', roles: ['ROLE_TEACHER'] },
+      //   { title: 'REPORT', link: '/teacher/reports', icon: 'fas fa-chart-line', roles: ['ROLE_TEACHER'] },
+      // ],
+      // ROLE_STUDENT: [
+      //   { title: 'COURSES', link: '/student/courses', icon: 'fas fa-book', roles: ['ROLE_STUDENT'] },
+      //   { title: 'STUDY', link: '/student/study', icon: 'fas fa-book', roles: ['ROLE_STUDENT'] },
+      // ],
     };
 
     if (storedRole && roleRoutes[storedRole]) {

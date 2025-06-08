@@ -1,0 +1,72 @@
+@import "../../../scss/variables";
+
+.card {
+  background: white;
+  border: 1px solid get-color($secondary, "100");
+  border-radius: 12px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+  overflow: hidden;
+
+  &:hover {
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    transform: translateY(-2px);
+  }
+
+  .card-header {
+    padding: 20px 20px 16px 20px;
+    border-bottom: 1px solid get-color($secondary, "100");
+
+    .card-title {
+      margin: 0 0 8px 0;
+      font-size: 18px;
+      font-weight: 600;
+      color: get-color($primary, "100");
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card-description {
+      margin: 0;
+      font-size: 14px;
+      color: get-color($primary, "200");
+      line-height: 1.5;
+    }
+  }
+
+  .card-content {
+    padding: 20px;
+
+    &:first-child {
+      padding-top: 20px;
+    }
+
+    &:last-child {
+      padding-bottom: 20px;
+    }
+  }
+}
+
+// Variants
+.card.hover-effect {
+  cursor: pointer;
+  
+  &:hover {
+    border-color: get-color($primary, "100");
+  }
+}
+
+.card.compact {
+  .card-header {
+    padding: 16px 16px 12px 16px;
+    
+    .card-title {
+      font-size: 16px;
+    }
+  }
+  
+  .card-content {
+    padding: 16px;
+  }
+}
