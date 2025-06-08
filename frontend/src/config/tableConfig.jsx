@@ -52,7 +52,7 @@ export const getAssignmentTableColumns = (onEdit, onDelete, userRole, onRowClick
     { header: 'ID', accessor: 'AS_ID' },
     { header: 'Name', accessor: 'NAME' },
     {
-      header: 'Description',
+      header: 'Content',
       accessor: 'DESCRIPTION',
       render: (row) => (
         <div className="table-description-cell">

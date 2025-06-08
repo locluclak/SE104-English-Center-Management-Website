@@ -60,16 +60,16 @@ const CourseDetail = ({ clsId, onBack, userRole, userId }) => {
       if (!assignmentsResponse.ok) {
         if (assignmentsResponse.status === 404) {
           setAssignments([]);
-          console.warn(`Không tìm thấy bài tập cho khóa học ID: ${clsId}`);
+          console.warn(`No assignments found for course ID: ${clsId}`);
         } else {
-          throw new Error(`Lỗi HTTP khi tải bài tập: ${assignmentsResponse.status}`);
+          throw new Error(`HTTP error when loading exercise: ${assignmentsResponse.status}`);
         }
       } else {
         const data = await assignmentsResponse.json();
         setAssignments(data.assignments || []);
       }
     } catch (error) {
-      console.error("Lỗi khi tải bài tập:", error);
+      console.error("Error loading exercise:", error);
       setAssignments([]);
     }
   }, [clsId]);
@@ -80,16 +80,16 @@ const CourseDetail = ({ clsId, onBack, userRole, userId }) => {
       if (!documentsResponse.ok) {
         if (documentsResponse.status === 404) {
           setDocuments([]);
-          console.warn(`Không tìm thấy tài liệu cho khóa học ID: ${clsId}`);
+          console.warn(`No documents found for course ID: ${clsId}`);
         } else {
-          throw new Error(`Lỗi HTTP khi tải tài liệu: ${documentsResponse.status}`);
+          throw new Error(`HTTP error while loading document: ${documentsResponse.status}`);
         }
       } else {
         const data = await documentsResponse.json();
         setDocuments(data || []);
       }
     } catch (error) {
-      console.error("Lỗi khi tải tài liệu:", error);
+      console.error("Error loading document:", error);
       setDocuments([]);
     }
   }, [clsId]);
@@ -189,7 +189,7 @@ const CourseDetail = ({ clsId, onBack, userRole, userId }) => {
   };
 
   const handleDeleteAssignment = async (assignment) => {
-    if (window.confirm(`Bạn có chắc chắn muốn xóa bài tập "${assignment.NAME}"?`)) {
+    if (window.confirm(`Are you sure you want to delete the assignment "${assignment.NAME}"?`)) {
       try {
         const response = await fetch(`${API_URL}/assignments/delete/${assignment.AS_ID}`, {
           method: 'DELETE',
@@ -200,17 +200,17 @@ const CourseDetail = ({ clsId, onBack, userRole, userId }) => {
           throw new Error(errorData.error || `Failed to delete assignment: ${response.statusText}`);
         }
 
-        alert('Bài tập đã được xóa thành công!');
+        alert('The assignment was successfully deleted!');
         await fetchAssignments();
       } catch (error) {
         console.error('Error deleting assignment:', error);
-        alert(`Lỗi khi xóa bài tập: ${error.message}`);
+        alert(`Error deleting assignment: ${error.message}`);
       }
     }
   };
 
   const handleDeleteDocument = async (document) => {
-    if (window.confirm(`Bạn có chắc chắn muốn xóa tài liệu "${document.NAME}"?`)) {
+    if (window.confirm(`Are you sure you want to delete the document "${document.NAME}"?`)) {
       try {
         const response = await fetch(`${API_URL}/documents/delete/${document.DOC_ID}`, {
           method: 'DELETE',
@@ -221,11 +221,11 @@ const CourseDetail = ({ clsId, onBack, userRole, userId }) => {
           throw new Error(errorData.error || `Failed to delete document: ${response.statusText}`);
         }
 
-        alert('Tài liệu đã được xóa thành công!');
+        alert('Document deleted successfully!');
         await fetchDocuments();
       } catch (error) {
         console.error('Error deleting document:', error);
-        alert(`Lỗi khi xóa tài liệu: ${error.message}`);
+        alert(`Error while deleting document: ${error.message}`);
       }
     }
   };
@@ -335,24 +335,24 @@ const CourseDetail = ({ clsId, onBack, userRole, userId }) => {
   };
 
   const submissionTableColumns = [
-    { header: "ID Học viên", accessor: "STUDENT_ID" }, 
-    { header: "Tên Học viên", accessor: "STUDENT_NAME" },
-    { header: "Ngày nộp", accessor: "SUBMIT_DATE", render: (row) => formatDate(row.SUBMIT_DATE) },
-    { header: "Mô tả", accessor: "DESCRIPTION" },
+    { header: "ID", accessor: "STUDENT_ID" }, 
+    { header: "Name", accessor: "STUDENT_NAME" },
+    { header: "Submit Date", accessor: "SUBMIT_DATE", render: (row) => formatDate(row.SUBMIT_DATE) },
+    { header: "Content", accessor: "DESCRIPTION" },
     {
-      header: "File đính kèm",
+      header: "File",
       accessor: "FILE",
       render: (row) => (
         row.FILE ? <a href={`${API_URL}${row.FILE}`} target="_blank" rel="noopener noreferrer">Xem file</a> : "Không có"
       )
     },
-    { header: "Điểm", accessor: "SCORE", render: (row) => row.SCORE !== null ? row.SCORE : "Chưa chấm" },
-    { header: "Bình luận", accessor: "TEACHER_COMMENT", render: (row) => row.TEACHER_COMMENT || "Không có" },
+    { header: "Score", accessor: "SCORE", render: (row) => row.SCORE !== null ? row.SCORE : "Chưa chấm" },
+    { header: "Comment", accessor: "TEACHER_COMMENT", render: (row) => row.TEACHER_COMMENT || "Không có" },
     {
         header: "Action",
         render: (row) => (
             <button onClick={() => handleSelectStudentSubmission(row)} className="grade-button">
-                {row.SCORE !== null ? 'Sửa điểm' : 'Chấm điểm'}
+                {row.SCORE !== null ? 'Editing' : 'Grading'}
             </button>
         )
     }
@@ -385,7 +385,7 @@ const CourseDetail = ({ clsId, onBack, userRole, userId }) => {
         await fetchDocuments();
 
       } catch (error) {
-        console.error("Lỗi khi tải chi tiết khóa học:", error);
+        console.error("Error loading course details:", error);
         setClassInfo(null);
         setStudents([]);
         setAssignments([]);
@@ -422,15 +422,15 @@ const CourseDetail = ({ clsId, onBack, userRole, userId }) => {
 
 
   if (loadingDetails) {
-    return <div className="loading-message">Đang tải thông tin chi tiết khóa học...</div>;
+    return <div className="loading-message">Loading course details...</div>;
   }
 
   if (!clsId) {
-    return <div className="error-message">Không có ID lớp học được chọn.</div>;
+    return <div className="error-message">No class ID selected.</div>;
   }
 
   if (!classInfo) {
-    return <div className="error-message">Không tìm thấy thông tin chi tiết lớp học này.</div>;
+    return <div className="error-message">No detailed information found for this class.</div>;
   }
 
   return (
@@ -449,16 +449,37 @@ const CourseDetail = ({ clsId, onBack, userRole, userId }) => {
         <div className="assignment-submission-view">
           
           <h3>{selectedAssignment.NAME}</h3>
-          <p><strong>Mô tả:</strong> <span dangerouslySetInnerHTML={{ __html: selectedAssignment.DESCRIPTION }} /></p> {/* Render HTML from description */}
-          <p><strong>Ngày bắt đầu:</strong> {formatDate(selectedAssignment.START_DATE)}</p>
-          <p><strong>Ngày kết thúc:</strong> {formatDate(selectedAssignment.END_DATE)}</p>
+          <p><strong>Content:</strong> <span dangerouslySetInnerHTML={{ __html: selectedAssignment.DESCRIPTION }} /></p> {/* Render HTML from description */}
+          <p><strong>Start Date:</strong> {formatDate(selectedAssignment.START_DATE)}</p>
+          <p><strong>End Date:</strong> {formatDate(selectedAssignment.END_DATE)}</p>
           {selectedAssignment.FILE && (
             <p>
-              <strong>File đính kèm:</strong>{" "}
+              <strong>Attached file:</strong>{" "}
               <a href={`${API_URL}${selectedAssignment.FILE}`} target="_blank" rel="noopener noreferrer">
-                Xem file
+                View file
               </a>
             </p>
+          )}
+
+          {studentSubmission && (
+            <div className="student-submission-details">
+                <h4>Your work:</h4>
+                <p><strong>Date of submission:</strong> {formatDate(studentSubmission.SUBMIT_DATE)}</p>
+                <p><strong>Content:</strong> <span dangerouslySetInnerHTML={{ __html: studentSubmission.DESCRIPTION || 'Không có mô tả.' }} /></p>
+                {studentSubmission.FILE && (
+                    <p>
+                        <strong>Attached file:</strong>{" "}
+                        <a href={`<span class="math-inline">\{API\_URL\}</span>{studentSubmission.FILE}`} target="_blank" rel="noopener noreferrer">
+                          View your files
+                        </a>
+                    </p>
+                )}
+                <hr />
+                <h4>Scoring results:</h4>
+                <p><strong>Score</strong> {studentSubmission.SCORE !== null ? studentSubmission.SCORE : "Chưa có điểm"}</p>
+                <p><strong>Teacher's comments:</strong> {studentSubmission.TEACHER_COMMENT || "Chưa có bình luận."}</p>
+                <hr />
+            </div>
           )}
 
           <SubmissionForm
@@ -470,7 +491,7 @@ const CourseDetail = ({ clsId, onBack, userRole, userId }) => {
         </div>
       ) : selectedAssignment && userRole === 'teacher' && assignmentSubmissions.length >= 0 ? (
         <div className="assignment-review-view">
-          <h3>Bài làm cho "{selectedAssignment.NAME}"</h3>
+          <h3>Assignment for "{selectedAssignment.NAME}"</h3>
           {selectedStudentSubmission ? (
             <TeacherGradingInterface
               submission={selectedStudentSubmission}
@@ -484,7 +505,7 @@ const CourseDetail = ({ clsId, onBack, userRole, userId }) => {
               {assignmentSubmissions.length > 0 ? (
                 <Table columns={submissionTableColumns} data={assignmentSubmissions} />
               ) : (
-                <p>Chưa có bài làm nào cho bài tập này.</p>
+                <p>There are no assignments for this exercise yet.</p>
               )}
             </div>
           )}
@@ -531,7 +552,7 @@ const CourseDetail = ({ clsId, onBack, userRole, userId }) => {
                 {students.length > 0 ? (
                   <Table columns={studentTableColumns} data={students} />
                 ) : (
-                  <p>Chưa có học viên nào trong khóa học này.</p>
+                  <p>There are no students in this course yet.</p>
                 )}
               </div>
             )}
@@ -539,17 +560,17 @@ const CourseDetail = ({ clsId, onBack, userRole, userId }) => {
             {activeTab === "assignment" && (
               <div>
                 <div className="section-header">
-                  <h3>Danh sách Bài tập</h3>
+                  <h3>List of Assignments</h3>
                   {userRole === "teacher" && (
                     <AddButton onClick={handleAddAssignment}>
-                      Thêm bài tập
+                      Add Assignments
                     </AddButton>
                   )}
                 </div>
                 {assignments.length > 0 ? (
                   <Table columns={assignmentCols} data={assignments} onRowClick={userRole === 'student' || userRole === 'teacher' ? handleAssignmentRowClick : null} />
                 ) : (
-                  <p>Không có bài tập nào cho khóa học này.</p>
+                  <p>There are no assignments for this course.</p>
                 )}
               </div>
             )}
@@ -557,17 +578,17 @@ const CourseDetail = ({ clsId, onBack, userRole, userId }) => {
             {activeTab === "doc" && (
               <div>
                 <div className="section-header">
-                  <h3>Danh sách Tài liệu</h3>
+                  <h3>List of Documents</h3>
                   {userRole === "teacher" && (
                     <AddButton onClick={handleAddDocument}>
-                      Thêm tài liệu
+                      Add documents
                     </AddButton>
                   )}
                 </div>
                 {documents.length > 0 ? (
                   <Table columns={documentCols} data={documents} />
                 ) : (
-                  <p>Không có tài liệu nào cho khóa học này.</p>
+                  <p>There are no materials for this course.</p>
                 )}
               </div>
             )}
