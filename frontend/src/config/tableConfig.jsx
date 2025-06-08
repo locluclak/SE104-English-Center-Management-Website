@@ -48,50 +48,64 @@ export const getAccountantTableColumns = (onEdit, onDelete) => [
   },
 ];
 
-export const getAssignmentTableColumns = (onEdit, onDelete) => [
-  { header: 'ID', accessor: 'AS_ID' },
-  { header: 'Name', accessor: 'NAME' },
-  {
-    header: 'Description',
-    accessor: 'DESCRIPTION',
-    render: (row) => (
-      <div className="table-description-cell">
-        {row.DESCRIPTION}
-      </div>
-    ),
-  },
-  { header: 'Start Date', accessor: 'START_DATE' },
-  { header: 'End Date', accessor: 'END_DATE' },
-  {
-    header: 'Action',
-    render: (row) => (
-      <>
-        <EditButton onClick={() => onEdit(row)} />
-        <DeleteButton onClick={() => onDelete(row)} />
-      </>
-    ),
-  },
-];
+export const getAssignmentTableColumns = (onEdit, onDelete, userRole) => { // Thêm userRole
+  const columns = [
+    { header: 'ID', accessor: 'AS_ID' },
+    { header: 'Name', accessor: 'NAME' },
+    {
+      header: 'Description',
+      accessor: 'DESCRIPTION',
+      render: (row) => (
+        <div className="table-description-cell">
+          {row.DESCRIPTION}
+        </div>
+      ),
+    },
+    { header: 'Start Date', accessor: 'START_DATE' },
+    { header: 'End Date', accessor: 'END_DATE' },
+  ];
 
-export const getDocumentTableColumns = (onEdit, onDelete) => [
-  { header: 'ID', accessor: 'DOC_ID' },
-  { header: 'Name', accessor: 'NAME' },
-  {
-    header: 'Description',
-    accessor: 'DESCRIPTION',
-    render: (row) => (
-      <div className="table-description-cell">
-        {row.DESCRIPTION}
-      </div>
-    ),
-  },
-  {
-    header: 'Action',
-    render: (row) => (
-      <>
-        <EditButton onClick={() => onEdit(row)} />
-        <DeleteButton onClick={() => onDelete(row)} />
-      </>
-    ),
-  },
-];
+  if (userRole === 'teacher') {
+    columns.push({
+      header: 'Action',
+      render: (row) => (
+        <>
+          <EditButton onClick={() => onEdit(row)} />
+          <DeleteButton onClick={() => onDelete(row)} />
+        </>
+      ),
+    });
+  }
+
+  return columns;
+};
+
+export const getDocumentTableColumns = (onEdit, onDelete, userRole) => { // Thêm userRole
+  const columns = [
+    { header: 'ID', accessor: 'DOC_ID' },
+    { header: 'Name', accessor: 'NAME' },
+    {
+      header: 'Description',
+      accessor: 'DESCRIPTION',
+      render: (row) => (
+        <div className="table-description-cell">
+          {row.DESCRIPTION}
+        </div>
+      ),
+    },
+  ];
+
+  if (userRole === 'teacher') {
+    columns.push({
+      header: 'Action',
+      render: (row) => (
+        <>
+          <EditButton onClick={() => onEdit(row)} />
+          <DeleteButton onClick={() => onDelete(row)} />
+        </>
+      ),
+    });
+  }
+
+  return columns;
+};

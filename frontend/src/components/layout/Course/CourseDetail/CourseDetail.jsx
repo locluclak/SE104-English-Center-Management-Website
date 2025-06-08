@@ -9,7 +9,7 @@ import ResourceForm from '../../../common/Form/ResourceForm/ResourceForm';
 
 const API_URL = "http://localhost:3000";
 
-const CourseDetail = ({ clsId, onBack, userRole }) => {
+const CourseDetail = ({ clsId, onBack, userRole }) => { 
   const [classInfo, setClassInfo] = useState(null);
   const [students, setStudents] = useState([]);
   const [assignments, setAssignments] = useState([]);
@@ -21,7 +21,7 @@ const CourseDetail = ({ clsId, onBack, userRole }) => {
   const [showResourceForm, setShowResourceForm] = useState(false);
   const [resourceFormType, setResourceFormType] = useState('');
 
-  const [editingResource, setEditingResource] = useState(null); 
+  const [editingResource, setEditingResource] = useState(null);
   const [editingResourceType, setEditingResourceType] = useState('');
 
   const handleRegister = () => setShowConfirm(true);
@@ -41,7 +41,7 @@ const CourseDetail = ({ clsId, onBack, userRole }) => {
     if (!isoString) return "";
     const date = new Date(isoString);
     if (isNaN(date.getTime())) {
-      return isoString; 
+      return isoString;
     }
     return new Intl.DateTimeFormat("vi-VN", { year: 'numeric', month: '2-digit', day: '2-digit' }).format(date);
   };
@@ -86,9 +86,10 @@ const CourseDetail = ({ clsId, onBack, userRole }) => {
     }
   }, [clsId]);
 
+
   const handleAddAssignment = () => {
     setResourceFormType('assignment');
-    setEditingResource(null); 
+    setEditingResource(null);
     setEditingResourceType('');
     setShowResourceForm(true);
     console.log("Teacher wants to add a new assignment for course:", clsId);
@@ -105,16 +106,59 @@ const CourseDetail = ({ clsId, onBack, userRole }) => {
   const handleEditAssignment = (assignment) => {
     setResourceFormType('assignment');
     setEditingResourceType('assignment');
-    setEditingResource(assignment); 
+    setEditingResource(assignment);
     setShowResourceForm(true);
   };
 
   const handleEditDocument = (document) => {
     setResourceFormType('document');
     setEditingResourceType('document');
-    setEditingResource(document); 
+    setEditingResource(document);
     setShowResourceForm(true);
   };
+
+  const handleDeleteAssignment = async (assignment) => {
+    if (window.confirm(`Bạn có chắc chắn muốn xóa bài tập "${assignment.NAME}"?`)) {
+        try {
+            const response = await fetch(`${API_URL}/assignments/delete/${assignment.AS_ID}`, {
+                method: 'DELETE',
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || `Failed to delete assignment: ${response.statusText}`);
+            }
+
+            alert('Bài tập đã được xóa thành công!');
+            await fetchAssignments(); 
+        } catch (error) {
+            console.error('Error deleting assignment:', error);
+            alert(`Lỗi khi xóa bài tập: ${error.message}`);
+        }
+    }
+  };
+
+  const handleDeleteDocument = async (document) => {
+    if (window.confirm(`Bạn có chắc chắn muốn xóa tài liệu "${document.NAME}"?`)) {
+        try {
+            const response = await fetch(`${API_URL}/documents/delete/${document.DOC_ID}`, {
+                method: 'DELETE',
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || `Failed to delete document: ${response.statusText}`);
+            }
+
+            alert('Tài liệu đã được xóa thành công!');
+            await fetchDocuments(); 
+        } catch (error) {
+            console.error('Error deleting document:', error);
+            alert(`Lỗi khi xóa tài liệu: ${error.message}`);
+        }
+    }
+  };
+
 
   const handleResourceFormSubmit = async (formData) => {
     const { title, description, file, audioBlob, startDate, endDate } = formData;
@@ -122,7 +166,7 @@ const CourseDetail = ({ clsId, onBack, userRole }) => {
     const dataToSend = new FormData();
     dataToSend.append('name', title);
     dataToSend.append('description', description);
-    dataToSend.append('course_id', clsId); 
+    dataToSend.append('course_id', clsId);
 
     if (file) {
       dataToSend.append('file', file);
@@ -142,10 +186,6 @@ const CourseDetail = ({ clsId, onBack, userRole }) => {
         method = 'PUT';
         successMessage = 'Assignment updated successfully!';
 
-        if (title) dataToSend.append('name', title);
-        if (description) dataToSend.append('description', description);
-        if (startDate) dataToSend.append('start_date', startDate);
-        if (endDate) dataToSend.append('end_date', endDate);
         const updateBody = { name: title, description: description };
         if (startDate) updateBody.start_date = startDate;
         if (endDate) updateBody.end_date = endDate;
@@ -153,7 +193,7 @@ const CourseDetail = ({ clsId, onBack, userRole }) => {
         response = await fetch(url, {
             method: method,
             headers: {
-                'Content-Type': 'application/json', 
+                'Content-Type': 'application/json',
             },
             body: JSON.stringify(updateBody),
         });
@@ -208,7 +248,7 @@ const CourseDetail = ({ clsId, onBack, userRole }) => {
       setShowResourceForm(false);
       setResourceFormType('');
       setEditingResource(null);
-      setEditingResourceType(''); 
+      setEditingResourceType('');
 
       if (resourceFormType === 'assignment' || editingResourceType === 'assignment') {
         await fetchAssignments();
@@ -225,8 +265,8 @@ const CourseDetail = ({ clsId, onBack, userRole }) => {
   const handleResourceFormCancel = () => {
     setShowResourceForm(false);
     setResourceFormType('');
-    setEditingResource(null); 
-    setEditingResourceType(''); 
+    setEditingResource(null);
+    setEditingResourceType('');
   };
 
   useEffect(() => {
@@ -278,13 +318,17 @@ const CourseDetail = ({ clsId, onBack, userRole }) => {
     return description.replace(/\[Giáo viên:\s*[^\]]+\]\s*/, '').trim();
   };
 
-  const assignmentCols = getAssignmentTableColumns(handleEditAssignment, (assignment) => {
-    alert(`Delete assignment: ${assignment.NAME}`);
-  });
+  const assignmentCols = getAssignmentTableColumns(
+    handleEditAssignment,
+    handleDeleteAssignment, 
+    userRole 
+  );
 
-  const documentCols = getDocumentTableColumns(handleEditDocument, (document) => {
-      alert(`Delete document: ${document.NAME}`);
-  });
+  const documentCols = getDocumentTableColumns(
+    handleEditDocument,
+    handleDeleteDocument, 
+    userRole 
+  );
 
   if (loadingDetails) {
     return <div className="loading-message">Đang tải thông tin chi tiết khóa học...</div>;
@@ -304,8 +348,8 @@ const CourseDetail = ({ clsId, onBack, userRole }) => {
       {showResourceForm ? (
         <ResourceForm
           type={resourceFormType}
-          initialData={editingResource} 
-          isEditMode={!!editingResource} 
+          initialData={editingResource}
+          isEditMode={!!editingResource}
           onSubmit={handleResourceFormSubmit}
           onCancel={handleResourceFormCancel}
         />
@@ -360,14 +404,14 @@ const CourseDetail = ({ clsId, onBack, userRole }) => {
               <div>
                 <div className="section-header">
                   <h3>Danh sách Bài tập</h3>
-                  {userRole === "teacher" && (
+                  {userRole === "teacher" && ( 
                     <AddButton onClick={handleAddAssignment}>
                       Thêm bài tập
                     </AddButton>
                   )}
                 </div>
                 {assignments.length > 0 ? (
-                  <Table columns={assignmentCols} data={assignments} /> 
+                  <Table columns={assignmentCols} data={assignments} />
                 ) : (
                   <p>Không có bài tập nào cho khóa học này.</p>
                 )}
@@ -378,7 +422,7 @@ const CourseDetail = ({ clsId, onBack, userRole }) => {
               <div>
                 <div className="section-header">
                   <h3>Danh sách Tài liệu</h3>
-                  {userRole === "teacher" && (
+                  {userRole === "teacher" && ( 
                     <AddButton onClick={handleAddDocument}>
                       Thêm tài liệu
                     </AddButton>
