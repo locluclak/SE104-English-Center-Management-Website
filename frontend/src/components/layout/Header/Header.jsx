@@ -6,12 +6,14 @@ import AccountPopup from '../Account/AccountPopup';
 import { itemsByRole } from '../../../config/navigationConfig.jsx';
 import './Header.css';
 
-const Header = ({ role, activeTab, setActiveTab, onNavigateSection }) => {
+const Header = ({ role, activeTab, setActiveTab, onNavigateSection, onFeatureSelect }) => {
   const [showNotifications, setShowNotifications] = useState(false);
   const [showAccountPopup, setShowAccountPopup] = useState(false);
+  const [openDropdown, setOpenDropdown] = useState(null); 
+
   const navigate = useNavigate();
 
-  const tabKeys = Object.keys(itemsByRole[role] || []);
+  const mainTabKeys = Object.keys(itemsByRole[role] || {}).filter(key => key !== 'home');
 
   const notifications = [
     { id: 1, message: "Bạn có đơn đăng ký mới." },
@@ -27,6 +29,27 @@ const Header = ({ role, activeTab, setActiveTab, onNavigateSection }) => {
     navigate('/signup');
   };
 
+  const handleTabClick = (key) => {
+    setActiveTab(key);
+    setOpenDropdown(null); 
+    if (itemsByRole[role]?.[key]?.length > 0 && onFeatureSelect) {
+        onFeatureSelect(itemsByRole[role][key][0].key, key);
+    }
+  };
+
+  const handleDropdownItemClick = (featureKey, tabKey) => {
+    onFeatureSelect(featureKey, tabKey);
+    setOpenDropdown(null);
+  };
+
+  const handleMouseEnter = (key) => {
+    setOpenDropdown(key);
+  };
+
+  const handleMouseLeave = () => {
+    setOpenDropdown(null);
+  };
+
   return (
     <div className="navbar-container">
       <nav className="navbar">
@@ -35,29 +58,54 @@ const Header = ({ role, activeTab, setActiveTab, onNavigateSection }) => {
         </div>
 
         <div className="navbar-right">
-        <ul className="navbar-center">
-          {tabKeys.map((key) => (
-            <li
-              key={key}
-              onClick={() => setActiveTab(key)}
-              className={activeTab === key ? 'active' : ''}
-            >
-              <span>{key.charAt(0).toUpperCase() + key.slice(1)}</span>
-            </li>
-          ))}
+          <ul className="navbar-center">
+            {role && itemsByRole[role]?.home && (
+                <li
+                    key="home"
+                    onClick={() => handleTabClick('home')}
+                    className={activeTab === 'home' ? 'active' : ''}
+                >
+                    <span>Home</span>
+                </li>
+            )}
 
-          {/* Các mục chỉ có khi chưa login (role null) */}
-          {!role && (
-            <>
-              <li onClick={() => onNavigateSection?.('about')}>
-                <span>About Me</span>
+            {mainTabKeys.map((key) => (
+              <li
+                key={key}
+                className={`dropdown-wrapper ${activeTab === key ? 'active' : ''}`}
+                onMouseEnter={() => handleMouseEnter(key)}
+                onMouseLeave={handleMouseLeave}
+              >
+                <span onClick={() => handleTabClick(key)}>
+                  {key.charAt(0).toUpperCase() + key.slice(1)} <span className="dropdown-arrow">&#9660;</span>
+                </span>
+                
+                {openDropdown === key && itemsByRole[role]?.[key]?.length > 0 && (
+                  <ul className="dropdown-menu">
+                    {itemsByRole[role][key].map((item) => (
+                      <li 
+                        key={item.key} 
+                        onClick={() => handleDropdownItemClick(item.key, key)}
+                      >
+                        {item.icon} {item.name}
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </li>
-              <li onClick={() => onNavigateSection?.('courses')}>
-                <span>Courses</span>
-              </li>
-            </>
-          )}
-        </ul>
+            ))}
+
+            {!role && (
+              <>
+                <li onClick={() => onNavigateSection?.('about')}>
+                  <span>About Me</span>
+                </li>
+                <li onClick={() => onNavigateSection?.('courses')}>
+                  <span>Courses</span>
+                </li>
+              </>
+            )}
+          </ul>
 
           {role ? (
             <>

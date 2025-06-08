@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import Header from '../../components/layout/Header/Header';
-import SidebarSearch from "../../components/layout/Sidebar/SidebarSearch";
 
 import MyCoursesTab from "../../components/layout/ClassesTab/StudentPage/MyCoursesTab";
 import WaitingTab from "../../components/layout/ClassesTab/StudentPage/WaitingTab";
@@ -15,7 +14,7 @@ import './Student.css';
 const StudentPage = () => {
   const [activeTab, setActiveTab] = useState('home');
   const [selectedClass, setSelectedClass] = useState(null);
-  const [selectedFeature, setSelectedFeature] = useState('my-course');
+  const [selectedFeature, setSelectedFeature] = useState('home');
   const [currentStudentId, setCurrentStudentId] = useState('your_student_id_here');
 
   useEffect(() => {
@@ -29,12 +28,14 @@ const StudentPage = () => {
   }, []);
 
   useEffect(() => {
-    if (activeTab === 'courses') {
+    if (activeTab === 'courses' && selectedFeature !== 'my-courses' && selectedFeature !== 'waiting') {
       setSelectedFeature('my-courses');
-    } else if (activeTab === 'dashboard') {
+    } else if (activeTab === 'dashboard' && selectedFeature !== 'calendar' && selectedFeature !== 'padlet') {
       setSelectedFeature('calendar');
+    } else if (activeTab === 'home') { 
+      setSelectedFeature('home');
     }
-  }, [activeTab]);
+  }, [activeTab, selectedFeature]);
 
   const handleNew = () => {
     console.log('StudentPage: handleNew called');
@@ -45,14 +46,20 @@ const StudentPage = () => {
     setSelectedClass(classId);
   };
 
-  const handleFeatureSelect = useCallback((featureKey) => {
-    console.log('handleFeatureSelect called with:', featureKey);
+  const handleFeatureSelect = useCallback((featureKey, tabKey) => { 
+    console.log('handleFeatureSelect called with:', featureKey, 'for tab:', tabKey);
     setSelectedFeature(featureKey);
+    setActiveTab(tabKey); 
   }, []);
 
   return (
     <div className="student-page">
-      <Header role="student" activeTab={activeTab} setActiveTab={setActiveTab} />
+      <Header 
+        role="student" 
+        activeTab={activeTab} 
+        setActiveTab={setActiveTab} 
+        onFeatureSelect={handleFeatureSelect} 
+      />
 
       <div className="student-body">
         {activeTab === 'home' && (
@@ -62,55 +69,46 @@ const StudentPage = () => {
         )}
 
         {activeTab !== 'home' && (
-          <>
-            <SidebarSearch 
-              role="student"
-              activeTab={activeTab}
-              onSearch={handleFeatureSelect}
-              onNew={handleNew}
-            />
-
-            <div className="stu-content">    
-              {activeTab === 'courses' && (
-                <div className="course-display-area"> 
-                  {selectedClass ? (
-                    <div className="course-inside">
-                      <CourseDetail
-                        clsId={selectedClass}
-                        onBack={() => setSelectedClass(null)}
-                      />
-                      <CourseProgress className={selectedClass} />
-                    </div>
-                  ) : (
-                    <>
-                      {selectedFeature === 'my-courses' && 
-                        <>
-                          {console.log("Passing studentId to MyCoursesTab:", currentStudentId)} 
-                          <MyCoursesTab 
-                            studentId={currentStudentId} 
-                            handleClassClick={handleClassClick} 
-                          />
-                        </>
-                      }
-                      {selectedFeature === 'waiting' && 
-                        <WaitingTab 
-                          studentId={currentStudentId}
+          <div className="stu-content">     
+            {activeTab === 'courses' && (
+              <div className="course-display-area"> 
+                {selectedClass ? (
+                  <div className="course-inside">
+                    <CourseDetail
+                      clsId={selectedClass}
+                      onBack={() => setSelectedClass(null)}
+                    />
+                    <CourseProgress className={selectedClass} />
+                  </div>
+                ) : (
+                  <>
+                    {selectedFeature === 'my-courses' && 
+                      <>
+                        {console.log("Passing studentId to MyCoursesTab:", currentStudentId)} 
+                        <MyCoursesTab 
+                          studentId={currentStudentId} 
                           handleClassClick={handleClassClick} 
                         />
-                      }
-                    </>
-                  )}
-                </div>
-              )}
+                      </>
+                    }
+                    {selectedFeature === 'waiting' && 
+                      <WaitingTab 
+                        studentId={currentStudentId}
+                        handleClassClick={handleClassClick} 
+                      />
+                    }
+                  </>
+                )}
+              </div>
+            )}
             
-              {activeTab === 'dashboard' && (
-                <div>
-                  {selectedFeature === 'calendar' && <Calendar />}
-                  {selectedFeature === 'padlet' && <Padlet />}
-                </div>
-              )}
-            </div>
-          </>
+            {activeTab === 'dashboard' && (
+              <div>
+                {selectedFeature === 'calendar' && <Calendar />}
+                {selectedFeature === 'padlet' && <Padlet />}
+              </div>
+            )}
+          </div>
         )}
       </div>
     </div>

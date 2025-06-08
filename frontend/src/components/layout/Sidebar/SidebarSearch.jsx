@@ -1,16 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { FaSearch } from 'react-icons/fa';
-import { itemsByRole, paymentSubItems } from '../../../config/navigationConfig.jsx';
+import { itemsByRole } from '../../../config/navigationConfig.jsx'; 
 import './SidebarSearch.css';
 
 function SidebarSearch({ role, activeTab, onSearch, onNew }) {
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState([]);
   const [selectedMainKey, setSelectedMainKey] = useState('');
-  const [selectedSubKey, setSelectedSubKey] = useState('');
-  const [subMenu, setSubMenu] = useState([]);
-
-  // Cập nhật menu khi role/tab thay đổi
+  
   useEffect(() => {
     const items = itemsByRole[role]?.[activeTab] || [];
     setSearchResults(items);
@@ -19,16 +16,7 @@ function SidebarSearch({ role, activeTab, onSearch, onNew }) {
     if (items.length > 0) {
       const defaultItem = items[0];
       setSelectedMainKey(defaultItem.key);
-      setSelectedSubKey('');
-
-
-      if (role === 'accountant' && activeTab === 'tuition' && defaultItem.key === 'students') {
-        setSubMenu(paymentSubItems);
-        setSelectedSubKey('transfer');
-        onSearch?.('transfer');
-      } else {
-        onSearch?.(defaultItem.key);
-      }
+      onSearch?.(defaultItem.key);
     }
   }, [role, activeTab, onSearch]);
 
@@ -45,20 +33,6 @@ function SidebarSearch({ role, activeTab, onSearch, onNew }) {
 
   const handleItemClick = (item) => {
     setSelectedMainKey(item.key);
-    setSelectedSubKey('');
-    if (role === 'accountant' && activeTab === 'tuition' && item.key === 'students') {
-      setSubMenu(paymentSubItems);
-      setSelectedSubKey('transfer');
-      onSearch?.('transfer');
-    } else {
-      setSubMenu([]);
-      setSelectedSubKey('');
-      onSearch?.(item.key);
-    }
-  };
-
-  const handleSubItemClick = (item) => {
-    setSelectedSubKey(item.key);
     onSearch?.(item.key);
   };
 
@@ -98,20 +72,6 @@ function SidebarSearch({ role, activeTab, onSearch, onNew }) {
             <div className="text-below">{item.name}</div>
           </div>
         ))}
-
-        {subMenu.length > 0 && (
-          <div className="submenu">
-            {subMenu.map((item) => (
-              <div
-                key={item.key}
-                className={`sub-item ${item.key === selectedSubKey ? 'selected' : ''}`}
-                onClick={() => handleSubItemClick(item)}
-              >
-                <span className="sub-icon">{item.icon}</span> {item.name}
-              </div>
-            ))}
-          </div>
-        )}
       </div>
     </div>
   );

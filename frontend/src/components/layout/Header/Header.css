@@ -37,20 +37,79 @@
 }
 
 .navbar-center li {
+  position: relative;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
   cursor: pointer;
   font-weight: 500;
   color: #1e293b;
   font-size: 1rem; /* Giảm kích thước */
-  padding: 5px 0;
+  padding: 5px;
 }
-/* 
-.navbar-center li:hover {
-  text-decoration: underline;
-} */
 
+.navbar-center li:hover,
 .navbar-center li.active {
   font-weight: bold;
   border-bottom: 2px solid #1e293b;
+}
+
+/* Dropdown specific styles */
+.dropdown-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown-arrow {
+  font-size: 10px;
+  transition: transform 0.3s ease;
+}
+
+/* Optional: rotate arrow when dropdown is open */
+.dropdown-wrapper:hover .dropdown-arrow {
+  transform: rotate(180deg);
+}
+
+.dropdown-menu {
+  position: absolute;
+  top: 100%; /* Đặt dropdown ngay dưới button/li */
+  left: 0;
+  background-color: #fff;
+  border: 1px solid #ddd;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  min-width: 180px; /* Chiều rộng tối thiểu của dropdown */
+  z-index: 100; /* Đảm bảo dropdown hiển thị trên các nội dung khác */
+  border-radius: 5px;
+  overflow: hidden;
+  list-style: none; /* Bỏ bullet của ul */
+  padding: 0;
+  margin-top: 5px; /* Khoảng cách giữa tab và dropdown */
+}
+
+.dropdown-menu li {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 15px;
+  text-align: left;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 15px;
+  color: #333;
+  transition: background-color 0.2s ease;
+  white-space: nowrap; /* Đảm bảo văn bản không xuống dòng */
+}
+
+.dropdown-menu li:hover {
+  background-color: #f0f0f0;
+}
+
+/* Styles for notification and account icons */
+.notification-wrapper,
+.account-wrapper {
+  position: relative;
+  margin-left: 15px;
 }
 
 .icon {

@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import Header from '../../components/layout/Header/Header.jsx';
-import SidebarSearch from '../../components/layout/Sidebar/SidebarSearch.jsx';
 
 import CurrentTab from "../../components/layout/ClassesTab/TeacherPage/CurrentTab.jsx";
 import EndTab from "../../components/layout/ClassesTab/TeacherPage/EndTab.jsx";
@@ -14,7 +13,7 @@ import './Teacher.css';
 const TeacherPage = () => {
   const [activeTab, setActiveTab] = useState('classes');
   const [selectedClass, setSelectedClass] = useState(null);
-  const [selectedFeature, setSelectedFeature] = useState('home');
+  const [selectedFeature, setSelectedFeature] = useState('current');
   const [teacherId, setTeacherId] = useState(null);
 
   useEffect(() => {
@@ -26,12 +25,12 @@ const TeacherPage = () => {
       console.warn("User ID (formerly Teacher ID) not found in localStorage. User might not be logged in or ID not saved.");
     }
 
-    if (activeTab === 'classes') {
+    if (activeTab === 'classes' && selectedFeature !== 'current' && selectedFeature !== 'end') {
       setSelectedFeature('current');
-    } else if (activeTab === 'dashboard') {
+    } else if (activeTab === 'dashboard' && selectedFeature !== 'calendar' && selectedFeature !== 'padlet') {
       setSelectedFeature('calendar');
     }
-  }, [activeTab]);
+  }, [activeTab, selectedFeature]);
 
   const handleNew = () => {
     console.log('TeacherPage: handleNew called');
@@ -42,23 +41,22 @@ const TeacherPage = () => {
     setSelectedClass(className);
   };
 
-  const handleFeatureSelect = useCallback((featureKey) => {
-    console.log('handleFeatureSelect called with:', featureKey);
+  const handleFeatureSelect = useCallback((featureKey, tabKey) => {
+    console.log('handleFeatureSelect called with:', featureKey, 'for tab:', tabKey);
     setSelectedFeature(featureKey);
+    setActiveTab(tabKey); 
   }, []);
 
   return (
     <div className="teacher-page">
-      <Header role="teacher" activeTab={activeTab} setActiveTab={setActiveTab} />
+      <Header 
+        role="teacher" 
+        activeTab={activeTab} 
+        setActiveTab={setActiveTab} 
+        onFeatureSelect={handleFeatureSelect} 
+      />
 
-      <div className="teacher-content">
-        <SidebarSearch
-          role="teacher"
-          activeTab={activeTab}
-          onSearch={handleFeatureSelect}
-          onNew={handleNew}
-        />
-
+      <div className="teacher-body">
         <div className="content">
           {activeTab === 'classes' && (
             <div className="class-display-area">

@@ -5,7 +5,7 @@
   width: 100vw;
 }
 
-.teacher-content {
+.teacher-body {
   display: flex;
   flex: 1;
   background-color: #f5f5f5;

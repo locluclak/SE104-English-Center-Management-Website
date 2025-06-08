@@ -59,9 +59,3 @@ export const itemsByRole = {
     ],
   },
 };
-
-export const paymentSubItems = [
-  { key: 'transfer', name: 'Transfer', icon: <FaMoneyCheckAlt /> },
-  { key: 'paid', name: 'Paid', icon: <FaFileInvoiceDollar /> },
-  { key: 'unpaid', name: 'Unpaid', icon: <FaReceipt /> },
-];
