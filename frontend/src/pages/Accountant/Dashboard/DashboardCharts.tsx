@@ -113,7 +113,7 @@ const DashboardCharts = () => {
   return (
     <div className="container-fluid m-2">
       <div className="sticky-header-wrapper">
-        <h2 className="header-custom">Báo Cáo Tổng Quan</h2>
+        <h2 className="header-custom">SUMMARIZE REPORT</h2>
         <div className="header-actions d-flex me-3 py-2 align-items-center justify-content-between">
           <div className="flex-grow-1 d-flex justify-content-center">
             {/* Dropdown Select để chọn khóa học */}

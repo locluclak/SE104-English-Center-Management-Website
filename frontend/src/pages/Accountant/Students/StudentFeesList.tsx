@@ -245,17 +245,7 @@ const StudentFeesList = () => {
         </div>
       </div>
 
-      {overallRevenue > 0 && (
-        <div className="revenue-summary">
-          <h4>
-            Total Revenue:{" "}
-            {new Intl.NumberFormat("vi-VN", {
-              style: "currency",
-              currency: "VND",
-            }).format(overallRevenue)}
-          </h4>
-        </div>
-      )}
+
 
       {report.length > 0 && (
         <Table
