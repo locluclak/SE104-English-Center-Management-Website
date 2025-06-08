@@ -1,127 +1,137 @@
-import { useState, useEffect } from "react"
-import { Table, Modal, Button, message, Select, Form } from "antd"
-import { MainApiRequest } from "@/services/MainApiRequest"
-import FloatingLabelInput from "@/components/FloatingInput/FloatingLabelInput"
-import "./StudentFeesList.scss"
+import { useState, useEffect } from "react";
+import { Table, Modal, Button, message, Select, Form, Input, DatePicker } from "antd";
+import { MainApiRequest } from "@/services/MainApiRequest";
+import "./StudentFeesList.scss";
+import moment from "moment";
 
-// Interface cho báo cáo theo lớp học
+// Interface for class report
 interface Student {
-  student_name: string
-  student_email: string
-  payment_price: number
-  payment_type: string
-  payment_status: string
-  payment_date: string | null
-  payment_id: string
+  student_name: string;
+  student_email: string;
+  payment_price: number;
+  payment_type: string;
+  payment_status: string;
+  payment_date: string | null;
+  payment_id: string;
 }
 
 interface ClassReport {
-  courseId: string
-  totalRevenue: number
-  students: Student[]
+  courseId: string;
+  totalRevenue: number;
+  students: Student[];
 }
 
 interface TuitionUpdate {
-  PRICE: number
-  TYPE: string
-  DESCRIPTION: string
-  STATUS: string
-  PAID_DATE: string
+  PRICE: number;
+  TYPE: string;
+  DESCRIPTION: string;
+  STATUS: string;
+  PAID_DATE: string;
+  T_ID: string;
 }
 
 const StudentFeesList = () => {
-  const [courseId, setCourseId] = useState<string | null>("")
-  const [report, setReport] = useState<any[]>([])
-  const [overallRevenue, setOverallRevenue] = useState(0)
-  const [availableCourses, setAvailableCourses] = useState<any[]>([])
-  const [isModalVisible, setIsModalVisible] = useState(false)
-  const [selectedStudent, setSelectedStudent] = useState<Student | null>(null)
-  const [form] = Form.useForm()
+  const [courseId, setCourseId] = useState<string | null>("");
+  const [report, setReport] = useState<any[]>([]);
+  const [overallRevenue, setOverallRevenue] = useState(0);
+  const [availableCourses, setAvailableCourses] = useState<any[]>([]);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [selectedStudent, setSelectedStudent] = useState<Student | null>(null);
+  const [form] = Form.useForm();
+  const [paymentStatus, setPaymentStatus] = useState<string | undefined>(undefined);
+  const [paymentType, setPaymentType] = useState<string | undefined>("");
 
-  // Fetch danh sách khóa học
+  // Options for select components based on ENUM from the database
+  const paymentStatusOptions = [
+    { label: "UNPAID", value: "UNPAID" },
+    { label: "PAID", value: "PAID" },
+    { label: "DEFERRED", value: "DEFERRED" },
+  ];
+
+  const paymentTypeOptions = [
+    { label: "UNPAID", value: "UNPAID" },
+    { label: "CARD", value: "CARD" },
+    { label: "TRANSFER", value: "TRANSFER" },
+    { label: "CASH", value: "CASH" },
+  ];
+
+  // Fetch list of courses
   useEffect(() => {
     const fetchCourses = async () => {
       try {
-        const response = await MainApiRequest.get("/course/all")
-        setAvailableCourses(response.data)
+        const response = await MainApiRequest.get("/course/all");
+        setAvailableCourses(response.data);
       } catch (error) {
-        console.error("Lỗi khi tải danh sách lớp học:", error)
-        message.error("Không thể tải danh sách lớp học.")
+        console.error("Error loading class list:", error);
+        message.error("Could not load class list.");
       }
-    }
-    fetchCourses()
-  }, [])
+    };
+    fetchCourses();
+  }, []);
 
   const handleEditStudent = (student: Student) => {
     console.log("Selected student:", student); // Kiểm tra xem student có đúng dữ liệu không
     setSelectedStudent(student);
+    setPaymentStatus(student.payment_status); // Set the initial payment status
+    setPaymentType(student.payment_type); // Set initial payment type
 
-    // Set dữ liệu cho form modal
+    // Set dữ liệu cho modal form
     form.setFieldsValue({
       student_name: student.student_name,
       student_email: student.student_email,
       payment_price: student.payment_price,
       payment_status: student.payment_status,
       payment_type: student.payment_type,
-      payment_date: student.payment_date ? new Date(student.payment_date) : null,
+      // Sử dụng moment để thiết lập giá trị ngày cho Ant Design DatePicker
+      payment_date: student.payment_date ? moment(student.payment_date) : null,
+      tuition_id: student.payment_id, // Đảm bảo truyền payment_id vào form
     });
 
     setIsModalVisible(true);
   };
 
-  const onOkSubmit = async () => {
-    console.log("Selected student:", selectedStudent);
+  const onPaymentStatusChange = (value: string) => {
+    setPaymentStatus(value);
+    if (value === "UNPAID") {
+      setPaymentType("UNPAID"); // Nếu payment_status là UNPAID, chọn payment_type là UNPAID
+    } else {
+      setPaymentType(undefined); // Nếu không phải UNPAID, bỏ chọn payment_type
+    }
+  };
 
+  const onOkSubmit = async () => {
     if (!selectedStudent || !selectedStudent.payment_id) {
-      message.error("Không có thông tin học viên để cập nhật.");
+      message.error("No student information to update.");
       return;
     }
 
     try {
       const values = await form.validateFields();
-        console.log("Values from the form:", values);
-      // Cập nhật dữ liệu, không bao gồm student_name và student_email
+      console.log("Values from the form:", values);
+
+      // Prepare data for update, excluding student_name and student_email
       const normalizedData: TuitionUpdate = {
         PRICE: values.payment_price,
-        TYPE: values.payment_type,
-        DESCRIPTION: "Paid in full", // Giữ nguyên mô tả
+        TYPE: values.payment_type || "UNPAID", // If payment_type is undefined, set it to UNPAID
+        DESCRIPTION: values.payment_status === 'PAID' ? values.payment_status : null,
         STATUS: values.payment_status,
-        PAID_DATE: values.payment_date ? values.payment_date.toISOString() : selectedStudent.payment_date, // Chỉ cập nhật khi có thay đổi
+        PAID_DATE: values.payment_date ? moment(values.payment_date).format('YYYY-MM-DD') : selectedStudent.payment_date ? moment(selectedStudent.payment_date).format('YYYY-MM-DD') : "",
+        T_ID: selectedStudent.payment_id,
       };
 
       console.log("Data to be sent to API:", normalizedData);
 
-      const response = await MainApiRequest.put(`/tuition/${selectedStudent.payment_id}`, normalizedData);
-
-      // Log phản hồi từ API
-      console.log("API response:", response);
+      const response = await MainApiRequest.put(`/payment/tuition/${selectedStudent.payment_id}`, normalizedData);
 
       if (response.status === 200) {
-        message.success("Cập nhật học phí thành công!");
-        const updatedStudent = {
-          ...selectedStudent,
-          payment_price: values.payment_price,
-          payment_type: values.payment_type,
-          payment_status: values.payment_status,
-          payment_date: values.payment_date ? values.payment_date.toISOString() : selectedStudent.payment_date,
-        };
-
-        const updatedReport = report.map((student) =>
-          student.payment_id === selectedStudent.payment_id ? updatedStudent : student,
-        );
-        setReport(updatedReport);
+        message.success("Tuition updated successfully!");
         setIsModalVisible(false);
         form.resetFields();
+        handleViewReport(); 
       }
-    } catch (error: any) {
-      // Log lỗi
-      console.error("Error during tuition update:", error);
-
-      if (error && error.errorFields) {
-        message.error("Vui lòng kiểm tra lại thông tin đã nhập.");
-      } else {
-        message.error("Không thể cập nhật học phí.");
-      }
+    } catch (error) {
+      console.error("Failed to update tuition:", error);
+      message.error("Could not update tuition.");
     }
   };
 
@@ -133,7 +143,7 @@ const StudentFeesList = () => {
 
   const handleViewReport = async () => {
     if (!courseId) {
-      message.error("Vui lòng chọn lớp học.");
+      message.error("Please select a class.");
       return;
     }
 
@@ -147,11 +157,11 @@ const StudentFeesList = () => {
       } else {
         setReport([]);
         setOverallRevenue(0);
-        message.warning("Không có dữ liệu báo cáo cho lớp học đã chọn.");
+        message.warning("No report data for the selected class.");
       }
     } catch (err) {
       console.error("Error fetching course report data", err);
-      message.error("Không thể tải báo cáo theo lớp học.");
+      message.error("Could not load class report.");
     }
   };
 
@@ -211,17 +221,6 @@ const StudentFeesList = () => {
         </Button>
       ),
     },
-  ];
-
-  // Options cho select components
-  const paymentStatusOptions = [
-    { label: "PAID", value: "PAID" },
-    { label: "UNPAID", value: "UNPAID" },
-  ];
-
-  const paymentTypeOptions = [
-    { label: "CASH", value: "CASH" },
-    { label: "CREDIT", value: "CREDIT" },
   ];
 
   return (
@@ -290,69 +289,51 @@ const StudentFeesList = () => {
       >
         {selectedStudent ? (
           <Form form={form} layout="vertical" className="edit-form">
-            <div className="form-row">
-              <FloatingLabelInput
-                label="Student Name"
-                name="student_name"
-                component="input"
-                disabled
-              />
-            </div>
+            <Form.Item label="Student Name" name="student_name">
+              <Input value={selectedStudent.student_name} disabled />
+            </Form.Item>
 
-            <div className="form-row">
-              <FloatingLabelInput
-                label="Student Email"
-                name="student_email"
-                component="input"
-                disabled
-              />
-            </div>
+            <Form.Item label="Student Email" name="student_email">
+              <Input value={selectedStudent.student_email} disabled />
+            </Form.Item>
 
-            <div className="form-row">
-              <FloatingLabelInput
-                label="Tuition Fee"
-                name="payment_price"
-                component="input"
-                type="number"
-                required
-                rules={[
-                  { required: true, message: "Vui lòng nhập học phí" },
-                  { type: "number", min: 0, message: "Học phí phải lớn hơn 0" },
-                ]}
-              />
-            </div>
+            <Form.Item label="Tuition Fee" name="payment_price" required>
+              <Input type="number" />
+            </Form.Item>
 
-            <div className="form-row">
-              <FloatingLabelInput
-                label="Payment Status"
-                name="payment_status"
-                component="select"
-                required
-                options={paymentStatusOptions}
-              />
-            </div>
+            <Form.Item label="Payment Status" name="payment_status" required>
+              <Select value={paymentStatus} onChange={onPaymentStatusChange}>
+                {paymentStatusOptions.map((option) => (
+                  <Select.Option key={option.value} value={option.value}>
+                    {option.label}
+                  </Select.Option>
+                ))}
+              </Select>
+            </Form.Item>
 
-            <div className="form-row">
-              <FloatingLabelInput
-                label="Payment Type"
-                name="payment_type"
-                component="select"
-                required
-                options={paymentTypeOptions}
-              />
-            </div>
+            {paymentStatus === "PAID" && (
+              <Form.Item label="Payment Type" name="payment_type" required>
+                <Select value={paymentType} onChange={(value) => setPaymentType(value)}>
+                  {paymentTypeOptions.map((option) => (
+                    <Select.Option key={option.value} value={option.value}>
+                      {option.label}
+                    </Select.Option>
+                  ))}
+                </Select>
+              </Form.Item>
+            )}
 
-            <div className="form-row">
-              <FloatingLabelInput
-                label="Payment Date"
-                name="payment_date"
-                component="date"
-                componentProps={{
-                  format: "DD/MM/YYYY HH:mm:ss",
-                  showTime: true,
-                }}
+            <Form.Item label="Payment Date" name="payment_date">
+              <DatePicker
+                value={moment(selectedStudent.payment_date)}
+                format="DD/MM/YYYY"
+                disabled={!paymentStatus || paymentStatus !== 'PAID'}
               />
-            </div>
+            </Form.Item>
+
+            <Form.Item label="Description" name="description">
+              <Input placeholder="Enter description (optional)" />
+            </Form.Item>
           </Form>
         ) : (
           <p>No student information available for editing.</p>
