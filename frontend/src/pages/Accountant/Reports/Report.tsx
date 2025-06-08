@@ -379,7 +379,7 @@ const Reports = () => {
 
   return (
     <div className="reports-container">
-      <h3 className="report-title">Báo cáo doanh thu</h3>
+      <h3 className="report-title">REVENUE REPORT</h3>
       <Tabs items={items} activeKey={selectedTab} onChange={setSelectedTab} />
       {report.length > 0 && (
         <div className="table-container">
