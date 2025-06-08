@@ -3,10 +3,10 @@
 import type React from "react"
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/Ui/Card/card"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/Ui/Card/card"
 import { Button } from "../../components/Ui/Button/button"
 import { Badge } from "../../components/Ui/Badge/badge"
-import { BookOpen, Users, Calendar, ArrowRight } from "lucide-react"
+import { BookOpen, Users, Calendar, ArrowRight } from "../../components/Ui/Icons/icons"
 
 interface EnrolledCourse {
   id: string
@@ -26,7 +26,6 @@ interface StudentCoursesProps {
 
 const StudentCourses: React.FC<StudentCoursesProps> = ({ studentId, userRole }) => {
   const [enrolledCourses, setEnrolledCourses] = useState<EnrolledCourse[]>([])
-  const [selectedCourse, setSelectedCourse] = useState<string | null>(null)
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -66,9 +65,7 @@ const StudentCourses: React.FC<StudentCoursesProps> = ({ studentId, userRole }) 
   }, [studentId])
 
   const handleCourseClick = (courseId: string) => {
-    setSelectedCourse(courseId)
-    console.log(`Opening course details for: ${courseId}`)
-    // Navigate to course detail page or show course content
+    navigate(`/student/courses/${courseId}`)
   }
 
   const getStatusColor = (status: string) => {
@@ -99,7 +96,7 @@ const StudentCourses: React.FC<StudentCoursesProps> = ({ studentId, userRole }) 
 
       <div className="courses-grid">
         {enrolledCourses.map((course) => (
-          <Card key={course.id} className="course-card" onClick={() => handleCourseClick(course.id)}>
+          <Card key={course.id} className="course-card">
             <CardHeader>
               <div className="course-header">
                 <div className="course-title-section">
@@ -142,7 +139,7 @@ const StudentCourses: React.FC<StudentCoursesProps> = ({ studentId, userRole }) 
                 </div>
               )}
 
-              <Button className="view-course-btn" variant="outline">
+              <Button className="view-course-btn" onClick={() => handleCourseClick(course.id)}>
                 <span>View Course</span>
                 <ArrowRight className="icon" />
               </Button>

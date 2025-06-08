@@ -1,0 +1,206 @@
+@import "../../scss/variables";
+
+.student-course-detail {
+  padding: 20px 0;
+
+  .course-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+
+    .back-button {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+  }
+
+  .course-title-section {
+    margin-bottom: 24px;
+
+    h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+      color: get-color($primary, "100");
+    }
+
+    .course-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+
+      .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: get-color($primary, "200");
+        font-size: 14px;
+
+        .icon {
+          color: get-color($primary, "100");
+        }
+      }
+    }
+  }
+
+  .progress-section {
+    margin-bottom: 24px;
+
+    .progress-header {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .progress-bar {
+      width: 100%;
+      height: 8px;
+      background-color: get-color($secondary, "100");
+      border-radius: 4px;
+      overflow: hidden;
+
+      .progress-fill {
+        height: 100%;
+        background-color: get-color($primary, "100");
+        transition: width 0.3s ease;
+      }
+    }
+  }
+
+  .course-tabs {
+    .tabs-list {
+      margin-bottom: 24px;
+    }
+
+    .tab-content {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+  }
+
+  .overview-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 24px;
+
+    @media (max-width: 768px) {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .detail-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid get-color($secondary, "100");
+
+    &:last-child {
+      margin-bottom: 0;
+      padding-bottom: 0;
+      border-bottom: none;
+    }
+  }
+
+  .upcoming-assignments {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+
+    .upcoming-assignment-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px;
+      border-radius: 8px;
+      background-color: get-color($background, "200");
+
+      .assignment-info {
+        h4 {
+          margin: 0 0 4px 0;
+          font-weight: 600;
+        }
+
+        p {
+          margin: 0;
+          font-size: 14px;
+          color: get-color($primary, "200");
+        }
+      }
+
+      .assignment-due {
+        font-size: 14px;
+        color: get-color($primary, "200");
+      }
+    }
+
+    .no-assignments {
+      text-align: center;
+      color: get-color($primary, "200");
+      padding: 20px;
+    }
+  }
+
+  .assignments-list,
+  .documents-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .no-content {
+    text-align: center;
+    color: get-color($primary, "200");
+    padding: 40px;
+    background-color: get-color($background, "200");
+    border-radius: 8px;
+  }
+
+  .course-detail-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 0;
+
+    .loading-spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid get-color($secondary, "100");
+      border-top: 3px solid get-color($primary, "100");
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin-bottom: 16px;
+    }
+
+    p {
+      color: get-color($primary, "200");
+    }
+  }
+
+  .course-not-found {
+    text-align: center;
+    padding: 60px 0;
+
+    h2 {
+      margin-bottom: 16px;
+      color: get-color($primary, "100");
+    }
+
+    p {
+      margin-bottom: 24px;
+      color: get-color($primary, "200");
+    }
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}

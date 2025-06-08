@@ -22,7 +22,7 @@ import StudentFeeList from "@/pages/Accountant/Students/StudentFeesList"
 import StudentPage from "@/pages/Student/StudentPage"
 
 export default function MainRoutes() {
-  const navigate = useNavigate()
+  // const navigate = useNavigate()
   const context = useSystemContext()
   const { isLoggedIn } = context
   const location = useLocation()
