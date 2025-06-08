@@ -8,10 +8,10 @@ import { routePath } from "@/layouts/Navbar/Navbar";
 import PageNotFound from "@/layouts/PageNotFound";
 import Login from "@/pages/Login/Login";
 
-import CoursesList from "@/pages/Admin/Courses/CoursesList";
-import StudentsList from "@/pages/Admin/Students/StudentsList";
-import TeachersList from "@/pages/Admin/Teachers/TeachersList";
-import AccountantList from "@/pages/Admin/Accountants/AccountantsList";
+import CoursesList from "@/pages/admin/Courses/CoursesList";
+import StudentsList from "@/pages/admin/Students/StudentsList";
+import TeachersList from "@/pages/admin/Teachers/TeachersList";
+import AccountantList from "@/pages/admin/Accountants/AccountantsList";
 import DashboardCharts from "@/pages/Accountant/Dashboard/DashboardCharts";
 import Reports from "@/pages/Accountant/Reports/Report";
 import StudentFeeList from "@/pages/Accountant/Students/StudentFeesList";
