@@ -30,7 +30,7 @@
       }
 
       &.active {
-        background-color: white;
+        background-color: rgb(177, 195, 227);
         color: get-color($primary, "100");
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
       }
