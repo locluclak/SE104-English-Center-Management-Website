@@ -1,16 +1,16 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 
-import Home from './pages/Home';
-import Login from './pages/Login';
-import SignUp from './pages/SignUp';
-import OtpForm from './pages/Otpform';
-import ForgotPassword from './pages/ForgotPassword';
-import ResetPassword from './pages/ResetPassword';
-import StudentPage from './pages/Student';
-import AdminPage from './pages/Admin';
-import TeacherPage from './pages/Teacher';
-import AccountantPage from './pages/Accountant';
+import Home from './pages/Home/Home';
+import Login from './pages/Login/Login';
+import SignUp from './pages/SignUp/SignUp';
+import OtpForm from './pages/OTP/Otpform';
+import ForgotPassword from './pages/Password/Forgotpassword';
+import ResetPassword from './pages/Password/Resetpassword';
+import StudentPage from './pages/Student/Student';
+import AdminPage from './pages/Admin/Admin';
+import TeacherPage from './pages/Teacher/Teacher';
+import AccountantPage from './pages/Accountant/Accountant';
 import RoleProtectedRoute from './routes/PrivateRoutes';
 
 function App() {

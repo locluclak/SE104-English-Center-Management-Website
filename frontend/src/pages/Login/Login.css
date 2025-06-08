@@ -1,0 +1,96 @@
+.login-container {
+    display: flex;
+    width: 60vw; /* Tăng độ rộng để chiếm 60% chiều ngang */
+    max-width: none; /* Loại bỏ giới hạn chiều rộng tối đa */
+    height: 70vh; /* Tăng chiều cao để chiếm 70% chiều cao */
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 8px 12px rgba(0, 0, 0, 0.1);
+}
+
+.login-image {
+    flex: 0 0 50%;
+    background-image: url('../../assets/login-bg.jpg');
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.login-form {
+    flex: 0 0 50%;
+    background-color: #ffffff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Khối đăng nhập */
+.login-box {
+    background: transparent;
+    padding: 2.5rem;
+    border-radius: 8px;
+    width: 80%;
+    max-width: 400px;
+    text-align: left;
+}
+
+.login-box h2 {
+    margin-bottom: 1rem;
+    color: #333;
+    font-size: 1.25rem;
+    font-weight: bold;
+    text-align: center;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+    text-align: left;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-size: 1rem;
+    font-weight: bold;
+    color: #555;
+}
+
+.form-group input {
+    width: 70%;
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+}
+
+.login-button {
+    width: 100%;
+    padding: 0.75rem;
+    background-color: #91a8ed;
+    color: #333;
+    font-size: 1rem;
+    cursor: pointer;
+    margin-top: 1rem;
+}
+
+.login-button:hover {
+    background-color: #6586e6;
+}
+
+.login-link {
+    margin-top: 1rem;
+    font-size: 0.8rem;
+    color: #6c757d;
+    text-align: center;
+}
+
+.login-link a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.login-link a:hover {
+    text-decoration: underline;
+}
