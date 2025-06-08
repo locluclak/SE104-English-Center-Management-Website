@@ -1,0 +1,12 @@
+@import "../../scss/variables";
+
+.teacher-layout {
+  min-height: 100vh;
+  background-color: get-color($background, "100");
+
+  .teacher-main-content {
+    width: 100%;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+}

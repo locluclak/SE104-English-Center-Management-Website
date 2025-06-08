@@ -21,6 +21,9 @@ import StudentFeeList from "@/pages/Accountant/Students/StudentFeesList"
 
 import StudentPage from "@/pages/Student/StudentPage"
 
+import TeacherLayout from "@/layouts/TeacherLayout/TeacherLayout"
+import TeacherPage from "@/pages/Teacher/TeacherPage"
+
 export default function MainRoutes() {
   // const navigate = useNavigate()
   const context = useSystemContext()
@@ -74,6 +77,10 @@ export default function MainRoutes() {
         {/* Student Layout - Separate from main layout */}
         <Route path="/student" element={<StudentLayout />}>
           <Route path="*" element={<StudentPage />} />
+        </Route>
+
+        <Route path="/teacher" element={<TeacherLayout />}>
+          <Route path="*" element={<TeacherPage />} />
         </Route>
 
         <Route path="*" element={<PageNotFound />} />

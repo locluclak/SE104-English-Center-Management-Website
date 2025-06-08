@@ -64,3 +64,7 @@ export const LogOut: React.FC<IconProps> = ({ className = "", size = 16 }) => (
 export const Upload: React.FC<IconProps> = ({ className = "", size = 16 }) => (
   <i className={`fas fa-upload ${className}`} style={{ fontSize: size }}></i>
 )
+
+export const Trash: React.FC<IconProps> = ({ className = "", size = 16 }) => (
+  <i className={`fas fa-trash ${className}`} style={{ fontSize: size }}></i>
+)
