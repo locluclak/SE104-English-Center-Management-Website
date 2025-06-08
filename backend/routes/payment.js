@@ -44,7 +44,6 @@ router.get('/students/fees', async (req, res) => {
 });
 
 
-
 // Update tuition information by T_ID
 router.put('/tuition/:id', async (req, res) => {
   const tuitionId = req.params.id;
@@ -71,13 +70,14 @@ router.get('/revenue-report/:courseId', async (req, res) => {
   try {
     // Query to fetch students and their payment info for the given course
     const [students] = await db.query(
-      `SELECT 
+      `SELECT
         PERSON.NAME AS student_name,
         PERSON.EMAIL AS student_email,
         TUITION.PRICE AS payment_price,
         TUITION.TYPE AS payment_type,
         TUITION.STATUS AS payment_status,
-        TUITION.PAID_DATE AS payment_date
+        TUITION.PAID_DATE AS payment_date,
+        TUITION.T_ID AS payment_id  -- <<< THÊM DÒNG NÀY
       FROM STUDENT_COURSE
       JOIN STUDENT ON STUDENT_COURSE.STUDENT_ID = STUDENT.ID
       JOIN PERSON ON STUDENT.ID = PERSON.ID
@@ -88,6 +88,7 @@ router.get('/revenue-report/:courseId', async (req, res) => {
 
     // Calculate total revenue
     const totalRevenue = students.reduce((sum, student) => {
+      // Ensure payment_price is treated as a number for calculation
       return student.payment_status === 'PAID' ? sum + parseFloat(student.payment_price) : sum;
     }, 0);
 
@@ -97,11 +98,12 @@ router.get('/revenue-report/:courseId', async (req, res) => {
     res.json({
       courseId,
       totalRevenue,
-      students,
+      students, 
       paidStudents,
       unpaidStudents
     });
   } catch (err) {
+    console.error('Error fetching revenue report:', err);
     res.status(500).json({ message: 'Database error', error: err });
   }
 });
