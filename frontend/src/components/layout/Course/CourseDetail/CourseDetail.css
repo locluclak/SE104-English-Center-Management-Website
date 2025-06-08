@@ -2,22 +2,13 @@
   gap: 0;
   flex: 1;
   min-width: 400px;
-  padding: 20px;
+  margin-top: 20px;
 }
 
 .course-detail-main {
   flex: 1;
   padding: 20px;
   overflow-y: auto;
-}
-
-.course-info {
-  position: relative; 
-  background-color: #edf2fb;
-  padding: 20px;
-  border-radius: 10px;
-  min-height: 250px;
-  padding-bottom: 70px; 
 }
 
 .back-btn {
@@ -158,4 +149,22 @@
 .table td:last-child {
     width: 120px; /* Chiều rộng cố định cho cột Action */
     text-align: center;
+}
+
+.assignment-review-view {
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-top: 20px;
+}
+
+.back-to-assignments-btn {
+  background-color: #abc4ff;
+  color: black;
+  margin-bottom: 20px;
+}
+
+.back-to-assignments-btn:hover:not(:disabled) {
+  background-color: #6c7ee1;
 }

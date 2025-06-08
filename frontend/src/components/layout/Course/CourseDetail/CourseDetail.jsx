@@ -6,10 +6,12 @@ import { getAssignmentTableColumns, getDocumentTableColumns } from "../../../../
 import { getCourseById } from '../../../../services/courseService';
 import AddButton from '../../../common/Button/AddButton';
 import ResourceForm from '../../../common/Form/ResourceForm/ResourceForm';
+import SubmissionForm from '../../../common/Form/SubmissionForm/SubmissionForm';
+import TeacherGradingInterface from '../../Grading/TeacherGradingInterface'; 
 
 const API_URL = "http://localhost:3000";
 
-const CourseDetail = ({ clsId, onBack, userRole }) => { 
+const CourseDetail = ({ clsId, onBack, userRole, userId }) => { 
   const [classInfo, setClassInfo] = useState(null);
   const [students, setStudents] = useState([]);
   const [assignments, setAssignments] = useState([]);
@@ -23,6 +25,12 @@ const CourseDetail = ({ clsId, onBack, userRole }) => {
 
   const [editingResource, setEditingResource] = useState(null);
   const [editingResourceType, setEditingResourceType] = useState('');
+
+  const [selectedAssignment, setSelectedAssignment] = useState(null); 
+  const [showSubmissionForm, setShowSubmissionForm] = useState(false);
+  const [studentSubmission, setStudentSubmission] = useState(null); 
+  const [assignmentSubmissions, setAssignmentSubmissions] = useState([]); 
+  const [selectedStudentSubmission, setSelectedStudentSubmission] = useState(null); 
 
   const handleRegister = () => setShowConfirm(true);
   const handleConfirm = () => {
@@ -86,13 +94,68 @@ const CourseDetail = ({ clsId, onBack, userRole }) => {
     }
   }, [clsId]);
 
+  const fetchStudentSubmission = useCallback(async (assignmentId) => {
+    if (!userId || !assignmentId || userRole !== 'student') return null;
+    try {
+      const response = await fetch(`${API_URL}/submission/${userId}/${assignmentId}`);
+      if (!response.ok) {
+        if (response.status === 404) {
+          return null;
+        }
+        throw new Error(`Failed to fetch submission: ${response.statusText}`);
+      }
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error("Error fetching student submission:", error);
+      return null;
+    }
+  }, [userId, userRole]);
+
+  const fetchAssignmentSubmissions = useCallback(async (assignmentId) => {
+    if (!assignmentId || userRole !== 'teacher') return [];
+    try {
+      const response = await fetch(`${API_URL}/submission/getbyassignment/${assignmentId}`);
+      if (!response.ok) {
+        if (response.status === 404) {
+          return []; 
+        }
+        throw new Error(`Failed to fetch submissions for assignment: ${response.statusText}`);
+      }
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      console.error("Error fetching all assignment submissions:", error);
+      return [];
+    }
+  }, [userRole]);
+
+  const handleGenericBack = () => {
+    if (selectedStudentSubmission) { 
+        setSelectedStudentSubmission(null);
+    } else if (selectedAssignment) {
+        setSelectedAssignment(null);
+        setAssignmentSubmissions([]);
+        setStudentSubmission(null);
+        setShowSubmissionForm(false);
+    } else if (showResourceForm) {
+        setShowResourceForm(false);
+        setEditingResource(null);
+        setEditingResourceType('');
+        setResourceFormType('');
+    } else { 
+        onBack();
+    }
+};
 
   const handleAddAssignment = () => {
     setResourceFormType('assignment');
     setEditingResource(null);
     setEditingResourceType('');
     setShowResourceForm(true);
-    console.log("Teacher wants to add a new assignment for course:", clsId);
+    setSelectedAssignment(null);
+    setShowSubmissionForm(false);
+    setSelectedStudentSubmission(null);
   };
 
   const handleAddDocument = () => {
@@ -100,7 +163,9 @@ const CourseDetail = ({ clsId, onBack, userRole }) => {
     setEditingResource(null);
     setEditingResourceType('');
     setShowResourceForm(true);
-    console.log("Teacher wants to add a new document for course:", clsId);
+    setSelectedAssignment(null);
+    setShowSubmissionForm(false);
+    setSelectedStudentSubmission(null);
   };
 
   const handleEditAssignment = (assignment) => {
@@ -108,6 +173,9 @@ const CourseDetail = ({ clsId, onBack, userRole }) => {
     setEditingResourceType('assignment');
     setEditingResource(assignment);
     setShowResourceForm(true);
+    setSelectedAssignment(null);
+    setShowSubmissionForm(false);
+    setSelectedStudentSubmission(null);
   };
 
   const handleEditDocument = (document) => {
@@ -115,64 +183,83 @@ const CourseDetail = ({ clsId, onBack, userRole }) => {
     setEditingResourceType('document');
     setEditingResource(document);
     setShowResourceForm(true);
+    setSelectedAssignment(null);
+    setShowSubmissionForm(false);
+    setSelectedStudentSubmission(null);
   };
 
   const handleDeleteAssignment = async (assignment) => {
     if (window.confirm(`Bạn có chắc chắn muốn xóa bài tập "${assignment.NAME}"?`)) {
-        try {
-            const response = await fetch(`${API_URL}/assignments/delete/${assignment.AS_ID}`, {
-                method: 'DELETE',
-            });
+      try {
+        const response = await fetch(`${API_URL}/assignments/delete/${assignment.AS_ID}`, {
+          method: 'DELETE',
+        });
 
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || `Failed to delete assignment: ${response.statusText}`);
-            }
-
-            alert('Bài tập đã được xóa thành công!');
-            await fetchAssignments(); 
-        } catch (error) {
-            console.error('Error deleting assignment:', error);
-            alert(`Lỗi khi xóa bài tập: ${error.message}`);
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || `Failed to delete assignment: ${response.statusText}`);
         }
+
+        alert('Bài tập đã được xóa thành công!');
+        await fetchAssignments();
+      } catch (error) {
+        console.error('Error deleting assignment:', error);
+        alert(`Lỗi khi xóa bài tập: ${error.message}`);
+      }
     }
   };
 
   const handleDeleteDocument = async (document) => {
     if (window.confirm(`Bạn có chắc chắn muốn xóa tài liệu "${document.NAME}"?`)) {
-        try {
-            const response = await fetch(`${API_URL}/documents/delete/${document.DOC_ID}`, {
-                method: 'DELETE',
-            });
+      try {
+        const response = await fetch(`${API_URL}/documents/delete/${document.DOC_ID}`, {
+          method: 'DELETE',
+        });
 
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || `Failed to delete document: ${response.statusText}`);
-            }
-
-            alert('Tài liệu đã được xóa thành công!');
-            await fetchDocuments(); 
-        } catch (error) {
-            console.error('Error deleting document:', error);
-            alert(`Lỗi khi xóa tài liệu: ${error.message}`);
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || `Failed to delete document: ${response.statusText}`);
         }
+
+        alert('Tài liệu đã được xóa thành công!');
+        await fetchDocuments();
+      } catch (error) {
+        console.error('Error deleting document:', error);
+        alert(`Lỗi khi xóa tài liệu: ${error.message}`);
+      }
     }
   };
 
+  const handleAssignmentRowClick = async (assignment) => {
+    setSelectedAssignment(assignment);
+    setShowResourceForm(false);
+    setShowSubmissionForm(false);
+    setStudentSubmission(null);
+    setAssignmentSubmissions([]);
+    setSelectedStudentSubmission(null);
 
-  const handleResourceFormSubmit = async (formData) => {
-    const { title, description, file, audioBlob, startDate, endDate } = formData;
+    if (userRole === 'student') {
+      const submission = await fetchStudentSubmission(assignment.AS_ID);
+      setStudentSubmission(submission);
+      setShowSubmissionForm(true);
+    } else if (userRole === 'teacher') {
+      const submissions = await fetchAssignmentSubmissions(assignment.AS_ID);
+      setAssignmentSubmissions(submissions);
+    }
+  };
+
+  const handleSubmissionFormSubmit = async (formData) => {
+    const { description, file, audioBlob } = formData;
+    const assignmentId = selectedAssignment.AS_ID;
 
     const dataToSend = new FormData();
-    dataToSend.append('name', title);
+    dataToSend.append('student_id', userId);
+    dataToSend.append('assignment_id', assignmentId);
     dataToSend.append('description', description);
-    dataToSend.append('course_id', clsId);
-
     if (file) {
       dataToSend.append('file', file);
-    }
-    if (audioBlob) {
-      dataToSend.append('audio', new File([audioBlob], `audio_${Date.now()}.webm`, { type: audioBlob.type }));
+    } else if (audioBlob) {
+      dataToSend.append('file', new File([audioBlob], `audio_${Date.now()}.webm`, { type: audioBlob.type })); 
     }
 
     try {
@@ -181,93 +268,95 @@ const CourseDetail = ({ clsId, onBack, userRole }) => {
       let method;
       let successMessage;
 
-      if (editingResource && editingResourceType === 'assignment') {
-        url = `${API_URL}/assignments/update/${editingResource.AS_ID}`;
+      if (studentSubmission) { 
+        url = `${API_URL}/submission/update/${userId}/${assignmentId}`;
         method = 'PUT';
-        successMessage = 'Assignment updated successfully!';
-
-        const updateBody = { name: title, description: description };
-        if (startDate) updateBody.start_date = startDate;
-        if (endDate) updateBody.end_date = endDate;
-
-        response = await fetch(url, {
-            method: method,
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(updateBody),
-        });
-
-      } else if (editingResource && editingResourceType === 'document') {
-        url = `${API_URL}/documents/update/${editingResource.DOC_ID}`;
-        method = 'PUT';
-        successMessage = 'Document updated successfully!';
-
-        const updateBody = { name: title, description: description };
-
-        response = await fetch(url, {
-            method: method,
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(updateBody),
-        });
-
-      } else if (resourceFormType === 'assignment') {
-        url = `${API_URL}/assignments/upload`;
-        method = 'POST';
-        successMessage = 'Assignment uploaded successfully!';
-
-        dataToSend.append('start_date', startDate);
-        dataToSend.append('end_date', endDate);
-
-        response = await fetch(url, {
-          method: method,
-          body: dataToSend,
-        });
-      } else if (resourceFormType === 'document') {
-        url = `${API_URL}/documents`;
-        method = 'POST';
-        successMessage = 'Document uploaded successfully!';
-
-        response = await fetch(url, {
-          method: method,
-          body: dataToSend,
-        });
+        successMessage = 'Submission updated successfully!';
       } else {
-        console.error("Unknown resource type or action.");
-        return;
+        url = `${API_URL}/submission/upload`;
+        method = 'POST';
+        successMessage = 'Submission submitted successfully!';
       }
+
+      response = await fetch(url, {
+        method: method,
+        body: dataToSend,
+      });
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || errorData.message || `Failed to perform action for ${resourceFormType}`);
+        throw new Error(errorData.error || errorData.message || `Failed to submit work`);
       }
 
-      console.log(successMessage);
-      setShowResourceForm(false);
-      setResourceFormType('');
-      setEditingResource(null);
-      setEditingResourceType('');
-
-      if (resourceFormType === 'assignment' || editingResourceType === 'assignment') {
-        await fetchAssignments();
-      } else if (resourceFormType === 'document' || editingResourceType === 'document') {
-        await fetchDocuments();
-      }
-
+      alert(successMessage);
+      setShowSubmissionForm(false);
+      setSelectedAssignment(null); 
     } catch (error) {
-      console.error(`Error processing ${resourceFormType}:`, error);
-      alert(`Failed to process ${resourceFormType}: ${error.message}`);
+      console.error("Error submitting work:", error);
+      alert(`Failed to submit work: ${error.message}`);
     }
   };
 
-  const handleResourceFormCancel = () => {
-    setShowResourceForm(false);
-    setResourceFormType('');
-    setEditingResource(null);
-    setEditingResourceType('');
+  const handleSubmissionFormCancel = () => {
+    setShowSubmissionForm(false);
+    setSelectedAssignment(null);
+    setStudentSubmission(null);
   };
+
+  const handleSelectStudentSubmission = (submission) => {
+    setSelectedStudentSubmission(submission);
+  };
+
+  const handleGradeSubmission = async (score, comment) => { 
+    if (!selectedStudentSubmission) return;
+
+    try {
+      const response = await fetch(`${API_URL}/submission/grade/${selectedStudentSubmission.STUDENT_ID}/${selectedStudentSubmission.AS_ID}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ score: Number(score), teacher_comment: comment }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || `Failed to grade submission: ${response.statusText}`);
+      }
+
+      alert('Submission graded successfully!');
+      const updatedSubmissions = await fetchAssignmentSubmissions(selectedAssignment.AS_ID);
+      setAssignmentSubmissions(updatedSubmissions);
+      setSelectedStudentSubmission(null); 
+    } catch (error) {
+      console.error('Error grading submission:', error);
+      alert(`Failed to grade submission: ${error.message}`);
+    }
+  };
+
+  const submissionTableColumns = [
+    { header: "ID Học viên", accessor: "STUDENT_ID" }, 
+    { header: "Tên Học viên", accessor: "STUDENT_NAME" },
+    { header: "Ngày nộp", accessor: "SUBMIT_DATE", render: (row) => formatDate(row.SUBMIT_DATE) },
+    { header: "Mô tả", accessor: "DESCRIPTION" },
+    {
+      header: "File đính kèm",
+      accessor: "FILE",
+      render: (row) => (
+        row.FILE ? <a href={`${API_URL}${row.FILE}`} target="_blank" rel="noopener noreferrer">Xem file</a> : "Không có"
+      )
+    },
+    { header: "Điểm", accessor: "SCORE", render: (row) => row.SCORE !== null ? row.SCORE : "Chưa chấm" },
+    { header: "Bình luận", accessor: "TEACHER_COMMENT", render: (row) => row.TEACHER_COMMENT || "Không có" },
+    {
+        header: "Action",
+        render: (row) => (
+            <button onClick={() => handleSelectStudentSubmission(row)} className="grade-button">
+                {row.SCORE !== null ? 'Sửa điểm' : 'Chấm điểm'}
+            </button>
+        )
+    }
+  ];
 
   useEffect(() => {
     const fetchCourseDetails = async () => {
@@ -320,15 +409,17 @@ const CourseDetail = ({ clsId, onBack, userRole }) => {
 
   const assignmentCols = getAssignmentTableColumns(
     handleEditAssignment,
-    handleDeleteAssignment, 
-    userRole 
+    handleDeleteAssignment,
+    userRole,
+    handleAssignmentRowClick 
   );
 
   const documentCols = getDocumentTableColumns(
     handleEditDocument,
-    handleDeleteDocument, 
-    userRole 
+    handleDeleteDocument,
+    userRole
   );
+
 
   if (loadingDetails) {
     return <div className="loading-message">Đang tải thông tin chi tiết khóa học...</div>;
@@ -344,15 +435,60 @@ const CourseDetail = ({ clsId, onBack, userRole }) => {
 
   return (
     <div className="course-detail-container">
-      <BackButton type="button" onClick={onBack}>← Back</BackButton>
+      <BackButton type="button" onClick={handleGenericBack}>← Back</BackButton>
+
       {showResourceForm ? (
         <ResourceForm
           type={resourceFormType}
           initialData={editingResource}
           isEditMode={!!editingResource}
           onSubmit={handleResourceFormSubmit}
-          onCancel={handleResourceFormCancel}
+          onCancel={handleGenericBack}
         />
+      ) : selectedAssignment && userRole === 'student' && showSubmissionForm ? (
+        <div className="assignment-submission-view">
+          
+          <h3>{selectedAssignment.NAME}</h3>
+          <p><strong>Mô tả:</strong> <span dangerouslySetInnerHTML={{ __html: selectedAssignment.DESCRIPTION }} /></p> {/* Render HTML from description */}
+          <p><strong>Ngày bắt đầu:</strong> {formatDate(selectedAssignment.START_DATE)}</p>
+          <p><strong>Ngày kết thúc:</strong> {formatDate(selectedAssignment.END_DATE)}</p>
+          {selectedAssignment.FILE && (
+            <p>
+              <strong>File đính kèm:</strong>{" "}
+              <a href={`${API_URL}${selectedAssignment.FILE}`} target="_blank" rel="noopener noreferrer">
+                Xem file
+              </a>
+            </p>
+          )}
+
+          <SubmissionForm
+            onSubmit={handleSubmissionFormSubmit}
+            onCancel={handleSubmissionFormCancel}
+            initialData={studentSubmission}
+            isEditMode={!!studentSubmission}
+          />
+        </div>
+      ) : selectedAssignment && userRole === 'teacher' && assignmentSubmissions.length >= 0 ? (
+        <div className="assignment-review-view">
+          <h3>Bài làm cho "{selectedAssignment.NAME}"</h3>
+          {selectedStudentSubmission ? (
+            <TeacherGradingInterface
+              submission={selectedStudentSubmission}
+              onGrade={handleGradeSubmission}
+              onBack={handleGenericBack}
+              API_URL={API_URL}
+              assignmentName={selectedAssignment.NAME} 
+            />
+          ) : (
+            <div>
+              {assignmentSubmissions.length > 0 ? (
+                <Table columns={submissionTableColumns} data={assignmentSubmissions} />
+              ) : (
+                <p>Chưa có bài làm nào cho bài tập này.</p>
+              )}
+            </div>
+          )}
+        </div>
       ) : (
         <div className="course-detail-main">
           <div className="course-info">
@@ -404,14 +540,14 @@ const CourseDetail = ({ clsId, onBack, userRole }) => {
               <div>
                 <div className="section-header">
                   <h3>Danh sách Bài tập</h3>
-                  {userRole === "teacher" && ( 
+                  {userRole === "teacher" && (
                     <AddButton onClick={handleAddAssignment}>
                       Thêm bài tập
                     </AddButton>
                   )}
                 </div>
                 {assignments.length > 0 ? (
-                  <Table columns={assignmentCols} data={assignments} />
+                  <Table columns={assignmentCols} data={assignments} onRowClick={userRole === 'student' || userRole === 'teacher' ? handleAssignmentRowClick : null} />
                 ) : (
                   <p>Không có bài tập nào cho khóa học này.</p>
                 )}
@@ -422,7 +558,7 @@ const CourseDetail = ({ clsId, onBack, userRole }) => {
               <div>
                 <div className="section-header">
                   <h3>Danh sách Tài liệu</h3>
-                  {userRole === "teacher" && ( 
+                  {userRole === "teacher" && (
                     <AddButton onClick={handleAddDocument}>
                       Thêm tài liệu
                     </AddButton>

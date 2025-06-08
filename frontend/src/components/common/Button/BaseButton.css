@@ -35,14 +35,12 @@
   background-color: #3e4a8d;
 }
 
-.btn-cancel,
-.btn-back {
+.btn-cancel {
   background-color: #9e9e9e;
   color: white;
 }
 
-.btn-cancel:hover:not(:disabled),
-.btn-back:hover:not(:disabled) {
+.btn-cancel:hover:not(:disabled) {
   background-color: #7e7e7e;
 }
 

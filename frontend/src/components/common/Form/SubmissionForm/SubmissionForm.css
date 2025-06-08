@@ -1,0 +1,128 @@
+.submission-form {
+    background-color: #f9f9f9;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-top: 20px;
+}
+
+.submission-form h3 {
+    color: #333;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.submission-form label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: bold;
+    color: #555;
+}
+
+.submission-form textarea {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box; 
+    font-size: 1rem;
+}
+
+.submission-form .toolbar {
+    display: flex;
+    justify-content: flex-end; 
+    margin-bottom: 10px;
+}
+
+.submission-form .file-recording-group {
+    display: flex;
+    gap: 10px;
+}
+
+.submission-form .file-upload-btn,
+.submission-form .record-btn,
+.submission-form .stop-record-btn {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: background-color 0.2s ease;
+}
+
+.submission-form .file-upload-btn:hover,
+.submission-form .record-btn:hover,
+.submission-form .stop-record-btn:hover {
+    background-color: #0056b3;
+}
+
+.submission-form .attachment-preview,
+.submission-form .audio-preview {
+    margin-top: 15px;
+    padding: 10px;
+    background-color: #e9ecef;
+    border-radius: 5px;
+    border: 1px solid #ced4da;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.submission-form .audio-preview audio {
+    flex-grow: 1; 
+}
+
+.submission-form .clear-audio-btn {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.submission-form .clear-audio-btn:hover {
+    background-color: #c82333;
+}
+
+.submission-form .button-group {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.submission-form button[type="submit"],
+.submission-form button[type="button"] {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background-color 0.2s ease;
+}
+
+.submission-form button[type="submit"] {
+    background-color: #28a745;
+    color: white;
+}
+
+.submission-form button[type="submit"]:hover {
+    background-color: #218838;
+}
+
+.submission-form button[type="button"] { 
+    background-color: #6c757d;
+    color: white;
+}
+
+.submission-form button[type="button"]:hover {
+    background-color: #5a6268;
+}

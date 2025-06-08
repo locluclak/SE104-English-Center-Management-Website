@@ -1,0 +1,111 @@
+.teacher-grading-interface {
+    background-color: #f9f9f9;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-top: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.teacher-grading-interface h3,
+.teacher-grading-interface h4 {
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.teacher-grading-interface .submission-content {
+    background-color: #ffffff;
+    padding: 15px;
+    border: 1px solid #e0e0e0;
+    border-radius: 5px;
+}
+
+.teacher-grading-interface .submission-content p {
+    margin-bottom: 8px;
+}
+
+.teacher-grading-interface .submission-content a {
+    color: #007bff;
+    text-decoration: none;
+}
+
+.teacher-grading-interface .submission-content a:hover {
+    text-decoration: underline;
+}
+
+.teacher-grading-interface hr {
+    border: none;
+    border-top: 1px solid #eee;
+    margin: 20px 0;
+}
+
+.teacher-grading-interface .grading-form label {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: bold;
+    color: #555;
+}
+
+.teacher-grading-interface .grading-form input[type="number"],
+.teacher-grading-interface .grading-form textarea {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box;
+    margin-top: 5px;
+    font-size: 1rem;
+}
+
+.teacher-grading-interface .grading-form textarea {
+    resize: vertical;
+}
+
+.teacher-grading-interface .grading-form button[type="submit"] {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+    margin-top: 15px;
+    transition: background-color 0.2s ease;
+}
+
+.teacher-grading-interface .grading-form button[type="submit"]:hover {
+    background-color: #0056b3;
+}
+
+.teacher-grading-interface .back-button {
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    padding: 8px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    align-self: flex-start; /* Align to the left */
+    transition: background-color 0.2s ease;
+}
+
+.teacher-grading-interface .back-button:hover {
+    background-color: #5a6268;
+}
+
+.grade-button {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background-color 0.2s ease;
+}
+
+.grade-button:hover {
+    background-color: #218838;
+}

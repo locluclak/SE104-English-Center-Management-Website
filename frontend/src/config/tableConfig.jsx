@@ -47,8 +47,7 @@ export const getAccountantTableColumns = (onEdit, onDelete) => [
     ),
   },
 ];
-
-export const getAssignmentTableColumns = (onEdit, onDelete, userRole) => { // Thêm userRole
+export const getAssignmentTableColumns = (onEdit, onDelete, userRole, onRowClick) => {  
   const columns = [
     { header: 'ID', accessor: 'AS_ID' },
     { header: 'Name', accessor: 'NAME' },
@@ -80,7 +79,7 @@ export const getAssignmentTableColumns = (onEdit, onDelete, userRole) => { // Th
   return columns;
 };
 
-export const getDocumentTableColumns = (onEdit, onDelete, userRole) => { // Thêm userRole
+export const getDocumentTableColumns = (onEdit, onDelete, userRole) => {
   const columns = [
     { header: 'ID', accessor: 'DOC_ID' },
     { header: 'Name', accessor: 'NAME' },

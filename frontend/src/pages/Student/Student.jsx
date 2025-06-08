@@ -16,16 +16,26 @@ const StudentPage = () => {
   const [selectedClass, setSelectedClass] = useState(null);
   const [selectedFeature, setSelectedFeature] = useState('home');
   const [currentStudentId, setCurrentStudentId] = useState('your_student_id_here');
+  const [currentUserRole, setCurrentUserRole] = useState('');
 
   useEffect(() => {
     const storedStudentId = localStorage.getItem('userId');
-    console.log("Stored studentId from localStorage:", storedStudentId); 
+    const storedUserRole = localStorage.getItem('userRole'); 
+    console.log("Stored studentId from localStorage:", storedStudentId);
+    console.log("Stored userRole from localStorage:", storedUserRole);
+
     if (storedStudentId) {
-        setCurrentStudentId(storedStudentId);
-    } else {
-      console.warn("Student ID not found in localStorage. MyCoursesTab might not display correctly.");
-    }
-  }, []);
+      setCurrentStudentId(storedStudentId);
+  } else {
+    console.warn("Student ID not found in localStorage. MyCoursesTab might not display correctly.");
+  }
+  if (storedUserRole) {
+      setCurrentUserRole(storedUserRole);
+  } else {
+      console.warn("User role not found in localStorage. Defaulting to 'student'.");
+      setCurrentUserRole('student'); 
+  }
+}, []);
 
   useEffect(() => {
     if (activeTab === 'courses' && selectedFeature !== 'my-courses' && selectedFeature !== 'waiting') {
@@ -54,11 +64,11 @@ const StudentPage = () => {
 
   return (
     <div className="student-page">
-      <Header 
-        role="student" 
-        activeTab={activeTab} 
-        setActiveTab={setActiveTab} 
-        onFeatureSelect={handleFeatureSelect} 
+      <Header
+        role="student"
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        onFeatureSelect={handleFeatureSelect}
       />
 
       <div className="student-body">
@@ -69,39 +79,41 @@ const StudentPage = () => {
         )}
 
         {activeTab !== 'home' && (
-          <div className="stu-content">     
+          <div className="stu-content">
             {activeTab === 'courses' && (
-              <div className="course-display-area"> 
+              <div className="course-display-area">
                 {selectedClass ? (
                   <div className="course-inside">
                     <CourseDetail
                       clsId={selectedClass}
                       onBack={() => setSelectedClass(null)}
+                      userRole={currentUserRole}
+                      userId={currentStudentId}
                     />
                     <CourseProgress className={selectedClass} />
                   </div>
                 ) : (
                   <>
-                    {selectedFeature === 'my-courses' && 
+                    {selectedFeature === 'my-courses' &&
                       <>
-                        {console.log("Passing studentId to MyCoursesTab:", currentStudentId)} 
-                        <MyCoursesTab 
-                          studentId={currentStudentId} 
-                          handleClassClick={handleClassClick} 
+                        {console.log("Passing studentId to MyCoursesTab:", currentStudentId)}
+                        <MyCoursesTab
+                          studentId={currentStudentId}
+                          handleClassClick={handleClassClick}
                         />
                       </>
                     }
-                    {selectedFeature === 'waiting' && 
-                      <WaitingTab 
+                    {selectedFeature === 'waiting' &&
+                      <WaitingTab
                         studentId={currentStudentId}
-                        handleClassClick={handleClassClick} 
+                        handleClassClick={handleClassClick}
                       />
                     }
                   </>
                 )}
               </div>
             )}
-            
+
             {activeTab === 'dashboard' && (
               <div>
                 {selectedFeature === 'calendar' && <Calendar />}
