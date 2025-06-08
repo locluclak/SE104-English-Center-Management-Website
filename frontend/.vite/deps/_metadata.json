@@ -1,25 +1,76 @@
 {
-  "hash": "d57693cc",
-  "configHash": "2d9c9290",
-  "lockfileHash": "aac884a0",
-  "browserHash": "28928f8a",
+  "hash": "ee72f0a3",
+  "configHash": "d227fd89",
+  "lockfileHash": "4a14d7a0",
+  "browserHash": "516868ac",
   "optimized": {
     "react": {
       "src": "../../node_modules/react/index.js",
       "file": "react.js",
-      "fileHash": "e6fa4924",
+      "fileHash": "fe57cab2",
+      "needsInterop": true
+    },
+    "react-dom/client": {
+      "src": "../../node_modules/react-dom/client.js",
+      "file": "react-dom_client.js",
+      "fileHash": "ed3895b2",
       "needsInterop": true
     },
     "react-router-dom": {
       "src": "../../node_modules/react-router-dom/dist/index.mjs",
       "file": "react-router-dom.js",
-      "fileHash": "07359043",
+      "fileHash": "fe908728",
+      "needsInterop": false
+    },
+    "date-fns": {
+      "src": "../../node_modules/date-fns/index.js",
+      "file": "date-fns.js",
+      "fileHash": "091059ae",
+      "needsInterop": false
+    },
+    "@fullcalendar/react": {
+      "src": "../../node_modules/@fullcalendar/react/dist/index.js",
+      "file": "@fullcalendar_react.js",
+      "fileHash": "f90dc95c",
+      "needsInterop": false
+    },
+    "@fullcalendar/daygrid": {
+      "src": "../../node_modules/@fullcalendar/daygrid/index.js",
+      "file": "@fullcalendar_daygrid.js",
+      "fileHash": "3e853316",
+      "needsInterop": false
+    },
+    "@fullcalendar/interaction": {
+      "src": "../../node_modules/@fullcalendar/interaction/index.js",
+      "file": "@fullcalendar_interaction.js",
+      "fileHash": "d882d346",
+      "needsInterop": false
+    },
+    "react-icons/fa": {
+      "src": "../../node_modules/react-icons/fa/index.mjs",
+      "file": "react-icons_fa.js",
+      "fileHash": "b9bb728c",
+      "needsInterop": false
+    },
+    "react-select": {
+      "src": "../../node_modules/react-select/dist/react-select.esm.js",
+      "file": "react-select.js",
+      "fileHash": "78816ae0",
       "needsInterop": false
     }
   },
   "chunks": {
-    "chunk-5WQJO2FO": {
-      "file": "chunk-5WQJO2FO.js"
+    "chunk-UYCYNHLB": {
+      "file": "chunk-UYCYNHLB.js"
+    },
+    "chunk-QJWJCAXU": {
+      "file": "chunk-QJWJCAXU.js"
+    },
+    "chunk-3527N3GG": {
+      "file": "chunk-3527N3GG.js"
+    },
+    "chunk-EQCVQC35": {
+      "file": "chunk-EQCVQC35.js"
     }
   }
 }

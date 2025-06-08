@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import CourseSection from "../../Course/CourseSection/CourseSection";
 import { getCoursesByTeacherId } from "../../../../services/courseService";
 
-const MyCoursesTab = ({ handleClassClick, teacherId }) => {
+const CurrentTab = ({ handleClassClick, teacherId }) => {
   const [currentCourses, setCurrentCourses] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -27,6 +27,7 @@ const MyCoursesTab = ({ handleClassClick, teacherId }) => {
         }));
         
         setCurrentCourses(formattedCourses);
+        console.log("API returned courses:", teacherCourses);
       } catch (error) {
         console.error('Error loading courses for teacher:', error);
       } finally {
@@ -48,4 +49,4 @@ const MyCoursesTab = ({ handleClassClick, teacherId }) => {
   );
 };
 
-export default MyCoursesTab;
+export default CurrentTab;

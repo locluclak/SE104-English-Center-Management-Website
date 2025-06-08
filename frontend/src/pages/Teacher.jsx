@@ -27,7 +27,8 @@ const TeacherPage = () => {
   useEffect(() => {
     const storedTeacherId = localStorage.getItem('userId');
     if (storedTeacherId) {
-      setTeacherId(storedTeacherId);
+      setTeacherId(Number(storedTeacherId));
+      console.log("Teacher ID:", Number(storedTeacherId));
     } else {
       console.warn("User ID (formerly Teacher ID) not found in localStorage. User might not be logged in or ID not saved.");
     }

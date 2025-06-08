@@ -349,13 +349,9 @@ router.get('/teacher/:teacherId', async (req, res) => {
 
   try {
     const [rows] = await db.execute(
-      `SELECT C.*
-       FROM TEACHER_COURSE TC
-       JOIN COURSE C ON TC.COURSE_ID = C.COURSE_ID
-       WHERE TC.TEACHER_ID = ?`,
+      `SELECT * FROM COURSE WHERE TEACHER_ID = ?`, 
       [teacherId]
     );
-
     res.status(200).json(rows);
   } catch (err) {
     console.error(err);

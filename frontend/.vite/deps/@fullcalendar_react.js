@@ -1,16 +1,16 @@
 import {
-  require_react_dom
-} from "./chunk-XQIPT53K.js";
-import {
-  require_react
-} from "./chunk-KS2M7ZJI.js";
-import {
   Calendar,
   CustomRenderingStore
 } from "./chunk-UYCYNHLB.js";
 import {
+  require_react_dom
+} from "./chunk-QJWJCAXU.js";
+import {
+  require_react
+} from "./chunk-3527N3GG.js";
+import {
   __toESM
-} from "./chunk-5WRI5ZAA.js";
+} from "./chunk-EQCVQC35.js";
 
 // node_modules/@fullcalendar/react/dist/index.js
 var import_react = __toESM(require_react());
