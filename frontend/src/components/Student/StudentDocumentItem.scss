@@ -1,0 +1,68 @@
+@import "../../scss/variables";
+
+.document-item {
+  .document-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .document-title-section {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+  }
+
+  .document-description {
+    margin-bottom: 16px;
+    color: get-color($primary, "200");
+  }
+
+  .document-meta {
+    margin-bottom: 16px;
+    
+    .document-size {
+      font-size: 14px;
+      color: get-color($primary, "200");
+      background-color: get-color($background, "200");
+      padding: 4px 8px;
+      border-radius: 4px;
+    }
+  }
+
+  .document-actions {
+    display: flex;
+    gap: 12px;
+  }
+}
+
+// File type badges
+.file-pdf {
+  background-color: #fecaca;
+  color: #dc2626;
+}
+
+.file-doc {
+  background-color: #dbeafe;
+  color: #1e40af;
+}
+
+.file-ppt {
+  background-color: #ffedd5;
+  color: #c2410c;
+}
+
+.file-image {
+  background-color: #d1fae5;
+  color: #047857;
+}
+
+.file-video {
+  background-color: #f3e8ff;
+  color: #7c3aed;
+}
+
+.file-other {
+  background-color: get-color($secondary, "100");
+  color: get-color($primary, "100");
+}

@@ -53,6 +53,14 @@ export const ArrowRight: React.FC<IconProps> = ({ className = "", size = 16 }) =
   <i className={`fas fa-arrow-right ${className}`} style={{ fontSize: size }}></i>
 )
 
+export const ArrowLeft: React.FC<IconProps> = ({ className = "", size = 16 }) => (
+  <i className={`fas fa-arrow-left ${className}`} style={{ fontSize: size }}></i>
+)
+
 export const LogOut: React.FC<IconProps> = ({ className = "", size = 16 }) => (
   <i className={`fas fa-sign-out-alt ${className}`} style={{ fontSize: size }}></i>
+)
+
+export const Upload: React.FC<IconProps> = ({ className = "", size = 16 }) => (
+  <i className={`fas fa-upload ${className}`} style={{ fontSize: size }}></i>
 )

@@ -6,6 +6,7 @@ import { Routes, Route, useNavigate, useLocation, Navigate } from "react-router-
 import StudentSidebar from "../../components/Student/StudentSidebar"
 import StudentHome from "./StudentHome"
 import StudentCourses from "./StudentCourses"
+import StudentCourseDetail from "./StudentCourseDetail"
 import StudentBoard from "./StudentBoard"
 import "./Student.scss"
 
@@ -50,10 +51,23 @@ const StudentPage: React.FC = () => {
 
         <div className="student-page-content">
           <Routes>
+            {/* Exact path for home */}
             <Route path="/home" element={<StudentHome studentId={currentStudentId} userRole={currentUserRole} />} />
-            <Route path="/courses" element={<StudentCourses studentId={currentStudentId} userRole={currentUserRole} />}/>
+
+            {/* Courses routes */}
+            <Route
+              path="/courses"
+              element={<StudentCourses studentId={currentStudentId} userRole={currentUserRole} />}
+            />
+            <Route path="/courses/:courseId" element={<StudentCourseDetail />} />
+
+            {/* Board routes */}
             <Route path="/board/*" element={<StudentBoard studentId={currentStudentId} userRole={currentUserRole} />} />
+
+            {/* Redirect empty path to home */}
             <Route path="" element={<Navigate to="/student" replace />} />
+
+            {/* Catch-all redirect to home */}
             <Route path="*" element={<Navigate to="/student" replace />} />
           </Routes>
         </div>
