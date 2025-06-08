@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from "react";
-import Card from "../../../common/Card/Card";
+import Table from "../../../common/Table/Table";
 import ClassDetail from "./ClassDetail";
 import {
   getAllCourses,
   addStudentToCourse,
 } from "../../../../services/courseService";
 import { format } from "date-fns";
+
+import EditButton from "../../../common/Button/EditButton";  
+import DeleteButton from "../../../common/Button/DeleteButton";
 
 const formatDate = (dateStr) => {
   if (!dateStr) return "";
@@ -37,20 +40,19 @@ const ClassesTab = ({ selectedStatus = "waiting" }) => {
       endDateFormatted: formatDate(data.END_DATE),
       raw: data,
     };
-  };  
+  };
 
   const fetchClasses = async () => {
     try {
-      console.log("Đang gọi API getAllCourses");  // <-- Dòng này giúp bạn xác định khi nào API được gọi
+      console.log("Đang gọi API getAllCourses");
       const data = await getAllCourses();
-      console.log("Dữ liệu từ API:", data);        // <-- Dòng này in ra dữ liệu nhận được
+      console.log("Dữ liệu từ API:", data);
       const normalized = data.map(normalizeClass);
       setClasses(normalized);
     } catch (err) {
       console.error("Failed to fetch classes:", err);
     }
   };
-  
 
   useEffect(() => {
     fetchClasses();
@@ -63,15 +65,25 @@ const ClassesTab = ({ selectedStatus = "waiting" }) => {
   };
 
   const handleSelectClass = (cls) => {
-    setOriginalClassData(cls.raw);
     setSelectedClass(cls);
-    setEditMode(false); // chỉ xem, không chỉnh sửa
+    setEditMode(false);
   };
 
   const handleEditClass = (cls) => {
-    setOriginalClassData(cls.raw);
     setSelectedClass(cls);
-    setEditMode(true); // vào chế độ chỉnh sửa
+    setEditMode(true);
+  };
+
+  const handleDeleteClass = async (cls) => {
+    if (window.confirm(`Bạn có chắc chắn muốn xóa lớp "${cls.name}"?`)) {
+      try {
+        console.log(`Đã xóa lớp: ${cls.name} (ID: ${cls.id})`);
+        fetchClasses(); 
+      } catch (error) {
+        console.error("Lỗi khi xóa lớp học:", error);
+        alert("Không thể xóa lớp học. Vui lòng thử lại.");
+      }
+    }
   };
 
   const now = new Date();
@@ -84,6 +96,34 @@ const ClassesTab = ({ selectedStatus = "waiting" }) => {
     return true;
   });
 
+  const columns = [
+    { header: "ID", accessor: "id", },
+    { header: "Class' Name", accessor: "name", },
+    { header: "Teacher", accessor: "teacherName", render: (row) => row.teacherName || "Chưa cập nhật", },
+    { header: "Start Date", accessor: "startDateFormatted", },
+    { header: "End Date", accessor: "endDateFormatted", },
+    { header: "Description", accessor: "description", render: (row) => row.description || "Không có", },
+    {
+      header: "Action",
+      render: (row) => (
+        <div style={{ display: "flex", gap: "8px" }}>
+          <EditButton
+            onClick={(e) => {
+              e.stopPropagation(); 
+              handleEditClass(row);
+            }}
+          />
+          <DeleteButton
+            onClick={(e) => {
+              e.stopPropagation(); 
+              handleDeleteClass(row);
+            }}
+          />
+        </div>
+      ),
+    },
+  ];
+
   return (
     <>
       {selectedClass ? (
@@ -92,27 +132,17 @@ const ClassesTab = ({ selectedStatus = "waiting" }) => {
           selectedStatus={selectedClass.status}
           onBack={handleBack}
           addStudentToCourse={addStudentToCourse}
-          originalData={classes.find((cls) => cls.id === selectedClass.id)}
+          originalData={selectedClass.raw}
           isEditing={editMode}
         />
       ) : (
-        <div className="class-grid">
+        <div className="classes-tab-container">
           {filteredClasses.length > 0 ? (
-            filteredClasses.map((cls) => (
-              <Card
-                key={cls.id}
-                title={cls.name}
-                role="admin"
-                onClick={() => handleSelectClass(cls)}
-                onEdit={() => handleEditClass(cls)}
-              >
-                <p><strong>ID:</strong> {cls.id}</p>
-                <p><strong>Giáo viên:</strong> {cls.teacherName}</p>
-                <p><strong>Ngày bắt đầu:</strong> {cls.startDateFormatted}</p>
-                <p><strong>Ngày kết thúc:</strong> {cls.endDateFormatted}</p>
-                <p><strong>Mô tả:</strong> {cls.description || "Không có"}</p>
-              </Card>
-            ))
+            <Table
+              columns={columns}
+              data={filteredClasses}
+              onRowClick={handleSelectClass}
+            />
           ) : (
             <p>Không có lớp nào thuộc trạng thái "{selectedStatus}".</p>
           )}

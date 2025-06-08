@@ -1,8 +1,9 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react"; // Added useEffect
 import { FaMicrophone, FaPaperclip, FaStop } from 'react-icons/fa';
-import './DocumentForm.css'
+import './ResourceForm.css'; // You'll need to create this CSS file
 
-const DocumentForm = ({ onSubmit, onCancel }) => {
+// Add initialData and isEditMode props
+const ResourceForm = ({ onSubmit, onCancel, type, initialData, isEditMode }) => {
   const [title, setTitle] = useState('');
   const [attachment, setAttachment] = useState(null);
   const [audioBlob, setAudioBlob] = useState(null);
@@ -12,17 +13,50 @@ const DocumentForm = ({ onSubmit, onCancel }) => {
   const textAreaRef = useRef(null);
   const [audioURL, setAudioURL] = useState("");
 
+  // New state for start and end dates
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
+
+  // Determine the label for the title input based on the 'type' prop
+  const titleLabel = type === 'assignment' ? '📘 Tên bài tập:' : 'Document\'s Name:';
+  const formClassName = type === 'assignment' ? 'assignment-form' : 'document-form';
+  const submitButtonText = isEditMode ? 'Update' : 'Save'; // Change button text based on mode
+
+  // Use useEffect to populate form fields when initialData changes (i.e., when editing)
+  useEffect(() => {
+    if (isEditMode && initialData) {
+      setTitle(initialData.NAME || '');
+      // For description, set innerHTML of contentEditable div
+      if (textAreaRef.current) {
+        textAreaRef.current.innerHTML = initialData.DESCRIPTION || '';
+      }
+      // Set dates for assignments
+      if (type === 'assignment') {
+        // Format dates to YYYY-MM-DD for input type="date"
+        setStartDate(initialData.START_DATE ? new Date(initialData.START_DATE).toISOString().split('T')[0] : '');
+        setEndDate(initialData.END_DATE ? new Date(initialData.END_DATE).toISOString().split('T')[0] : '');
+      }
+      // Files and audio are not pre-filled as we generally don't re-upload on edit unless explicitly chosen.
+      // If you need to show existing file/audio, you'd fetch their URLs and display them,
+      // but the actual file object won't be available from initialData.
+    } else {
+        // Clear form when not in edit mode (e.g., when switching from edit to add)
+        setTitle('');
+        setAttachment(null);
+        clearRecording();
+        if (textAreaRef.current) {
+            textAreaRef.current.innerHTML = '';
+        }
+        setStartDate('');
+        setEndDate('');
+    }
+  }, [isEditMode, initialData, type]); // Dependencies for useEffect
+
+
   const handleFileChange = (e) => {
     const file = e.target.files[0];
     if (file) {
       setAttachment(file);
-      if (file.type.startsWith('image/')) {
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          // Preview có thể dùng event.target.result nếu cần
-        };
-        reader.readAsDataURL(file);
-      }
     }
   };
 
@@ -73,19 +107,22 @@ const DocumentForm = ({ onSubmit, onCancel }) => {
     e.preventDefault();
     const description = textAreaRef.current.innerHTML;
 
-    const documentData = {
+    const formData = {
       title,
       description,
       file: attachment,
       audioBlob,
     };
 
-    onSubmit(documentData);
+    if (type === 'assignment') {
+      formData.startDate = startDate;
+      formData.endDate = endDate;
+    }
 
-    setTitle('');
-    setAttachment(null);
-    clearRecording(); // dùng lại hàm đã có
-    textAreaRef.current.innerHTML = '';
+    onSubmit(formData); // Pass data back to parent component (CourseDetail)
+
+    // Form fields are reset by the useEffect when initialData becomes null
+    // or when isEditMode changes to false after submission in CourseDetail
   };
 
   const formatText = (command, value = null) => {
@@ -94,14 +131,37 @@ const DocumentForm = ({ onSubmit, onCancel }) => {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="document-form">
-      <label>Document's Name:</label>
+    <form onSubmit={handleSubmit} className={`resource-form ${formClassName}`}>
+      <h3>{isEditMode ? `Edit ${type}` : `Add New ${type}`}</h3> {/* Dynamic heading */}
+      <label>{titleLabel}</label>
       <input
         type="text"
         value={title}
         onChange={e => setTitle(e.target.value)}
         required
       />
+
+      {type === 'assignment' && (
+        <div className="date-inputs">
+          <label htmlFor="startDate">Ngày bắt đầu:</label>
+          <input
+            type="date"
+            id="startDate"
+            value={startDate}
+            onChange={e => setStartDate(e.target.value)}
+            required
+          />
+
+          <label htmlFor="endDate">Ngày kết thúc:</label>
+          <input
+            type="date"
+            id="endDate"
+            value={endDate}
+            onChange={e => setEndDate(e.target.value)}
+            required
+          />
+        </div>
+      )}
 
       <div className="toolbar">
         <div className="formatting-group">
@@ -132,13 +192,13 @@ const DocumentForm = ({ onSubmit, onCancel }) => {
               style={{ display: 'none' }}
               accept="image/*,audio/*,video/*,application/pdf"
             />
-              < FaPaperclip />
+            <FaPaperclip />
           </label>
 
           {!isRecording ? (
-            <button type="button" onClick={startRecording} className="record-btn"> < FaMicrophone /> </button>
+            <button type="button" onClick={startRecording} className="record-btn"> <FaMicrophone /> </button>
           ) : (
-            <button type="button" onClick={stopRecording} className="stop-record-btn"> < FaStop /> </button>
+            <button type="button" onClick={stopRecording} className="stop-record-btn"> <FaStop /> </button>
           )}
         </div>
       </div>
@@ -178,11 +238,11 @@ const DocumentForm = ({ onSubmit, onCancel }) => {
       ></div>
 
       <div className="button-group">
-        <button type="submit">Save</button>
+        <button type="submit">{submitButtonText}</button> {/* Dynamic button text */}
         <button type="button" onClick={onCancel}>Cancel</button>
       </div>
     </form>
   );
 };
 
-export default DocumentForm;
+export default ResourceForm;

@@ -15,6 +15,7 @@ const TeacherPage = () => {
   const [selectedClass, setSelectedClass] = useState(null);
   const [selectedFeature, setSelectedFeature] = useState('current');
   const [teacherId, setTeacherId] = useState(null);
+  const userRole = "teacher"; 
 
   useEffect(() => {
     const storedTeacherId = localStorage.getItem('userId');
@@ -32,8 +33,8 @@ const TeacherPage = () => {
     }
   }, [activeTab, selectedFeature]);
 
-  const handleNew = () => {
-    console.log('TeacherPage: handleNew called');
+  const handleNewCourse = () => {
+    console.log('TeacherPage: handleNewCourse called - Teacher wants to add a new course.');
   };
 
   const handleClassClick = (className) => {
@@ -57,7 +58,7 @@ const TeacherPage = () => {
       />
 
       <div className="teacher-body">
-        <div className="content">
+        <div className="teacher-main">
           {activeTab === 'classes' && (
             <div className="class-display-area">
               {selectedClass ? (
@@ -65,6 +66,7 @@ const TeacherPage = () => {
                   <CourseDetail
                     clsId={selectedClass}
                     onBack={() => setSelectedClass(null)}
+                    userRole={userRole} 
                   />
                 </>
               ) : (

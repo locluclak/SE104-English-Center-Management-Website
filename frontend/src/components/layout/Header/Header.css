@@ -51,7 +51,6 @@
 .navbar-center li:hover,
 .navbar-center li.active {
   font-weight: bold;
-  border-bottom: 2px solid #1e293b;
 }
 
 /* Dropdown specific styles */

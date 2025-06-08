@@ -32,7 +32,7 @@ const Header = ({ role, activeTab, setActiveTab, onNavigateSection, onFeatureSel
   const handleTabClick = (key) => {
     setActiveTab(key);
     setOpenDropdown(null); 
-    if (itemsByRole[role]?.[key]?.length > 0 && onFeatureSelect) {
+    if (role !== 'admin' && itemsByRole[role]?.[key]?.length > 0 && onFeatureSelect) {
         onFeatureSelect(itemsByRole[role][key][0].key, key);
     }
   };
@@ -70,29 +70,39 @@ const Header = ({ role, activeTab, setActiveTab, onNavigateSection, onFeatureSel
             )}
 
             {mainTabKeys.map((key) => (
-              <li
-                key={key}
-                className={`dropdown-wrapper ${activeTab === key ? 'active' : ''}`}
-                onMouseEnter={() => handleMouseEnter(key)}
-                onMouseLeave={handleMouseLeave}
-              >
-                <span onClick={() => handleTabClick(key)}>
-                  {key.charAt(0).toUpperCase() + key.slice(1)} <span className="dropdown-arrow">&#9660;</span>
-                </span>
-                
-                {openDropdown === key && itemsByRole[role]?.[key]?.length > 0 && (
-                  <ul className="dropdown-menu">
-                    {itemsByRole[role][key].map((item) => (
-                      <li 
-                        key={item.key} 
-                        onClick={() => handleDropdownItemClick(item.key, key)}
-                      >
-                        {item.icon} {item.name}
-                      </li>
-                    ))}
-                  </ul>
-                )}
-              </li>
+              role === 'admin' ? (
+                <li
+                  key={key}
+                  onClick={() => handleTabClick(key)}
+                  className={activeTab === key ? 'active' : ''}
+                >
+                  <span>{key.charAt(0).toUpperCase() + key.slice(1)}</span>
+                </li>
+              ) : (
+                <li
+                  key={key}
+                  className={`dropdown-wrapper ${activeTab === key ? 'active' : ''}`}
+                  onMouseEnter={() => handleMouseEnter(key)}
+                  onMouseLeave={handleMouseLeave}
+                >
+                  <span onClick={() => handleTabClick(key)}>
+                    {key.charAt(0).toUpperCase() + key.slice(1)} <span className="dropdown-arrow">&#9660;</span>
+                  </span>
+                  
+                  {openDropdown === key && itemsByRole[role]?.[key]?.length > 0 && (
+                    <ul className="dropdown-menu">
+                      {itemsByRole[role][key].map((item) => (
+                        <li 
+                          key={item.key} 
+                          onClick={() => handleDropdownItemClick(item.key, key)}
+                        >
+                          {item.icon} {item.name}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </li>
+              )
             ))}
 
             {!role && (

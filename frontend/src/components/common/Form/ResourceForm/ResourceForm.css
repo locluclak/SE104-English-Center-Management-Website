@@ -1,0 +1,167 @@
+/* ResourceForm.css */
+
+.resource-form {
+  padding: 20px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  max-width: 700px; /* Adjust as needed */
+  margin: 20px auto;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  background-color: #f9f9f9;
+}
+
+.resource-form label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: bold;
+  color: #333;
+}
+
+.resource-form input[type="text"],
+.resource-form input[type="date"],
+.resource-form .editor {
+  width: calc(100% - 22px); /* Adjust for padding and border */
+  padding: 10px;
+  margin-bottom: 15px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 1rem;
+}
+
+.resource-form input[type="date"] {
+  width: auto; /* Allow date input to size itself */
+  margin-right: 10px;
+}
+
+.date-inputs {
+  display: flex;
+  align-items: center;
+  margin-bottom: 15px;
+  gap: 15px; /* Spacing between date inputs */
+}
+
+.date-inputs label {
+    margin-bottom: 0; /* Override default label margin */
+}
+
+.toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+  background-color: #e9e9e9;
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+}
+
+.toolbar button,
+.toolbar select,
+.file-upload-btn {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  margin-right: 5px;
+  transition: background-color 0.2s ease;
+}
+
+.toolbar button:hover,
+.toolbar select:hover,
+.file-upload-btn:hover {
+  background-color: #0056b3;
+}
+
+.toolbar select {
+  background-color: #f0f0f0;
+  color: #333;
+  border: 1px solid #ccc;
+}
+
+.record-btn {
+  background-color: #dc3545; /* Red for record */
+}
+.record-btn:hover {
+  background-color: #c82333;
+}
+
+.stop-record-btn {
+  background-color: #ffc107; /* Orange for stop */
+  color: #333;
+}
+.stop-record-btn:hover {
+  background-color: #e0a800;
+}
+
+.file-upload-btn {
+  display: inline-flex; /* To align icon */
+  align-items: center;
+  justify-content: center;
+  padding: 8px 12px;
+}
+
+.attachment-preview, .audio-preview {
+  margin-top: 15px;
+  padding: 10px;
+  border: 1px dashed #ccc;
+  border-radius: 4px;
+  background-color: #f0f0f0;
+}
+
+.attachment-preview img {
+  margin-top: 5px;
+  border: 1px solid #eee;
+}
+
+.audio-preview audio {
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+.clear-audio-btn {
+  background-color: #6c757d;
+  color: white;
+  border: none;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.clear-audio-btn:hover {
+  background-color: #5a6268;
+}
+
+.button-group {
+  margin-top: 20px;
+  text-align: right;
+}
+
+.button-group button {
+  padding: 10px 20px;
+  margin-left: 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: background-color 0.2s ease;
+}
+
+.button-group button[type="submit"] {
+  background-color: #28a745;
+  color: white;
+}
+
+.button-group button[type="submit"]:hover {
+  background-color: #218838;
+}
+
+.button-group button[type="button"] { /* Cancel button */
+  background-color: #6c757d;
+  color: white;
+}
+
+.button-group button[type="button"]:hover {
+  background-color: #5a6268;
+}

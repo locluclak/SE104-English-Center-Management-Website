@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from "react";
 import Select from "react-select";
 
-import CreateButton from "../Button/CreateButton";
-import SaveButton from "../Button/SaveButton";
-import CancelButton from "../Button/CancelButton";
-import Table from "../Table/Table";
+import CreateButton from "../../Button/CreateButton";
+import SaveButton from "../../Button/SaveButton";
+import CancelButton from "../../Button/CancelButton";
+import Table from "../../Table/Table";
 
 import "./DynamicForm.css";
-import { fetchStudents, fetchTeachers } from "../../../services/personService";
+import { fetchStudents, fetchTeachers } from "../../../../services/personService";
 
 const DynamicForm = ({ formConfig, initialData, onClose, onSubmitSuccess }) => {
   if (!formConfig) {

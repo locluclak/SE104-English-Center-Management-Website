@@ -12,12 +12,12 @@
 }
 
 .course-info {
-  position: relative; /* Quan trọng để đặt nút bên trong */
+  position: relative; 
   background-color: #edf2fb;
   padding: 20px;
   border-radius: 10px;
   min-height: 250px;
-  padding-bottom: 70px; /* Đảm bảo không bị đè lên nút */
+  padding-bottom: 70px; 
 }
 
 .back-btn {
@@ -108,4 +108,54 @@
 .modal-buttons button:last-child {
   background-color: #dc3545;
   color: white;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center; 
+  margin-bottom: 15px; 
+}
+
+.section-header h3 {
+  margin: 0;
+}
+
+/* CourseDetail.css hoặc một file CSS chung */
+
+.table-description-cell {
+  /* Bắt buộc phải có chiều rộng cố định hoặc tối đa để overflow hoạt động */
+  max-width: 200px; /* Hoặc một giá trị cố định bạn mong muốn cho cột này */
+  /* Hoặc bạn có thể thiết lập max-width cho .table th, .table td:nth-child(column_index) */
+
+  white-space: nowrap; /* Ngăn không cho văn bản xuống dòng */
+  overflow: hidden; /* Ẩn phần văn bản vượt quá chiều rộng */
+  text-overflow: ellipsis; /* Thêm dấu "..." ở cuối nếu văn bản bị cắt */
+}
+
+/* Đảm bảo các ô trong bảng có thuộc tính này nếu bạn muốn kiểm soát chiều rộng cột */
+/* Ví dụ: */
+.table th,
+.table td {
+  padding: 8px;
+  border: 1px solid #ddd;
+  text-align: left;
+  /* Nếu bạn muốn cột mô tả có width cố định ngay từ đầu, bạn có thể thêm vào đây
+     nhưng cách tốt hơn là dùng max-width như trên */
+}
+
+/* Để cột ID nhỏ gọn hơn, bạn có thể thêm: */
+.table th:first-child,
+.table td:first-child {
+    max-width: 50px; /* Giới hạn chiều rộng cho cột ID */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Và để cột Action không bị chiếm quá nhiều chỗ */
+.table th:last-child,
+.table td:last-child {
+    width: 120px; /* Chiều rộng cố định cho cột Action */
+    text-align: center;
 }

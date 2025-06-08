@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import "./ClassDetail.css";
 import BackButton from "../../../common/Button/BackButton";
-import DynamicForm from "../../../common/Form/DynamicForm";
+import DynamicForm from "../../../common/Form/DynamicForm/DynamicForm";
 import Table from "../../../common/Table/Table";
 import { getCourseById, createCourse, updateCourse, addStudentToCourse, removeStudentFromCourse } from "../../../../services/courseService";
 import { fetchStudents, fetchTeachers } from "../../../../services/personService";

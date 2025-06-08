@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import Table from '../Table/Table';
+import Table from '../../Table/Table';
 
 const studentEnrollColumns = (onDelete) => [
   { header: 'ID', accessor: 'studentId' },

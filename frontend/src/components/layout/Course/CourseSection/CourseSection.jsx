@@ -1,30 +1,36 @@
 import React from 'react';
-import Card from '../../../common/Card/Card'; 
+import Table from '../../../common/Table/Table'; 
 import './CourseSection.css';
 
 const CourseSection = ({ title, classList, onClassClick }) => {
+  const columns = [
+    { header: 'ID', accessor: 'id', },
+    { header: 'Class Name', accessor: 'name', },
+    {
+      header: 'Teacher',
+      accessor: 'teacherName',
+      render: (row) => row.teacherName || 'Chưa cập nhật',
+    },
+    { header: 'Start Date', accessor: 'startDateFormatted', },
+    { header: 'End Date', accessor: 'endDateFormatted', },
+    {
+      header: 'Description',
+      accessor: 'description',
+      render: (row) => row.description || "---",
+    },
+  ];
+
   return (
     <div className="course-section">
       <h3>{title}</h3>
       {classList.length === 0 ? (
         <p>Không có lớp học nào.</p>
       ) : (
-        <div className="course-grid">
-          {classList.map((course) => (
-            <Card
-              key={course.id}
-              title={course.name}
-              onClick={() => onClassClick(course)}
-            >
-              <p><strong>ID:</strong> {course.id}</p>
-              <p><strong>Giáo viên:</strong> {course.teacherName || 'Chưa cập nhật'}</p>
-              <p><strong>Trạng thái:</strong> {course.status}</p>
-              <p><strong>Ngày bắt đầu:</strong> {course.startDateFormatted}</p>
-              <p><strong>Ngày kết thúc:</strong> {course.endDateFormatted}</p>
-              <p><strong>Mô tả:</strong> {course.description || "Không có"}</p>
-            </Card>
-          ))}
-        </div>
+        <Table
+          columns={columns}
+          data={classList}
+          onRowClick={onClassClick} 
+        />
       )}
     </div>
   );

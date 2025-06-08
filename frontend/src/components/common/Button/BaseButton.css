@@ -47,6 +47,7 @@
 }
 
 .btn-delete {
+  margin: 20px;
   background-color: #e17a8d;
   color: black;
 }
