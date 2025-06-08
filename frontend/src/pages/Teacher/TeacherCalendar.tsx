@@ -2,13 +2,24 @@
 
 import type React from "react"
 import { useState, useEffect } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/Ui/Card/card"
-import { Badge } from "../../components/Ui/Badge/badge"
-import { Button } from "../../components/Ui/Button/button"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "../../components/Ui/Dialog/dialog"
-import { Input } from "../../components/Ui/Input/input"
-import { Textarea } from "../../components/Ui/Textarea/textarea"
-import { Calendar, Clock, MapPin, Users, FileText, Plus } from "../../components/Ui/Icons/icons"
+import { Card } from "antd"
+import { Button } from "@/components/Ui/Button/button"
+import { Select, SelectItem } from "@/components/Ui/Select/Select"
+import { ChevronLeft, ChevronRight, Plus, AlertCircle } from "lucide-react"
+
+import "./TeacherCalendar.scss"
+
+interface AssignmentDeadline {
+  id: string
+  title: string
+  description: string
+  dueDate: string
+  dueTime: string
+  courseId: string
+  courseName: string
+  studentsCount: number
+  submissionsCount: number
+}
 
 interface CalendarEvent {
   id: string
@@ -17,9 +28,12 @@ interface CalendarEvent {
   date: string
   time: string
   location: string
-  type: "class" | "assignment" | "exam" | "meeting"
+  type: "class" | "assignment" | "exam" | "meeting" | "deadline"
   courseId?: string
   courseName?: string
+  isDeadline?: boolean
+  studentsCount?: number
+  submissionsCount?: number
 }
 
 interface TeacherCalendarProps {
@@ -29,285 +43,279 @@ interface TeacherCalendarProps {
 
 const TeacherCalendar: React.FC<TeacherCalendarProps> = ({ teacherId, userRole }) => {
   const [events, setEvents] = useState<CalendarEvent[]>([])
-  const [isAddEventDialogOpen, setIsAddEventDialogOpen] = useState(false)
-  const [newEvent, setNewEvent] = useState<Partial<CalendarEvent>>({
-    title: "",
-    description: "",
-    date: "",
-    time: "",
-    location: "",
-    type: "class",
-    courseId: "",
-    courseName: "",
-  })
-  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [currentDate, setCurrentDate] = useState(new Date())
+  const [selectedCourse, setSelectedCourse] = useState<string>("all")
 
   useEffect(() => {
-    // Mock data - replace with actual API calls
-    setEvents([
+    // Mock data - assignments from courses taught by teacher
+    const mockAssignments: AssignmentDeadline[] = [
       {
         id: "1",
-        title: "Mathematics 101 - Lecture",
-        description: "Algebra and Linear Equations",
-        date: "2024-01-15",
-        time: "09:00",
-        location: "Room 101",
-        type: "class",
+        title: "Bài tập Toán học Chương 3",
+        description: "Bài tập đại số tuyến tính",
+        dueDate: "2025-06-20",
+        dueTime: "23:59",
         courseId: "1",
-        courseName: "Mathematics 101",
+        courseName: "Toán học 101",
+        studentsCount: 25,
+        submissionsCount: 18,
       },
       {
         id: "2",
-        title: "Physics Assignment Due",
-        description: "Lab Report on Motion",
-        date: "2024-01-16",
-        time: "23:59",
-        location: "Online Submission",
-        type: "assignment",
+        title: "Báo cáo thí nghiệm Vật lý",
+        description: "Phân tích chuyển động con lắc",
+        dueDate: "2025-06-25",
+        dueTime: "23:59",
         courseId: "2",
-        courseName: "Physics 101",
+        courseName: "Vật lý 101",
+        studentsCount: 20,
+        submissionsCount: 12,
       },
       {
         id: "3",
-        title: "Chemistry Exam",
-        description: "Midterm Examination",
-        date: "2024-01-18",
-        time: "14:00",
-        location: "Exam Hall A",
-        type: "exam",
+        title: "Luận văn Hóa học",
+        description: "Nghiên cứu hợp chất hữu cơ",
+        dueDate: "2025-06-30",
+        dueTime: "23:59",
         courseId: "3",
-        courseName: "Chemistry 101",
+        courseName: "Hóa học 101",
+        studentsCount: 22,
+        submissionsCount: 5,
+      },
+    ]
+
+    // Convert assignments to calendar events
+    const assignmentEvents: CalendarEvent[] = mockAssignments.map((assignment) => ({
+      id: assignment.id,
+      title: `${assignment.title} - Hạn nộp`,
+      description: assignment.description,
+      date: assignment.dueDate,
+      time: assignment.dueTime,
+      location: "Nộp trực tuyến",
+      type: "deadline",
+      courseId: assignment.courseId,
+      courseName: assignment.courseName,
+      isDeadline: true,
+      studentsCount: assignment.studentsCount,
+      submissionsCount: assignment.submissionsCount,
+    }))
+
+    // Add regular class events
+    const classEvents: CalendarEvent[] = [
+      {
+        id: "class1",
+        title: "Toán học 101 - Bài giảng",
+        description: "Đại số tuyến tính",
+        date: "2025-06-15",
+        time: "09:00",
+        location: "Phòng 101",
+        type: "class",
+        courseId: "1",
+        courseName: "Toán học 101",
       },
       {
-        id: "4",
-        title: "Department Meeting",
-        description: "Weekly faculty meeting",
-        date: "2024-01-17",
+        id: "class2",
+        title: "Vật lý 101 - Thí nghiệm",
+        description: "Thí nghiệm con lắc",
+        date: "2025-06-18",
+        time: "14:00",
+        location: "Phòng thí nghiệm Vật lý",
+        type: "class",
+        courseId: "2",
+        courseName: "Vật lý 101",
+      },
+      {
+        id: "meeting1",
+        title: "Họp khoa",
+        description: "Họp giảng viên hàng tuần",
+        date: "2025-06-17",
         time: "16:00",
-        location: "Conference Room 205",
+        location: "Phòng họp",
         type: "meeting",
       },
-    ])
+    ]
+
+    setEvents([...assignmentEvents, ...classEvents])
   }, [teacherId])
 
-  const getEventTypeColor = (type: string) => {
-    switch (type) {
-      case "class":
-        return "event-class"
-      case "assignment":
-        return "event-assignment"
-      case "exam":
-        return "event-exam"
-      case "meeting":
-        return "event-meeting"
-      default:
-        return "event-default"
-    }
+  const getDaysInMonth = (date: Date) => {
+    return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate()
   }
 
-  const getEventIcon = (type: string) => {
-    switch (type) {
-      case "class":
-        return <Users className="icon" />
-      case "assignment":
-        return <FileText className="icon" />
-      case "exam":
-        return <Clock className="icon" />
-      case "meeting":
-        return <Users className="icon" />
-      default:
-        return <Calendar className="icon" />
-    }
+  const getFirstDayOfMonth = (date: Date) => {
+    const firstDay = new Date(date.getFullYear(), date.getMonth(), 1).getDay()
+    return firstDay === 0 ? 6 : firstDay - 1 // Convert Sunday (0) to 6, Monday (1) to 0, etc.
   }
 
-  const handleAddEvent = () => {
-    setIsSubmitting(true)
+  const getEventsForDate = (date: Date) => {
+    const dateString = date.toISOString().split("T")[0]
+    return events.filter((event) => {
+      const matchesDate = event.date === dateString
+      const matchesCourse = selectedCourse === "all" || event.courseId === selectedCourse
+      return matchesDate && matchesCourse
+    })
+  }
 
-    // Simulate API call
-    setTimeout(() => {
-      const newId = `${events.length + 1}`
-      const eventToAdd: CalendarEvent = {
-        id: newId,
-        title: newEvent.title || "",
-        description: newEvent.description || "",
-        date: newEvent.date || "",
-        time: newEvent.time || "",
-        location: newEvent.location || "",
-        type: (newEvent.type as "class" | "assignment" | "exam" | "meeting") || "class",
-        courseId: newEvent.courseId,
-        courseName: newEvent.courseName,
+  const navigateMonth = (direction: "prev" | "next") => {
+    setCurrentDate((prev) => {
+      const newDate = new Date(prev)
+      if (direction === "prev") {
+        newDate.setMonth(prev.getMonth() - 1)
+      } else {
+        newDate.setMonth(prev.getMonth() + 1)
       }
-
-      setEvents([...events, eventToAdd])
-      setNewEvent({
-        title: "",
-        description: "",
-        date: "",
-        time: "",
-        location: "",
-        type: "class",
-        courseId: "",
-        courseName: "",
-      })
-      setIsSubmitting(false)
-      setIsAddEventDialogOpen(false)
-    }, 1000)
+      return newDate
+    })
   }
 
-  const sortedEvents = events.sort(
-    (a, b) => new Date(a.date + "T" + a.time).getTime() - new Date(b.date + "T" + b.time).getTime(),
-  )
+  const renderCalendarGrid = () => {
+    const daysInMonth = getDaysInMonth(currentDate)
+    const firstDay = getFirstDayOfMonth(currentDate)
+    const days = []
+
+    // Empty cells for days before the first day of the month
+    for (let i = 0; i < firstDay; i++) {
+      days.push(<div key={`empty-${i}`} className="calendar-day empty"></div>)
+    }
+
+    // Days of the month
+    for (let day = 1; day <= daysInMonth; day++) {
+      const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), day)
+      const dayEvents = getEventsForDate(date)
+      const hasDeadline = dayEvents.some((event) => event.isDeadline)
+      const isToday = date.toDateString() === new Date().toDateString()
+
+      days.push(
+        <div key={day} className={`calendar-day ${isToday ? "today" : ""} ${hasDeadline ? "has-deadline" : ""}`}>
+          <div className="day-number">{day}</div>
+          <div className="day-events">
+            {dayEvents.map((event) => (
+              <div key={event.id} className="event-item" title={event.title}>
+                {event.isDeadline && <AlertCircle className="w-3 h-3 mr-1" />}
+                {event.title.length > 20 ? `${event.title.substring(0, 20)}...` : event.title}
+                {event.isDeadline && (
+                  <span className="submission-count">
+                    ({event.submissionsCount}/{event.studentsCount})
+                  </span>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>,
+      )
+    }
+
+    return days
+  }
+
+  const monthNames = [
+    "tháng 1",
+    "tháng 2",
+    "tháng 3",
+    "tháng 4",
+    "tháng 5",
+    "tháng 6",
+    "tháng 7",
+    "tháng 8",
+    "tháng 9",
+    "tháng 10",
+    "tháng 11",
+    "tháng 12",
+  ]
+
+  const weekDays = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"]
+  const upcomingDeadlines = events.filter((event) => event.isDeadline && new Date(event.date) >= new Date())
 
   return (
-    <div className="teacher-calendar">
+    <div className="teacher-calendar-container">
       <div className="calendar-header">
-        <h2>Academic Calendar</h2>
-        <div className="calendar-actions">
-          <Badge variant="outline">{events.length} Upcoming Events</Badge>
-          <Button onClick={() => setIsAddEventDialogOpen(true)}>
-            <Plus className="icon" />
-            Add Event
+        <div className="calendar-controls">
+          <Select
+            value={selectedCourse}
+            onChange={setSelectedCourse}
+            placeholder="Tất cả các lớp học"
+            className="course-filter"
+          >
+            <SelectItem value="all">Tất cả các lớp học</SelectItem>
+            <SelectItem value="1">Toán học 101</SelectItem>
+            <SelectItem value="2">Vật lý 101</SelectItem>
+            <SelectItem value="3">Hóa học 101</SelectItem>
+          </Select>
+        </div>
+
+        <div className="calendar-navigation">
+          <Button variant="ghost" size="sm" onClick={() => navigateMonth("prev")}>
+            <ChevronLeft className="w-4 h-4" />
+          </Button>
+          <h2 className="month-year">
+            {monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}
+          </h2>
+          <Button variant="ghost" size="sm" onClick={() => navigateMonth("next")}>
+            <ChevronRight className="w-4 h-4" />
           </Button>
         </div>
+
+        <Button className="new-event-btn">
+          <Plus className="w-4 h-4 mr-2" />
+          Tạo sự kiện
+        </Button>
       </div>
 
-      <div className="events-grid">
-        {sortedEvents.map((event) => (
-          <Card key={event.id} className="event-card">
-            <CardHeader>
-              <div className="event-header">
-                <div className="event-title-section">
-                  {getEventIcon(event.type)}
-                  <CardTitle>{event.title}</CardTitle>
+      {/* Assignment Deadlines Overview */}
+      {upcomingDeadlines.length > 0 && (
+        <Card className="deadlines-overview mb-6">
+          <div className="deadlines-header">
+            <AlertCircle className="w-5 h-5 text-orange-600" />
+            <h3 className="text-lg font-semibold text-orange-800">Hạn nộp bài tập & Tình trạng nộp bài</h3>
+          </div>
+          <div className="deadlines-list">
+            {upcomingDeadlines.slice(0, 3).map((deadline) => (
+              <div key={deadline.id} className="deadline-item">
+                <div className="deadline-info">
+                  <div className="deadline-title">{deadline.title}</div>
+                  <div className="deadline-course">{deadline.courseName}</div>
                 </div>
-                <Badge className={getEventTypeColor(event.type)}>{event.type}</Badge>
+                <div className="deadline-stats">
+                  <div className="deadline-date">{new Date(deadline.date).toLocaleDateString("vi-VN")}</div>
+                  <div className="submission-progress">
+                    <span className="submitted">{deadline.submissionsCount}</span>
+                    <span className="separator">/</span>
+                    <span className="total">{deadline.studentsCount}</span>
+                    <span className="label">đã nộp</span>
+                  </div>
+                  <div className="progress-bar">
+                    <div
+                      className="progress-fill"
+                      style={{
+                        width: `${((deadline.submissionsCount || 0) / (deadline.studentsCount || 1)) * 100}%`,
+                      }}
+                    />
+                  </div>
+                </div>
               </div>
-              {event.courseName && <CardDescription>{event.courseName}</CardDescription>}
-            </CardHeader>
-
-            <CardContent className="event-content">
-              <p className="event-description">{event.description}</p>
-
-              <div className="event-details">
-                <div className="detail-item">
-                  <Calendar className="icon" />
-                  <span>{new Date(event.date).toLocaleDateString()}</span>
-                </div>
-                <div className="detail-item">
-                  <Clock className="icon" />
-                  <span>{event.time}</span>
-                </div>
-                <div className="detail-item">
-                  <MapPin className="icon" />
-                  <span>{event.location}</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-
-      {events.length === 0 && (
-        <div className="empty-state">
-          <Calendar className="empty-icon" />
-          <h3>No events scheduled</h3>
-          <p>Your calendar is empty. Events will appear here when scheduled.</p>
-        </div>
+            ))}
+          </div>
+        </Card>
       )}
 
-      {/* Add Event Dialog */}
-      <Dialog open={isAddEventDialogOpen} onOpenChange={setIsAddEventDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Add New Event</DialogTitle>
-          </DialogHeader>
-
-          <div className="dialog-form">
-            <div className="form-field">
-              <label>Title</label>
-              <Input
-                placeholder="Event title"
-                value={newEvent.title}
-                onChange={(e) => setNewEvent({ ...newEvent, title: e.target.value })}
-              />
-            </div>
-
-            <div className="form-field">
-              <label>Description</label>
-              <Textarea
-                placeholder="Event description"
-                value={newEvent.description}
-                onChange={(e) => setNewEvent({ ...newEvent, description: e.target.value })}
-              />
-            </div>
-
-            <div className="form-row">
-              <div className="form-field">
-                <label>Date</label>
-                <Input
-                  type="date"
-                  value={newEvent.date}
-                  onChange={(e) => setNewEvent({ ...newEvent, date: e.target.value })}
-                />
+      <Card className="calendar-card">
+        <div className="calendar-grid">
+          <div className="weekdays">
+            {weekDays.map((day) => (
+              <div key={day} className="weekday">
+                {day}
               </div>
-
-              <div className="form-field">
-                <label>Time</label>
-                <Input
-                  type="time"
-                  value={newEvent.time}
-                  onChange={(e) => setNewEvent({ ...newEvent, time: e.target.value })}
-                />
-              </div>
-            </div>
-
-            <div className="form-field">
-              <label>Location</label>
-              <Input
-                placeholder="Event location"
-                value={newEvent.location}
-                onChange={(e) => setNewEvent({ ...newEvent, location: e.target.value })}
-              />
-            </div>
-
-            <div className="form-field">
-              <label>Event Type</label>
-              <select
-                value={newEvent.type}
-                onChange={(e) => setNewEvent({ ...newEvent, type: e.target.value as any })}
-                className="event-type-select"
-              >
-                <option value="class">Class</option>
-                <option value="assignment">Assignment</option>
-                <option value="exam">Exam</option>
-                <option value="meeting">Meeting</option>
-              </select>
-            </div>
-
-            <div className="form-field">
-              <label>Course (Optional)</label>
-              <Input
-                placeholder="Course name"
-                value={newEvent.courseName}
-                onChange={(e) => setNewEvent({ ...newEvent, courseName: e.target.value })}
-              />
-            </div>
+            ))}
           </div>
-
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsAddEventDialogOpen(false)}>
-              Cancel
-            </Button>
-            <Button
-              onClick={handleAddEvent}
-              disabled={isSubmitting || !newEvent.title || !newEvent.date || !newEvent.time}
-              loading={isSubmitting}
-            >
-              {isSubmitting ? "Adding..." : "Add Event"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+          <div className="days-grid">{renderCalendarGrid()}</div>
+        </div>
+      </Card>
+      <div className="calendar-footer">
+        <p>
+          Hiện tại bạn có {events.length} sự kiện trong tháng này. Hãy kiểm tra các sự kiện để không bỏ lỡ thông tin
+          quan trọng!
+        </p>
+      </div>
     </div>
   )
 }

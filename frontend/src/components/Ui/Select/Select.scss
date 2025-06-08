@@ -1,0 +1,72 @@
+@import "../../../scss/variables";
+
+.custom-select {
+  .ant-select-selector {
+    border: 1px solid #d9d9d9 !important;
+    border-radius: 6px !important;
+    height: 40px !important;
+    padding: 8px 12px !important;
+    font-size: 14px !important;
+    transition: all 0.2s ease !important;
+
+    &:hover {
+      border-color: #4285f4 !important;
+    }
+  }
+
+  &.ant-select-focused .ant-select-selector {
+    border-color: #4285f4 !important;
+    box-shadow: 0 0 0 2px rgba(66, 133, 244, 0.2) !important;
+  }
+
+  .ant-select-selection-item {
+    line-height: 24px !important;
+    color: #333 !important;
+  }
+
+  .ant-select-selection-placeholder {
+    color: #999 !important;
+    line-height: 24px !important;
+  }
+
+  .ant-select-arrow {
+    color: #999 !important;
+    font-size: 12px !important;
+  }
+
+  &.ant-select-open .ant-select-arrow {
+    transform: rotate(180deg) !important;
+  }
+}
+
+.ant-select-dropdown {
+  border-radius: 6px !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+  border: 1px solid #e0e0e0 !important;
+
+  .ant-select-item {
+    padding: 8px 12px !important;
+    font-size: 14px !important;
+    border-radius: 4px !important;
+    margin: 2px 4px !important;
+
+    &:hover {
+      background-color: #f5f5f5 !important;
+    }
+
+    &.ant-select-item-option-selected {
+      background-color: #e6f7ff !important;
+      color: #1890ff !important;
+      font-weight: 500 !important;
+    }
+  }
+}
+
+// Course filter specific styling
+.course-filter {
+  min-width: 200px !important;
+
+  .ant-select-selector {
+    background-color: white !important;
+  }
+}
