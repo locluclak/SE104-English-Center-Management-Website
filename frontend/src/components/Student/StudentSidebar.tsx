@@ -1,9 +1,14 @@
-"use client";
-
-import type React from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Home, BookOpen, Calendar, FileText, LogOut } from "../Ui/Icons/icons";
+import {
+  Home,
+  BookOpen,
+  Calendar,
+  FileText,
+  LogOut,
+} from "../Ui/Icons/icons";
 import "./StudentSidebar.scss";
+import AvtImg from "@/assets/profile.jpg";
 
 interface StudentRoute {
   title: string;
@@ -21,32 +26,56 @@ interface StudentSidebarProps {
 const studentRoutes: StudentRoute[] = [
   { title: "HOME", url: "/student/home", icon: Home, roles: ["ROLE_STUDENT"] },
   { title: "COURSES", url: "/student/courses", icon: BookOpen, roles: ["ROLE_STUDENT"] },
-  { title: "BOARD", url: "/student/board", icon: FileText, roles: ["ROLE_STUDENT"],
+  {
+    title: "BOARD",
+    url: "/student/board",
+    icon: FileText,
+    roles: ["ROLE_STUDENT"],
     children: [
-        {title: "Calendar", url: "/student/board/calendar",icon: Calendar, roles: ["ROLE_STUDENT"],},
-        { title: "Padlet Attachment", url: "/student/board/padlet", icon: FileText, roles: ["ROLE_STUDENT"] }
-    ],},
+      {
+        title: "Calendar",
+        url: "/student/board/calendar",
+        icon: Calendar,
+        roles: ["ROLE_STUDENT"],
+      },
+      {
+        title: "Padlet Attachment",
+        url: "/student/board/padlet",
+        icon: FileText,
+        roles: ["ROLE_STUDENT"],
+      },
+    ],
+  },
 ];
 
-const StudentSidebar: React.FC<StudentSidebarProps> = ({
-  currentPath,
-  onNavigate,
-}) => {
+const StudentSidebar: React.FC<StudentSidebarProps> = ({ currentPath, onNavigate }) => {
+  const [userName, setUserName] = useState<string>("");
+  const [userRole, setUserRole] = useState<string>("");
+
+  useEffect(() => {
+    const mockUser = {
+      id: 1,
+      email: "alice@example.com",
+      role: "STUDENT",
+      name: "Alice Johnson",
+    };
+
+    setUserName(mockUser.name);
+    setUserRole(mockUser.role);
+    localStorage.setItem("token", JSON.stringify(mockUser));
+  }, []);
+
   const handleLogout = () => {
     localStorage.clear();
     window.location.href = "/login";
   };
 
   const isActiveRoute = (routeUrl: string) => {
-    // Special case for home route
     if (routeUrl === "/student") {
       return currentPath === "/student" || currentPath === "/student/";
     }
     return currentPath.startsWith(routeUrl);
   };
-
-  // Log current path for debugging
-  console.log("Current path:", currentPath);
 
   return (
     <div className="student-sidebar">
@@ -66,18 +95,11 @@ const StudentSidebar: React.FC<StudentSidebarProps> = ({
               hasChildren &&
               route.children?.some((child) => isActiveRoute(child.url));
 
-            // Log active state for debugging
-            console.log(
-              `Route ${route.title}: isActive=${isActive}, isParentActive=${isParentActive}`
-            );
-
             return (
               <li key={route.title} className="nav-item">
                 <Link
                   to={route.url}
-                  className={`nav-link ${
-                    isActive || isParentActive ? "active" : ""
-                  }`}
+                  className={`nav-link ${isActive || isParentActive ? "active" : ""}`}
                   onClick={(e) => {
                     e.preventDefault();
                     onNavigate(route.url);
@@ -87,31 +109,25 @@ const StudentSidebar: React.FC<StudentSidebarProps> = ({
                   <span className="nav-text">{route.title}</span>
                 </Link>
 
-                {hasChildren &&
-                  (isActive || isParentActive) &&
-                  route.children && (
-                    <ul className="nav-children">
-                      {route.children.map((subRoute) => (
-                        <li key={subRoute.title} className="nav-child-item">
-                          <Link
-                            to={subRoute.url}
-                            className={`nav-child-link ${
-                              isActiveRoute(subRoute.url) ? "active" : ""
-                            }`}
-                            onClick={(e) => {
-                              e.preventDefault();
-                              onNavigate(subRoute.url);
-                            }}
-                          >
-                            <subRoute.icon className="nav-child-icon" />
-                            <span className="nav-child-text">
-                              {subRoute.title}
-                            </span>
-                          </Link>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
+                {hasChildren && (isActive || isParentActive) && (
+                  <ul className="nav-children">
+                    {route.children?.map((subRoute) => (
+                      <li key={subRoute.title} className="nav-child-item">
+                        <Link
+                          to={subRoute.url}
+                          className={`nav-child-link ${isActiveRoute(subRoute.url) ? "active" : ""}`}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            onNavigate(subRoute.url);
+                          }}
+                        >
+                          <subRoute.icon className="nav-child-icon" />
+                          <span className="nav-child-text">{subRoute.title}</span>
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </li>
             );
           })}
@@ -119,6 +135,14 @@ const StudentSidebar: React.FC<StudentSidebarProps> = ({
       </nav>
 
       <div className="sidebar-footer">
+        <div className="sidebar-user-profile" onClick={() => onNavigate("/student/profile")}>
+          <img src={AvtImg} alt="Avatar" className="profile-avatar" />
+          <div className="profile-info">
+            <div className="profile-name">{userName}</div>
+            <div className="profile-role">{userRole}</div>
+          </div>
+        </div>
+
         <button className="logout-btn" onClick={handleLogout}>
           <LogOut className="logout-icon" />
           <span className="logout-text">LOG OUT</span>

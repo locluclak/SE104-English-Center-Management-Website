@@ -3,6 +3,8 @@ import { useEffect, useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/Ui/Card/card"
 import { Button } from "@/components/Ui/Button/button"
 import { BookOpen, Clock, Users } from "@/components/Ui/Icons/icons"
+import { MainApiRequest } from "@/services/MainApiRequest"
+import { message } from "antd"
 
 interface Course {
   id: string
@@ -28,61 +30,67 @@ interface StudentHomeProps {
   userRole: string
 }
 
+// Hàm lấy tên giáo viên (cần được định nghĩa hoặc import)
+const fetchTeacherForCourse = async (courseId: string): Promise<string> => {
+  try {
+    const res = await MainApiRequest.get(`/course/teacher/${courseId}`)
+    const teachers = res.data
+    return teachers?.[0]?.NAME || "N/A"
+  } catch (err) {
+    console.error("Failed to fetch teacher", err)
+    return "N/A"
+  }
+}
+
 const StudentHome: React.FC<StudentHomeProps> = ({ studentId, userRole }) => {
-  const [availableCourses, setAvailableCourses] = useState<Course[]>([])
+  const [coursesList, setCoursesList] = useState<Course[]>([])
   const [assignments, setAssignments] = useState<Assignment[]>([])
 
   useEffect(() => {
-    // Mock data - replace with actual API calls
-    setAvailableCourses([
-      {
-        id: "1",
-        name: "Mathematics 101",
-        description: "Basic mathematics course",
-        instructor: "Dr. Smith",
-        schedule: "Mon, Wed, Fri 9:00 AM",
-        enrolled: 25,
-        maxStudents: 30,
-      },
-      {
-        id: "2",
-        name: "Physics 101",
-        description: "Introduction to Physics",
-        instructor: "Dr. Johnson",
-        schedule: "Tue, Thu 2:00 PM",
-        enrolled: 20,
-        maxStudents: 25,
-      },
-    ])
+    const fetchCoursesList = async () => {
+      try {
+        const res = await MainApiRequest.get("/course/all")
+        const rawCourses = res.data
 
-    setAssignments([
-      {
-        id: "1",
-        title: "Algebra Homework",
-        courseId: "1",
-        courseName: "Mathematics 101",
-        dueDate: "2024-01-15",
-        status: "pending",
-      },
-      {
-        id: "2",
-        title: "Physics Lab Report",
-        courseId: "2",
-        courseName: "Physics 101",
-        dueDate: "2024-01-20",
-        status: "pending",
-      },
-    ])
+        const coursesWithTeachers = await Promise.all(
+          rawCourses.map(async (cls: any) => {
+            const teacherName = await fetchTeacherForCourse(cls.COURSE_ID)
+
+            const cleanDescription = cls.DESCRIPTION?.replace(
+              /^[^\[]*\[Giáo viên:\s*.*?\]\s*/,
+              ""
+            )
+
+            return {
+              id: cls.COURSE_ID,
+              name: cls.NAME,
+              description: cleanDescription || "",
+              instructor: teacherName,
+              schedule: cls.START_DATE ? new Date(cls.START_DATE).toLocaleDateString() : "TBD",
+              enrolled: cls.NUMBER_STU || 0,
+              maxStudents: cls.MAX_STU || 0,
+            }
+          })
+        )
+
+        setCoursesList(coursesWithTeachers)
+      } catch (error) {
+        console.error("Failed to fetch courses:", error)
+        message.error("Unable to load courses.")
+      }
+    }
+
+    fetchCoursesList()
   }, [studentId])
 
   const handleCourseEnroll = (courseId: string) => {
     console.log(`Enrolling in course: ${courseId}`)
-    // Implement enrollment logic
+    // TODO: Ghi danh
   }
 
   const handleAssignmentClick = (assignmentId: string) => {
     console.log(`Opening assignment: ${assignmentId}`)
-    // Navigate to assignment details
+    // TODO: Xử lý chuyển hướng
   }
 
   return (
@@ -96,7 +104,7 @@ const StudentHome: React.FC<StudentHomeProps> = ({ studentId, userRole }) => {
       <section className="courses-section">
         <h2>Available Courses</h2>
         <div className="courses-grid">
-          {availableCourses.map((course) => (
+          {coursesList.map((course) => (
             <Card key={course.id} className="course-card">
               <CardHeader>
                 <CardTitle className="course-title">
@@ -113,7 +121,7 @@ const StudentHome: React.FC<StudentHomeProps> = ({ studentId, userRole }) => {
                   </p>
                   <p className="detail-item">
                     <Clock className="icon" />
-                    {course.schedule}
+                    Start Date: {course.schedule}
                   </p>
                   <p>
                     Enrolled: {course.enrolled}/{course.maxStudents}
