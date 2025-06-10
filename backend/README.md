@@ -1,7 +1,7 @@
 # Testing stage
 ## Database initialization
 ```
-CREATE DATABASE english_center;
+CREATE DATABASE english_center_database;
 USE english_center;
 
 CREATE TABLE courses (
@@ -22,5 +22,5 @@ Create .env file and replace your mysql password (**if you try this code, please
 DB_HOST=localhost
 DB_USER=root
 DB_PASSWORD=your_mysql_password
-DB_NAME=english_center
+DB_NAME=english_center_database
 ```
