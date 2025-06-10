@@ -6,6 +6,7 @@ import { Card } from "antd"
 import { Button } from "@/components/Ui/Button/button"
 import { Select, SelectItem } from "@/components/Ui/Select/Select"
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react"
+import { MainApiRequest } from "@/services/MainApiRequest"
 
 import "./StudentCalendar.scss"
 
@@ -20,6 +21,11 @@ interface CalendarEvent {
   courseName?: string
 }
 
+interface Course {
+  id: string
+  name: string
+}
+
 interface StudentCalendarProps {
   studentId: string
   userRole: string
@@ -29,9 +35,27 @@ const StudentCalendar: React.FC<StudentCalendarProps> = ({ studentId, userRole }
   const [events, setEvents] = useState<CalendarEvent[]>([])
   const [currentDate, setCurrentDate] = useState(new Date())
   const [selectedCourse, setSelectedCourse] = useState<string>("all")
+  const [courses, setCourses] = useState<Course[]>([])
 
   useEffect(() => {
-    // Mock data - events from enrolled courses
+    const fetchCourses = async () => {
+      try {
+        const res = await MainApiRequest.get("/course/all")
+        const data = res.data
+
+        const formatted = data.map((c: any) => ({
+          id: String(c.COURSE_ID),
+          name: c.NAME,
+        }))
+        setCourses(formatted)
+      } catch (err) {
+        console.error("Failed to fetch courses", err)
+      }
+    }
+
+    fetchCourses()
+
+    // Mock events
     const mockEvents: CalendarEvent[] = [
       {
         id: "1",
@@ -68,13 +92,11 @@ const StudentCalendar: React.FC<StudentCalendarProps> = ({ studentId, userRole }
     setEvents(mockEvents)
   }, [studentId])
 
-  const getDaysInMonth = (date: Date) => {
-    return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate()
-  }
+  const getDaysInMonth = (date: Date) => new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate()
 
   const getFirstDayOfMonth = (date: Date) => {
     const firstDay = new Date(date.getFullYear(), date.getMonth(), 1).getDay()
-    return firstDay === 0 ? 6 : firstDay - 1 // Convert Sunday (0) to 6, Monday (1) to 0, etc.
+    return firstDay === 0 ? 6 : firstDay - 1
   }
 
   const getEventsForDate = (date: Date) => {
@@ -89,11 +111,8 @@ const StudentCalendar: React.FC<StudentCalendarProps> = ({ studentId, userRole }
   const navigateMonth = (direction: "prev" | "next") => {
     setCurrentDate((prev) => {
       const newDate = new Date(prev)
-      if (direction === "prev") {
-        newDate.setMonth(prev.getMonth() - 1)
-      } else {
-        newDate.setMonth(prev.getMonth() + 1)
-      }
+      if (direction === "prev") newDate.setMonth(prev.getMonth() - 1)
+      else newDate.setMonth(prev.getMonth() + 1)
       return newDate
     })
   }
@@ -103,12 +122,10 @@ const StudentCalendar: React.FC<StudentCalendarProps> = ({ studentId, userRole }
     const firstDay = getFirstDayOfMonth(currentDate)
     const days = []
 
-    // Empty cells for days before the first day of the month
     for (let i = 0; i < firstDay; i++) {
       days.push(<div key={`empty-${i}`} className="calendar-day empty"></div>)
     }
 
-    // Days of the month
     for (let day = 1; day <= daysInMonth; day++) {
       const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), day)
       const dayEvents = getEventsForDate(date)
@@ -124,7 +141,7 @@ const StudentCalendar: React.FC<StudentCalendarProps> = ({ studentId, userRole }
               </div>
             ))}
           </div>
-        </div>,
+        </div>
       )
     }
 
@@ -132,18 +149,8 @@ const StudentCalendar: React.FC<StudentCalendarProps> = ({ studentId, userRole }
   }
 
   const monthNames = [
-    "Tháng 1",
-    "Tháng 2",
-    "Tháng 3",
-    "Tháng 4",
-    "Tháng 5",
-    "Tháng 6",
-    "Tháng 7",
-    "Tháng 8",
-    "Tháng 9",
-    "Tháng 10",
-    "Tháng 11",
-    "Tháng 12",
+    "Tháng 1", "Tháng 2", "Tháng 3", "Tháng 4", "Tháng 5", "Tháng 6",
+    "Tháng 7", "Tháng 8", "Tháng 9", "Tháng 10", "Tháng 11", "Tháng 12",
   ]
 
   const weekDays = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"]
@@ -159,9 +166,11 @@ const StudentCalendar: React.FC<StudentCalendarProps> = ({ studentId, userRole }
             className="course-filter"
           >
             <SelectItem value="all">Tất cả các khóa học</SelectItem>
-            <SelectItem value="1">Toán học 101</SelectItem>
-            <SelectItem value="2">Vật lý 101</SelectItem>
-            <SelectItem value="3">Hóa học 101</SelectItem>
+            {courses.map((course) => (
+              <SelectItem key={course.id} value={course.id}>
+                {course.name}
+              </SelectItem>
+            ))}
           </Select>
         </div>
 
@@ -187,9 +196,7 @@ const StudentCalendar: React.FC<StudentCalendarProps> = ({ studentId, userRole }
         <div className="calendar-grid">
           <div className="weekdays">
             {weekDays.map((day) => (
-              <div key={day} className="weekday">
-                {day}
-              </div>
+              <div key={day} className="weekday">{day}</div>
             ))}
           </div>
           <div className="days-grid">{renderCalendarGrid()}</div>
@@ -198,8 +205,7 @@ const StudentCalendar: React.FC<StudentCalendarProps> = ({ studentId, userRole }
 
       <div className="calendar-footer">
         <p>
-          Hiện tại bạn có {events.length} sự kiện trong tháng này. Hãy kiểm tra các sự kiện để không bỏ lỡ thông tin quan
-          trọng!
+          Hiện tại bạn có {events.length} sự kiện trong tháng này. Hãy kiểm tra các sự kiện để không bỏ lỡ thông tin quan trọng!
         </p>
       </div>
     </div>
