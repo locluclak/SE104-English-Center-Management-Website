@@ -28,6 +28,10 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+.submission-buttons {
+    display: flex;
+    gap: 12px; // hoặc 8px, tùy độ rộng bạn mong muốn
+  }
 
     .grade-display {
       background-color: get-color($background, "200");
@@ -88,7 +92,6 @@
       font-weight: 600;
       color: get-color($primary, "100");
     }
-
     .submission-text {
       background-color: get-color($background, "200");
       padding: 16px;

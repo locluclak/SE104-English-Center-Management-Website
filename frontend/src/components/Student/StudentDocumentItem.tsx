@@ -8,13 +8,10 @@ import { FileText, Download, Eye } from "../../components/Ui/Icons/icons"
 import "./StudentDocumentItem.scss"
 
 interface Document {
-  id: string
+  id: number
   title: string
   description: string
-  uploadDate: string
-  fileType: "pdf" | "doc" | "ppt" | "image" | "video" | "other"
-  fileSize: string
-  downloadUrl: string
+  file?: string // e.g. /uploads/abc.pdf
 }
 
 interface StudentDocumentItemProps {
@@ -23,84 +20,99 @@ interface StudentDocumentItemProps {
 
 export const StudentDocumentItem: React.FC<StudentDocumentItemProps> = ({ document }) => {
   const handleDownload = () => {
-    console.log(`Downloading document: ${document.title}`)
-    // In a real app, this would trigger the download
-    window.open(document.downloadUrl, "_blank")
+    if (document.file) {
+      window.open(document.file, "_blank")
+    }
   }
 
   const handlePreview = () => {
-    console.log(`Previewing document: ${document.title}`)
-    // In a real app, this would open a preview
-    window.open(document.downloadUrl, "_blank")
+    if (document.file) {
+      window.open(document.file, "_blank")
+    }
   }
 
-  const getFileTypeIcon = (fileType: string) => {
-    switch (fileType) {
+  const getFileExtension = (filePath: string) => {
+    const ext = filePath?.split(".").pop()?.toLowerCase()
+    return ext || "other"
+  }
+
+  const getFileTypeIcon = (ext: string) => {
+    switch (ext) {
       case "pdf":
-        return <FileText className="icon" />
       case "doc":
-        return <FileText className="icon" />
+      case "docx":
       case "ppt":
+      case "pptx":
         return <FileText className="icon" />
-      case "image":
+      case "jpg":
+      case "jpeg":
+      case "png":
+      case "gif":
         return <Eye className="icon" />
-      case "video":
+      case "mp4":
+      case "mov":
         return <Eye className="icon" />
       default:
         return <FileText className="icon" />
     }
   }
 
-  const getFileTypeColor = (fileType: string) => {
-    switch (fileType) {
+  const getFileTypeColor = (ext: string) => {
+    switch (ext) {
       case "pdf":
         return "file-pdf"
       case "doc":
+      case "docx":
         return "file-doc"
       case "ppt":
+      case "pptx":
         return "file-ppt"
-      case "image":
+      case "jpg":
+      case "jpeg":
+      case "png":
+      case "gif":
         return "file-image"
-      case "video":
+      case "mp4":
+      case "mov":
         return "file-video"
       default:
         return "file-other"
     }
   }
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString()
-  }
+  const fileExt = getFileExtension(document.file || "")
 
   return (
     <Card className="document-item">
       <CardHeader>
         <div className="document-header">
           <div className="document-title-section">
-            {getFileTypeIcon(document.fileType)}
+            {getFileTypeIcon(fileExt)}
             <CardTitle>{document.title}</CardTitle>
           </div>
-          <Badge className={getFileTypeColor(document.fileType)}>{document.fileType.toUpperCase()}</Badge>
+          <Badge className={getFileTypeColor(fileExt)}>{fileExt.toUpperCase()}</Badge>
         </div>
-        <CardDescription>Uploaded: {formatDate(document.uploadDate)}</CardDescription>
+        <CardDescription>{document.file ? "Tài liệu đính kèm" : "Không có tệp"}</CardDescription>
       </CardHeader>
 
       <CardContent>
         <p className="document-description">{document.description}</p>
 
-        <div className="document-meta">
-          <span className="document-size">{document.fileSize}</span>
-        </div>
-
         <div className="document-actions">
-          <Button variant="outline" onClick={handlePreview}>
-            <Eye className="icon" />
-            Preview
-          </Button>
-          <Button onClick={handleDownload}>
-            <Download className="icon" />
-            Download
-          </Button>
+          {document.file ? (
+            <>
+              <Button variant="outline" onClick={handlePreview}>
+                <Eye className="icon" />
+                Xem trước
+              </Button>
+              <Button onClick={handleDownload}>
+                <Download className="icon" />
+                Tải về
+              </Button>
+            </>
+          ) : (
+            <span className="no-file-warning">Không có file đính kèm</span>
+          )}
         </div>
       </CardContent>
     </Card>

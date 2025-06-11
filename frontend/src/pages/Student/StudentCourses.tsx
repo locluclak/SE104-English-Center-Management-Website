@@ -69,7 +69,7 @@ const StudentCourses: React.FC = () => {
               name: c.NAME,
               description: cleanDescription || "",
               instructor: teacher,
-              schedule: `${new Date(c.START_DATE).toLocaleDateString()} - ${new Date(c.END_DATE).toLocaleDateString()}`,
+              schedule: `${new Date(c.START_DATE).toLocaleDateString("vi-VN")} - ${new Date(c.END_DATE).toLocaleDateString("vi-VN")}`,
               progress: status === "completed" ? 100 : status === "active" ? 50 : 0,
               status,
               // nextClass: "", // nếu có API ngày học tiếp theo thì gán ở đây
