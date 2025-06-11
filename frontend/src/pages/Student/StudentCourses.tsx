@@ -1,12 +1,12 @@
-"use client"
-
 import type React from "react"
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/Ui/Card/card"
-import { Button } from "../../components/Ui/Button/button"
-import { Badge } from "../../components/Ui/Badge/badge"
-import { BookOpen, Users, Calendar, ArrowRight } from "../../components/Ui/Icons/icons"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/Ui/Card/card"
+import { Button } from "@/components/Ui/Button/button"
+import { Badge } from "@/components/Ui/Badge/badge"
+import { BookOpen, Users, Calendar, ArrowRight } from "@/components/Ui/Icons/icons"
+import { MainApiRequest } from "@/services/MainApiRequest"
+import { message } from "antd"
 
 interface EnrolledCourse {
   id: string
@@ -15,53 +15,76 @@ interface EnrolledCourse {
   instructor: string
   schedule: string
   progress: number
-  status: "active" | "completed" | "paused"
+  status: "active" | "completed" | "upcoming"
   nextClass: string
 }
 
-interface StudentCoursesProps {
-  studentId: string
-  userRole: string
-}
-
-const StudentCourses: React.FC<StudentCoursesProps> = ({ studentId, userRole }) => {
-  const [enrolledCourses, setEnrolledCourses] = useState<EnrolledCourse[]>([])
+const StudentCourses: React.FC = () => {
   const navigate = useNavigate()
+  const [enrolledCourses, setEnrolledCourses] = useState<EnrolledCourse[]>([])
+
+  const rawUser = localStorage.getItem("token")
+  const parsedUser = rawUser ? JSON.parse(rawUser) : null
+  const studentId = parsedUser?.id
+
+
+  const fetchTeacherForCourse = async (courseId: string): Promise<string> => {
+    try {
+      const res = await MainApiRequest.get(`/course/teacher/${courseId}`)
+      const teachers = res.data
+      return teachers?.[0]?.NAME || "N/A"
+    } catch (err) {
+      console.error("Failed to fetch teacher", err)
+      return "N/A"
+    }
+  }
+
+  const determineStatus = (startDate: string, endDate: string): "active" | "completed" | "upcoming" => {
+    const now = new Date()
+    const start = new Date(startDate)
+    const end = new Date(endDate)
+
+    if (now < start) return "upcoming"
+    if (now > end) return "completed"
+    return "active"
+  }
 
   useEffect(() => {
-    // Mock data - replace with actual API calls
-    setEnrolledCourses([
-      {
-        id: "1",
-        name: "Mathematics 101",
-        description: "Basic mathematics course covering algebra and geometry",
-        instructor: "Dr. Smith",
-        schedule: "Mon, Wed, Fri 9:00 AM",
-        progress: 75,
-        status: "active",
-        nextClass: "2024-01-15T09:00:00",
-      },
-      {
-        id: "2",
-        name: "Physics 101",
-        description: "Introduction to Physics principles and applications",
-        instructor: "Dr. Johnson",
-        schedule: "Tue, Thu 2:00 PM",
-        progress: 60,
-        status: "active",
-        nextClass: "2024-01-16T14:00:00",
-      },
-      {
-        id: "3",
-        name: "Chemistry 101",
-        description: "Basic chemistry concepts and laboratory work",
-        instructor: "Dr. Williams",
-        schedule: "Mon, Wed 11:00 AM",
-        progress: 100,
-        status: "completed",
-        nextClass: "",
-      },
-    ])
+    if (!studentId) return
+
+    const loadEnrolledCourses = async () => {
+      try {
+        const res = await MainApiRequest.get(`/course/student/${studentId}`)
+        const rawCourses = res.data
+
+        const mappedCourses = await Promise.all(
+          rawCourses.map(async (c: any) => {
+            const teacher = await fetchTeacherForCourse(c.COURSE_ID)
+            const cleanDescription = c.DESCRIPTION?.replace(/^\[Giáo viên:.*?\]\s*/, "")
+
+            const status = determineStatus(c.START_DATE, c.END_DATE)
+
+            return {
+              id: c.COURSE_ID,
+              name: c.NAME,
+              description: cleanDescription || "",
+              instructor: teacher,
+              schedule: `${new Date(c.START_DATE).toLocaleDateString()} - ${new Date(c.END_DATE).toLocaleDateString()}`,
+              progress: status === "completed" ? 100 : status === "active" ? 50 : 0,
+              status,
+              // nextClass: "", // nếu có API ngày học tiếp theo thì gán ở đây
+            }
+          })
+        )
+
+        setEnrolledCourses(mappedCourses)
+      } catch (err) {
+        console.error("Failed to fetch enrolled courses", err)
+        message.error("Không thể tải danh sách khoá học đã đăng ký.")
+      }
+    }
+
+    loadEnrolledCourses()
   }, [studentId])
 
   const handleCourseClick = (courseId: string) => {
@@ -74,24 +97,20 @@ const StudentCourses: React.FC<StudentCoursesProps> = ({ studentId, userRole }) 
         return "status-active"
       case "completed":
         return "status-completed"
-      case "paused":
-        return "status-paused"
+      case "upcoming":
+        return "status-upcoming"
       default:
         return "status-default"
     }
-  }
-
-  const formatNextClass = (dateString: string) => {
-    if (!dateString) return "Course completed"
-    const date = new Date(dateString)
-    return date.toLocaleDateString() + " at " + date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
   }
 
   return (
     <div className="student-courses">
       <div className="page-header">
         <h1>My Courses</h1>
-        <Badge variant="secondary">{enrolledCourses.filter((c) => c.status === "active").length} Active Courses</Badge>
+        <Badge variant="secondary">
+          {enrolledCourses.filter((c) => c.status === "active").length} Active Courses
+        </Badge>
       </div>
 
       <div className="courses-grid">
@@ -120,7 +139,6 @@ const StudentCourses: React.FC<StudentCoursesProps> = ({ studentId, userRole }) 
                 </div>
               </div>
 
-              {/* Progress Bar */}
               <div className="progress-section">
                 <div className="progress-header">
                   <span>Progress</span>
@@ -130,14 +148,6 @@ const StudentCourses: React.FC<StudentCoursesProps> = ({ studentId, userRole }) 
                   <div className="progress-fill" style={{ width: `${course.progress}%` }} />
                 </div>
               </div>
-
-              {/* Next Class Info */}
-              {course.status === "active" && (
-                <div className="next-class">
-                  <p className="next-class-label">Next Class:</p>
-                  <p className="next-class-time">{formatNextClass(course.nextClass)}</p>
-                </div>
-              )}
 
               <Button className="view-course-btn" onClick={() => handleCourseClick(course.id)}>
                 <span>View Course</span>
