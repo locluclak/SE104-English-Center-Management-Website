@@ -3,13 +3,14 @@
 import type React from "react"
 import { useState, useEffect } from "react"
 import { useParams, useNavigate } from "react-router-dom"
-import { Card, CardContent, CardHeader, CardTitle } from "../../components/Ui/Card/card"
-import { Button } from "../../components/Ui/Button/button"
-import { Badge } from "../../components/Ui/Badge/badge"
-import { Tabs, TabsList, TabsTrigger } from "../../components/Ui/Tabs//tabs"
-import { Users, Calendar, ArrowLeft, Clock } from "../../components/Ui/Icons/icons"
-import { StudentAssignmentItem } from "../../components/Student/StudentAssignmentItem"
-import { StudentDocumentItem } from "../../components/Student/StudentDocumentItem"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/Ui/Card/card"
+import { Button } from "@/components/Ui/Button/button"
+import { Badge } from "@/components/Ui/Badge/badge"
+import { Tabs, TabsList, TabsTrigger } from "@/components/Ui/Tabs/tabs"
+import { Users, Calendar, ArrowLeft, Clock } from "@/components/Ui/Icons/icons"
+import { StudentAssignmentItem } from "@/components/Student/StudentAssignmentItem"
+import { StudentDocumentItem } from "@/components/Student/StudentDocumentItem"
+import { MainApiRequest } from "@/services/MainApiRequest"
 import "./StudentCourseDetail.scss"
 
 interface CourseDetail {
@@ -23,7 +24,6 @@ interface CourseDetail {
   startDate: string
   endDate: string
   syllabus: string
-  nextClass: string
 }
 
 interface Assignment {
@@ -31,19 +31,7 @@ interface Assignment {
   title: string
   description: string
   dueDate: string
-  status: "pending" | "submitted" | "graded"
-  grade?: number
-  feedback?: string
-}
-
-interface Document {
-  id: string
-  title: string
-  description: string
-  uploadDate: string
-  fileType: "pdf" | "doc" | "ppt" | "image" | "video" | "other"
-  fileSize: string
-  downloadUrl: string
+  status: "pending"
 }
 
 const StudentCourseDetail: React.FC = () => {
@@ -52,111 +40,67 @@ const StudentCourseDetail: React.FC = () => {
   const [activeTab, setActiveTab] = useState("overview")
   const [courseDetail, setCourseDetail] = useState<CourseDetail | null>(null)
   const [assignments, setAssignments] = useState<Assignment[]>([])
-  const [documents, setDocuments] = useState<Document[]>([])
   const [loading, setLoading] = useState(true)
 
+  const formatStatus = (start: string, end: string): CourseDetail["status"] => {
+    const now = new Date()
+    const startDate = new Date(start)
+    const endDate = new Date(end)
+    if (now < startDate) return "paused"
+    if (now > endDate) return "completed"
+    return "active"
+  }
+
   useEffect(() => {
-    // Mock data - replace with actual API calls
-    setLoading(true)
+    const fetchCourseData = async () => {
+      if (!courseId) return
+      try {
+        const res = await MainApiRequest.get(`/course/${courseId}`)
+        const teacherRes = await MainApiRequest.get(`/course/teacher/${courseId}`)
 
-    // Simulate API call delay
-    setTimeout(() => {
-      setCourseDetail({
-        id: courseId || "1",
-        name: "Mathematics 101",
-        description: "Basic mathematics course covering algebra and geometry",
-        instructor: "Dr. Smith",
-        schedule: "Mon, Wed, Fri 9:00 AM",
-        progress: 75,
-        status: "active",
-        startDate: "2024-01-01",
-        endDate: "2024-05-30",
-        syllabus:
-          "This course covers fundamental mathematical concepts including algebra, geometry, and basic calculus. Students will learn problem-solving techniques and develop analytical thinking skills.",
-        nextClass: "2024-01-15T09:00:00",
-      })
+        const course = res.data
+        const instructor = teacherRes.data?.[0]?.NAME || "N/A"
+        const status = formatStatus(course.START_DATE, course.END_DATE)
 
-      setAssignments([
-        {
-          id: "a1",
-          title: "Algebra Homework 1",
-          description: "Complete problems 1-10 in Chapter 3",
-          dueDate: "2024-01-20T23:59:00",
-          status: "pending",
-        },
-        {
-          id: "a2",
-          title: "Geometry Quiz",
-          description: "Online quiz covering triangles and circles",
-          dueDate: "2024-01-25T23:59:00",
-          status: "pending",
-        },
-        {
-          id: "a3",
-          title: "Midterm Project",
-          description: "Research paper on a mathematical concept of your choice",
-          dueDate: "2024-02-15T23:59:00",
-          status: "pending",
-        },
-        {
-          id: "a4",
-          title: "Practice Problems",
-          description: "Complete the practice problems from last week's lecture",
-          dueDate: "2024-01-10T23:59:00",
-          status: "submitted",
-        },
-      ])
+        setCourseDetail({
+          id: course.COURSE_ID,
+          name: course.NAME,
+          description: course.DESCRIPTION?.replace(/^\[Giáo viên:.*?\]\s*/, "") || "",
+          instructor,
+          schedule: `${new Date(course.START_DATE).toLocaleDateString("vi-VN")} - ${new Date(course.END_DATE).toLocaleDateString("vi-VN")}`,
+          progress: status === "completed" ? 100 : status === "active" ? 50 : 0,
+          status,
+          startDate: course.START_DATE,
+          endDate: course.END_DATE,
+          syllabus: course.DESCRIPTION || "",
+        })
 
-      setDocuments([
-        {
-          id: "d1",
-          title: "Course Syllabus",
-          description: "Complete course syllabus and schedule",
-          uploadDate: "2024-01-01",
-          fileType: "pdf",
-          fileSize: "1.2 MB",
-          downloadUrl: "/files/syllabus.pdf",
-        },
-        {
-          id: "d2",
-          title: "Lecture 1: Introduction to Algebra",
-          description: "Slides from the first lecture",
-          uploadDate: "2024-01-05",
-          fileType: "ppt",
-          fileSize: "3.5 MB",
-          downloadUrl: "/files/lecture1.ppt",
-        },
-        {
-          id: "d3",
-          title: "Textbook Chapter 1-3",
-          description: "Digital copy of the textbook chapters 1-3",
-          uploadDate: "2024-01-05",
-          fileType: "pdf",
-          fileSize: "8.7 MB",
-          downloadUrl: "/files/textbook_ch1-3.pdf",
-        },
-        {
-          id: "d4",
-          title: "Practice Problems Set 1",
-          description: "Additional practice problems for Week 1",
-          uploadDate: "2024-01-07",
-          fileType: "pdf",
-          fileSize: "0.8 MB",
-          downloadUrl: "/files/practice_set1.pdf",
-        },
-      ])
+        const assignmentRes = await MainApiRequest.get(`/assignment/getbycourse/${courseId}`)
+        const assignmentsRaw = assignmentRes.data?.assignments || []
 
-      setLoading(false)
-    }, 500)
+        const simplifiedAssignments = assignmentsRaw.map((a: any): Assignment => ({
+          id: a.AS_ID,
+          title: a.NAME,
+          description: a.DESCRIPTION || "",
+          dueDate: a.END_DATE,
+          status: "pending", // mặc định, sẽ xử lý ở component con
+        }))
+
+        setAssignments(simplifiedAssignments)
+      } catch (err) {
+        console.error("Lỗi khi tải khoá học:", err)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchCourseData()
   }, [courseId])
 
-  const handleBack = () => {
-    navigate("/student/courses")
-  }
+  const handleBack = () => navigate("/student/courses")
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString()
-  }
+  const formatDate = (dateString: string) =>
+    new Date(dateString).toLocaleDateString()
 
   const formatNextClass = (dateString: string) => {
     if (!dateString) return "No upcoming classes"
@@ -204,10 +148,6 @@ const StudentCourseDetail: React.FC = () => {
             <Calendar className="icon" />
             <span>{courseDetail.schedule}</span>
           </div>
-          <div className="meta-item">
-            <Clock className="icon" />
-            <span>Next Class: {formatNextClass(courseDetail.nextClass)}</span>
-          </div>
         </div>
       </div>
 
@@ -217,7 +157,7 @@ const StudentCourseDetail: React.FC = () => {
           <span>{courseDetail.progress}%</span>
         </div>
         <div className="progress-bar">
-          <div className="progress-fill" style={{ width: `${courseDetail.progress}%` }}></div>
+          <div className="progress-fill" style={{ width: `${courseDetail.progress}%` }} />
         </div>
       </div>
 
@@ -238,68 +178,6 @@ const StudentCourseDetail: React.FC = () => {
                 <p>{courseDetail.description}</p>
               </CardContent>
             </Card>
-
-            <div className="overview-grid">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Course Details</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="detail-item">
-                    <strong>Start Date:</strong>
-                    <span>{formatDate(courseDetail.startDate)}</span>
-                  </div>
-                  <div className="detail-item">
-                    <strong>End Date:</strong>
-                    <span>{formatDate(courseDetail.endDate)}</span>
-                  </div>
-                  <div className="detail-item">
-                    <strong>Schedule:</strong>
-                    <span>{courseDetail.schedule}</span>
-                  </div>
-                  <div className="detail-item">
-                    <strong>Status:</strong>
-                    <Badge className={`status-${courseDetail.status}`}>{courseDetail.status}</Badge>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Syllabus</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p>{courseDetail.syllabus}</p>
-                </CardContent>
-              </Card>
-            </div>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Upcoming Assignments</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="upcoming-assignments">
-                  {assignments
-                    .filter((a) => a.status === "pending")
-                    .slice(0, 3)
-                    .map((assignment) => (
-                      <div key={assignment.id} className="upcoming-assignment-item">
-                        <div className="assignment-info">
-                          <h4>{assignment.title}</h4>
-                          <p>{assignment.description}</p>
-                        </div>
-                        <div className="assignment-due">
-                          <span>Due: {new Date(assignment.dueDate).toLocaleDateString()}</span>
-                        </div>
-                      </div>
-                    ))}
-                  {assignments.filter((a) => a.status === "pending").length === 0 && (
-                    <p className="no-assignments">No upcoming assignments</p>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
           </div>
         )}
 
@@ -316,12 +194,7 @@ const StudentCourseDetail: React.FC = () => {
 
         {activeTab === "materials" && (
           <div className="tab-content">
-            <div className="documents-list">
-              {documents.map((document) => (
-                <StudentDocumentItem key={document.id} document={document} />
-              ))}
-              {documents.length === 0 && <p className="no-content">No materials available</p>}
-            </div>
+            <p>Materials tab coming soon...</p>
           </div>
         )}
       </Tabs>
