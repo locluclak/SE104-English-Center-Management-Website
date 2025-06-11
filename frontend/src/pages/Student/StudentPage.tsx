@@ -73,15 +73,8 @@ const StudentPage: React.FC = () => {
               }
             />
 
-            <Route
-              path="/courses"
-              element={
-                <StudentCourses
-                  studentId={currentStudentId}
-                  userRole={currentUserRole}
-                />
-              }
-            />
+            <Route path="/courses" element={<StudentCourses />} />
+
             <Route
               path="/courses/:courseId"
               element={<StudentCourseDetail />}
