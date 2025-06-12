@@ -3,9 +3,9 @@
 
 import React, { useEffect, useRef, useState } from "react"
 import { Modal, Input, Button as AntButton, Dropdown, Menu, message } from "antd"
-import type { MenuProps } from 'antd'; // Import MenuProps để định nghĩa kiểu cho menu items
+import type { MenuProps } from 'antd';
 import { Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, Type, Palette, Mic, MicOff, Paperclip, Trash } from "lucide-react"
-import { Textarea } from "@/components/Ui/Textarea/textarea"
+// import { Textarea } from "@/components/Ui/Textarea/textarea" // Comment/Xóa dòng này
 import { MainApiRequest } from "@/services/MainApiRequest"
 import "./PadletCreateModal.scss"
 
@@ -13,8 +13,9 @@ import "./PadletCreateModal.scss"
 interface Attachment {
   id: string;
   fileName: string;
-  fileSize: string;
-  fileType: string;
+  fileSize: number;
+  fileType: string; // mimetype
+  mediaType: 'attachment' | 'audio';
   downloadUrl: string;
 }
 
@@ -23,12 +24,12 @@ interface PadletCreateModalProps {
   onClose: () => void
   onSuccess?: () => void
   studentId: string
-  mode: "create" | "edit" // Bỏ "view" để tránh lỗi so sánh
-  defaultData?: { // Dữ liệu khi ở chế độ edit
+  mode: "create" | "edit" | "view" // Thêm "view"
+  defaultData?: { // defaultData có thể là undefined
     id: string
     title: string
     content: string
-    attachments: Attachment[]
+    attachments: Attachment[] // Bao gồm cả audio nếu có
     color: string
     textFormat: {
       fontSize: string
@@ -37,15 +38,15 @@ interface PadletCreateModalProps {
       textAlign: string
       textColor: string
     }
-  }
+  } | null // defaultData cũng có thể là null
 }
 
 const PadletCreateModal: React.FC<PadletCreateModalProps> = ({ open, onClose, onSuccess, studentId, mode, defaultData }) => {
   const [noteTitle, setNoteTitle] = useState("")
   const [noteContent, setNoteContent] = useState("")
   const [newAttachments, setNewAttachments] = useState<File[]>([])
-  const [existingAttachments, setExistingAttachments] = useState<Attachment[]>([])
-  const [removedAttachments, setRemovedAttachments] = useState<string[]>([])
+  const [existingAttachments, setExistingAttachments] = useState<Attachment[]>([]) // Chỉ các attachments thông thường
+  const [removedAttachments, setRemovedAttachments] = useState<string[]>([]) // Tên file đã xóa (để gửi lên backend)
   const [noteColor, setNoteColor] = useState("#ffffff")
   const [noteTextFormat, setNoteTextFormat] = useState({
     fontSize: "14px",
@@ -57,30 +58,40 @@ const PadletCreateModal: React.FC<PadletCreateModalProps> = ({ open, onClose, on
 
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [isRecording, setIsRecording] = useState(false)
-  const [audioBlob, setAudioBlob] = useState<Blob | null>(null)
+  const [audioBlob, setAudioBlob] = useState<Blob | null>(null) // Blob cho ghi âm mới
+  const [existingAudioAttachment, setExistingAudioAttachment] = useState<Attachment | null>(null); // Toàn bộ object Attachment cho audio hiện có
+  const [isAudioRemoved, setIsAudioRemoved] = useState(false); // Đánh dấu audio bị xóa
   const [recordingTime, setRecordingTime] = useState(0)
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const audioChunksRef = useRef<Blob[]>([])
   const recordingIntervalRef = useRef<NodeJS.Timeout | null>(null)
-  const textareaRef = useRef<HTMLTextAreaElement>(null)
+  const textareaRef = useRef<HTMLTextAreaElement>(null); // Ref cho textarea gốc
 
-  // Reset form và load defaultData khi modal mở/đóng hoặc mode/defaultData thay đổi
   useEffect(() => {
     if (open) {
-      if (mode === "edit" && defaultData) {
-        setNoteTitle(defaultData.title)
-        setNoteContent(defaultData.content)
-        setExistingAttachments(defaultData.attachments || [])
-        setNoteColor(defaultData.color || "#ffffff")
-        setNoteTextFormat(defaultData.textFormat || {
-          fontSize: "14px", fontWeight: "normal", fontStyle: "normal",
-          textAlign: "left", textColor: "#000000",
-        })
-        setNewAttachments([])
-        setRemovedAttachments([])
-        setAudioBlob(null)
-        setRecordingTime(0)
-      } else {
+      if (mode === "edit" || mode === "view") {
+        if (defaultData) { // Kiểm tra defaultData trước khi truy cập
+          setNoteTitle(defaultData.title)
+          setNoteContent(defaultData.content)
+
+          // Phân loại attachments từ defaultData
+          const regAttachments = defaultData.attachments.filter(att => att.mediaType === 'attachment');
+          const audioAtt = defaultData.attachments.find(att => att.mediaType === 'audio');
+
+          setExistingAttachments(regAttachments || [])
+          setExistingAudioAttachment(audioAtt || null);
+          setNoteColor(defaultData.color || "#ffffff")
+          setNoteTextFormat(defaultData.textFormat || {
+            fontSize: "14px", fontWeight: "normal", fontStyle: "normal",
+            textAlign: "left", textColor: "#000000",
+          })
+          setNewAttachments([])
+          setRemovedAttachments([])
+          setAudioBlob(null)
+          setIsAudioRemoved(false);
+          setRecordingTime(0)
+        }
+      } else { // mode === "create"
         setNoteTitle("")
         setNoteContent("")
         setNewAttachments([])
@@ -92,6 +103,8 @@ const PadletCreateModal: React.FC<PadletCreateModalProps> = ({ open, onClose, on
           textAlign: "left", textColor: "#000000",
         })
         setAudioBlob(null)
+        setExistingAudioAttachment(null);
+        setIsAudioRemoved(false);
         setRecordingTime(0)
       }
     }
@@ -133,6 +146,8 @@ const PadletCreateModal: React.FC<PadletCreateModalProps> = ({ open, onClose, on
       mediaRecorder.onstop = () => {
         const audioBlob = new Blob(audioChunksRef.current, { type: "audio/wav" })
         setAudioBlob(audioBlob)
+        setExistingAudioAttachment(null); // Khi ghi âm mới, xóa tham chiếu đến audio cũ
+        setIsAudioRemoved(false); // Đảm bảo cờ xóa không được bật nếu có audio mới
         stream.getTracks().forEach((track) => track.stop())
       }
 
@@ -168,24 +183,40 @@ const PadletCreateModal: React.FC<PadletCreateModalProps> = ({ open, onClose, on
     setRemovedAttachments(prev => [...prev, fileName])
   }
 
+  const removeAudioFile = () => {
+    setAudioBlob(null); // Xóa audio mới nếu có
+    setExistingAudioAttachment(null); // Xóa tham chiếu audio cũ
+    setIsAudioRemoved(true); // Đánh dấu để xóa audio cũ trên backend
+  };
+
   const handleSubmit = async () => {
     setIsSubmitting(true)
     const formData = new FormData()
     formData.append("name", noteTitle)
     formData.append("content", noteContent)
     formData.append("ownerId", studentId)
-    // Thêm màu nền vào formData (nếu backend hỗ trợ lưu)
-    // formData.append("color", noteColor); 
+    formData.append("color", noteColor) // Thêm màu nền vào formData
 
     newAttachments.forEach((file) => formData.append("attachments", file))
-    formData.append("removeAttachment", JSON.stringify(removedAttachments)) // Gửi mảng tên file cần xóa
+
+    // Nếu có ghi âm mới được tạo
+    if (audioBlob) {
+      formData.append("audio", audioBlob, `audio_${Date.now()}.wav`);
+    }
+
+    // Xử lý các file cần xóa (bao gồm cả audio cũ nếu đã bị xóa)
+    const filesToDeleteOnBackend = [...removedAttachments];
+    if (isAudioRemoved && existingAudioAttachment) {
+        filesToDeleteOnBackend.push(existingAudioAttachment.fileName);
+    }
+    formData.append("removeAttachment", JSON.stringify(filesToDeleteOnBackend));
 
     try {
       if (mode === "create") {
         await MainApiRequest.post("/padlet/create", formData)
         message.success("Đã tạo ghi chú")
       } else if (mode === "edit" && defaultData?.id) {
-        await MainApiRequest.put(`/padlet/edit/${defaultData.id}`, formData, { // Đổi sang /padlet/edit/
+        await MainApiRequest.put(`/padlet/edit/${defaultData.id}`, formData, {
           headers: {
             'Content-Type': 'multipart/form-data',
           },
@@ -203,40 +234,40 @@ const PadletCreateModal: React.FC<PadletCreateModalProps> = ({ open, onClose, on
   }
 
   const fontSizeMenu: MenuProps['items'] = [
-    { key: "12px", label: "12px" },
-    { key: "14px", label: "14px" },
-    { key: "16px", label: "16px" },
-    { key: "18px", label: "18px" },
-    { key: "20px", label: "20px" },
+    { key: "12px", label: "12px", onClick: () => updateTextFormat("fontSize", "12px") },
+    { key: "14px", label: "14px", onClick: () => updateTextFormat("fontSize", "14px") },
+    { key: "16px", label: "16px", onClick: () => updateTextFormat("fontSize", "16px") },
+    { key: "18px", label: "18px", onClick: () => updateTextFormat("fontSize", "18px") },
+    { key: "20px", label: "20px", onClick: () => updateTextFormat("fontSize", "20px") },
   ];
 
 
   const textColorMenu: MenuProps['items'] = [
-    { key: "#000000", label: "Đen" },
-    { key: "#dc2626", label: "Đỏ" },
-    { key: "#2563eb", label: "Xanh dương" },
-    { key: "#16a34a", label: "Xanh lá" },
-    { key: "#ca8a04", label: "Vàng" },
+    { key: "#000000", label: "Đen", onClick: () => updateTextFormat("textColor", "#000000") },
+    { key: "#dc2626", label: "Đỏ", onClick: () => updateTextFormat("textColor", "#dc2626") },
+    { key: "#2563eb", label: "Xanh dương", onClick: () => updateTextFormat("textColor", "#2563eb") },
+    { key: "#16a34a", label: "Xanh lá", onClick: () => updateTextFormat("textColor", "#16a34a") },
+    { key: "#ca8a04", label: "Vàng", onClick: () => updateTextFormat("textColor", "#ca8a04") },
   ];
 
   const formatTime = (seconds: number) => `${Math.floor(seconds / 60)}:${(seconds % 60).toString().padStart(2, "0")}`
 
-  // Loại bỏ biến readOnly nếu không có chế độ "view"
-  // const readOnly = mode === "view"
-  const isReadOnly = mode === "edit" && !open; // Hoặc một logic khác nếu bạn muốn disable form khi không phải edit
+  const isReadOnly = mode === "view"; // Chỉ đọc khi ở chế độ "view"
+  const isFormDisabled = isReadOnly || isSubmitting; // Tắt form khi chỉ đọc hoặc đang submit
 
   return (
     <Modal
-      title={mode === "create" ? "Tạo ghi chú" : "Chỉnh sửa ghi chú"}
+      title={mode === "create" ? "Tạo ghi chú" : (mode === "edit" ? "Chỉnh sửa ghi chú" : "Xem ghi chú")}
       open={open}
       onCancel={onClose}
       footer={
-        // Không kiểm tra mode === "view" nữa
-        [
+        isReadOnly // Footer khác nhau cho chế độ xem
+          ? [<AntButton key="close" onClick={onClose}>Đóng</AntButton>]
+          : [
             <AntButton key="cancel" onClick={onClose}>
               Hủy
             </AntButton>,
-            <AntButton key="submit" type="primary" loading={isSubmitting} onClick={handleSubmit} disabled={!noteTitle}>
+            <AntButton key="submit" type="primary" loading={isSubmitting} onClick={handleSubmit} disabled={!noteTitle || isFormDisabled}>
               {mode === "create" ? "Tạo" : "Cập nhật"}
             </AntButton>,
           ]
@@ -246,47 +277,51 @@ const PadletCreateModal: React.FC<PadletCreateModalProps> = ({ open, onClose, on
       <div className="padlet-modal">
         <div>
           <label className="block text-sm font-medium mb-1">Tiêu đề</label>
-          <Input disabled={isReadOnly} value={noteTitle} onChange={(e) => setNoteTitle(e.target.value)} placeholder="Nhập tiêu đề ghi chú"/>
+          <Input disabled={isFormDisabled} value={noteTitle} onChange={(e) => setNoteTitle(e.target.value)} placeholder="Nhập tiêu đề ghi chú"/>
         </div>
 
-        <div className="text-formatting-toolbar flex items-center space-x-2 p-2 border rounded-md bg-gray-50">
-          <AntButton size="small" onClick={() => applyTextFormat("bold")} disabled={isReadOnly} title="In đậm">
-            <Bold className="w-4 h-4" />
-          </AntButton>
-          <AntButton size="small" onClick={() => applyTextFormat("italic")} disabled={isReadOnly} title="In nghiêng">
-            <Italic className="w-4 h-4" />
-          </AntButton>
-          <AntButton size="small" onClick={() => applyTextFormat("underline")} disabled={isReadOnly} title="Gạch chân">
-            <Underline className="w-4 h-4" />
-          </AntButton>
+        {/* Toolbar định dạng chỉ hiện khi không ở chế độ xem */}
+        {!isReadOnly && (
+            <div className="text-formatting-toolbar flex items-center space-x-2 p-2 border rounded-md bg-gray-50">
+              <AntButton size="small" onClick={() => applyTextFormat("bold")} disabled={isFormDisabled} title="In đậm">
+                <Bold className="w-4 h-4" />
+              </AntButton>
+              <AntButton size="small" onClick={() => applyTextFormat("italic")} disabled={isFormDisabled} title="In nghiêng">
+                <Italic className="w-4 h-4" />
+              </AntButton>
+              <AntButton size="small" onClick={() => applyTextFormat("underline")} disabled={isFormDisabled} title="Gạch chân">
+                <Underline className="w-4 h-4" />
+              </AntButton>
 
-          <AntButton size="small" onClick={() => updateTextFormat("textAlign", "left")} disabled={isReadOnly} title="Căn trái">
-            <AlignLeft className="w-4 h-4" />
-          </AntButton>
-          <AntButton size="small" onClick={() => updateTextFormat("textAlign", "center")} disabled={isReadOnly} title="Căn giữa">
-            <AlignCenter className="w-4 h-4" />
-          </AntButton>
-          <AntButton size="small" onClick={() => updateTextFormat("textAlign", "right")} disabled={isReadOnly} title="Căn phải">
-            <AlignRight className="w-4 h-4" />
-          </AntButton>
+              <AntButton size="small" onClick={() => updateTextFormat("textAlign", "left")} disabled={isFormDisabled} title="Căn trái">
+                <AlignLeft className="w-4 h-4" />
+              </AntButton>
+              <AntButton size="small" onClick={() => updateTextFormat("textAlign", "center")} disabled={isFormDisabled} title="Căn giữa">
+                <AlignCenter className="w-4 h-4" />
+              </AntButton>
+              <AntButton size="small" onClick={() => updateTextFormat("textAlign", "right")} disabled={isFormDisabled} title="Căn phải">
+                <AlignRight className="w-4 h-4" />
+              </AntButton>
 
-          <Dropdown menu={{ items: fontSizeMenu }} trigger={["click"]}>
-            <AntButton size="small" disabled={isReadOnly} title="Cỡ chữ">
-              <Type className="w-4 h-4" />
-              {noteTextFormat.fontSize}
-            </AntButton>
-          </Dropdown>
+              <Dropdown menu={{ items: fontSizeMenu }} trigger={["click"]}>
+                <AntButton size="small" disabled={isFormDisabled} title="Cỡ chữ">
+                  <Type className="w-4 h-4" />
+                  {noteTextFormat.fontSize}
+                </AntButton>
+              </Dropdown>
 
-          <Dropdown menu={{ items: textColorMenu }} trigger={["click"]}>
-            <AntButton size="small" disabled={isReadOnly} title="Màu chữ">
-              <Palette className="w-4 h-4" />
-            </AntButton>
-          </Dropdown>
-        </div>
+              <Dropdown menu={{ items: textColorMenu }} trigger={["click"]}>
+                <AntButton size="small" disabled={isFormDisabled} title="Màu chữ">
+                  <Palette className="w-4 h-4" />
+                </AntButton>
+              </Dropdown>
+            </div>
+        )}
 
         <div>
             <label className="block text-sm font-medium mb-1">Nội dung</label>
-            <Textarea
+            {/* Thay thế Textarea tùy chỉnh bằng textarea HTML gốc để ref hoạt động */}
+            <textarea
               rows={6}
               readOnly={isReadOnly}
               value={noteContent}
@@ -297,7 +332,15 @@ const PadletCreateModal: React.FC<PadletCreateModalProps> = ({ open, onClose, on
                 fontStyle: noteTextFormat.fontStyle,
                 textAlign: noteTextFormat.textAlign as any,
                 color: noteTextFormat.textColor,
+                width: '100%',
+                padding: '8px',
+                border: '1px solid #d9d9d9',
+                borderRadius: '6px',
+                resize: 'vertical',
+                boxSizing: 'border-box' // Để padding không làm tăng width
               }}
+              ref={textareaRef}
+              placeholder="Viết ghi chú của bạn ở đây..."
             />
         </div>
 
@@ -323,7 +366,7 @@ const PadletCreateModal: React.FC<PadletCreateModalProps> = ({ open, onClose, on
           <label className="block text-sm font-medium mb-1">Đính kèm & Ghi âm</label>
           {!isReadOnly && <input type="file" multiple onChange={handleFileChange} className="mb-2" />}
 
-          {mode === "edit" && existingAttachments.length > 0 && (
+          {existingAttachments.length > 0 && (
             <div className="space-y-2 mb-2">
               <h5 className="text-sm font-medium">File đã đính kèm:</h5>
               {existingAttachments.map((att) => (
@@ -379,7 +422,19 @@ const PadletCreateModal: React.FC<PadletCreateModalProps> = ({ open, onClose, on
               )}
             </div>
           )}
-          {audioBlob && <audio controls src={URL.createObjectURL(audioBlob)} className="w-full" />}
+          {(audioBlob || existingAudioAttachment) && (
+              <div className="flex items-center space-x-2 p-2 bg-gray-100 rounded">
+                  <audio controls src={audioBlob ? URL.createObjectURL(audioBlob) : (existingAudioAttachment?.downloadUrl || '')} className="flex-grow" />
+                  {!isReadOnly && (
+                    <AntButton size="small" onClick={removeAudioFile} title="Xóa ghi âm">
+                        <Trash className="w-4 h-4" />
+                    </AntButton>
+                  )}
+              </div>
+          )}
+          {!isReadOnly && isAudioRemoved && !audioBlob && (
+              <p className="text-red-500 text-sm mt-1">Ghi âm đã được đánh dấu để xóa khi cập nhật.</p>
+          )}
         </div>
       </div>
     </Modal>
