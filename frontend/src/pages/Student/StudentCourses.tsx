@@ -50,42 +50,42 @@ const StudentCourses: React.FC = () => {
   }
 
   useEffect(() => {
-    if (!studentId) return
+  if (!studentId) return;
 
-    const loadEnrolledCourses = async () => {
-      try {
-        const res = await MainApiRequest.get(`/course/student/${studentId}`)
-        const rawCourses = res.data
+  const loadEnrolledCourses = async () => {
+    try {
+      const res = await MainApiRequest.get(`/course/enrolled-courses/${studentId}`);
+      const rawCourses = res.data.courses;
 
-        const mappedCourses = await Promise.all(
-          rawCourses.map(async (c: any) => {
-            const teacher = await fetchTeacherForCourse(c.COURSE_ID)
-            const cleanDescription = c.DESCRIPTION?.replace(/^\[Giáo viên:.*?\]\s*/, "")
+      const mappedCourses = await Promise.all(
+        rawCourses.map(async (c: any) => {
+          const teacher = await fetchTeacherForCourse(c.COURSE_ID);
+          const cleanDescription = c.DESCRIPTION?.replace(/^\[Giáo viên:.*?\]\s*/, "");
 
-            const status = determineStatus(c.START_DATE, c.END_DATE)
+          const status = determineStatus(c.START_DATE, c.END_DATE);
 
-            return {
-              id: c.COURSE_ID,
-              name: c.NAME,
-              description: cleanDescription || "",
-              instructor: teacher,
-              schedule: `${new Date(c.START_DATE).toLocaleDateString("vi-VN")} - ${new Date(c.END_DATE).toLocaleDateString("vi-VN")}`,
-              progress: status === "completed" ? 100 : status === "active" ? 50 : 0,
-              status,
-              // nextClass: "", // nếu có API ngày học tiếp theo thì gán ở đây
-            }
-          })
-        )
+          return {
+            id: c.COURSE_ID,
+            name: c.NAME,
+            description: cleanDescription || "",
+            instructor: teacher,
+            schedule: `${new Date(c.START_DATE).toLocaleDateString("vi-VN")} - ${new Date(c.END_DATE).toLocaleDateString("vi-VN")}`,
+            progress: status === "completed" ? 100 : status === "active" ? 50 : 0,
+            status,
+          };
+        })
+      );
 
-        setEnrolledCourses(mappedCourses)
-      } catch (err) {
-        console.error("Failed to fetch enrolled courses", err)
-        message.error("Không thể tải danh sách khoá học đã đăng ký.")
-      }
+      setEnrolledCourses(mappedCourses);
+    } catch (err) {
+      console.error("Failed to fetch enrolled courses", err);
+      message.error("Không thể tải danh sách khoá học đã đăng ký.");
     }
+  };
 
-    loadEnrolledCourses()
-  }, [studentId])
+  loadEnrolledCourses();
+}, [studentId]);
+
 
   const handleCourseClick = (courseId: string) => {
     navigate(`/student/courses/${courseId}`)
