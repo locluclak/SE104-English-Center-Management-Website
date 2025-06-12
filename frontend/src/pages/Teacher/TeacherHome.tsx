@@ -3,30 +3,20 @@
 import type React from "react"
 import { useEffect, useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/Ui/Card/card"
+import { Card } from "../../components/Ui/Card/card"
 import { Button } from "../../components/Ui/Button/button"
-import { Badge } from "../../components/Ui/Badge/badge"
 import { BookOpen, Users, Calendar, Clock } from "../../components/Ui/Icons/icons"
 
-interface Course {
-  id: string
-  name: string
-  description: string
-  students: number
-  maxStudents: number
-  schedule: string
-  nextClass: string
-  status: "active" | "completed" | "paused"
-}
-
-interface Assignment {
+interface AssignmentDeadline {
   id: string
   title: string
+  description: string
+  dueDate: string
+  dueTime: string
   courseId: string
   courseName: string
-  dueDate: string
+  studentsCount: number
   submissionsCount: number
-  totalStudents: number
 }
 
 interface TeacherHomeProps {
@@ -35,86 +25,59 @@ interface TeacherHomeProps {
 }
 
 const TeacherHome: React.FC<TeacherHomeProps> = ({ teacherId, userRole }) => {
-  const [assignedCourses, setAssignedCourses] = useState<Course[]>([])
-  const [pendingAssignments, setPendingAssignments] = useState<Assignment[]>([])
+  const [upcomingDeadlines, setUpcomingDeadlines] = useState<AssignmentDeadline[]>([])
   const [loading, setLoading] = useState(true)
   const navigate = useNavigate()
 
   useEffect(() => {
-    // Mock data - replace with actual API calls
     setLoading(true)
 
     setTimeout(() => {
-      setAssignedCourses([
+      const mockAssignments: AssignmentDeadline[] = [
         {
           id: "1",
-          name: "Mathematics 101",
-          description: "Basic mathematics course",
-          students: 25,
-          maxStudents: 30,
-          schedule: "Mon, Wed, Fri 9:00 AM",
-          nextClass: "2024-01-15T09:00:00",
-          status: "active",
+          title: "Bài tập Toán học Chương 3",
+          description: "Bài tập đại số tuyến tính",
+          dueDate: "2025-06-20",
+          dueTime: "23:59",
+          courseId: "1",
+          courseName: "Toán học 101",
+          studentsCount: 25,
+          submissionsCount: 18,
         },
         {
           id: "2",
-          name: "Physics 101",
-          description: "Introduction to Physics",
-          students: 20,
-          maxStudents: 25,
-          schedule: "Tue, Thu 2:00 PM",
-          nextClass: "2024-01-16T14:00:00",
-          status: "active",
+          title: "Báo cáo thí nghiệm Vật lý",
+          description: "Phân tích chuyển động con lắc",
+          dueDate: "2025-06-25",
+          dueTime: "23:59",
+          courseId: "2",
+          courseName: "Vật lý 101",
+          studentsCount: 20,
+          submissionsCount: 12,
         },
         {
           id: "3",
-          name: "Chemistry 101",
-          description: "Basic chemistry concepts",
-          students: 22,
-          maxStudents: 25,
-          schedule: "Mon, Wed 11:00 AM",
-          nextClass: "2024-01-17T11:00:00",
-          status: "active",
+          title: "Luận văn Hóa học",
+          description: "Nghiên cứu hợp chất hữu cơ",
+          dueDate: "2025-06-30",
+          dueTime: "23:59",
+          courseId: "3",
+          courseName: "Hóa học 101",
+          studentsCount: 22,
+          submissionsCount: 5,
         },
-      ])
-
-      setPendingAssignments([
-        {
-          id: "1",
-          title: "Algebra Homework",
-          courseId: "1",
-          courseName: "Mathematics 101",
-          dueDate: "2024-01-15",
-          submissionsCount: 15,
-          totalStudents: 25,
-        },
-        {
-          id: "2",
-          title: "Physics Lab Report",
-          courseId: "2",
-          courseName: "Physics 101",
-          dueDate: "2024-01-20",
-          submissionsCount: 8,
-          totalStudents: 20,
-        },
-      ])
+      ]
+      setUpcomingDeadlines(mockAssignments.filter((assignment) => {
+        const assignmentDate = new Date(assignment.dueDate);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        return assignmentDate >= today;
+      }));
 
       setLoading(false)
     }, 500)
   }, [teacherId])
-
-  const handleCourseClick = (courseId: string) => {
-    navigate(`/teacher/courses/${courseId}`)
-  }
-
-  const handleAssignmentClick = (courseId: string, assignmentId: string) => {
-    navigate(`/teacher/courses/${courseId}/assignments/${assignmentId}`)
-  }
-
-  const formatNextClass = (dateString: string) => {
-    const date = new Date(dateString)
-    return date.toLocaleDateString() + " at " + date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
-  }
 
   if (loading) {
     return (
@@ -132,106 +95,47 @@ const TeacherHome: React.FC<TeacherHomeProps> = ({ teacherId, userRole }) => {
         <p>Welcome back!</p>
       </div>
 
-      {/* Assigned Courses Section */}
-      <section className="courses-section">
-        <h2>My Courses</h2>
-        <div className="courses-grid">
-          {assignedCourses.map((course) => (
-            <Card key={course.id} className="course-card" onClick={() => handleCourseClick(course.id)}>
-              <CardHeader>
-                <div className="course-header">
-                  <div className="course-title-section">
-                    <BookOpen className="icon" />
-                    <CardTitle>{course.name}</CardTitle>
-                  </div>
-                  <Badge className={`status-${course.status}`}>{course.status}</Badge>
-                </div>
-                <CardDescription>{course.description}</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="course-details">
-                  <p className="detail-item">
-                    <Users className="icon" />
-                    Students: {course.students}/{course.maxStudents}
-                  </p>
-                  <p className="detail-item">
-                    <Calendar className="icon" />
-                    {course.schedule}
-                  </p>
-                  <p className="detail-item">
-                    <Clock className="icon" />
-                    Next Class: {formatNextClass(course.nextClass)}
-                  </p>
-                </div>
-                <Button className="view-course-btn" onClick={() => handleCourseClick(course.id)}>
-                  Manage Course
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-        {assignedCourses.length === 0 && (
-          <div className="empty-state">
-            <BookOpen className="empty-icon" />
-            <h3>No courses assigned</h3>
-            <p>You don't have any courses assigned to you yet.</p>
+      {/* Assignment Deadlines Overview */}
+      {upcomingDeadlines.length > 0 ? (
+        <Card className="deadlines-overview mb-6">
+          <div className="deadlines-header">
+            <h3 className="text-lg font-semibold text-orange-800">Hạn nộp bài tập & Tình trạng nộp bài</h3>
           </div>
-        )}
-      </section>
-
-      {/* Pending Assignments Section */}
-      <section className="assignments-section">
-        <h2>Recent Assignment Submissions</h2>
-        <div className="assignments-grid">
-          {pendingAssignments.map((assignment) => (
-            <Card
-              key={assignment.id}
-              className="assignment-card"
-              onClick={() => handleAssignmentClick(assignment.courseId, assignment.id)}
-            >
-              <CardHeader>
-                <CardTitle>{assignment.title}</CardTitle>
-                <CardDescription>{assignment.courseName}</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="assignment-details">
-                  <p className="detail-item">
-                    <Calendar className="icon" />
-                    Due: {new Date(assignment.dueDate).toLocaleDateString()}
-                  </p>
-                  <div className="submissions-progress">
-                    <div className="progress-header">
-                      <span>Submissions</span>
-                      <span>
-                        {assignment.submissionsCount}/{assignment.totalStudents}
-                      </span>
-                    </div>
-                    <div className="progress-bar">
-                      <div
-                        className="progress-fill"
-                        style={{ width: `${(assignment.submissionsCount / assignment.totalStudents) * 100}%` }}
-                      />
-                    </div>
+          <div className="deadlines-list">
+            {upcomingDeadlines.slice(0, 3).map((deadline) => (
+              <div key={deadline.id} className="deadline-item">
+                <div className="deadline-info">
+                  <div className="deadline-title">{deadline.title}</div>
+                  <div className="deadline-course">{deadline.courseName}</div>
+                </div>
+                <div className="deadline-stats">
+                  <div className="deadline-date">{new Date(deadline.dueDate).toLocaleDateString("vi-VN")}</div>
+                  <div className="submission-progress">
+                    <span className="submitted">{deadline.submissionsCount}</span>
+                    <span className="separator">/</span>
+                    <span className="total">{deadline.studentsCount}</span>
+                    <span className="label">đã nộp</span>
+                  </div>
+                  <div className="progress-bar">
+                    <div
+                      className="progress-fill"
+                      style={{
+                        width: `${((deadline.submissionsCount || 0) / (deadline.studentsCount || 1)) * 100}%`,
+                      }}
+                    />
                   </div>
                 </div>
-                <Button
-                  className="view-submissions-btn"
-                  onClick={() => handleAssignmentClick(assignment.courseId, assignment.id)}
-                >
-                  View Submissions
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-        {pendingAssignments.length === 0 && (
-          <div className="empty-state">
-            <BookOpen className="empty-icon" />
-            <h3>No pending assignments</h3>
-            <p>There are no assignments pending review.</p>
+              </div>
+            ))}
           </div>
-        )}
-      </section>
+        </Card>
+      ) : (
+        <div className="empty-state">
+          <BookOpen className="empty-icon" /> {/* Using BookOpen as a general empty icon */}
+          <h3>No upcoming assignment deadlines</h3>
+          <p>There are no assignments with upcoming deadlines to display at the moment.</p>
+        </div>
+      )}
     </div>
   )
 }
