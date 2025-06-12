@@ -202,6 +202,17 @@ const StudentCourseDetail: React.FC = () => {
           </div>
         )}
 
+        {activeTab === "assignments" && (
+          <div className="tab-content">
+            <div className="assignments-list">
+              {assignments.map((assignment) => (
+                <StudentAssignmentItem key={assignment.id} assignment={assignment} courseId={courseDetail.id} />
+              ))}
+              {assignments.length === 0 && <p className="no-content">No assignments available</p>}
+              </div>
+          </div>
+        )}
+
         {activeTab === "materials" && (
           <div className="tab-content">
             <div className="documents-list"> 
