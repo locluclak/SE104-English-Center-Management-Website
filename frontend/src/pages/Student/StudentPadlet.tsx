@@ -51,6 +51,11 @@ const StudentPadlet: React.FC<StudentPadletProps> = () => {
   const [isModalOpen, setIsModalOpen] = useState(false); // Dùng chung cho create/edit/view
   const [modalMode, setModalMode] = useState<"create" | "edit" | "view">("create"); // Chế độ modal
   const [noteToOperate, setNoteToOperate] = useState<PadletNote | null>(null); // Ghi chú để chỉnh sửa/xem
+  const getFullFileUrl = (filePath: string) => {
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || '';
+    // Xóa dấu / ở cuối apiUrl và đầu filePath để tránh bị //
+    return `${apiUrl.replace(/\/$/, '')}/${filePath.replace(/^\//, '')}`;
+  }
 
   // --- Lấy studentId từ localStorage khi component mount ---
   useEffect(() => {
@@ -311,7 +316,7 @@ const StudentPadlet: React.FC<StudentPadletProps> = () => {
             {note.audio && (
                 <div className="note-attachments mt-2">
                     <h5 className="text-sm font-medium mb-2">Ghi âm:</h5>
-                    <audio controls src={note.audio.downloadUrl} className="w-full" />
+                    <audio controls src={getFullFileUrl(note.audio.downloadUrl)} className="w-full" />
                 </div>
             )}
 
