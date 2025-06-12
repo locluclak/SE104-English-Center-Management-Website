@@ -3,26 +3,31 @@
 
 import React, { useEffect, useState, useCallback } from "react"
 import { Card, Input, Button as AntButton, message, Spin } from "antd"
-import { Plus, Search, StickyNote, Trash, Download, Paperclip, Edit } from "lucide-react"
+import { Plus, Search, StickyNote, Trash, Download, Paperclip, Edit, Eye } from "lucide-react"
 import { Button } from "@/components/Ui/Button/button"
 import PadletCreateModal from "@/components/PadletCreateModal/PadletCreateModal"
-import { MainApiRequest } from "@/services/MainApiRequest" // Đảm bảo đường dẫn này đúng
+import { MainApiRequest } from "@/services/MainApiRequest"
 
 import "./StudentPadlet.scss"
+
+// Định nghĩa lại Attachment interface để khớp với dữ liệu từ backend (có mediaType)
+interface Attachment {
+  id: string
+  fileName: string
+  fileSize: number // Kích thước file
+  fileType: string // Mime type
+  mediaType: 'attachment' | 'audio' // Loại media: đính kèm hay ghi âm
+  downloadUrl: string
+}
 
 interface PadletNote {
   id: string
   title: string
   content: string
-  createdDate: string
-  updatedDate: string
-  attachments: {
-    id: string
-    fileName: string
-    fileSize: string
-    fileType: string
-    downloadUrl: string
-  }[]
+  createdDate: string // Format 'YYYY-MM-DD' hoặc tương tự
+  updatedDate: string // Format 'YYYY-MM-DD' hoặc tương tự
+  attachments: Attachment[] // Chỉ chứa file đính kèm (non-audio)
+  audio?: Attachment // File ghi âm riêng
   color: string
   textFormat: {
     fontSize: string
@@ -34,18 +39,18 @@ interface PadletNote {
 }
 
 interface StudentPadletProps {
-  // Bỏ studentId và userRole khỏi props vì lấy từ localStorage
+  // Không nhận props studentId hay userRole nữa, lấy từ localStorage
 }
 
 const StudentPadlet: React.FC<StudentPadletProps> = () => {
   const [notes, setNotes] = useState<PadletNote[]>([])
   const [searchTerm, setSearchTerm] = useState("")
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
   const [loadingNotes, setLoadingNotes] = useState(true)
   const [currentStudentId, setCurrentStudentId] = useState<string | null>(null)
 
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false)
-  const [noteToEdit, setNoteToEdit] = useState<PadletNote | null>(null)
+  const [isModalOpen, setIsModalOpen] = useState(false); // Dùng chung cho create/edit/view
+  const [modalMode, setModalMode] = useState<"create" | "edit" | "view">("create"); // Chế độ modal
+  const [noteToOperate, setNoteToOperate] = useState<PadletNote | null>(null); // Ghi chú để chỉnh sửa/xem
 
   // --- Lấy studentId từ localStorage khi component mount ---
   useEffect(() => {
@@ -56,7 +61,7 @@ const StudentPadlet: React.FC<StudentPadletProps> = () => {
         if (mockUser && mockUser.id) {
           const idFromStorage = String(mockUser.id)
           setCurrentStudentId(idFromStorage)
-          console.log("Student ID from localStorage:", idFromStorage) //
+          console.log("Student ID from localStorage:", idFromStorage)
         } else {
           console.warn("Token trong localStorage không chứa ID hợp lệ.")
           setLoadingNotes(false)
@@ -79,21 +84,30 @@ const StudentPadlet: React.FC<StudentPadletProps> = () => {
       const data = res.data.padlets
 
       const formatted: PadletNote[] = data.map((p: any) => {
-        // Cải thiện xử lý createTime và attachmentNames để tránh lỗi null.split()
-        const createdDate = p.createTime ? p.createTime.split("T")[0] : "N/A"
-        const updatedDate = p.createTime ? p.createTime.split("T")[0] : "N/A"
+        // Xử lý potential null/undefined cho createTime
+        const createdDate = p.createTime ? new Date(p.createTime).toLocaleDateString() : "N/A"
+        const updatedDate = p.createTime ? new Date(p.createTime).toLocaleDateString() : "N/A" // Giả sử updatedDate cũng từ createTime
 
-        // Xử lý attachmentNames: đảm bảo là mảng và lọc bỏ null
-        const attachments = (Array.isArray(p.attachmentNames)
-          ? p.attachmentNames.filter((name: string | null) => name !== null) as string[] // Ép kiểu sau khi lọc
-          : []
-        ).map((fileName: string) => ({
-              id: `${p.padletId}-${fileName}`,
-              fileName,
-              fileSize: "N/A",
-              fileType: fileName.split(".").pop() || "unknown",
-              downloadUrl: `http://localhost:3000/uploads/${fileName}`,
-            }));
+        // Xử lý attachmentsData từ backend: phân loại thành attachments và audio
+        const allAttachments: Attachment[] = p.attachmentsData || [];
+        const regularAttachments: Attachment[] = [];
+        let audioAttachment: Attachment | undefined;
+
+        allAttachments.forEach((att: any) => { // Backend trả về JSON_OBJECT nên cần map lại
+            const attachment: Attachment = {
+                id: String(att.id),
+                fileName: att.fileName,
+                fileSize: att.fileSize,
+                fileType: att.fileType,
+                mediaType: att.mediaType,
+                downloadUrl: att.downloadUrl
+            };
+            if (attachment.mediaType === 'audio') {
+                audioAttachment = attachment;
+            } else {
+                regularAttachments.push(attachment);
+            }
+        });
 
         return {
           id: String(p.padletId),
@@ -101,9 +115,10 @@ const StudentPadlet: React.FC<StudentPadletProps> = () => {
           content: p.padletContent,
           createdDate: createdDate,
           updatedDate: updatedDate,
-          attachments: attachments,
-          color: "#ffffff",
-          textFormat: {
+          attachments: regularAttachments, // Chỉ chứa các file đính kèm thông thường
+          audio: audioAttachment, // File ghi âm riêng
+          color: p.color || "#ffffff", // Lấy màu từ API, mặc định là trắng
+          textFormat: { // Giả định frontend quản lý text format nếu backend không lưu
             fontSize: "14px",
             fontWeight: "normal",
             fontStyle: "normal",
@@ -115,13 +130,13 @@ const StudentPadlet: React.FC<StudentPadletProps> = () => {
 
       setNotes(formatted)
     } catch (err: any) {
-      console.error("Lỗi tải ghi chú:", err) //
+      console.error("Lỗi tải ghi chú:", err)
       if (err.response && err.response.status !== 404) {
           message.error("Không thể tải ghi chú.");
       } else if (!err.response) {
           message.error("Không thể tải ghi chú. Vui lòng kiểm tra kết nối mạng hoặc server.");
       } else if (err.response.status === 404) {
-          message.info("Chưa có ghi chú nào. Hãy tạo ghi chú mới!"); // Thông báo thân thiện hơn cho 404
+          message.info("Chưa có ghi chú nào. Hãy tạo ghi chú mới!");
       }
     } finally {
       setLoadingNotes(false)
@@ -135,7 +150,7 @@ const StudentPadlet: React.FC<StudentPadletProps> = () => {
     } else {
         setNotes([]);
         setLoadingNotes(false);
-        console.warn("Không có studentId để tải ghi chú."); //
+        console.warn("Không có studentId để tải ghi chú.");
     }
   }, [currentStudentId, fetchNotes])
 
@@ -161,7 +176,9 @@ const StudentPadlet: React.FC<StudentPadletProps> = () => {
         message.error("ID người dùng không có sẵn để tạo ghi chú. Vui lòng kiểm tra localStorage.");
         return;
     }
-    setIsCreateModalOpen(true);
+    setModalMode("create");
+    setNoteToOperate(null);
+    setIsModalOpen(true);
   };
 
   // --- Mở modal chỉnh sửa ---
@@ -170,8 +187,16 @@ const StudentPadlet: React.FC<StudentPadletProps> = () => {
       message.error("ID người dùng không có sẵn để chỉnh sửa ghi chú.");
       return;
     }
-    setNoteToEdit(note);
-    setIsEditModalOpen(true);
+    setNoteToOperate(note);
+    setModalMode("edit");
+    setIsModalOpen(true);
+  };
+
+  // --- Mở modal xem (chỉ đọc) ---
+  const handleOpenViewModal = (note: PadletNote) => {
+    setNoteToOperate(note);
+    setModalMode("view");
+    setIsModalOpen(true);
   };
 
   // --- Lọc ghi chú ---
@@ -200,26 +225,15 @@ const StudentPadlet: React.FC<StudentPadletProps> = () => {
         </Button>
       </div>
 
-      {/* Modal Tạo ghi chú */}
+      {/* Sử dụng một Modal duy nhất */}
       <PadletCreateModal
-        open={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
+        open={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
         onSuccess={() => currentStudentId && fetchNotes(currentStudentId)}
         studentId={currentStudentId || ""}
-        mode="create"
+        mode={modalMode}
+        defaultData={noteToOperate || undefined} 
       />
-
-      {/* Modal Chỉnh sửa ghi chú */}
-      {noteToEdit && (
-        <PadletCreateModal
-          open={isEditModalOpen}
-          onClose={() => setIsEditModalOpen(false)}
-          onSuccess={() => currentStudentId && fetchNotes(currentStudentId)}
-          studentId={currentStudentId || ""}
-          mode="edit"
-          defaultData={noteToEdit}
-        />
-      )}
 
       {/* Thanh tìm kiếm */}
       <div className="search-filter">
@@ -244,9 +258,15 @@ const StudentPadlet: React.FC<StudentPadletProps> = () => {
                 <h3 className="text-lg font-semibold">{note.title}</h3>
               </div>
               <div className="note-actions">
+                {/* Nút View */}
+                <AntButton size="small" onClick={() => handleOpenViewModal(note)} title="Xem ghi chú">
+                    <Eye className="w-4 h-4" />
+                </AntButton>
+                {/* Nút Edit */}
                 <AntButton size="small" onClick={() => handleOpenEditModal(note)} title="Chỉnh sửa ghi chú">
                     <Edit className="w-4 h-4" />
                 </AntButton>
+                {/* Nút Delete */}
                 <AntButton size="small" onClick={() => handleDelete(note.id)} title="Xóa ghi chú">
                   <Trash className="w-4 h-4" />
                 </AntButton>
@@ -266,6 +286,7 @@ const StudentPadlet: React.FC<StudentPadletProps> = () => {
               <div className="note-text" dangerouslySetInnerHTML={{ __html: note.content }} />
             </div>
 
+            {/* Hiển thị các file đính kèm thông thường */}
             {note.attachments.length > 0 && (
               <div className="note-attachments">
                 <h5 className="text-sm font-medium mb-2">Đính kèm:</h5>
@@ -286,6 +307,14 @@ const StudentPadlet: React.FC<StudentPadletProps> = () => {
                 ))}
               </div>
             )}
+            {/* Hiển thị file ghi âm nếu có */}
+            {note.audio && (
+                <div className="note-attachments mt-2">
+                    <h5 className="text-sm font-medium mb-2">Ghi âm:</h5>
+                    <audio controls src={note.audio.downloadUrl} className="w-full" />
+                </div>
+            )}
+
              <div className="note-footer text-xs text-gray-500 mt-2">
                 Ngày tạo: {note.createdDate}
             </div>
@@ -293,6 +322,7 @@ const StudentPadlet: React.FC<StudentPadletProps> = () => {
         ))}
       </div>
 
+      {/* Empty state */}
       {filteredNotes.length === 0 && !loadingNotes && (
         <div className="empty-state">
           <StickyNote className="empty-icon" />
