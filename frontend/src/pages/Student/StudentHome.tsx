@@ -160,29 +160,6 @@ const StudentHome: React.FC = () => {
           ))}
         </div>
       </section>
-
-      {/* Pending Assignments Section */}
-      <section className="assignments-section">
-        <h2>Pending Assignments</h2>
-        <div className="assignments-grid">
-          {assignments.map((assignment) => (
-            <Card key={assignment.id} className="assignment-card" onClick={() => handleAssignmentClick(assignment.id)}>
-              <CardHeader>
-                <CardTitle>{assignment.title}</CardTitle>
-                <CardDescription>{assignment.courseName}</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="assignment-footer">
-                  <span className="due-date">
-                    Due: {new Date(assignment.dueDate).toLocaleDateString("vi-VN")}
-                  </span>
-                  <span className={`status status-${assignment.status}`}>{assignment.status}</span>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </section>
     </div>
   )
 }
