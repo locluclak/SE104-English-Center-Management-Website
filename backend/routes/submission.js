@@ -29,11 +29,11 @@ router.post('/upload', async (req, res) => {
       return res.status(500).json({ error: 'File upload error' });
     }
 
-    const { student_id, assignment_id, description } = req.body;
+    const { student_id, assignment_id, description, uploadedname } = req.body;
     const filePath = req.file ? `/uploads/${req.file.filename}` : null;
 
     // Validate required fields
-    if (!student_id || !assignment_id || !filePath) {
+    if (!student_id || !assignment_id || !filePath || !uploadedname) {
       return res.status(400).json({ error: 'Missing required fields: student_id, assignment_id, or file' });
     }
 
@@ -78,10 +78,10 @@ router.post('/upload', async (req, res) => {
 
       // Insert the submission into the database
       const sql = `
-        INSERT INTO SUBMITION (STUDENT_ID, AS_ID, SUBMIT_DATE, DESCRIPTION, FILE)
-        VALUES (?, ?, NOW(), ?, ?)
+        INSERT INTO SUBMITION (STUDENT_ID, AS_ID, SUBMIT_DATE, DESCRIPTION, FILE, FILENAME)
+        VALUES (?, ?, NOW(), ?, ?, ?)
       `;
-      await conn.query(sql, [student_id, assignment_id, description || null, filePath]);
+      await conn.query(sql, [student_id, assignment_id, description || null, filePath, uploadedname]);
 
       conn.release();
       res.status(201).json({ message: 'Submission uploaded successfully' });
