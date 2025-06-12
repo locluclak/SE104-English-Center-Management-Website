@@ -12,7 +12,6 @@ interface Course {
   description: string
   instructor: string
   schedule: string
-  enrolled: number
   maxStudents: number
 }
 
@@ -25,12 +24,7 @@ interface Assignment {
   status: "pending" | "submitted" | "graded"
 }
 
-interface StudentHomeProps {
-  studentId: string
-  userRole: string
-}
-
-// Hàm lấy tên giáo viên (cần được định nghĩa hoặc import)
+// Lấy tên giáo viên cho mỗi khoá học
 const fetchTeacherForCourse = async (courseId: string): Promise<string> => {
   try {
     const res = await MainApiRequest.get(`/course/teacher/${courseId}`)
@@ -42,32 +36,36 @@ const fetchTeacherForCourse = async (courseId: string): Promise<string> => {
   }
 }
 
-const StudentHome: React.FC<StudentHomeProps> = ({ studentId, userRole }) => {
+const StudentHome: React.FC = () => {
   const [coursesList, setCoursesList] = useState<Course[]>([])
   const [assignments, setAssignments] = useState<Assignment[]>([])
 
+  const rawUser = localStorage.getItem("token")
+  const parsedUser = rawUser ? JSON.parse(rawUser) : null
+  const studentId = parsedUser?.id
+
   useEffect(() => {
+    if (!studentId) return
+
     const fetchCoursesList = async () => {
       try {
-        const res = await MainApiRequest.get("/course/all")
-        const rawCourses = res.data
+        const res = await MainApiRequest.get(`/course/unenrolled-courses/${studentId}`)
+        const rawCourses = res.data.courses || []
 
         const coursesWithTeachers = await Promise.all(
           rawCourses.map(async (cls: any) => {
             const teacherName = await fetchTeacherForCourse(cls.COURSE_ID)
 
-            const cleanDescription = cls.DESCRIPTION?.replace(
-              /^[^\[]*\[Giáo viên:\s*.*?\]\s*/,
-              ""
-            )
+            const cleanDescription = cls.DESCRIPTION?.replace(/\[Giáo viên:.*?\]\s*/, "")
 
             return {
               id: cls.COURSE_ID,
               name: cls.NAME,
               description: cleanDescription || "",
               instructor: teacherName,
-              schedule: cls.START_DATE ? new Date(cls.START_DATE).toLocaleDateString() : "TBD",
-              enrolled: cls.NUMBER_STU || 0,
+              schedule: cls.START_DATE
+                ? new Date(cls.START_DATE).toLocaleDateString("vi-VN")
+                : "TBD",
               maxStudents: cls.MAX_STU || 0,
             }
           })
@@ -75,8 +73,8 @@ const StudentHome: React.FC<StudentHomeProps> = ({ studentId, userRole }) => {
 
         setCoursesList(coursesWithTeachers)
       } catch (error) {
-        console.error("Failed to fetch courses:", error)
-        message.error("Unable to load courses.")
+        console.error("Failed to fetch available courses:", error)
+        message.error("Không thể tải danh sách khoá học khả dụng.")
       }
     }
 
@@ -85,7 +83,7 @@ const StudentHome: React.FC<StudentHomeProps> = ({ studentId, userRole }) => {
 
   const handleCourseEnroll = (courseId: string) => {
     console.log(`Enrolling in course: ${courseId}`)
-    // TODO: Ghi danh
+    // TODO: Gọi API ghi danh tại đây
   }
 
   const handleAssignmentClick = (assignmentId: string) => {
@@ -104,6 +102,13 @@ const StudentHome: React.FC<StudentHomeProps> = ({ studentId, userRole }) => {
       <section className="courses-section">
         <h2>Available Courses</h2>
         <div className="courses-grid">
+          {coursesList.length === 0 && (
+            <div className="empty-state">
+              <BookOpen className="empty-icon" />
+              <h3>Không có khoá học khả dụng</h3>
+              <p>Bạn đã ghi danh tất cả các khoá học hoặc chưa có khoá học nào mở.</p>
+            </div>
+          )}
           {coursesList.map((course) => (
             <Card key={course.id} className="course-card">
               <CardHeader>
@@ -123,16 +128,12 @@ const StudentHome: React.FC<StudentHomeProps> = ({ studentId, userRole }) => {
                     <Clock className="icon" />
                     Start Date: {course.schedule}
                   </p>
-                  <p>
-                    Enrolled: {course.enrolled}/{course.maxStudents}
-                  </p>
                 </div>
                 <Button
                   className="enroll-btn"
                   onClick={() => handleCourseEnroll(course.id)}
-                  disabled={course.enrolled >= course.maxStudents}
                 >
-                  {course.enrolled >= course.maxStudents ? "Full" : "Enroll"}
+                  Enroll
                 </Button>
               </CardContent>
             </Card>
@@ -152,7 +153,9 @@ const StudentHome: React.FC<StudentHomeProps> = ({ studentId, userRole }) => {
               </CardHeader>
               <CardContent>
                 <div className="assignment-footer">
-                  <span className="due-date">Due: {new Date(assignment.dueDate).toLocaleDateString()}</span>
+                  <span className="due-date">
+                    Due: {new Date(assignment.dueDate).toLocaleDateString("vi-VN")}
+                  </span>
                   <span className={`status status-${assignment.status}`}>{assignment.status}</span>
                 </div>
               </CardContent>

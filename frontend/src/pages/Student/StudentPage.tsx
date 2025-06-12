@@ -63,32 +63,13 @@ const StudentPage: React.FC = () => {
 
         <div className="student-page-content">
           <Routes>
-            <Route
-              path="/home"
-              element={
-                <StudentHome
-                  studentId={currentStudentId}
-                  userRole={currentUserRole}
-                />
-              }
-            />
+            <Route path="/home" element={<StudentHome/>}/>
 
             <Route path="/courses" element={<StudentCourses />} />
 
-            <Route
-              path="/courses/:courseId"
-              element={<StudentCourseDetail />}
-            />
+            <Route path="/courses/:courseId" element={<StudentCourseDetail />}/>
 
-            <Route
-              path="/board/*"
-              element={
-                <StudentBoard
-                  studentId={currentStudentId}
-                  userRole={currentUserRole}
-                />
-              }
-            />
+            <Route path="/board/*" element={ <StudentBoard studentId={currentStudentId} userRole={currentUserRole}/>}/>
 
             {/* ✅ THÊM PROFILE */}
             <Route path="/profile" element={<ProfileUser />} />
