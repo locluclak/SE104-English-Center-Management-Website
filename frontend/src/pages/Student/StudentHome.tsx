@@ -81,10 +81,30 @@ const StudentHome: React.FC = () => {
     fetchCoursesList()
   }, [studentId])
 
-  const handleCourseEnroll = (courseId: string) => {
-    console.log(`Enrolling in course: ${courseId}`)
-    // TODO: Gọi API ghi danh tại đây
-  }
+  const handleCourseEnroll = async (courseId: string) => {
+    if (!studentId) {
+      message.error("Không tìm thấy ID sinh viên. Vui lòng đăng nhập lại.");
+      return;
+    }
+    try {
+      // Make sure this API endpoint matches your backend route
+      // It should be '/course/add-student'
+      await MainApiRequest.post("/course/add-student", { studentId, courseId }); // <--- CHANGE THIS LINE
+      message.success("Ghi danh khoá học thành công!");
+  
+      setCoursesList((prevCourses) =>
+        prevCourses.filter((course) => course.id !== courseId)
+      );
+    } catch (error: any) { // Add any to the error type for better handling
+      console.error("Failed to enroll in course:", error);
+      // Check if it's a duplicate entry error
+      if (error.response && error.response.status === 409) {
+        message.warning("Bạn đã ghi danh vào khoá học này rồi.");
+      } else {
+        message.error("Không thể ghi danh vào khoá học. Vui lòng thử lại.");
+      }
+    }
+  };
 
   const handleAssignmentClick = (assignmentId: string) => {
     console.log(`Opening assignment: ${assignmentId}`)

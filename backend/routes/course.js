@@ -526,7 +526,7 @@ router.get('/:courseId/assignments_time', async (req, res) => {
     const [rows] = await db.execute(query, [courseId]);
 
     if (rows.length === 0) {
-      return res.status(404).json({ error: 'No assignments found for this course' });
+      return res.status(200).json({ message: 'No assignments found for this course' });
     }
 
     res.status(200).json({ assignments: rows });
@@ -549,7 +549,7 @@ router.get('/enrolled-courses/:personId', async (req, res) => {
     const [courses] = await db.execute(query, [personId]);
 
     if (courses.length === 0) {
-      return res.status(404).json({ message: 'No courses found for this person' });
+      return res.status(200).json({ message: 'No courses found for this person' });
     }
 
     res.status(200).json({ courses });
@@ -577,7 +577,7 @@ router.get('/unenrolled-courses/:personId', async (req, res) => {
     const [courses] = await db.execute(query, [personId]);
 
     if (courses.length === 0) {
-      return res.status(404).json({ message: 'No unenrolled courses found for this person' });
+      return res.status(200).json({ message: 'No unenrolled courses found for this person' });
     }
 
     res.status(200).json({ courses });
