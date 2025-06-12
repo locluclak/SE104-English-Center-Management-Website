@@ -143,6 +143,19 @@ router.get('/getbycourse/:courseId', async (req, res) => {
   }
 });
 
+// NEW ROUTE: GET /assignments/all - Get all assignments
+router.get('/all', async (req, res) => {
+  try {
+      // Include COURSE_ID for frontend mapping
+      const [rows] = await db.execute('SELECT AS_ID, NAME, DESCRIPTION, START_DATE, END_DATE, COURSE_ID FROM ASSIGNMENT');
+      // Ensure the response structure matches what frontend expects: data.assignments
+      res.status(200).json({ assignments: rows });
+  } catch (error) {
+      console.error('Error fetching all assignments:', error);
+      res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 // PUT /assignments/update/:id - Update assignment details (excluding course_id)
 router.put('/update/:id', async (req, res) => {
   const assignmentId = req.params.id;
