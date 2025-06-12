@@ -21,16 +21,16 @@ const upload = multer({ storage: storage });
 
 // POST /documents - Upload document
 router.post('/', upload.single('file'), async (req, res) => {
-  const { name, description, course_id } = req.body;
+  const { name, description, course_id, uploadedname} = req.body;
   const filePath = req.file ? `/uploads/${req.file.filename}` : null;
 
-  if (!name || !course_id || !filePath) {
+  if (!name || !course_id || !filePath || !uploadedname) {
     return res.status(400).json({ message: 'Missing required fields' });
   }
-
+  console.log('uploadedname')
   try {
-    const sql = `INSERT INTO DOCUMENT (NAME, DESCRIPTION, FILE, COURSE_ID) VALUES (?, ?, ?, ?)`;
-    const [result] = await db.execute(sql, [name, description, filePath, course_id]);
+    const sql = `INSERT INTO DOCUMENT (NAME, DESCRIPTION, FILENAME, FILE, COURSE_ID) VALUES (?, ?, ?, ?, ?)`;
+    const [result] = await db.execute(sql, [name, description, uploadedname, filePath, course_id]);
     res.status(201).json({ message: 'Document uploaded', doc_id: result.insertId });
   } catch (err) {
     res.status(500).json({ error: err.message });
