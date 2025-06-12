@@ -456,6 +456,40 @@ router.get('/student/:studentId', async (req, res) => {
   }
 });
 
+//Get all assignments (calendar events) for a student across all their enrolled courses
+router.get('/student/:studentId/calendar', async (req, res) => {
+  const studentId = req.params.studentId;
+
+  try {
+      const query = `
+          SELECT
+              A.AS_ID,
+              A.NAME AS assignmentName,
+              A.DESCRIPTION AS assignmentDescription,
+              A.START_DATE AS assignmentStartDate,
+              A.END_DATE AS assignmentEndDate,
+              C.COURSE_ID,
+              C.NAME AS courseName
+          FROM ASSIGNMENT A
+          JOIN COURSE C ON A.COURSE_ID = C.COURSE_ID
+          JOIN STUDENT_COURSE SC ON C.COURSE_ID = SC.COURSE_ID
+          WHERE SC.STUDENT_ID = ?
+          ORDER BY A.START_DATE;
+      `;
+      const [assignments] = await db.execute(query, [studentId]);
+
+      if (assignments.length === 0) {
+          return res.status(200).json({ message: 'No calendar entries (assignments) found for this student.', assignments: [] });
+      }
+
+      res.status(200).json({ assignments });
+  } catch (error) {
+      console.error('Error fetching student calendar data (assignments):', error);
+      res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+
 router.get('/teacher/:courseId', async (req, res) => {
   const courseId = req.params.courseId;
 
