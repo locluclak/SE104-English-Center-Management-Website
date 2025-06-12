@@ -110,7 +110,10 @@ export const StudentAssignmentItem: React.FC<StudentAssignmentItemProps> = ({ as
 
       const formData = new FormData()
       formData.append("description", submissionText)
-      if (selectedFile) formData.append("file", selectedFile)
+      if (selectedFile) {
+      formData.append("file", selectedFile)
+      formData.append("uploadedname", selectedFile.name) 
+      }
 
       if (isEditable) {
         await MainApiRequest.put(`/submission/update/${studentId}/${assignment.id}`, formData, { headers: { "Content-Type": "multipart/form-data" } })
