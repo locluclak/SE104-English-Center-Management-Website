@@ -347,3 +347,130 @@
     transform: rotate(360deg);
   }
 }
+
+// Deadlines Overview Section
+.deadlines-overview {
+  border: 1px solid get-color($secondary, "100");
+  border-radius: 12px;
+  background: white;
+  padding: 20px;
+  margin-bottom: 24px; // Added margin-bottom as seen in the component
+
+  .deadlines-header {
+    display: flex;
+    align-items: center;
+    margin-bottom: 16px;
+    gap: 8px; // Spacing between icon and text
+
+    h3 {
+      margin: 0;
+      // Already defined text-lg font-semibold text-orange-800 from component, replicate with SCSS variables if available
+      font-size: 1.125rem; // Equivalent to text-lg
+      font-weight: 600; // Equivalent to font-semibold
+      color: #cc5400; // A darker orange, close to text-orange-800
+    }
+  }
+
+  .deadlines-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .deadline-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px dashed get-color($secondary, "100"); // Example dashed line
+
+    &:last-child {
+      border-bottom: none; // No border for the last item
+    }
+
+    @media (max-width: 600px) {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
+    }
+  }
+
+  .deadline-info {
+    flex-grow: 1;
+    margin-right: 16px; // Space between info and stats
+
+    @media (max-width: 600px) {
+      margin-right: 0;
+    }
+  }
+
+  .deadline-title {
+    font-weight: 600;
+    color: get-color($primary, "100");
+    margin-bottom: 4px;
+  }
+
+  .deadline-course {
+    font-size: 0.875rem; // Equivalent to text-sm
+    color: get-color($primary, "200");
+  }
+
+  .deadline-stats {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+
+    @media (max-width: 600px) {
+      width: 100%;
+      justify-content: space-between;
+    }
+  }
+
+  .deadline-date {
+    font-size: 0.875rem;
+    color: get-color($primary, "200");
+    white-space: nowrap; // Prevents date from wrapping
+  }
+
+  .submission-progress {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.875rem;
+    color: get-color($primary, "100");
+
+    .submitted {
+      font-weight: 600;
+      color: #1e40af; // Similar to blue-700
+    }
+
+    .separator {
+      color: get-color($primary, "200");
+    }
+
+    .total {
+      color: get-color($primary, "200");
+    }
+
+    .label {
+      margin-left: 4px;
+      color: get-color($primary, "200");
+      white-space: nowrap;
+    }
+  }
+
+  .progress-bar {
+    width: 100px; // Fixed width for the progress bar
+    height: 6px; // Slightly smaller height
+    background-color: get-color($secondary, "100");
+    border-radius: 3px;
+    overflow: hidden;
+    margin-left: 8px; // Space after submission count
+
+    .progress-fill {
+      height: 100%;
+      background-color: get-color($primary, "100"); // Example fill color
+      transition: width 0.3s ease;
+    }
+  }
+}

@@ -5,21 +5,9 @@ import { useState, useEffect } from "react"
 import { Card } from "antd"
 import { Button } from "@/components/Ui/Button/button"
 import { Select, SelectItem } from "@/components/Ui/Select/Select"
-import { ChevronLeft, ChevronRight, Plus, AlertCircle } from "lucide-react"
+import { ChevronLeft, ChevronRight, Plus } from "lucide-react" // Removed AlertCircle
 
 import "./TeacherCalendar.scss"
-
-interface AssignmentDeadline {
-  id: string
-  title: string
-  description: string
-  dueDate: string
-  dueTime: string
-  courseId: string
-  courseName: string
-  studentsCount: number
-  submissionsCount: number
-}
 
 interface CalendarEvent {
   id: string
@@ -48,7 +36,7 @@ const TeacherCalendar: React.FC<TeacherCalendarProps> = ({ teacherId, userRole }
 
   useEffect(() => {
     // Mock data - assignments from courses taught by teacher
-    const mockAssignments: AssignmentDeadline[] = [
+    const mockAssignments = [
       {
         id: "1",
         title: "Bài tập Toán học Chương 3",
@@ -191,7 +179,7 @@ const TeacherCalendar: React.FC<TeacherCalendarProps> = ({ teacherId, userRole }
           <div className="day-events">
             {dayEvents.map((event) => (
               <div key={event.id} className="event-item" title={event.title}>
-                {event.isDeadline && <AlertCircle className="w-3 h-3 mr-1" />}
+                {/* Removed AlertCircle */}
                 {event.title.length > 20 ? `${event.title.substring(0, 20)}...` : event.title}
                 {event.isDeadline && (
                   <span className="submission-count">
@@ -224,7 +212,6 @@ const TeacherCalendar: React.FC<TeacherCalendarProps> = ({ teacherId, userRole }
   ]
 
   const weekDays = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"]
-  const upcomingDeadlines = events.filter((event) => event.isDeadline && new Date(event.date) >= new Date())
 
   return (
     <div className="teacher-calendar-container">
@@ -260,43 +247,6 @@ const TeacherCalendar: React.FC<TeacherCalendarProps> = ({ teacherId, userRole }
           Tạo sự kiện
         </Button>
       </div>
-
-      {/* Assignment Deadlines Overview */}
-      {upcomingDeadlines.length > 0 && (
-        <Card className="deadlines-overview mb-6">
-          <div className="deadlines-header">
-            <AlertCircle className="w-5 h-5 text-orange-600" />
-            <h3 className="text-lg font-semibold text-orange-800">Hạn nộp bài tập & Tình trạng nộp bài</h3>
-          </div>
-          <div className="deadlines-list">
-            {upcomingDeadlines.slice(0, 3).map((deadline) => (
-              <div key={deadline.id} className="deadline-item">
-                <div className="deadline-info">
-                  <div className="deadline-title">{deadline.title}</div>
-                  <div className="deadline-course">{deadline.courseName}</div>
-                </div>
-                <div className="deadline-stats">
-                  <div className="deadline-date">{new Date(deadline.date).toLocaleDateString("vi-VN")}</div>
-                  <div className="submission-progress">
-                    <span className="submitted">{deadline.submissionsCount}</span>
-                    <span className="separator">/</span>
-                    <span className="total">{deadline.studentsCount}</span>
-                    <span className="label">đã nộp</span>
-                  </div>
-                  <div className="progress-bar">
-                    <div
-                      className="progress-fill"
-                      style={{
-                        width: `${((deadline.submissionsCount || 0) / (deadline.studentsCount || 1)) * 100}%`,
-                      }}
-                    />
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </Card>
-      )}
 
       <Card className="calendar-card">
         <div className="calendar-grid">
