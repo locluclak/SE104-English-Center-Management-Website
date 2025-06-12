@@ -14,7 +14,8 @@ interface CalendarEvent {
   id: string
   title: string
   description: string
-  date: string
+  startDate: string
+  endDate: string
   time: string
   type: "assignment" | "class" | "exam" | "deadline"
   courseId?: string
@@ -31,7 +32,7 @@ interface StudentCalendarProps {
   userRole: string
 }
 
-const StudentCalendar: React.FC<StudentCalendarProps> = ({ studentId, userRole }) => {
+const StudentCalendar: React.FC<StudentCalendarProps> = ({ studentId }) => {
   const [events, setEvents] = useState<CalendarEvent[]>([])
   const [currentDate, setCurrentDate] = useState(new Date())
   const [selectedCourse, setSelectedCourse] = useState<string>("all")
@@ -40,57 +41,59 @@ const StudentCalendar: React.FC<StudentCalendarProps> = ({ studentId, userRole }
   useEffect(() => {
     const fetchCourses = async () => {
       try {
-        const res = await MainApiRequest.get("/course/all")
+        const res = await MainApiRequest.get(`/course/student/${studentId}`)
         const data = res.data
-
         const formatted = data.map((c: any) => ({
           id: String(c.COURSE_ID),
           name: c.NAME,
         }))
         setCourses(formatted)
       } catch (err) {
-        console.error("Failed to fetch courses", err)
+        console.error("Không thể lấy danh sách lớp học", err)
       }
     }
 
     fetchCourses()
-
-    // Mock events
-    const mockEvents: CalendarEvent[] = [
-      {
-        id: "1",
-        title: "NỘP BÀI TẬP BONUS tối h...",
-        description: "Nộp bài tập bonus chương 3",
-        date: "2025-06-30",
-        time: "23:59",
-        type: "assignment",
-        courseId: "1",
-        courseName: "Toán học 101",
-      },
-      {
-        id: "2",
-        title: "Kiểm tra giữa kỳ",
-        description: "Kiểm tra giữa kỳ môn Vật lý",
-        date: "2025-06-15",
-        time: "14:00",
-        type: "exam",
-        courseId: "2",
-        courseName: "Vật lý 101",
-      },
-      {
-        id: "3",
-        title: "Thực hành lab",
-        description: "Thực hành thí nghiệm con lắc",
-        date: "2025-06-08",
-        time: "09:00",
-        type: "class",
-        courseId: "2",
-        courseName: "Vật lý 101",
-      },
-    ]
-
-    setEvents(mockEvents)
   }, [studentId])
+
+  useEffect(() => {
+    const fetchAssignments = async () => {
+      try {
+        const endpoint =
+          selectedCourse === "all"
+            ? "/assignment/all"
+            : `/assignment/getbycourse/${selectedCourse}`
+
+        const res = await MainApiRequest.get(endpoint)
+        const data = res.data.assignments
+
+        const mapped = data.map((a: any) => ({
+          id: a.AS_ID,
+          title: a.NAME,
+          description: "",
+          startDate: a.START_DATE,
+          endDate: a.END_DATE,
+          time: "23:59",
+          type: "assignment",
+          courseId: a.COURSE_ID?.toString() || selectedCourse,
+          courseName: mapCourseName(a.COURSE_ID?.toString() || selectedCourse),
+        }))
+
+        setEvents(mapped)
+      } catch (err) {
+        console.error("Không thể lấy assignment", err)
+        setEvents([])
+      }
+    }
+
+    fetchAssignments()
+  }, [selectedCourse])
+
+  const mapCourseName = (id: string) => {
+  const course = courses.find(c => c.id === id)
+  return course?.name || "Khoá học"
+}
+
 
   const getDaysInMonth = (date: Date) => new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate()
 
@@ -99,20 +102,20 @@ const StudentCalendar: React.FC<StudentCalendarProps> = ({ studentId, userRole }
     return firstDay === 0 ? 6 : firstDay - 1
   }
 
+  const isDateInRange = (date: string, start: string, end: string) => {
+    const d = new Date(date)
+    return d >= new Date(start) && d <= new Date(end)
+  }
+
   const getEventsForDate = (date: Date) => {
     const dateString = date.toISOString().split("T")[0]
-    return events.filter((event) => {
-      const matchesDate = event.date === dateString
-      const matchesCourse = selectedCourse === "all" || event.courseId === selectedCourse
-      return matchesDate && matchesCourse
-    })
+    return events.filter((event) => isDateInRange(dateString, event.startDate, event.endDate))
   }
 
   const navigateMonth = (direction: "prev" | "next") => {
     setCurrentDate((prev) => {
       const newDate = new Date(prev)
-      if (direction === "prev") newDate.setMonth(prev.getMonth() - 1)
-      else newDate.setMonth(prev.getMonth() + 1)
+      newDate.setMonth(prev.getMonth() + (direction === "next" ? 1 : -1))
       return newDate
     })
   }
@@ -128,11 +131,12 @@ const StudentCalendar: React.FC<StudentCalendarProps> = ({ studentId, userRole }
 
     for (let day = 1; day <= daysInMonth; day++) {
       const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), day)
+      const dateString = date.toISOString().split("T")[0]
       const dayEvents = getEventsForDate(date)
       const isToday = date.toDateString() === new Date().toDateString()
 
       days.push(
-        <div key={day} className={`calendar-day ${isToday ? "today" : ""}`}>
+        <div key={day} className={`calendar-day ${isToday ? "today" : ""} ${dayEvents.length > 0 ? "has-event" : ""}`}>
           <div className="day-number">{day}</div>
           <div className="day-events">
             {dayEvents.map((event) => (
@@ -175,13 +179,21 @@ const StudentCalendar: React.FC<StudentCalendarProps> = ({ studentId, userRole }
         </div>
 
         <div className="calendar-navigation">
-          <Button variant="ghost" size="sm" onClick={() => navigateMonth("prev")}>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigateMonth("prev")}
+          >
             <ChevronLeft className="w-4 h-4" />
           </Button>
           <h2 className="month-year">
             {monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}
           </h2>
-          <Button variant="ghost" size="sm" onClick={() => navigateMonth("next")}>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigateMonth("next")}
+          >
             <ChevronRight className="w-4 h-4" />
           </Button>
         </div>
@@ -196,7 +208,9 @@ const StudentCalendar: React.FC<StudentCalendarProps> = ({ studentId, userRole }
         <div className="calendar-grid">
           <div className="weekdays">
             {weekDays.map((day) => (
-              <div key={day} className="weekday">{day}</div>
+              <div key={day} className="weekday">
+                {day}
+              </div>
             ))}
           </div>
           <div className="days-grid">{renderCalendarGrid()}</div>
@@ -205,11 +219,12 @@ const StudentCalendar: React.FC<StudentCalendarProps> = ({ studentId, userRole }
 
       <div className="calendar-footer">
         <p>
-          Hiện tại bạn có {events.length} sự kiện trong tháng này. Hãy kiểm tra các sự kiện để không bỏ lỡ thông tin quan trọng!
+          Hiện tại bạn có {events.length} sự kiện trong tháng này. Hãy kiểm tra
+          các sự kiện để không bỏ lỡ thông tin quan trọng!
         </p>
       </div>
     </div>
-  )
+  );
 }
 
 export default StudentCalendar
