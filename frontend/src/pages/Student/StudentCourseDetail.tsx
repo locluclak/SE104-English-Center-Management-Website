@@ -34,12 +34,21 @@ interface Assignment {
   status: "pending"
 }
 
+interface Document {
+  DOC_ID: number
+  NAME: string
+  DESCRIPTION: string
+  FILE?: string 
+  COURSE_ID: string
+}
+
 const StudentCourseDetail: React.FC = () => {
   const { courseId } = useParams<{ courseId: string }>()
   const navigate = useNavigate()
   const [activeTab, setActiveTab] = useState("overview")
   const [courseDetail, setCourseDetail] = useState<CourseDetail | null>(null)
   const [assignments, setAssignments] = useState<Assignment[]>([])
+  const [documents, setDocuments] = useState<Document[]>([])
   const [loading, setLoading] = useState(true)
 
   const formatStatus = (start: string, end: string): CourseDetail["status"] => {
@@ -87,6 +96,18 @@ const StudentCourseDetail: React.FC = () => {
         }))
 
         setAssignments(simplifiedAssignments)
+
+        const documentRes = await MainApiRequest.get(`/document/getbycourse/${courseId}`)
+        const documentsRaw = documentRes.data || []
+
+        const simplifiedDocuments = documentsRaw.map((doc: any) => ({
+          DOC_ID: doc.DOC_ID,
+          NAME: doc.NAME,
+          DESCRIPTION: doc.DESCRIPTION || "",
+          FILE: `/uploads/${doc.FILE?.split('/').pop()}`,
+          COURSE_ID: doc.COURSE_ID,
+        }));
+        setDocuments(simplifiedDocuments)
       } catch (err) {
         console.error("Lỗi khi tải khoá học:", err)
       } finally {
@@ -181,20 +202,19 @@ const StudentCourseDetail: React.FC = () => {
           </div>
         )}
 
-        {activeTab === "assignments" && (
-          <div className="tab-content">
-            <div className="assignments-list">
-              {assignments.map((assignment) => (
-                <StudentAssignmentItem key={assignment.id} assignment={assignment} courseId={courseDetail.id} />
-              ))}
-              {assignments.length === 0 && <p className="no-content">No assignments available</p>}
-            </div>
-          </div>
-        )}
-
         {activeTab === "materials" && (
           <div className="tab-content">
-            <p>Materials tab coming soon...</p>
+            <div className="documents-list"> 
+              {documents.map((doc) => (
+                <StudentDocumentItem key={doc.DOC_ID} document={{
+                  id: doc.DOC_ID,
+                  title: doc.NAME,
+                  description: doc.DESCRIPTION,
+                  file: doc.FILE, 
+                }} />
+              ))}
+              {documents.length === 0 && <p className="no-content">No materials available</p>}
+            </div>
           </div>
         )}
       </Tabs>

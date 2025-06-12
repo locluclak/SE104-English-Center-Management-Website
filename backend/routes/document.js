@@ -100,17 +100,13 @@ router.get('/getbycourse/:id', async (req, res) => {
   const courseId = req.params.id;
 
   try {
-    // Fetch document information excluding the file link
     const [rows] = await db.execute(
-      'SELECT DOC_ID, NAME, DESCRIPTION, COURSE_ID FROM DOCUMENT WHERE COURSE_ID = ?',
+      'SELECT DOC_ID, NAME, DESCRIPTION, FILE, COURSE_ID FROM DOCUMENT WHERE COURSE_ID = ?',
       [courseId]
     );
 
-    if (rows.length === 0) {
-      return res.status(404).json({ message: 'No documents found for this course' });
-    }
-
-    res.json(rows);
+    // Ensure we always return an array, even if empty
+    res.status(200).json(rows); // rows will be an empty array if no results found
   } catch (err) {
     console.error('Error fetching documents:', err);
     res.status(500).json({ error: 'Internal server error' });
