@@ -231,7 +231,7 @@ router.get('/submissions_byassignment/:assignmentId', async (req, res) => {
     conn.release();
 
     if (rows.length === 0) {
-      return res.status(404).json({ error: 'No submissions found for this assignment' });
+      return res.status(200).json({ message: 'No submissions found for this assignment' });
     }
 
     res.status(200).json({ submissions: rows });
