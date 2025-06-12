@@ -25,12 +25,11 @@ interface Course {
   name: string
 }
 
-interface StudentCalendarProps {
-  studentId: string
-  userRole?: string
-}
+const StudentCalendar: React.FC = () => {
+  const storedUser = typeof window !== "undefined" ? localStorage.getItem("token") : null
+  const parsedUser = storedUser ? JSON.parse(storedUser) : null
+  const studentId = parsedUser?.id
 
-const StudentCalendar: React.FC<StudentCalendarProps> = ({ studentId }) => {
   const [events, setEvents] = useState<CalendarEvent[]>([])
   const [currentDate, setCurrentDate] = useState(new Date())
   const [selectedCourse, setSelectedCourse] = useState<string>("all")
@@ -38,92 +37,62 @@ const StudentCalendar: React.FC<StudentCalendarProps> = ({ studentId }) => {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  // Load danh sách khóa học + assignments dựa theo selectedCourse
   useEffect(() => {
     const fetchData = async () => {
       try {
+        if (!studentId) return
+
         setLoading(true)
         setError(null)
-        
-        // Fetch courses
-        const coursesRes = await MainApiRequest.get(`/course/student/${studentId}`)
-        const coursesData = coursesRes.data.map((c: any) => ({
+
+        // Lấy danh sách course đã đăng ký
+        const res = await MainApiRequest.get(`/course/student/${studentId}`)
+        const courseList = res.data.map((c: any) => ({
           id: String(c.COURSE_ID),
           name: c.NAME,
         }))
-        setCourses(coursesData)
+        setCourses(courseList)
 
-        // Fetch initial events
-        const eventsRes = await MainApiRequest.get("/assignment/all")
-        const eventsData = eventsRes.data.assignments.map((a: {
-          AS_ID: string;
-          NAME: string;
-          DESCRIPTION?: string;
-          START_DATE: string;
-          END_DATE: string;
-          COURSE_ID?: number;
-        }) => ({
+        // Lấy assignment theo filter selectedCourse
+        let assignments: any[] = []
+
+        if (selectedCourse === "all") {
+          const allRes = await MainApiRequest.get(`/course/student/${studentId}/calendar`)
+          assignments = allRes.data.assignments || []
+        } else {
+          const oneRes = await MainApiRequest.get(`/course/${selectedCourse}/assignments_time`)
+          assignments = oneRes.data.assignments || []
+        }
+
+        const mapped: CalendarEvent[] = assignments.map((a: any) => ({
           id: a.AS_ID,
-          title: a.NAME,
-          description: a.DESCRIPTION || "",
-          startDate: a.START_DATE,
-          endDate: a.END_DATE,
+          title: a.assignmentName || a.NAME,
+          description: a.assignmentDescription || a.DESCRIPTION || "",
+          startDate: a.assignmentStartDate || a.START_DATE,
+          endDate: a.assignmentEndDate || a.END_DATE,
           time: "23:59",
-          type: "assignment",
-          courseId: a.COURSE_ID?.toString(),
-          courseName: coursesData.find((c: Course) => c.id === a.COURSE_ID?.toString())?.name || "Khóa học",
+          type: "assignment" as const,
+          courseId: a.COURSE_ID?.toString() || selectedCourse,
+          courseName: courseList.find((c: Course) => c.id === (a.COURSE_ID?.toString() || selectedCourse))?.name || "Khóa học",
         }))
-        setEvents(eventsData)
+
+        setEvents(mapped)
       } catch (err) {
-        console.error("Error fetching data:", err)
+        console.error("Lỗi khi tải dữ liệu:", err)
         setError("Không thể tải dữ liệu. Vui lòng thử lại sau.")
       } finally {
         setLoading(false)
       }
     }
 
-    if (studentId) {
-      fetchData()
-    }
-  }, [studentId])
-
-  useEffect(() => {
-    if (selectedCourse === "all") return
-
-    const fetchCourseEvents = async () => {
-      try {
-        setLoading(true)
-        const res = await MainApiRequest.get(`/assignment/getbycourse/${selectedCourse}`)
-        const data = res.data.assignments
-
-        const mapped = data.map((a: any) => ({
-          id: a.AS_ID,
-          title: a.NAME,
-          description: a.DESCRIPTION || "",
-          startDate: a.START_DATE,
-          endDate: a.END_DATE,
-          time: "23:59",
-          type: "assignment",
-          courseId: a.COURSE_ID?.toString() || selectedCourse,
-          courseName: courses.find(c => c.id === (a.COURSE_ID?.toString() || selectedCourse))?.name || "Khóa học",
-        }))
-
-        setEvents(mapped)
-      } catch (err) {
-        console.error("Không thể lấy assignment", err)
-        setEvents([])
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchCourseEvents()
-  }, [selectedCourse, courses])
+    fetchData()
+  }, [studentId, selectedCourse])
 
   const getDaysInMonth = (date: Date) => new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate()
-
   const getFirstDayOfMonth = (date: Date) => {
     const firstDay = new Date(date.getFullYear(), date.getMonth(), 1).getDay()
-    return firstDay === 0 ? 6 : firstDay - 1 // Adjust to start week on Monday
+    return firstDay === 0 ? 6 : firstDay - 1
   }
 
   const isDateInRange = (date: string, start: string, end: string) => {
@@ -149,22 +118,17 @@ const StudentCalendar: React.FC<StudentCalendarProps> = ({ studentId }) => {
     const firstDay = getFirstDayOfMonth(currentDate)
     const days = []
 
-    // Add empty cells for days before the first day of month
     for (let i = 0; i < firstDay; i++) {
       days.push(<div key={`empty-${i}`} className="calendar-day empty"></div>)
     }
 
-    // Add cells for each day of the month
     for (let day = 1; day <= daysInMonth; day++) {
       const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), day)
       const dayEvents = getEventsForDate(date)
       const isToday = date.toDateString() === new Date().toDateString()
 
       days.push(
-        <div 
-          key={day} 
-          className={`calendar-day ${isToday ? "today" : ""} ${dayEvents.length > 0 ? "has-event" : ""}`}
-        >
+        <div key={day} className={`calendar-day ${isToday ? "today" : ""} ${dayEvents.length > 0 ? "has-event" : ""}`}>
           <div className="day-number">{day}</div>
           <div className="day-events">
             {dayEvents.slice(0, 2).map((event) => (
@@ -173,7 +137,7 @@ const StudentCalendar: React.FC<StudentCalendarProps> = ({ studentId }) => {
               </div>
             ))}
             {dayEvents.length > 2 && (
-              <div className="event-more">+{dayEvents.length - 2} more</div>
+              <div className="event-more">+{dayEvents.length - 2} sự kiện</div>
             )}
           </div>
         </div>
@@ -187,16 +151,10 @@ const StudentCalendar: React.FC<StudentCalendarProps> = ({ studentId }) => {
     "Tháng 1", "Tháng 2", "Tháng 3", "Tháng 4", "Tháng 5", "Tháng 6",
     "Tháng 7", "Tháng 8", "Tháng 9", "Tháng 10", "Tháng 11", "Tháng 12",
   ]
-
   const weekDays = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"]
 
-  if (loading) {
-    return <div className="loading">Đang tải dữ liệu...</div>
-  }
-
-  if (error) {
-    return <div className="error">{error}</div>
-  }
+  if (loading) return <div className="loading">Đang tải dữ liệu...</div>
+  if (error) return <div className="error">{error}</div>
 
   return (
     <div className="student-calendar-container">
@@ -218,23 +176,13 @@ const StudentCalendar: React.FC<StudentCalendarProps> = ({ studentId }) => {
         </div>
 
         <div className="calendar-navigation">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => navigateMonth("prev")}
-            disabled={loading}
-          >
+          <Button variant="ghost" size="sm" onClick={() => navigateMonth("prev")} disabled={loading}>
             <ChevronLeft className="w-4 h-4" />
           </Button>
           <h2 className="month-year">
             {monthNames[currentDate.getMonth()]} {currentDate.getFullYear()}
           </h2>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => navigateMonth("next")}
-            disabled={loading}
-          >
+          <Button variant="ghost" size="sm" onClick={() => navigateMonth("next")} disabled={loading}>
             <ChevronRight className="w-4 h-4" />
           </Button>
         </div>
@@ -259,10 +207,7 @@ const StudentCalendar: React.FC<StudentCalendarProps> = ({ studentId }) => {
       </Card>
 
       <div className="calendar-footer">
-        <p>
-          Hiện tại bạn có {events.length} sự kiện trong tháng này. Hãy kiểm tra
-          các sự kiện để không bỏ lỡ thông tin quan trọng!
-        </p>
+        <p>Hiện tại bạn có {events.length} sự kiện trong tháng này.</p>
       </div>
     </div>
   )
