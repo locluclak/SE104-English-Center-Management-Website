@@ -21,22 +21,23 @@ const upload = multer({ storage: storage });
 
 // POST /assignments/upload - Upload a new assignment
 router.post('/upload', upload.single('file'), async (req, res) => {
-  const { name, description, start_date, end_date, course_id } = req.body;
+  const { name, description, start_date, end_date, uploadedname, course_id } = req.body;
   const filePath = req.file ? `/uploads/${req.file.filename}` : null;
 
   // Validate required fields
-  if (!name || !start_date || !end_date || !course_id) {
+  if (!name || !start_date || !end_date || !course_id || !uploadedname) {
     return res.status(400).json({ error: 'Missing required fields: name, start_date, end_date, or course_id' });
   }
 
   try {
     const sql = `
-      INSERT INTO ASSIGNMENT (NAME, DESCRIPTION, FILE, START_DATE, END_DATE, COURSE_ID)
-      VALUES (?, ?, ?, ?, ?, ?)
+      INSERT INTO ASSIGNMENT (NAME, DESCRIPTION, FILENAME, FILE, START_DATE, END_DATE, COURSE_ID)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
     `;
     const [result] = await db.execute(sql, [
       name,
       description || null, // Use null if description is not provided
+      uploadedname,
       filePath, // File path can be null if no file is uploaded
       start_date,
       end_date,
