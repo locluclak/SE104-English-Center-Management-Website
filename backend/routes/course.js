@@ -475,5 +475,32 @@ router.get('/teacher/:courseId', async (req, res) => {
   }
 });
 
+<<<<<<< HEAD
 >>>>>>> b5c13c1ed (feat: update course management API and frontend to include teacher information, add category management routes, and enhance course creation with teacher assignment)
+=======
+// Route to get list of assignments in a course
+router.get('/:courseId/assignments_time', async (req, res) => {
+  const courseId = req.params.courseId;
+
+  try {
+    const query = `
+      SELECT AS_ID, NAME, DESCRIPTION, START_DATE, END_DATE
+      FROM ASSIGNMENT
+      WHERE COURSE_ID = ?
+    `;
+
+    const [rows] = await db.execute(query, [courseId]);
+
+    if (rows.length === 0) {
+      return res.status(404).json({ error: 'No assignments found for this course' });
+    }
+
+    res.status(200).json({ assignments: rows });
+  } catch (error) {
+    console.error('Error fetching assignments:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+>>>>>>> 7687ec0c0 (feat: Add endpoint to fetch assignments for a course and update submission response message)
 module.exports = router;
