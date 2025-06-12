@@ -51,6 +51,8 @@ export const StudentDocumentItem: React.FC<StudentDocumentItemProps> = ({ docume
         return <Eye className="icon" />
       case "mp4":
       case "mov":
+      case "avi":
+      case "webm":
         return <Eye className="icon" />
       default:
         return <FileText className="icon" />
