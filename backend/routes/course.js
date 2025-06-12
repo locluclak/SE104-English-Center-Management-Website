@@ -275,4 +275,56 @@ router.delete('/remove-student', async (req, res) => {
   }
 });
 
+// Route to get enrolled courses of a person
+router.get('/enrolled-courses/:personId', async (req, res) => {
+  const { personId } = req.params;
+
+  try {
+    const query = `
+      SELECT c.COURSE_ID, c.NAME, c.DESCRIPTION, c.START_DATE, c.END_DATE, c.PRICE
+      FROM STUDENT_COURSE sc
+      JOIN COURSE c ON sc.COURSE_ID = c.COURSE_ID
+      WHERE sc.STUDENT_ID = ?
+    `;
+    const [courses] = await db.execute(query, [personId]);
+
+    if (courses.length === 0) {
+      return res.status(404).json({ message: 'No courses found for this person' });
+    }
+
+    res.status(200).json({ courses });
+  } catch (error) {
+    console.error('Error fetching enrolled courses:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Route to get unenrolled courses of a person that are pending and will start in the future
+router.get('/unenrolled-courses/:personId', async (req, res) => {
+  const { personId } = req.params;
+
+  try {
+    const query = `
+      SELECT c.COURSE_ID, c.NAME, c.DESCRIPTION, c.START_DATE, c.END_DATE, c.PRICE
+      FROM COURSE c
+      WHERE c.COURSE_ID NOT IN (
+        SELECT sc.COURSE_ID
+        FROM STUDENT_COURSE sc
+        WHERE sc.STUDENT_ID = ?
+      )
+      AND c.START_DATE > NOW() -- Only include courses that will start in the future
+    `;
+    const [courses] = await db.execute(query, [personId]);
+
+    if (courses.length === 0) {
+      return res.status(404).json({ message: 'No unenrolled courses found for this person' });
+    }
+
+    res.status(200).json({ courses });
+  } catch (error) {
+    console.error('Error fetching unenrolled courses:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 module.exports = router;
