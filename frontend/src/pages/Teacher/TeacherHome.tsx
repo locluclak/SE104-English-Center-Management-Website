@@ -1,22 +1,22 @@
 "use client"
 
 import type React from "react"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useCallback } from "react"
 import { useNavigate } from "react-router-dom"
 import { Card } from "../../components/Ui/Card/card"
 import { Button } from "../../components/Ui/Button/button"
 import { BookOpen, Users, Calendar, Clock } from "../../components/Ui/Icons/icons"
+import { MainApiRequest } from "@/services/MainApiRequest"
 
-interface AssignmentDeadline {
-  id: string
-  title: string
-  description: string
-  dueDate: string
-  dueTime: string
-  courseId: string
-  courseName: string
-  studentsCount: number
-  submissionsCount: number
+interface BackendAssignmentDeadline {
+  id: string;
+  title: string;
+  description: string;
+  dueDate: string;
+  courseId: string;
+  courseName: string;
+  studentsCount: number;
+  submissionsCount: number;
 }
 
 interface TeacherHomeProps {
@@ -25,59 +25,35 @@ interface TeacherHomeProps {
 }
 
 const TeacherHome: React.FC<TeacherHomeProps> = ({ teacherId, userRole }) => {
-  const [upcomingDeadlines, setUpcomingDeadlines] = useState<AssignmentDeadline[]>([])
+  const [upcomingDeadlines, setUpcomingDeadlines] = useState<BackendAssignmentDeadline[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const navigate = useNavigate()
 
-  useEffect(() => {
+  const fetchUpcomingDeadlines = useCallback(async () => {
     setLoading(true)
+    setError(null)
 
-    setTimeout(() => {
-      const mockAssignments: AssignmentDeadline[] = [
-        {
-          id: "1",
-          title: "Bài tập Toán học Chương 3",
-          description: "Bài tập đại số tuyến tính",
-          dueDate: "2025-06-20",
-          dueTime: "23:59",
-          courseId: "1",
-          courseName: "Toán học 101",
-          studentsCount: 25,
-          submissionsCount: 18,
-        },
-        {
-          id: "2",
-          title: "Báo cáo thí nghiệm Vật lý",
-          description: "Phân tích chuyển động con lắc",
-          dueDate: "2025-06-25",
-          dueTime: "23:59",
-          courseId: "2",
-          courseName: "Vật lý 101",
-          studentsCount: 20,
-          submissionsCount: 12,
-        },
-        {
-          id: "3",
-          title: "Luận văn Hóa học",
-          description: "Nghiên cứu hợp chất hữu cơ",
-          dueDate: "2025-06-30",
-          dueTime: "23:59",
-          courseId: "3",
-          courseName: "Hóa học 101",
-          studentsCount: 22,
-          submissionsCount: 5,
-        },
-      ]
-      setUpcomingDeadlines(mockAssignments.filter((assignment) => {
-        const assignmentDate = new Date(assignment.dueDate);
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        return assignmentDate >= today;
-      }));
+    if (!teacherId) {
+      setError("Teacher ID is missing. Cannot fetch upcoming deadlines.");
+      setLoading(false);
+      return;
+    }
 
-      setLoading(false)
-    }, 500)
-  }, [teacherId])
+    try {
+      const response = await MainApiRequest.get<BackendAssignmentDeadline[]>(`/assignment/teacher/${teacherId}/progress`);
+      setUpcomingDeadlines(response.data);
+    } catch (err) {
+      console.error("Failed to fetch upcoming deadlines:", err);
+      setError("Failed to load upcoming deadlines. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  }, [teacherId]);
+
+  useEffect(() => {
+    fetchUpcomingDeadlines();
+  }, [fetchUpcomingDeadlines]);
 
   if (loading) {
     return (
@@ -88,6 +64,15 @@ const TeacherHome: React.FC<TeacherHomeProps> = ({ teacherId, userRole }) => {
     )
   }
 
+  if (error) {
+    return (
+      <div className="error-state">
+        <p>{error}</p>
+        <Button onClick={fetchUpcomingDeadlines}>Retry</Button>
+      </div>
+    );
+  }
+
   return (
     <div className="teacher-home">
       <div className="page-header">
@@ -95,7 +80,6 @@ const TeacherHome: React.FC<TeacherHomeProps> = ({ teacherId, userRole }) => {
         <p>Welcome back!</p>
       </div>
 
-      {/* Assignment Deadlines Overview */}
       {upcomingDeadlines.length > 0 ? (
         <Card className="deadlines-overview mb-6">
           <div className="deadlines-header">
@@ -131,7 +115,7 @@ const TeacherHome: React.FC<TeacherHomeProps> = ({ teacherId, userRole }) => {
         </Card>
       ) : (
         <div className="empty-state">
-          <BookOpen className="empty-icon" /> {/* Using BookOpen as a general empty icon */}
+          <BookOpen className="empty-icon" />
           <h3>No upcoming assignment deadlines</h3>
           <p>There are no assignments with upcoming deadlines to display at the moment.</p>
         </div>
