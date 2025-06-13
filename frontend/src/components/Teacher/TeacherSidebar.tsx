@@ -53,13 +53,6 @@ const teacherRoutes: TeacherRoute[] = [
       },
     ],
   },
-
-  {
-    title: "PROFILE",
-    url: "/teacher/profile",
-    icon: FileText,
-    roles: ["ROLE_TEACHER"],
-  },
 ]
 
 const TeacherSidebar: React.FC<TeacherSidebarProps> = ({ currentPath, onNavigate }) => {
