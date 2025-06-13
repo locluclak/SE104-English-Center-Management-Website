@@ -73,6 +73,8 @@ const TeacherSidebar: React.FC<TeacherSidebarProps> = ({ currentPath, onNavigate
     // Lưu vào localStorage để TeacherPage và ProfileUser có thể truy cập
     localStorage.setItem("userId", String(mockTeacher.id));
     localStorage.setItem("userRole", mockTeacher.role);
+
+    console.log("TeacherSidebar set userId in localStorage:", localStorage.getItem("userId"));
     localStorage.setItem("token", JSON.stringify(mockTeacher)); // Giả sử ProfileUser cần token
   }, [])
 

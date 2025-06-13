@@ -446,4 +446,72 @@ router.get('/unenrolled-courses/:personId', async (req, res) => {
   }
 });
 
+//Get all courses taught by a specific teacher
+router.get('/teacher-courses/:teacherId', async (req, res) => {
+  const teacherId = req.params.teacherId;
+
+  if (!teacherId || teacherId.trim() === '') { 
+    console.error('Backend: Teacher ID is missing or empty.');
+    return res.status(400).json({ error: 'Teacher ID is required' });
+  }
+
+  try {
+    const query = `
+      SELECT
+        C.COURSE_ID AS id,
+        C.NAME AS name,
+        C.DESCRIPTION AS description,
+        C.START_DATE,
+        C.END_DATE,
+        C.PRICE,
+        COUNT(SC.STUDENT_ID) AS students,
+        C.MAX_STU AS maxStudents
+      FROM COURSE C
+      JOIN TEACHER_COURSE TC ON C.COURSE_ID = TC.COURSE_ID
+      LEFT JOIN STUDENT_COURSE SC ON C.COURSE_ID = SC.COURSE_ID
+      WHERE TC.TEACHER_ID = ?
+      GROUP BY C.COURSE_ID, C.NAME, C.DESCRIPTION, C.START_DATE, C.END_DATE, C.PRICE, C.MAX_STU
+      ORDER BY C.START_DATE DESC;
+    `;
+    const [courses] = await db.execute(query, [teacherId]);
+
+    console.log('Backend: Courses retrieved for teacherId', teacherId, ':', courses);
+
+    const formattedCourses = courses.map(course => {
+      const now = new Date();
+      const startDate = new Date(course.START_DATE);
+      const endDate = new Date(course.END_DATE);
+    let status = "active";
+
+    if (now < startDate) {
+      status = "upcoming";
+    } else if (now > endDate) {
+      status = "completed";
+    }
+
+    const schedule = "TBD";
+    let nextClass = "";
+    if (status === "active" || status === "upcoming") {
+      nextClass = startDate.toISOString(); 
+    }
+
+    return {
+      id: String(course.id),
+      name: course.name,
+      description: course.description,
+      students: course.students || 0, // Ensure students count is not null
+      maxStudents: course.maxStudents,
+      schedule: schedule,
+      nextClass: nextClass,
+      status: status,
+    };
+  });
+
+    res.status(200).json(formattedCourses);
+  } catch (error) {
+    console.error('Error fetching courses by teacher ID:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 module.exports = router;
