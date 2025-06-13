@@ -1,8 +1,10 @@
 "use client"
 
 import type React from "react"
+import { useEffect, useState } from "react"
 import { Link } from "react-router-dom"
 import { Home, BookOpen, Calendar, FileText, LogOut } from "../Ui/Icons/icons"
+import AvtImg from "@/assets/profile.jpg"
 import "./TeacherSidebar.scss"
 
 interface TeacherRoute {
@@ -51,16 +53,42 @@ const teacherRoutes: TeacherRoute[] = [
       },
     ],
   },
+
+  {
+    title: "PROFILE",
+    url: "/teacher/profile",
+    icon: FileText,
+    roles: ["ROLE_TEACHER"],
+  },
 ]
 
 const TeacherSidebar: React.FC<TeacherSidebarProps> = ({ currentPath, onNavigate }) => {
+  const [userName, setUserName] = useState<string>("")
+  const [userRole, setUserRole] = useState<string>("")
+
+  useEffect(() => {
+    // Mock dữ liệu người dùng cho giáo viên
+    const mockTeacher = {
+      id: 8,
+      email: "helen@example.com",
+      role: "STAFF", // Hoặc "TEACHER" nếu bạn muốn cụ thể hơn
+      name: "Helen Wood",
+    }
+
+    setUserName(mockTeacher.name)
+    setUserRole(mockTeacher.role)
+    // Lưu vào localStorage để TeacherPage và ProfileUser có thể truy cập
+    localStorage.setItem("userId", String(mockTeacher.id));
+    localStorage.setItem("userRole", mockTeacher.role);
+    localStorage.setItem("token", JSON.stringify(mockTeacher)); // Giả sử ProfileUser cần token
+  }, [])
+
   const handleLogout = () => {
     localStorage.clear()
     window.location.href = "/login"
   }
 
   const isActiveRoute = (routeUrl: string) => {
-    // Special case for home route
     if (routeUrl === "/teacher") {
       return currentPath === "/teacher" || currentPath === "/teacher/"
     }
@@ -123,6 +151,14 @@ const TeacherSidebar: React.FC<TeacherSidebarProps> = ({ currentPath, onNavigate
       </nav>
 
       <div className="sidebar-footer">
+        <div className="sidebar-user-profile" onClick={() => onNavigate("/teacher/profile")}>
+          <img src={AvtImg} alt="Avatar" className="profile-avatar" />
+          <div className="profile-info">
+            <div className="profile-name">{userName}</div>
+            <div className="profile-role">{userRole}</div>
+          </div>
+        </div>
+
         <button className="logout-btn" onClick={handleLogout}>
           <LogOut className="logout-icon" />
           <span className="logout-text">LOG OUT</span>

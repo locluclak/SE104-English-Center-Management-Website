@@ -8,6 +8,7 @@ import TeacherHome from "./TeacherHome"
 import TeacherCourses from "./TeacherCourses"
 import TeacherCourseDetail from "./TeacherCourseDetail"
 import TeacherBoard from "./TeacherBoard"
+import ProfileUser from "@/pages/ProfileUser/ProfileUser"
 import "./Teacher.scss"
 
 const TeacherPage: React.FC = () => {
@@ -60,6 +61,9 @@ const TeacherPage: React.FC = () => {
 
             {/* Board routes */}
             <Route path="/board/*" element={<TeacherBoard teacherId={currentTeacherId} userRole={currentUserRole} />} />
+
+            {/* ✅ THÊM PROFILE CHO TEACHER */}
+            <Route path="/profile" element={<ProfileUser />} />
 
             {/* Redirect empty path to home */}
             <Route path="" element={<Navigate to="/teacher" replace />} />
