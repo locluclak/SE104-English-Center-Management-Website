@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/Ui/Card/card"
 import { Button } from "../../components/Ui/Button/button"
@@ -14,54 +14,97 @@ import { Users, Calendar, ArrowLeft, Clock, Plus, Search, FileText } from "../..
 import { TeacherAssignmentItem } from "../../components/Teacher/TeacherAssignmentItem"
 import { TeacherDocumentItem } from "../../components/Teacher/TeacherDocumentItem"
 import { TeacherStudentItem } from "../../components/Teacher/TeacherStudentItem"
+import { MainApiRequest } from "@/services/MainApiRequest"
 import "./TeacherCourseDetail.scss"
 
+interface BackendCourseDetail {
+  COURSE_ID: string;
+  NAME: string;
+  DESCRIPTION: string;
+  NUMBER_STU: number;
+  MAX_STU: number;
+  PRICE: number;
+  START_DATE: string;
+  END_DATE: string;
+}
+
 interface CourseDetail {
-  id: string
-  name: string
-  description: string
-  students: number
-  maxStudents: number
-  schedule: string
-  status: "active" | "completed" | "paused"
-  startDate: string
-  endDate: string
-  syllabus: string
-  nextClass: string
+  id: string;
+  name: string;
+  description: string;
+  students: number;
+  maxStudents: number;
+  price: number;
+  startDate: string;
+  endDate: string;
+  schedule: string;
+  nextClass: string;
+  status: "active" | "completed" | "paused" | "upcoming";
+  syllabus: string;
+}
+
+interface BackendAssignment {
+  AS_ID: string;
+  NAME: string;
+  DESCRIPTION: string;
+  START_DATE: string;
+  END_DATE: string;
+  FILENAME: string | null;
+  FILE: string | null;
+  COURSE_ID: string;
 }
 
 interface Assignment {
-  id: string
-  title: string
-  description: string
-  dueDate: string
-  submissionsCount: number
-  totalStudents: number
+  id: string;
+  title: string;
+  description: string;
+  dueDate: string;
+  submissionsCount: number;
+  totalStudents: number;
   attachments: {
-    id: string
-    fileName: string
-    fileSize: string
-    fileType: string
-    downloadUrl: string
-  }[]
+    id: string;
+    fileName: string;
+    fileSize: string;
+    fileType: string;
+    downloadUrl: string;
+  }[];
+}
+
+interface BackendDocument {
+  DOC_ID: string;
+  NAME: string;
+  DESCRIPTION: string;
+  FILENAME: string | null;
+  FILE: string | null;
+  COURSE_ID: string;
 }
 
 interface Document {
-  id: string
-  title: string
-  description: string
-  uploadDate: string
-  fileType: "pdf" | "doc" | "ppt" | "image" | "video" | "other"
-  fileSize: string
-  downloadUrl: string
+  id: string;
+  title: string;
+  description: string;
+  uploadDate: string;
+  fileType: "pdf" | "doc" | "ppt" | "image" | "video" | "other";
+  fileSize: string;
+  downloadUrl: string;
+}
+
+interface BackendStudent {
+  ID: string;
+  NAME: string;
+  EMAIL: string;
+  PHONE_NUMBER: string;
+  DATE_OF_BIRTH: string;
+  ENROLL_DATE: string;
+  PAYMENT_STATUS?: "UNPAID" | "PAID" | "DEFERRED";
 }
 
 interface Student {
-  id: string
-  name: string
-  email: string
-  progress: number
-  lastActivity: string
+  id: string;
+  name: string;
+  email: string;
+  progress: number;
+  lastActivity: string;
 }
 
 const TeacherCourseDetail: React.FC = () => {
@@ -73,9 +116,9 @@ const TeacherCourseDetail: React.FC = () => {
   const [documents, setDocuments] = useState<Document[]>([])
   const [students, setStudents] = useState<Student[]>([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("")
 
-  // Dialog states
   const [isNewAssignmentDialogOpen, setIsNewAssignmentDialogOpen] = useState(false)
   const [isNewDocumentDialogOpen, setIsNewDocumentDialogOpen] = useState(false)
   const [newAssignment, setNewAssignment] = useState({
@@ -87,144 +130,115 @@ const TeacherCourseDetail: React.FC = () => {
   const [newDocument, setNewDocument] = useState({ title: "", description: "", file: null as File | null })
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  useEffect(() => {
-    // Mock data - replace with actual API calls
+  const fetchCourseData = useCallback(async () => {
     setLoading(true)
+    setError(null)
+    if (!courseId) {
+      setError("Course ID is missing.");
+      setLoading(false);
+      return;
+    }
+    try {
+      const courseResponse = await MainApiRequest.get<BackendCourseDetail>(`/course/${courseId}`);
+      
+      const now = new Date();
+      const startDate = new Date(courseResponse.data.START_DATE);
+      const endDate = new Date(courseResponse.data.END_DATE);
+      let status: "active" | "completed" | "paused" | "upcoming" = "active";
+      if (now < startDate) {
+        status = "upcoming";
+      } else if (now > endDate) {
+        status = "completed";
+      }
+      
+      const schedule = `From ${formatDate(courseResponse.data.START_DATE)} to ${formatDate(courseResponse.data.END_DATE)}`;
+      const nextClass = (status === "active" || status === "upcoming") ? startDate.toISOString() : "";
 
-    // Simulate API call delay
-    setTimeout(() => {
       setCourseDetail({
-        id: courseId || "1",
-        name: "Mathematics 101",
-        description: "Basic mathematics course covering algebra and geometry",
-        students: 25,
-        maxStudents: 30,
-        schedule: "Mon, Wed, Fri 9:00 AM",
-        status: "active",
-        startDate: "2024-01-01",
-        endDate: "2024-05-30",
-        syllabus:
-          "This course covers fundamental mathematical concepts including algebra, geometry, and basic calculus. Students will learn problem-solving techniques and develop analytical thinking skills.",
-        nextClass: "2024-01-15T09:00:00",
-      })
+        id: courseResponse.data.COURSE_ID,
+        name: courseResponse.data.NAME,
+        description: courseResponse.data.DESCRIPTION,
+        students: courseResponse.data.NUMBER_STU,
+        maxStudents: courseResponse.data.MAX_STU,
+        price: courseResponse.data.PRICE,
+        startDate: courseResponse.data.START_DATE,
+        endDate: courseResponse.data.END_DATE,
+        schedule,
+        nextClass,
+        status,
+        syllabus: courseResponse.data.DESCRIPTION,
+      });
 
-      setAssignments([
-        {
-          id: "a1",
-          title: "Algebra Homework 1",
-          description: "Complete problems 1-10 in Chapter 3",
-          dueDate: "2024-01-20T23:59:00",
-          submissionsCount: 15,
-          totalStudents: 25,
-          attachments: [],
-        },
-        {
-          id: "a2",
-          title: "Geometry Quiz",
-          description: "Online quiz covering triangles and circles",
-          dueDate: "2024-01-25T23:59:00",
-          submissionsCount: 8,
-          totalStudents: 25,
-          attachments: [],
-        },
-        {
-          id: "a3",
-          title: "Midterm Project",
-          description: "Research paper on a mathematical concept of your choice",
-          dueDate: "2024-02-15T23:59:00",
-          submissionsCount: 0,
-          totalStudents: 25,
-          attachments: [],
-        },
-      ])
+      const assignmentsResponse = await MainApiRequest.get<{ assignments: BackendAssignment[] }>(`/assignment/getbycourse/${courseId}`);
+      const fetchedAssignments = assignmentsResponse.data.assignments.map(assign => ({
+        id: assign.AS_ID,
+        title: assign.NAME,
+        description: assign.DESCRIPTION,
+        dueDate: assign.END_DATE,
+        submissionsCount: Math.floor(Math.random() * (courseResponse.data.NUMBER_STU || 0) * 0.8), // Mock
+        totalStudents: courseResponse.data.NUMBER_STU || 0,
+        attachments: assign.FILENAME && assign.FILE ? [{
+          id: 'file-' + assign.AS_ID,
+          fileName: assign.FILENAME,
+          fileSize: 'N/A',
+          fileType: assign.FILENAME.split('.').pop() || 'other',
+          downloadUrl: assign.FILE,
+        }] : [],
+      }));
+      setAssignments(fetchedAssignments);
 
-      setDocuments([
-        {
-          id: "d1",
-          title: "Course Syllabus",
-          description: "Complete course syllabus and schedule",
-          uploadDate: "2024-01-01",
-          fileType: "pdf",
-          fileSize: "1.2 MB",
-          downloadUrl: "/files/syllabus.pdf",
-        },
-        {
-          id: "d2",
-          title: "Lecture 1: Introduction to Algebra",
-          description: "Slides from the first lecture",
-          uploadDate: "2024-01-05",
-          fileType: "ppt",
-          fileSize: "3.5 MB",
-          downloadUrl: "/files/lecture1.ppt",
-        },
-        {
-          id: "d3",
-          title: "Textbook Chapter 1-3",
-          description: "Digital copy of the textbook chapters 1-3",
-          uploadDate: "2024-01-05",
-          fileType: "pdf",
-          fileSize: "8.7 MB",
-          downloadUrl: "/files/textbook_ch1-3.pdf",
-        },
-      ])
+      const documentsResponse = await MainApiRequest.get<BackendDocument[]>(`/document/getbycourse/${courseId}`);
+      const fetchedDocuments = documentsResponse.data.map(doc => ({
+        id: doc.DOC_ID,
+        title: doc.NAME,
+        description: doc.DESCRIPTION,
+        uploadDate: new Date().toISOString().split('T')[0],
+        fileType: (doc.FILENAME?.split('.').pop() || 'other') as Document['fileType'],
+        fileSize: 'N/A',
+        downloadUrl: doc.FILE || '#',
+      }));
+      setDocuments(fetchedDocuments);
 
-      setStudents([
-        {
-          id: "s1",
-          name: "John Doe",
-          email: "john.doe@example.com",
-          progress: 85,
-          lastActivity: "2024-01-14T10:30:00",
-        },
-        {
-          id: "s2",
-          name: "Jane Smith",
-          email: "jane.smith@example.com",
-          progress: 92,
-          lastActivity: "2024-01-14T09:15:00",
-        },
-        {
-          id: "s3",
-          name: "Michael Johnson",
-          email: "michael.johnson@example.com",
-          progress: 78,
-          lastActivity: "2024-01-13T14:45:00",
-        },
-        {
-          id: "s4",
-          name: "Emily Brown",
-          email: "emily.brown@example.com",
-          progress: 65,
-          lastActivity: "2024-01-12T11:20:00",
-        },
-        {
-          id: "s5",
-          name: "David Wilson",
-          email: "david.wilson@example.com",
-          progress: 90,
-          lastActivity: "2024-01-14T08:50:00",
-        },
-      ])
+      const studentsResponse = await MainApiRequest.get<BackendStudent[]>(`/course/${courseId}/students`);
+      const fetchedStudents = studentsResponse.data.map(student => ({
+        id: student.ID,
+        name: student.NAME,
+        email: student.EMAIL,
+        progress: Math.floor(Math.random() * 100),
+        lastActivity: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000).toISOString(),
+      }));
+      setStudents(fetchedStudents);
 
-      setLoading(false)
-    }, 500)
-  }, [courseId])
+    } catch (err) {
+      console.error("Failed to fetch course details:", err);
+      setError("Failed to load course details. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  }, [courseId]);
+
+  useEffect(() => {
+    fetchCourseData();
+  }, [fetchCourseData]);
 
   const handleBack = () => {
-    navigate("/teacher/courses")
+    navigate("/teacher/course")
   }
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString()
+    if (!dateString) return "N/A";
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return "Invalid Date";
+    return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
   }
 
   const formatNextClass = (dateString: string) => {
     if (!dateString) return "No upcoming classes"
     const date = new Date(dateString)
-    return date.toLocaleDateString() + " at " + date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
+    if (isNaN(date.getTime())) return "Invalid date"
+    return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) + " at " + date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
   }
 
-  // Thêm function để handle file upload
   const handleAssignmentFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const filesArray = Array.from(e.target.files)
@@ -232,86 +246,98 @@ const TeacherCourseDetail: React.FC = () => {
     }
   }
 
-  // Thêm function để remove file
   const removeAssignmentFile = (index: number) => {
     const updatedFiles = newAssignment.attachments.filter((_, i) => i !== index)
     setNewAssignment({ ...newAssignment, attachments: updatedFiles })
   }
 
-  // Cập nhật handleCreateAssignment để xử lý file attachments
-  const handleCreateAssignment = () => {
+  const handleCreateAssignment = async () => {
     setIsSubmitting(true)
+    setError(null);
 
-    // Simulate API call
-    setTimeout(() => {
-      console.log("Creating new assignment:", newAssignment)
+    if (!courseId) {
+      setError("Course ID is missing for assignment creation.");
+      setIsSubmitting(false);
+      return;
+    }
+    try {
+      const formData = new FormData();
+      formData.append('name', newAssignment.title);
+      formData.append('description', newAssignment.description);
+      formData.append('start_date', new Date().toISOString().split('T')[0] + ' ' + new Date().toTimeString().split(' ')[0]); 
+      formData.append('end_date', newAssignment.dueDate ? new Date(newAssignment.dueDate).toISOString().slice(0, 19).replace('T', ' ') : '');
+      formData.append('course_id', courseId);
+        
+      if (newAssignment.attachments.length > 0) {
+        formData.append('file', newAssignment.attachments[0]);
+        formData.append('uploadedname', newAssignment.attachments[0].name);
+      } else {
+        formData.append('uploadedname', '');
+      }
 
-      // Process attachments
-      const attachments = newAssignment.attachments.map((file, index) => ({
-        id: `att_${Date.now()}_${index}`,
-        fileName: file.name,
-        fileSize: `${(file.size / (1024 * 1024)).toFixed(1)} MB`,
-        fileType: file.name.split(".").pop() || "unknown",
-        downloadUrl: `/files/${file.name}`,
-      }))
-
-      // Add the new assignment to the list (in a real app, this would come from the API response)
-      const newId = `a${assignments.length + 1}`
-      setAssignments([
-        ...assignments,
-        {
-          id: newId,
-          title: newAssignment.title,
-          description: newAssignment.description,
-          dueDate: newAssignment.dueDate,
-          submissionsCount: 0,
-          totalStudents: courseDetail?.students || 0,
-          attachments: attachments,
+      const response = await MainApiRequest.post('/assignment/upload', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
         },
-      ])
+      });
 
-      // Reset form and close dialog
-      setNewAssignment({ title: "", description: "", dueDate: "", attachments: [] })
-      setIsSubmitting(false)
-      setIsNewAssignmentDialogOpen(false)
-    }, 1000)
-  }
+      const createdAssignment = response.data;
 
-  const handleUploadDocument = () => {
-    setIsSubmitting(true)
-
-    // Simulate API call
-    setTimeout(() => {
-      console.log("Uploading new document:", newDocument)
-
-      // Add the new document to the list (in a real app, this would come from the API response)
-      const newId = `d${documents.length + 1}`
-      const fileType = newDocument.file?.name.split(".").pop() || "other"
-      const fileSize = newDocument.file ? `${(newDocument.file.size / (1024 * 1024)).toFixed(1)} MB` : "0 KB"
-
-      setDocuments([
-        ...documents,
-        {
-          id: newId,
-          title: newDocument.title,
-          description: newDocument.description,
-          uploadDate: new Date().toISOString().split("T")[0],
-          fileType: fileType as any,
-          fileSize: fileSize,
-          downloadUrl: `/files/${newDocument.file?.name || "document"}`,
-        },
-      ])
-
-      // Reset form and close dialog
-      setNewDocument({ title: "", description: "", file: null })
-      setIsSubmitting(false)
-      setIsNewDocumentDialogOpen(false)
-    }, 1000)
+      fetchCourseData();
+      setNewAssignment({ title: "", description: "", dueDate: "", attachments: [] });
+      setIsNewAssignmentDialogOpen(false);
+    } catch (err) {
+      console.error("Failed to create assignment:", err);
+      setError("Failed to create assignment. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   }
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       setNewDocument({ ...newDocument, file: e.target.files[0] })
+    }
+  }
+
+  const handleUploadDocument = async () => {
+    setIsSubmitting(true)
+    setError(null);
+    if (!courseId) {
+      setError("Course ID is missing for document upload.");
+      setIsSubmitting(false);
+      return;
+    }
+    if (!newDocument.file) {
+      setError("No file selected for upload.");
+      setIsSubmitting(false);
+      return;
+    }
+
+    try {
+      const formData = new FormData();
+      formData.append('name', newDocument.title);
+      formData.append('description', newDocument.description);
+      formData.append('course_id', courseId);
+      formData.append('file', newDocument.file);
+      formData.append('uploadedname', newDocument.file.name);
+
+      const response = await MainApiRequest.post('/document', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      const createdDocument = response.data;
+
+      fetchCourseData();
+      setNewDocument({ title: "", description: "", file: null });
+      setIsNewDocumentDialogOpen(false);
+    } catch (err) {
+      console.error("Failed to upload document:", err);
+      setError("Failed to upload document. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
   }
 
@@ -326,6 +352,17 @@ const TeacherCourseDetail: React.FC = () => {
       <div className="course-detail-loading">
         <div className="loading-spinner"></div>
         <p>Loading course details...</p>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="course-not-found">
+        <h2>Error Loading Course</h2>
+        <p>{error}</p>
+        <Button onClick={fetchCourseData}>Retry</Button>
+        <Button onClick={handleBack} variant="outline" className="ml-2">Back to Courses</Button>
       </div>
     )
   }
@@ -365,7 +402,7 @@ const TeacherCourseDetail: React.FC = () => {
           </div>
           <div className="meta-item">
             <Clock className="icon" />
-            <span>Next Class: {formatNextClass(courseDetail.nextClass)}</span>
+            <span>Next Class: {formatNextClass(courseDetail.nextClass || courseDetail.startDate)}</span>
           </div>
         </div>
       </div>
@@ -411,6 +448,10 @@ const TeacherCourseDetail: React.FC = () => {
                     <strong>Status:</strong>
                     <Badge className={`status-${courseDetail.status}`}>{courseDetail.status}</Badge>
                   </div>
+                  <div className="detail-item">
+                    <strong>Price:</strong>
+                    <span>{courseDetail.price.toLocaleString('vi-VN')} VND</span>
+                  </div>
                 </CardContent>
               </Card>
 
@@ -419,7 +460,7 @@ const TeacherCourseDetail: React.FC = () => {
                   <CardTitle>Syllabus</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <p>{courseDetail.syllabus}</p>
+                  <p>{courseDetail.syllabus}</p> 
                 </CardContent>
               </Card>
             </div>
@@ -435,8 +476,8 @@ const TeacherCourseDetail: React.FC = () => {
                       <Users className="icon" />
                     </div>
                     <div className="activity-content">
-                      <p className="activity-text">3 new students enrolled in the course</p>
-                      <p className="activity-time">2 days ago</p>
+                      <p className="activity-text">{courseDetail.students} students currently enrolled</p>
+                      <p className="activity-time">Updated recently</p>
                     </div>
                   </div>
                   <div className="activity-item">
@@ -444,8 +485,8 @@ const TeacherCourseDetail: React.FC = () => {
                       <Calendar className="icon" />
                     </div>
                     <div className="activity-content">
-                      <p className="activity-text">You uploaded "Lecture 1: Introduction to Algebra"</p>
-                      <p className="activity-time">5 days ago</p>
+                      <p className="activity-text">Course starts on {formatDate(courseDetail.startDate)}</p>
+                      <p className="activity-time">Upcoming</p>
                     </div>
                   </div>
                   <div className="activity-item">
@@ -453,8 +494,8 @@ const TeacherCourseDetail: React.FC = () => {
                       <Clock className="icon" />
                     </div>
                     <div className="activity-content">
-                      <p className="activity-text">Course schedule was updated</p>
-                      <p className="activity-time">1 week ago</p>
+                      <p className="activity-text">Course ends on {formatDate(courseDetail.endDate)}</p>
+                      <p className="activity-time">Future</p>
                     </div>
                   </div>
                 </div>
@@ -475,12 +516,15 @@ const TeacherCourseDetail: React.FC = () => {
 
             <div className="assignments-list">
               {assignments.map((assignment) => (
-                <TeacherAssignmentItem key={assignment.id} assignment={assignment} courseId={courseDetail.id} />
+                <TeacherAssignmentItem 
+                  key={assignment.id} 
+                  assignment={assignment} 
+                  courseId={courseDetail.id} 
+                />
               ))}
               {assignments.length === 0 && <p className="no-content">No assignments available</p>}
             </div>
 
-            {/* Create Assignment Dialog */}
             <Dialog open={isNewAssignmentDialogOpen} onOpenChange={setIsNewAssignmentDialogOpen}>
               <DialogContent>
                 <DialogHeader>
@@ -548,7 +592,6 @@ const TeacherCourseDetail: React.FC = () => {
                   <Button
                     onClick={handleCreateAssignment}
                     disabled={isSubmitting || !newAssignment.title || !newAssignment.dueDate}
-                    loading={isSubmitting}
                   >
                     {isSubmitting ? "Creating..." : "Create Assignment"}
                   </Button>
@@ -570,12 +613,14 @@ const TeacherCourseDetail: React.FC = () => {
 
             <div className="documents-list">
               {documents.map((document) => (
-                <TeacherDocumentItem key={document.id} document={document} />
+                <TeacherDocumentItem 
+                  key={document.id} 
+                  document={document} 
+                />
               ))}
               {documents.length === 0 && <p className="no-content">No materials available</p>}
             </div>
 
-            {/* Upload Document Dialog */}
             <Dialog open={isNewDocumentDialogOpen} onOpenChange={setIsNewDocumentDialogOpen}>
               <DialogContent>
                 <DialogHeader>
@@ -621,7 +666,6 @@ const TeacherCourseDetail: React.FC = () => {
                   <Button
                     onClick={handleUploadDocument}
                     disabled={isSubmitting || !newDocument.title || !newDocument.file}
-                    loading={isSubmitting}
                   >
                     {isSubmitting ? "Uploading..." : "Upload Material"}
                   </Button>
@@ -647,7 +691,11 @@ const TeacherCourseDetail: React.FC = () => {
 
             <div className="students-list">
               {filteredStudents.map((student) => (
-                <TeacherStudentItem key={student.id} student={student} courseId={courseDetail.id} />
+                <TeacherStudentItem 
+                  key={student.id} 
+                  student={student} 
+                  courseId={courseDetail.id} 
+                />
               ))}
               {filteredStudents.length === 0 && (
                 <p className="no-content">{searchTerm ? "No students match your search" : "No students enrolled"}</p>
@@ -660,4 +708,4 @@ const TeacherCourseDetail: React.FC = () => {
   )
 }
 
-export default TeacherCourseDetail
+export default TeacherCourseDetail;
