@@ -97,6 +97,10 @@ const PadletCreateModal: React.FC<PadletCreateModalProps> = ({
   const audioChunksRef = useRef<Blob[]>([]);
   const recordingIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null); // Ref cho textarea gốc
+  const API_HOST = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000").replace(/\/$/, '');
+  const existingAudioUrl = existingAudioAttachment?.downloadUrl
+    ? new URL(existingAudioAttachment.downloadUrl, API_HOST).href
+    : null;
 
   useEffect(() => {
     if (open) {
@@ -581,19 +585,28 @@ const PadletCreateModal: React.FC<PadletCreateModalProps> = ({
             </div>
           )}
         </div>
-          <div>
-            <label className="block text-sm font-medium mb-1">Ghi âm</label>
-            <AudioRecorderPlayer
-              mode={mode}
-              existingAudioUrl={existingAudioAttachment?.downloadUrl? `http://localhost:3000/${existingAudioAttachment.downloadUrl}`: null}
-              onAudioBlobChange={(blob) => setAudioBlob(blob)}
-              onAudioRemove={() => {
-                setAudioBlob(null);
-                setExistingAudioAttachment(null);
-                setIsAudioRemoved(true);
-              }}
-            />
-          </div>
+        <div>
+          <label className="block text-sm font-medium mb-1">Ghi âm</label>
+          <AudioRecorderPlayer
+            mode={mode}
+            existingAudioUrl={existingAudioUrl}
+            onAudioBlobChange={(blob) => {
+              setAudioBlob(blob);
+              // Nếu có ghi âm mới, ta không còn xóa audio cũ nữa
+              if (blob) {
+                setIsAudioRemoved(false);
+              }
+            }}
+            onAudioRemove={() => {
+              setAudioBlob(null);
+              // Chỉ đánh dấu xóa audio cũ nếu nó thực sự tồn tại
+              if(existingAudioAttachment) {
+                 setIsAudioRemoved(true);
+              }
+              setExistingAudioAttachment(null);
+            }}
+          />
+        </div>
       </div>
     </Modal>
   );
