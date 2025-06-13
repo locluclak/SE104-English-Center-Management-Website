@@ -127,9 +127,9 @@ router.get('/getbycourse/:courseId', async (req, res) => {
   const courseId = req.params.courseId;
 
   try {
-    // Fetch all assignments for the given course ID, excluding the FILE field
+    // Fetch all assignments for the given course ID, including NUM_SUBMISSION
     const [rows] = await db.execute(
-      'SELECT AS_ID, NAME, DESCRIPTION, START_DATE, END_DATE FROM ASSIGNMENT WHERE COURSE_ID = ?',
+      'SELECT AS_ID, NAME, DESCRIPTION, START_DATE, END_DATE, NUM_SUBMISSION FROM ASSIGNMENT WHERE COURSE_ID = ?',
       [courseId]
     );
 
