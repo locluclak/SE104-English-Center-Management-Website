@@ -6,24 +6,15 @@ const fs = require('fs');
 
 const router = express.Router();
 
-// HELPER FUNCTION: tạo đường dẫn tương đối, an toàn cho URL
-const getRelativePath = (file) => {
-  if (!file) return null;
-  return path.join(file.destination, file.filename).replace(/\\/g, "/");
-};
-
-// Cấu hình multer
 const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
+  destination: (req, file, cb) => {
     const dir = 'uploads/';
-    if (!fs.existsSync(dir)) {
-      fs.mkdirSync(dir, { recursive: true });
-    }
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
     cb(null, dir);
   },
-  filename: function (req, file, cb) {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, uniqueSuffix + path.extname(file.originalname));
+  filename: (req, file, cb) => {
+    const unique = Date.now() + '-' + Math.round(Math.random() * 1e9);
+    cb(null, unique + path.extname(file.originalname));
   }
 });
 
@@ -35,185 +26,158 @@ const upload = multer({
   { name: 'audio', maxCount: 1 }
 ]);
 
-// === ROUTES ===
+// Helper: format insert for MEDIAFILE
+const prepareFileInsert = (padletId, file, mediaType = 'attachment') => ([
+  padletId,
+  file.originalname,
+  file.mimetype,
+  file.path,
+  mediaType
+]);
 
-// 1. Tạo padlet mới
+// === CREATE ===
 router.post('/create', upload, async (req, res) => {
-  console.log("FILES:", req.files);
-  console.log("BODY:", req.body);
-
-  const { name, content, ownerId } = req.body;
-  if (!name || !content || !ownerId) {
-    return res.status(400).json({ error: 'Name, content, and ownerId are required.' });
-  }
+  const { name, content, ownerId, color } = req.body;
+  if (!name || !content || !ownerId) return res.status(400).json({ error: 'Thiếu trường bắt buộc' });
 
   try {
     const [result] = await db.execute(
-      'INSERT INTO PADLET (NAME, CONTENT, CREATETIME, OWNERID) VALUES (?, ?, NOW(), ?)',
-      [name, content, ownerId]
+      'INSERT INTO PADLET (NAME, CONTENT, CREATETIME, OWNERID, COLOR) VALUES (?, ?, NOW(), ?, ?)',
+      [name, content, ownerId, color || '#ffffff']
     );
+
     const padletId = result.insertId;
+    const files = [];
 
-    const allFiles = [];
     const attachments = req.files?.attachments || [];
-    const audio = req.files?.audio || [];
+    const audio = req.files?.audio?.[0];
 
-    attachments.forEach(file => {
-      allFiles.push({ ...file, mediaType: 'attachment' });
-    });
+    attachments.forEach(file => files.push(prepareFileInsert(padletId, file, 'attachment')));
+    if (audio) files.push(prepareFileInsert(padletId, audio, 'audio'));
 
-    audio.forEach(file => {
-      allFiles.push({ ...file, mediaType: 'audio' });
-    });
-
-    if (allFiles.length > 0) {
-      const fileInserts = allFiles.map(file => [
-        padletId,
-        file.originalname,
-        file.mimetype,
-        getRelativePath(file),
-        file.mediaType
-      ]);
-
-      await db.query(
-        'INSERT INTO MEDIAFILE (NOTEID, FILENAME, TYPE, FILEPATH, MEDIATYPE) VALUES ?',
-        [fileInserts]
-      );
+    if (files.length > 0) {
+      await db.query('INSERT INTO MEDIAFILE (NOTEID, FILENAME, TYPE, FILEPATH, MEDIATYPE) VALUES ?', [files]);
     }
 
-    res.status(201).json({ message: 'Padlet note created successfully.', padletId });
-  } catch (error) {
-    console.error("Error creating padlet:", error);
-    res.status(500).json({ error: 'An error occurred while creating the padlet note.' });
+    res.status(201).json({ message: 'Tạo ghi chú thành công', padletId });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Lỗi khi tạo ghi chú' });
   }
 });
 
-// 2. Lấy danh sách ghi chú
+// === GET NOTES ===
 router.get('/notes/:ownerId', async (req, res) => {
   const { ownerId } = req.params;
 
   try {
-    const [padlets] = await db.query(
-      `SELECT 
-        p.ID AS padletId, p.NAME AS padletName, p.CONTENT AS padletContent, 
-        p.CREATETIME AS createTime, 
-        IF(COUNT(m.ID) > 0,
-          JSON_ARRAYAGG(
-            JSON_OBJECT(
-              'id', m.ID, 
-              'fileName', m.FILENAME, 
-              'fileType', m.TYPE, 
-              'mediaType', m.MEDIATYPE, 
-              'downloadUrl', m.FILEPATH
-            )
-          ),
-          JSON_ARRAY()
+    const [padlets] = await db.query(`
+      SELECT 
+        p.ID AS padletId,
+        p.NAME AS padletName,
+        p.CONTENT AS padletContent,
+        p.COLOR AS color,
+        p.CREATETIME AS createTime,
+        JSON_ARRAYAGG(
+          JSON_OBJECT(
+            'id', m.ID,
+            'fileName', m.FILENAME,
+            'fileType', m.TYPE,
+            'mediaType', m.MEDIATYPE,
+            'downloadUrl', m.FILEPATH
+          )
         ) AS attachmentsData
       FROM PADLET p
       LEFT JOIN MEDIAFILE m ON p.ID = m.NOTEID
       WHERE p.OWNERID = ?
       GROUP BY p.ID
-      ORDER BY p.CREATETIME DESC`,
-      [ownerId]
-    );
+      ORDER BY p.CREATETIME DESC
+    `, [ownerId]);
 
     res.status(200).json({ padlets });
-  } catch (error) {
-    console.error("Error fetching notes:", error);
-    res.status(500).json({ error: 'An error occurred while fetching padlet notes.' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Lỗi khi tải ghi chú' });
   }
 });
 
-// 3. Cập nhật ghi chú
+// === EDIT ===
 router.put('/edit/:padletId', upload, async (req, res) => {
   const { padletId } = req.params;
-  const { name, content, removeAttachment } = req.body;
+  const { name, content, color, removeAttachment, removeAudio } = req.body;
 
   try {
-    if (name || content) {
-      await db.execute(
-        'UPDATE PADLET SET NAME = COALESCE(?, NAME), CONTENT = COALESCE(?, CONTENT) WHERE ID = ?',
-        [name, content, padletId]
-      );
-    }
+    await db.execute(
+      'UPDATE PADLET SET NAME = COALESCE(?, NAME), CONTENT = COALESCE(?, CONTENT), COLOR = COALESCE(?, COLOR) WHERE ID = ?',
+      [name, content, color, padletId]
+    );
 
-    let removeAttachments = [];
+    // Xoá file đính kèm
     if (removeAttachment) {
-      try {
-        removeAttachments = JSON.parse(removeAttachment);
-      } catch (e) {
-        console.warn("Could not parse removeAttachment JSON:", removeAttachment);
-      }
-    }
+      const removeList = JSON.parse(removeAttachment);
+      if (Array.isArray(removeList) && removeList.length > 0) {
+        const [filesToDelete] = await db.query(
+          'SELECT FILEPATH FROM MEDIAFILE WHERE NOTEID = ? AND ID IN (?)',
+          [padletId, removeList]
+        );
 
-    if (Array.isArray(removeAttachments) && removeAttachments.length > 0) {
-      const [filesToDelete] = await db.query(
-        'SELECT FILEPATH FROM MEDIAFILE WHERE NOTEID = ? AND FILENAME IN (?)',
-        [padletId, removeAttachments]
-      );
-      for (const file of filesToDelete) {
-        if (fs.existsSync(file.FILEPATH)) {
-          fs.unlink(file.FILEPATH, (err) => {
-            if (err) console.error(`Failed to delete file: ${file.FILEPATH}`, err);
-          });
+        for (const file of filesToDelete) {
+          try { if (fs.existsSync(file.FILEPATH)) fs.unlinkSync(file.FILEPATH); } catch (err) {}
         }
+
+        await db.query('DELETE FROM MEDIAFILE WHERE NOTEID = ? AND ID IN (?)', [padletId, removeList]);
       }
-      await db.query('DELETE FROM MEDIAFILE WHERE NOTEID = ? AND FILENAME IN (?)', [padletId, removeAttachments]);
     }
 
-    const allNewFiles = [];
-    const attachments = req.files?.attachments || [];
-    const audio = req.files?.audio || [];
-
-    attachments.forEach(file => {
-      allNewFiles.push({ ...file, mediaType: 'attachment' });
-    });
-
-    audio.forEach(file => {
-      allNewFiles.push({ ...file, mediaType: 'audio' });
-    });
-
-    if (allNewFiles.length > 0) {
-      const fileInserts = allNewFiles.map(file => [
-        padletId,
-        file.originalname,
-        file.mimetype,
-        getRelativePath(file),
-        file.mediaType
-      ]);
-      await db.query(
-        'INSERT INTO MEDIAFILE (NOTEID, FILENAME, TYPE, FILEPATH, MEDIATYPE) VALUES ?',
-        [fileInserts]
+    // Xoá audio cũ nếu yêu cầu
+    if (removeAudio === 'true') {
+      const [audioFiles] = await db.query(
+        'SELECT FILEPATH FROM MEDIAFILE WHERE NOTEID = ? AND MEDIATYPE = "audio"',
+        [padletId]
       );
+
+      for (const file of audioFiles) {
+        try { if (fs.existsSync(file.FILEPATH)) fs.unlinkSync(file.FILEPATH); } catch (err) {}
+      }
+
+      await db.query('DELETE FROM MEDIAFILE WHERE NOTEID = ? AND MEDIATYPE = "audio"', [padletId]);
     }
 
-    res.status(200).json({ message: 'Padlet note updated successfully.' });
-  } catch (error) {
-    console.error("Error updating padlet:", error);
-    res.status(500).json({ error: 'An error occurred while updating the padlet note.' });
+    // Thêm file mới
+    const files = [];
+    const attachments = req.files?.attachments || [];
+    const audio = req.files?.audio?.[0];
+
+    attachments.forEach(file => files.push(prepareFileInsert(padletId, file, 'attachment')));
+    if (audio) files.push(prepareFileInsert(padletId, audio, 'audio'));
+
+    if (files.length > 0) {
+      await db.query('INSERT INTO MEDIAFILE (NOTEID, FILENAME, TYPE, FILEPATH, MEDIATYPE) VALUES ?', [files]);
+    }
+
+    res.status(200).json({ message: 'Cập nhật ghi chú thành công' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Lỗi khi cập nhật ghi chú' });
   }
 });
 
-// 4. Xoá ghi chú
+// === DELETE ===
 router.delete('/delete/:padletId', async (req, res) => {
   const { padletId } = req.params;
-  try {
-    const [filesToDelete] = await db.query('SELECT FILEPATH FROM MEDIAFILE WHERE NOTEID = ?', [padletId]);
 
-    for (const file of filesToDelete) {
-      if (fs.existsSync(file.FILEPATH)) {
-        fs.unlink(file.FILEPATH, (err) => {
-          if (err) console.error(`Failed to delete file: ${file.FILEPATH}`, err);
-        });
-      }
+  try {
+    const [files] = await db.query('SELECT FILEPATH FROM MEDIAFILE WHERE NOTEID = ?', [padletId]);
+
+    for (const file of files) {
+      try { if (fs.existsSync(file.FILEPATH)) fs.unlinkSync(file.FILEPATH); } catch (err) {}
     }
 
     await db.query('DELETE FROM PADLET WHERE ID = ?', [padletId]);
-
-    res.status(200).json({ message: 'Padlet note and its files deleted successfully.' });
-  } catch (error) {
-    console.error('Error deleting padlet note:', error);
-    res.status(500).json({ error: 'An error occurred while deleting the padlet note.' });
+    res.status(200).json({ message: 'Đã xoá ghi chú và file đính kèm' });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: 'Lỗi khi xoá ghi chú' });
   }
 });
 
