@@ -6,6 +6,7 @@ const fs = require('fs');
 
 const router = express.Router();
 
+// Multer cấu hình
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
     const dir = 'uploads/';
@@ -20,13 +21,13 @@ const storage = multer.diskStorage({
 
 const upload = multer({
   storage,
-  limits: { fileSize: 20 * 1024 * 1024 } // 20MB
+  limits: { fileSize: 20 * 1024 * 1024 }
 }).fields([
   { name: 'attachments' },
   { name: 'audio', maxCount: 1 }
 ]);
 
-// Helper: format insert for MEDIAFILE
+// Hàm helper xử lý media insert
 const prepareFileInsert = (padletId, file, mediaType = 'attachment') => ([
   padletId,
   file.originalname,
@@ -112,7 +113,7 @@ router.put('/edit/:padletId', upload, async (req, res) => {
       [name, content, color, padletId]
     );
 
-    // Xoá file đính kèm
+    // Xoá đính kèm
     if (removeAttachment) {
       const removeList = JSON.parse(removeAttachment);
       if (Array.isArray(removeList) && removeList.length > 0) {
@@ -122,14 +123,14 @@ router.put('/edit/:padletId', upload, async (req, res) => {
         );
 
         for (const file of filesToDelete) {
-          try { if (fs.existsSync(file.FILEPATH)) fs.unlinkSync(file.FILEPATH); } catch (err) {}
+          try { if (fs.existsSync(file.FILEPATH)) fs.unlinkSync(file.FILEPATH); } catch (_) {}
         }
 
         await db.query('DELETE FROM MEDIAFILE WHERE NOTEID = ? AND ID IN (?)', [padletId, removeList]);
       }
     }
 
-    // Xoá audio cũ nếu yêu cầu
+    // Xoá audio cũ nếu cần
     if (removeAudio === 'true') {
       const [audioFiles] = await db.query(
         'SELECT FILEPATH FROM MEDIAFILE WHERE NOTEID = ? AND MEDIATYPE = "audio"',
@@ -137,7 +138,7 @@ router.put('/edit/:padletId', upload, async (req, res) => {
       );
 
       for (const file of audioFiles) {
-        try { if (fs.existsSync(file.FILEPATH)) fs.unlinkSync(file.FILEPATH); } catch (err) {}
+        try { if (fs.existsSync(file.FILEPATH)) fs.unlinkSync(file.FILEPATH); } catch (_) {}
       }
 
       await db.query('DELETE FROM MEDIAFILE WHERE NOTEID = ? AND MEDIATYPE = "audio"', [padletId]);
@@ -170,7 +171,7 @@ router.delete('/delete/:padletId', async (req, res) => {
     const [files] = await db.query('SELECT FILEPATH FROM MEDIAFILE WHERE NOTEID = ?', [padletId]);
 
     for (const file of files) {
-      try { if (fs.existsSync(file.FILEPATH)) fs.unlinkSync(file.FILEPATH); } catch (err) {}
+      try { if (fs.existsSync(file.FILEPATH)) fs.unlinkSync(file.FILEPATH); } catch (_) {}
     }
 
     await db.query('DELETE FROM PADLET WHERE ID = ?', [padletId]);
