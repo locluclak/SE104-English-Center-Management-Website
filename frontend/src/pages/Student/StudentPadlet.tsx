@@ -90,8 +90,17 @@ const StudentPadlet: React.FC<StudentPadletProps> = () => {
 
       const formatted: PadletNote[] = data.map((p: any) => {
         // Xử lý potential null/undefined cho createTime
-        const createdDate = p.createTime ? new Date(p.createTime).toLocaleDateString() : "N/A"
-        const updatedDate = p.createTime ? new Date(p.createTime).toLocaleDateString() : "N/A" // Giả sử updatedDate cũng từ createTime
+        const formatDate = (dateStr: string) => {
+        const date = new Date(dateStr);
+        const day = String(date.getDate()).padStart(2, '0');
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const year = date.getFullYear();
+        return `${day}/${month}/${year}`;
+      };
+
+      const createdDate = p.createTime ? formatDate(p.createTime) : "N/A";
+      const updatedDate = p.createTime ? formatDate(p.createTime) : "N/A";
+
 
         // Xử lý attachmentsData từ backend: phân loại thành attachments và audio
         const allAttachments: Attachment[] = p.attachmentsData || [];
