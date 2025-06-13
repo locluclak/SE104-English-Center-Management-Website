@@ -1,105 +1,80 @@
+// components/Padlet/AudioRecorderPlayer.tsx
 "use client"
 
 import React, { useEffect, useRef, useState } from "react"
-import { Button as AntButton, message } from "antd"
-import { Mic, MicOff, Trash } from "lucide-react"
+import { Button, Space } from "antd"
 
 interface AudioRecorderPlayerProps {
-  mode: "create" | "edit" | "view"
-  existingAudioUrl?: string | null
-  onAudioBlobChange?: (blob: Blob | null) => void
-  onAudioRemove?: () => void
+  disabled?: boolean
+  defaultAudioUrl?: string
+  onAudioRecorded?: (file: File, url: string) => void
 }
 
-const AudioRecorderPlayer: React.FC<AudioRecorderPlayerProps> = ({
-  mode,
-  existingAudioUrl,
-  onAudioBlobChange,
-  onAudioRemove,
-}) => {
-  const [isRecording, setIsRecording] = useState(false)
-  const [recordingTime, setRecordingTime] = useState(0)
-  const [audioBlob, setAudioBlob] = useState<Blob | null>(null)
-
+const AudioRecorderPlayer: React.FC<AudioRecorderPlayerProps> = ({ disabled, defaultAudioUrl, onAudioRecorded }) => {
+  const [recording, setRecording] = useState(false)
+  const [audioUrl, setAudioUrl] = useState<string | null>(defaultAudioUrl || null)
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
-  const audioChunksRef = useRef<Blob[]>([])
-  const intervalRef = useRef<NodeJS.Timeout | null>(null)
-
-  const isReadOnly = mode === "view"
+  const audioChunksRef = useRef<BlobPart[]>([])
+  const streamRef = useRef<MediaStream | null>(null)
 
   const startRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-      const recorder = new MediaRecorder(stream)
-      mediaRecorderRef.current = recorder
+      streamRef.current = stream
+
+      const mediaRecorder = new MediaRecorder(stream)
+      mediaRecorderRef.current = mediaRecorder
       audioChunksRef.current = []
 
-      recorder.ondataavailable = (event) => {
-        audioChunksRef.current.push(event.data)
+      mediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          audioChunksRef.current.push(event.data)
+        }
       }
 
-      recorder.onstop = () => {
-        const blob = new Blob(audioChunksRef.current, { type: "audio/wav" })
-        setAudioBlob(blob)
-        onAudioBlobChange?.(blob)
-        stream.getTracks().forEach((track) => track.stop())
+      mediaRecorder.onstop = () => {
+        const blob = new Blob(audioChunksRef.current, { type: "audio/webm" })
+        const url = URL.createObjectURL(blob)
+        setAudioUrl(url)
+
+        const file = new File([blob], "recording.webm", { type: "audio/webm" })
+        onAudioRecorded?.(file, url)
+
+        // stop mic access
+        stream.getTracks().forEach(track => track.stop())
       }
 
-      recorder.start()
-      setIsRecording(true)
-      setRecordingTime(0)
-      intervalRef.current = setInterval(() => setRecordingTime((t) => t + 1), 1000)
-    } catch {
-      message.error("Không thể truy cập micro")
+      mediaRecorder.start()
+      setRecording(true)
+    } catch (err) {
+      console.error("Không thể bắt đầu ghi âm:", err)
     }
   }
 
   const stopRecording = () => {
-    mediaRecorderRef.current?.stop()
-    setIsRecording(false)
-    if (intervalRef.current) clearInterval(intervalRef.current)
+    if (mediaRecorderRef.current && recording) {
+      mediaRecorderRef.current.stop()
+      setRecording(false)
+    }
   }
 
   const removeAudio = () => {
-    setAudioBlob(null)
-    onAudioBlobChange?.(null)
-    onAudioRemove?.()
+    setAudioUrl(null)
+    onAudioRecorded?.(null as any, "")
   }
 
-  const formatTime = (s: number) => `${Math.floor(s / 60)}:${(s % 60).toString().padStart(2, "0")}`
+  useEffect(() => {
+    setAudioUrl(defaultAudioUrl || null)
+  }, [defaultAudioUrl])
 
   return (
     <div>
-      {!isReadOnly && (
-        <div className="flex gap-2 mb-2">
-          {!isRecording ? (
-            <AntButton onClick={startRecording}>
-              <Mic className="w-4 h-4 mr-1" />
-              Ghi âm
-            </AntButton>
-          ) : (
-            <AntButton onClick={stopRecording}>
-              <MicOff className="w-4 h-4 mr-1" />
-              Dừng ({formatTime(recordingTime)})
-            </AntButton>
-          )}
-        </div>
-      )}
-
-      {(audioBlob || existingAudioUrl) && (
-        <div className="flex items-center space-x-2 p-2 bg-gray-100 rounded">
-          <audio
-            controls
-            src={audioBlob ? URL.createObjectURL(audioBlob) : existingAudioUrl || ""}
-            className="flex-grow"
-          />
-          {!isReadOnly && (
-            <AntButton size="small" onClick={removeAudio}>
-              <Trash className="w-4 h-4" />
-            </AntButton>
-          )}
-        </div>
-      )}
+      <Space>
+        {!disabled && !recording && <Button onClick={startRecording}>Ghi âm</Button>}
+        {!disabled && recording && <Button danger onClick={stopRecording}>Dừng</Button>}
+        {audioUrl && <audio controls src={audioUrl} style={{ marginTop: 8 }} />}
+        {audioUrl && !disabled && <Button onClick={removeAudio}>Xoá ghi âm</Button>}
+      </Space>
     </div>
   )
 }
