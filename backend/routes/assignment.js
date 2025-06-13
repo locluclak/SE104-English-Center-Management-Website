@@ -202,4 +202,48 @@ router.put('/update/:id', async (req, res) => {
   }
 });
 
+//Get assignment progress for a teacher
+router.get('/teacher/:teacherId/progress', async (req, res) => {
+  const teacherId = req.params.teacherId;
+
+  if (!teacherId) {
+    return res.status(400).json({ error: 'Teacher ID is required' });
+  }
+
+  try {
+    const query = `
+      SELECT
+        A.AS_ID AS id,
+        A.NAME AS title,
+        A.DESCRIPTION AS description,
+        A.END_DATE AS dueDate,
+        C.COURSE_ID AS courseId,
+        C.NAME AS courseName,
+        C.NUMBER_STU AS studentsCount, -- Total students in the course
+        COUNT(S.STUDENT_ID) AS submissionsCount -- Submissions for this specific assignment
+      FROM ASSIGNMENT A
+      JOIN COURSE C ON A.COURSE_ID = C.COURSE_ID
+      JOIN TEACHER_COURSE TC ON C.COURSE_ID = TC.COURSE_ID
+      LEFT JOIN SUBMITION S ON A.AS_ID = S.AS_ID
+      WHERE TC.TEACHER_ID = ?
+      GROUP BY A.AS_ID, A.NAME, A.DESCRIPTION, A.END_DATE, C.COURSE_ID, C.NAME, C.NUMBER_STU
+      ORDER BY A.END_DATE ASC;
+    `;
+    const [assignments] = await db.execute(query, [teacherId]);
+
+    const now = new Date();
+    const upcomingAssignments = assignments.filter(assignment => { // Removed ': any' type annotation
+      const assignmentDueDate = new Date(assignment.dueDate);
+      assignmentDueDate.setHours(23, 59, 59, 999); // Set to end of day for comparison
+      return assignmentDueDate >= now;
+    });
+
+    res.status(200).json(upcomingAssignments);
+  } catch (error) {
+    console.error('Error fetching teacher assignment progress:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+
 module.exports = router;
