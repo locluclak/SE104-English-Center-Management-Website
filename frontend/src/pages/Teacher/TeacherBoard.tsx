@@ -53,8 +53,8 @@ const TeacherBoard: React.FC<TeacherBoardProps> = ({ teacherId, userRole }) => {
         </TabsList>
 
         <Routes>
-          <Route index element={<TeacherCalendar teacherId={teacherId} userRole={userRole} />} />
-          <Route path="calendar" element={<TeacherCalendar teacherId={teacherId} userRole={userRole} />} />
+          <Route index element={<TeacherCalendar teacherId={teacherId}  />} />
+          <Route path="calendar" element={<TeacherCalendar teacherId={teacherId} />} />
           <Route path="padlet" element={<TeacherPadlet teacherId={teacherId} userRole={userRole} />} />
         </Routes>
       </Tabs>
