@@ -8,7 +8,7 @@ import './Login.scss';
 
 const Login = () => {
   const navigate = useNavigate();
-  const { isLoggedIn, setToken } = useSystemContext();
+  const { setToken } = useSystemContext();
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -43,11 +43,13 @@ const Login = () => {
     }
   };
 
-  useEffect(() => {
-    if (isLoggedIn) {
-      navigate('/');
+    useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+        navigate('/');
     }
-  }, [isLoggedIn]);
+    }, [navigate]);
+
 
   return (
     <div className="bg-login">
