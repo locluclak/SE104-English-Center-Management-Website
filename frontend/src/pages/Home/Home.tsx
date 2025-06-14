@@ -1,44 +1,24 @@
-// import React from 'react';
-// import { useNavigate } from 'react-router-dom';
+import { useNavigate, Outlet } from 'react-router-dom'
 
-// import './Home.css'
+const Home = () => {
+  const navigate = useNavigate()
 
-// const Home = () => {
-//   const navigate = useNavigate();
+  return (
+    <div className="d-flex flex-column align-items-center justify-content-center vh-100 bg-light">
+      <h1 className="mb-4">WELCOME TO HALO CENTER</h1>
+      <div className="d-flex gap-3">
+        <button className="btn btn-primary" onClick={() => navigate('/login')}>
+            LOG IN
+        </button>
+        <button className="btn btn-outline-primary" onClick={() => navigate('/register')}>
+            REGISTER
+        </button>
+      </div>
+      <div className="mt-4 w-100">
+        <Outlet />
+      </div>
+    </div>
+  )
+}
 
-//   const goToLogin = () => {
-//     navigate('/login');
-//   };
-
-//   const goToSignup = () => {
-//     navigate('/signup');
-//   };
-
-//   const scrollToSection = (id) => {
-//     const element = document.getElementById(id);
-//     if (element) {
-//       element.scrollIntoView({ behavior: 'smooth' });
-//     }
-//   };  
-
-//   const handleClassClick = (className) => {
-//     alert(`Bạn đã chọn ${className}`);
-//   };  
-
-//   return (
-//     <div className="home-page">
-//       <Header
-//         role={null}
-//         activeTab=""
-//         setActiveTab={() => {}}
-//         onNavigateSection={scrollToSection}
-//       />
-      
-//       <div className="homepage-container">
-//         <HomeContent handleClassClick={handleClassClick} />
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default Home;
+export default Home
