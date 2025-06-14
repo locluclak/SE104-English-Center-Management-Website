@@ -25,72 +25,75 @@ import Login from "@/pages/Login/Login"
 import Register from "@/pages/Register/Register"
 
 export default function MainRoutes() {
-  const { isLoggedIn } = useSystemContext()
-  const location = useLocation()
-  const navigate = useNavigate()
+  const { isLoggedIn } = useSystemContext(); // userRole đã được bỏ ở đây
+  const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (isLoggedIn) {
-      const publicPages = ["/login", "/register", "/"]
+      const publicPages = ["/login", "/register", "/"];
       if (publicPages.includes(location.pathname)) {
-        const role = localStorage.getItem("role")
-        switch (role) {
+        const role = localStorage.getItem("role"); // Lấy vai trò từ localStorage
+        switch (role) { // Sử dụng biến role mới
           case "ADMIN":
-            navigate("/admin/courses")
-            break
+            navigate("/admin/courses", { replace: true });
+            break;
           case "ACCOUNTANT":
-            navigate("/accountant/dashboard")
-            break
+            navigate("/accountant/dashboard", { replace: true });
+            break;
           case "TEACHER":
-            navigate("/teacher")
-            break
+            navigate("/teacher", { replace: true });
+            break;
           case "STUDENT":
-            navigate("/student")
-            break
+            navigate("/student", { replace: true });
+            break;
           default:
-            navigate("/")
+            navigate("/", { replace: true });
         }
       }
+    } else {
+      const protectedPathsStart = ["/admin", "/accountant", "/student", "/teacher"];
+      const isProtectedPath = protectedPathsStart.some(path => location.pathname.startsWith(path));
+
+      if (isProtectedPath) {
+        navigate("/login", { replace: true });
+      }
     }
-  }, [isLoggedIn, location.pathname])
+  }, [isLoggedIn, location.pathname, navigate]); // userRole đã được bỏ khỏi dependency array
+
 
   return (
     <Routes>
-      {/* Redirect root sang login luôn */}
       <Route path="/" element={<Navigate to="/login" replace />} />
 
-      {/* Public routes */}
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
-
-      {/* Optional: giữ Home nếu cần */}
       <Route path="/home" element={<Home />} />
 
-      {/* Admin & Accountant routes */}
-      <Route path="/" element={<Layout />}>
-        {/* Admin */}
+      <Route
+        path="/"
+        element={
+          <Layout />
+        }
+      >
         <Route path="admin/courses" element={<CoursesList />} />
         <Route path="admin/students" element={<StudentsList />} />
         <Route path="admin/teachers" element={<TeachersList />} />
         <Route path="admin/accountants" element={<AccountantList />} />
 
-        {/* Accountant */}
         <Route path="accountant/dashboard" element={<DashboardCharts />} />
         <Route path="accountant/studentfees" element={<StudentFeeList />} />
         <Route path="accountant/reports" element={<Reports />} />
       </Route>
 
-      {/* Student */}
       <Route path="/student" element={<StudentLayout />}>
         <Route path="*" element={<StudentPage />} />
       </Route>
 
-      {/* Teacher */}
       <Route path="/teacher" element={<TeacherLayout />}>
         <Route path="*" element={<TeacherPage />} />
       </Route>
 
-      {/* 404 fallback */}
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   )

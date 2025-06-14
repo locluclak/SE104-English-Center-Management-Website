@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { useSystemContext } from '@/hooks/useSystemContext';
 import './Sidebar.scss';
 import { comparePathname } from '@/utils/uri';
 
@@ -52,7 +51,6 @@ const Sidebar: React.FC = () => {
   const handleLogout = () => {
   localStorage.removeItem('token');
   localStorage.removeItem('role');
-  setRole(null);
   window.location.href = '/';
 };
 
