@@ -25,8 +25,6 @@ const Login = () => {
         localStorage.setItem('token', token)
         localStorage.setItem('role', role)
         localStorage.setItem('userId', userId)
-
-        // chuyển hướng sẽ do MainRoutes xử lý
       }
     } catch (err: any) {
       console.error('Login error:', err)
@@ -36,7 +34,7 @@ const Login = () => {
 
   useEffect(() => {
     if (isLoggedIn) {
-      navigate('/') // chuyển về layout chính, tự redirect theo role
+      navigate('/')
     }
   }, [isLoggedIn])
 
