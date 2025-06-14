@@ -58,43 +58,37 @@ const CoursesList = () => {
   >(null);
 
   const fetchCoursesList = async () => {
-    try {
-      const res = await MainApiRequest.get("/course/all");
-      const rawCourses = res.data;
+  try {
+    const res = await MainApiRequest.get("/course/all");
+    const rawCourses = res.data;
 
-      const coursesWithTeachers = await Promise.all(
-        rawCourses.map(async (cls: any) => {
-          const teacherName = await fetchTeacherForCourse(cls.COURSE_ID);
-          const match = cls.DESCRIPTION?.match(
-            /^[^\[]*\[Giáo viên:\s*(.*?)\]\s*/
-          );
-          const cleanDescription = cls.DESCRIPTION?.replace(
-            /^[^\[]*\[Giáo viên:\s*.*?\]\s*/,
-            ""
-          );
+    const coursesWithTeachers = await Promise.all(
+      rawCourses.map(async (cls: any) => {
+        const teacherName = await fetchTeacherForCourse(cls.COURSE_ID);
 
-          return {
-            id: cls.COURSE_ID,
-            name: cls.NAME,
-            description: cleanDescription,
-            teacherName,
-            startDate: cls.START_DATE,
-            endDate: cls.END_DATE,
-            minStu: cls.MIN_STU,
-            maxStu: cls.MAX_STU,
-            price: cls.PRICE,
-            status: cls.STATUS || "waiting",
-            teacherId: null,
-          };
-        })
-      );
+        return {
+          id: cls.COURSE_ID,
+          name: cls.NAME,
+          description: cls.DESCRIPTION, 
+          teacherName,
+          startDate: cls.START_DATE,
+          endDate: cls.END_DATE,
+          minStu: cls.MIN_STU,
+          maxStu: cls.MAX_STU,
+          price: cls.PRICE,
+          status: cls.STATUS || "waiting",
+          teacherId: null,
+        };
+      })
+    );
 
-      setCoursesList(coursesWithTeachers);
-    } catch (error) {
-      console.error("Failed to fetch courses:", error);
-      message.error("Unable to load courses.");
-    }
-  };
+    setCoursesList(coursesWithTeachers);
+  } catch (error) {
+    console.error("Failed to fetch courses:", error);
+    message.error("Unable to load courses.");
+  }
+};
+
 
   const fetchTeacherForCourse = async (courseId: number): Promise<string> => {
     try {
