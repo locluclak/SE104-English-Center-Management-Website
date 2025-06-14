@@ -60,39 +60,36 @@ export const StudentAssignmentItem: React.FC<StudentAssignmentItemProps> = ({ as
   }
 
   const fetchSubmissions = async () => {
-  try {
-    const token = localStorage.getItem("token")
-    const studentId = token ? JSON.parse(token).id : null
-    if (!studentId) return
+    try {
+      const token = localStorage.getItem("token")
+      const studentId = token ? JSON.parse(token).id : null
+      if (!studentId) return
 
-    const res = await MainApiRequest.get(`/submission/submissions_byassignment/${assignment.id}`)
+      const res = await MainApiRequest.get(`/submission/submissions_byassignment/${assignment.id}`)
 
-    const filtered = (res.data.submissions || []).filter(
-      (s: Submission) => s.STUDENT_ID === studentId
-    )
+      const filtered = (res.data.submissions || []).filter(
+        (s: Submission) => s.STUDENT_ID === studentId
+      )
 
-    setSubmissions(filtered)
+      setSubmissions(filtered)
 
-    if (filtered.length > 0 && assignment.status === "pending") {
-      assignment.status = "submitted"
-      onStatusChange?.("submitted")
-    }
-  } catch (err: any) {
-    if (err?.response?.status === 404) {
-      // Không có submission => không sao cả
-      setSubmissions([])
-    } else {
-      console.error("Lỗi khi lấy submission:", err)
-      message.error("Đã xảy ra lỗi khi tải bài nộp.")
+      if (filtered.length > 0 && assignment.status === "pending") {
+        assignment.status = "submitted"
+        onStatusChange?.("submitted")
+      }
+    } catch (err: any) {
+      if (err?.response?.status === 404) {
+        setSubmissions([])
+      } else {
+        console.error("Lỗi khi lấy submission:", err)
+        message.error("Đã xảy ra lỗi khi tải bài nộp.")
+      }
     }
   }
-}
-
-
 
   useEffect(() => {
     fetchSubmissions()
-  }, [assignment.id])
+  }, [assignment.id, onStatusChange]) 
 
   const handleEditSubmission = () => {
     const latest = submissions[submissions.length - 1]
@@ -109,35 +106,26 @@ export const StudentAssignmentItem: React.FC<StudentAssignmentItemProps> = ({ as
       if (!studentId) throw new Error("Student ID not found")
 
       const latest = submissions[submissions.length - 1]
-      const isEditable = latest && latest.SCORE == null
+      const isEditable = latest && (latest.SCORE === undefined || latest.SCORE === null)
 
       const formData = new FormData()
       formData.append("description", submissionText)
-      if (selectedFile) formData.append("file", selectedFile)
+      if (selectedFile) {
+      formData.append("file", selectedFile)
+      formData.append("uploadedname", selectedFile.name) 
+      }
 
       if (isEditable) {
-        await MainApiRequest.put(`/submission/update/${studentId}/${assignment.id}`, formData, {headers: { "Content-Type": "multipart/form-data" },})
+        await MainApiRequest.put(`/submission/update/${studentId}/${assignment.id}`, formData, { headers: { "Content-Type": "multipart/form-data" } })
       } else {
         formData.append("student_id", studentId)
         formData.append("assignment_id", assignment.id)
-        await MainApiRequest.post(`/submission/upload`, formData, {headers: { "Content-Type": "multipart/form-data" }})
-        assignment.status = "submitted"
+        await MainApiRequest.post(`/submission/upload`, formData, { headers: { "Content-Type": "multipart/form-data" } })
+        assignment.status = "submitted" 
         onStatusChange?.("submitted")
       }
 
-      if (selectedFile) {
-        const docForm = new FormData()
-        docForm.append("name", `${assignment.title} - ${studentId}`)
-        docForm.append("description", submissionText || "Assignment submission")
-        docForm.append("course_id", courseId)
-        docForm.append("file", selectedFile)
-
-        await MainApiRequest.post("/document", docForm, {
-          headers: { "Content-Type": "multipart/form-data" },
-        })
-      }
-
-      message.success("Submission and document saved successfully!")
+      message.success("Submission saved successfully!")
       setIsSubmitDialogOpen(false)
       fetchSubmissions()
     } catch (error) {
@@ -168,9 +156,9 @@ export const StudentAssignmentItem: React.FC<StudentAssignmentItemProps> = ({ as
     return due < new Date() && assignment.status === "pending"
   }
 
-  const latestUnscored = submissions[submissions.length - 1]
-  const canEdit = submissions.length > 0 && (submissions[submissions.length - 1].SCORE === undefined || submissions[submissions.length - 1].SCORE === null)
-  const hasSubmission = submissions.length > 0
+  const latestUnscored = submissions.findLast(sub => sub.SCORE === undefined || sub.SCORE === null);
+  const canEdit = latestUnscored !== undefined;
+  const hasSubmission = submissions.length > 0;
 
   return (
     <Card className={`assignment-item ${isOverdue() ? "overdue" : ""}`}>
@@ -192,36 +180,36 @@ export const StudentAssignmentItem: React.FC<StudentAssignmentItemProps> = ({ as
       <CardContent>
         <p className="assignment-description">{assignment.description}</p>
         <div className="assignment-actions">
-          {assignment.status === "pending" && (
+          {!hasSubmission || (hasSubmission && !canEdit) ? (
             <Button onClick={() => setIsSubmitDialogOpen(true)}>
               <Upload className="icon" /> Submit Assignment
             </Button>
-          )}
-            <div className="submission-buttons">
-          {hasSubmission && (
-            <>
-              <Button variant="outline" onClick={() => setIsViewDialogOpen(true)} className="mr-2">
-                View Submission
-              </Button>
-              {canEdit && (
-                <Button variant="default" onClick={handleEditSubmission}>
-                  Edit Submission
+          ) : null}
+
+          <div className="submission-buttons">
+            {hasSubmission && (
+              <>
+                <Button variant="outline" onClick={() => setIsViewDialogOpen(true)} className="mr-2">
+                  View Submission
                 </Button>
-              )}
-            </>
-          )}
-    
-          {assignment.status === "graded" && assignment.grade !== undefined && (
-            <div className="grade-display">
-              <span>Grade: </span>
-              <strong>{assignment.grade}/100</strong>
-            </div>
-          )}
+                {canEdit && ( 
+                  <Button variant="default" onClick={handleEditSubmission}>
+                    Edit Submission
+                  </Button>
+                )}
+              </>
+            )}
+
+            {assignment.status === "graded" && assignment.grade !== undefined && (
+              <div className="grade-display">
+                <span>Grade: </span>
+                <strong>{assignment.grade}/100</strong>
+              </div>
+            )}
           </div>
         </div>
       </CardContent>
 
-      {/* Submit / Edit Dialog */}
       <Dialog open={isSubmitDialogOpen} onOpenChange={setIsSubmitDialogOpen}>
         <DialogContent>
           <DialogHeader>
@@ -263,7 +251,6 @@ export const StudentAssignmentItem: React.FC<StudentAssignmentItemProps> = ({ as
             <Button
               onClick={handleSubmit}
               disabled={submitting || (!submissionText.trim() && !selectedFile)}
-              loading={submitting}
             >
               {submitting ? "Submitting..." : "Submit"}
             </Button>
@@ -271,7 +258,6 @@ export const StudentAssignmentItem: React.FC<StudentAssignmentItemProps> = ({ as
         </DialogContent>
       </Dialog>
 
-      {/* View Submission Dialog */}
       <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
         <DialogContent>
           <DialogHeader>
@@ -302,7 +288,7 @@ export const StudentAssignmentItem: React.FC<StudentAssignmentItemProps> = ({ as
                       </a>
                     </div>
                   )}
-                  {sub.SCORE !== undefined ? (
+                  {sub.SCORE !== undefined && sub.SCORE !== null ? (
                     <p>
                       <strong>Score:</strong> {sub.SCORE}/100
                     </p>

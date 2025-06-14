@@ -10,6 +10,7 @@ const documentRoutes = require('./routes/document');
 const assignmentRoutes = require('./routes/assignment'); // Import assignment routes
 const submissionRoutes = require('./routes/submission'); // Import submission routes
 const categoryRoutes = require('./routes/category'); // Import category routes
+const padletRoutes = require('./routes/padlet'); // Import padlet routes
 const path = require('path');
 // Initialize Express application
 const app = express();
@@ -19,7 +20,7 @@ app.use(cors());
 
 // Parse incoming JSON request bodies
 app.use(express.json());
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/uploads', express.static('uploads'));
 
 // Mount authentication routes at the root path
 app.use('/', authRoutes);
@@ -30,6 +31,7 @@ app.use('/document', documentRoutes);
 app.use('/assignment', assignmentRoutes); // Mount assignment routes
 app.use('/submission', submissionRoutes); // Mount submission routes
 app.use('/category', categoryRoutes); // Mount category routes
+app.use('/padlet', padletRoutes); // Mount padlet routes
 // Set the port from environment variable or default to 3000
 const PORT = process.env.PORT || 3000;
 

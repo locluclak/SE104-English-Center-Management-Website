@@ -8,10 +8,12 @@ import TeacherHome from "./TeacherHome"
 import TeacherCourses from "./TeacherCourses"
 import TeacherCourseDetail from "./TeacherCourseDetail"
 import TeacherBoard from "./TeacherBoard"
+import ProfileUser from "@/pages/ProfileUser/ProfileUser"
 import "./Teacher.scss"
 
 const TeacherPage: React.FC = () => {
   const [currentTeacherId, setCurrentTeacherId] = useState<string>("")
+  const [currentTeacherIdIsSet, setCurrentTeacherIdIsSet] = useState(false);
   const [currentUserRole, setCurrentUserRole] = useState<string>("")
   const navigate = useNavigate()
   const location = useLocation()
@@ -20,11 +22,17 @@ const TeacherPage: React.FC = () => {
     const storedTeacherId = localStorage.getItem("userId")
     const storedUserRole = localStorage.getItem("userRole")
 
+    console.log("TeacherPage retrieved userId from localStorage:", storedTeacherId)
+    console.log("TeacherPage retrieved userRole from localStorage:", storedUserRole)
+
     if (storedTeacherId) {
       setCurrentTeacherId(storedTeacherId)
+      console.log("TeacherPage retrieved userId from localStorage:", storedTeacherId)
     } else {
-      console.warn("Teacher ID not found in localStorage.")
+      console.warn("Teacher ID not found in localStorage. Setting to empty string.")
+      setCurrentTeacherId("")
     }
+    setCurrentTeacherIdIsSet(true);
 
     if (storedUserRole) {
       setCurrentUserRole(storedUserRole)
@@ -32,6 +40,7 @@ const TeacherPage: React.FC = () => {
       console.warn("User role not found in localStorage. Defaulting to 'teacher'.")
       setCurrentUserRole("teacher")
     }
+
   }, [])
 
   const handleNavigation = useCallback(
@@ -41,6 +50,24 @@ const TeacherPage: React.FC = () => {
     [navigate],
   )
 
+  if (!currentTeacherIdIsSet) {
+    return (
+      <div className="teacher-page-loading">
+        <p>Loading teacher portal...</p>
+      </div>
+    )
+  }
+
+  if (currentTeacherId === "") {
+    return (
+      <div className="teacher-page-error">
+        <p>User not logged in or teacher ID missing. Please log in.</p>
+        {/* Bạn có thể chuyển hướng về trang đăng nhập ở đây */}
+        {/* <Navigate to="/login" replace /> */}
+      </div>
+    );
+  }
+
   return (
     <div className="teacher-page-wrapper">
       <div className="teacher-page-layout">
@@ -48,24 +75,20 @@ const TeacherPage: React.FC = () => {
 
         <div className="teacher-page-content">
           <Routes>
-            {/* Exact path for home */}
-            <Route path="/home" element={<TeacherHome teacherId={currentTeacherId} userRole={currentUserRole} />} />
+            <Route path="/home" element={<TeacherHome teacherId={currentTeacherId} userRole={currentUserRole || "teacher"} />} />
 
-            {/* Courses routes */}
             <Route
               path="/courses"
-              element={<TeacherCourses teacherId={currentTeacherId} userRole={currentUserRole} />}
+              element={<TeacherCourses teacherId={currentTeacherId} userRole={currentUserRole || "teacher"} />}
             />
             <Route path="/courses/:courseId" element={<TeacherCourseDetail />} />
 
-            {/* Board routes */}
-            <Route path="/board/*" element={<TeacherBoard teacherId={currentTeacherId} userRole={currentUserRole} />} />
+            <Route path="/board/*" element={<TeacherBoard teacherId={currentTeacherId} userRole={currentUserRole || "teacher"} />} />
 
-            {/* Redirect empty path to home */}
-            <Route path="" element={<Navigate to="/teacher" replace />} />
+            <Route path="/profile" element={<ProfileUser />} />
 
-            {/* Catch-all redirect to home */}
-            <Route path="*" element={<Navigate to="/teacher" replace />} />
+            <Route path="" element={<Navigate to="/teacher/home" replace />} />
+            <Route path="*" element={<Navigate to="/teacher/home" replace />} />
           </Routes>
         </div>
       </div>
@@ -73,4 +96,4 @@ const TeacherPage: React.FC = () => {
   )
 }
 
-export default TeacherPage
+export default TeacherPage;

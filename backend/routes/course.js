@@ -318,6 +318,40 @@ router.get('/student/:studentId', async (req, res) => {
   }
 });
 
+//Get all assignments (calendar events) for a student across all their enrolled courses
+router.get('/student/:studentId/calendar', async (req, res) => {
+  const studentId = req.params.studentId;
+
+  try {
+      const query = `
+          SELECT
+              A.AS_ID,
+              A.NAME AS assignmentName,
+              A.DESCRIPTION AS assignmentDescription,
+              A.START_DATE AS assignmentStartDate,
+              A.END_DATE AS assignmentEndDate,
+              C.COURSE_ID,
+              C.NAME AS courseName
+          FROM ASSIGNMENT A
+          JOIN COURSE C ON A.COURSE_ID = C.COURSE_ID
+          JOIN STUDENT_COURSE SC ON C.COURSE_ID = SC.COURSE_ID
+          WHERE SC.STUDENT_ID = ?
+          ORDER BY A.START_DATE;
+      `;
+      const [assignments] = await db.execute(query, [studentId]);
+
+      if (assignments.length === 0) {
+          return res.status(200).json({ message: 'No calendar entries (assignments) found for this student.', assignments: [] });
+      }
+
+      res.status(200).json({ assignments });
+  } catch (error) {
+      console.error('Error fetching student calendar data (assignments):', error);
+      res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+
 router.get('/teacher/:courseId', async (req, res) => {
   const courseId = req.params.courseId;
 
@@ -333,6 +367,149 @@ router.get('/teacher/:courseId', async (req, res) => {
     res.status(200).json(teachers);
   } catch (error) {
     console.error('Error fetching teachers by course ID:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Route to get list of assignments in a course
+router.get('/:courseId/assignments_time', async (req, res) => {
+  const courseId = req.params.courseId;
+
+  try {
+    const query = `
+      SELECT AS_ID, NAME, DESCRIPTION, START_DATE, END_DATE
+      FROM ASSIGNMENT
+      WHERE COURSE_ID = ?
+    `;
+
+    const [rows] = await db.execute(query, [courseId]);
+
+    if (rows.length === 0) {
+      return res.status(200).json({ message: 'No assignments found for this course' });
+    }
+
+    res.status(200).json({ assignments: rows });
+  } catch (error) {
+    console.error('Error fetching assignments:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+// Route to get enrolled courses of a person
+router.get('/enrolled-courses/:personId', async (req, res) => {
+  const { personId } = req.params;
+
+  try {
+    const query = `
+      SELECT c.COURSE_ID, c.NAME, c.DESCRIPTION, c.START_DATE, c.END_DATE, c.PRICE
+      FROM STUDENT_COURSE sc
+      JOIN COURSE c ON sc.COURSE_ID = c.COURSE_ID
+      WHERE sc.STUDENT_ID = ?
+    `;
+    const [courses] = await db.execute(query, [personId]);
+
+    if (courses.length === 0) {
+      return res.status(200).json({ message: 'No courses found for this person' });
+    }
+
+    res.status(200).json({ courses });
+  } catch (error) {
+    console.error('Error fetching enrolled courses:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// Route to get unenrolled courses of a person that are pending and will start in the future
+router.get('/unenrolled-courses/:personId', async (req, res) => {
+  const { personId } = req.params;
+
+  try {
+    const query = `
+      SELECT c.COURSE_ID, c.NAME, c.DESCRIPTION, c.START_DATE, c.END_DATE, c.PRICE
+      FROM COURSE c
+      WHERE c.COURSE_ID NOT IN (
+        SELECT sc.COURSE_ID
+        FROM STUDENT_COURSE sc
+        WHERE sc.STUDENT_ID = ?
+      )
+      AND c.START_DATE > NOW() -- Only include courses that will start in the future
+    `;
+    const [courses] = await db.execute(query, [personId]);
+
+    if (courses.length === 0) {
+      return res.status(200).json({ message: 'No unenrolled courses found for this person' });
+    }
+
+    res.status(200).json({ courses });
+  } catch (error) {
+    console.error('Error fetching unenrolled courses:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+//Get all courses taught by a specific teacher
+router.get('/teacher-courses/:teacherId', async (req, res) => {
+  const teacherId = req.params.teacherId;
+
+  if (!teacherId || teacherId.trim() === '') { 
+    console.error('Backend: Teacher ID is missing or empty.');
+    return res.status(400).json({ error: 'Teacher ID is required' });
+  }
+
+  try {
+    const query = `
+      SELECT
+        C.COURSE_ID AS id,
+        C.NAME AS name,
+        C.DESCRIPTION AS description,
+        C.START_DATE,
+        C.END_DATE,
+        C.PRICE,
+        COUNT(SC.STUDENT_ID) AS students,
+        C.MAX_STU AS maxStudents
+      FROM COURSE C
+      JOIN TEACHER_COURSE TC ON C.COURSE_ID = TC.COURSE_ID
+      LEFT JOIN STUDENT_COURSE SC ON C.COURSE_ID = SC.COURSE_ID
+      WHERE TC.TEACHER_ID = ?
+      GROUP BY C.COURSE_ID, C.NAME, C.DESCRIPTION, C.START_DATE, C.END_DATE, C.PRICE, C.MAX_STU
+      ORDER BY C.START_DATE DESC;
+    `;
+    const [courses] = await db.execute(query, [teacherId]);
+
+    console.log('Backend: Courses retrieved for teacherId', teacherId, ':', courses);
+
+    const formattedCourses = courses.map(course => {
+      const now = new Date();
+      const startDate = new Date(course.START_DATE);
+      const endDate = new Date(course.END_DATE);
+    let status = "active";
+
+    if (now < startDate) {
+      status = "upcoming";
+    } else if (now > endDate) {
+      status = "completed";
+    }
+
+    const schedule = "TBD";
+    let nextClass = "";
+    if (status === "active" || status === "upcoming") {
+      nextClass = startDate.toISOString(); 
+    }
+
+    return {
+      id: String(course.id),
+      name: course.name,
+      description: course.description,
+      students: course.students || 0, // Ensure students count is not null
+      maxStudents: course.maxStudents,
+      schedule: schedule,
+      nextClass: nextClass,
+      status: status,
+    };
+  });
+
+    res.status(200).json(formattedCourses);
+  } catch (error) {
+    console.error('Error fetching courses by teacher ID:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });

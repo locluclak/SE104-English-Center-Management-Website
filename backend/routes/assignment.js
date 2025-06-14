@@ -21,22 +21,23 @@ const upload = multer({ storage: storage });
 
 // POST /assignments/upload - Upload a new assignment
 router.post('/upload', upload.single('file'), async (req, res) => {
-  const { name, description, start_date, end_date, course_id } = req.body;
+  const { name, description, start_date, end_date, uploadedname, course_id } = req.body;
   const filePath = req.file ? `/uploads/${req.file.filename}` : null;
 
   // Validate required fields
-  if (!name || !start_date || !end_date || !course_id) {
+  if (!name || !start_date || !end_date || !course_id || !uploadedname) {
     return res.status(400).json({ error: 'Missing required fields: name, start_date, end_date, or course_id' });
   }
 
   try {
     const sql = `
-      INSERT INTO ASSIGNMENT (NAME, DESCRIPTION, FILE, START_DATE, END_DATE, COURSE_ID)
-      VALUES (?, ?, ?, ?, ?, ?)
+      INSERT INTO ASSIGNMENT (NAME, DESCRIPTION, FILENAME, FILE, START_DATE, END_DATE, COURSE_ID)
+      VALUES (?, ?, ?, ?, ?, ?, ?)
     `;
     const [result] = await db.execute(sql, [
       name,
       description || null, // Use null if description is not provided
+      uploadedname,
       filePath, // File path can be null if no file is uploaded
       start_date,
       end_date,
@@ -133,13 +134,26 @@ router.get('/getbycourse/:courseId', async (req, res) => {
     );
 
     if (rows.length === 0) {
-      return res.status(404).json({ error: 'No assignments found for this course' });
+      return res.status(200).json({ message: 'No assignments found for this course' });
     }
 
     res.status(200).json({ assignments: rows });
   } catch (err) {
     console.error('Error fetching assignments:', err);
     res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+// NEW ROUTE: GET /assignments/all - Get all assignments
+router.get('/all', async (req, res) => {
+  try {
+      // Include COURSE_ID for frontend mapping
+      const [rows] = await db.execute('SELECT AS_ID, NAME, DESCRIPTION, START_DATE, END_DATE, COURSE_ID FROM ASSIGNMENT');
+      // Ensure the response structure matches what frontend expects: data.assignments
+      res.status(200).json({ assignments: rows });
+  } catch (error) {
+      console.error('Error fetching all assignments:', error);
+      res.status(500).json({ error: 'Internal server error' });
   }
 });
 
@@ -187,5 +201,49 @@ router.put('/update/:id', async (req, res) => {
     res.status(500).json({ error: 'Internal server error' });
   }
 });
+
+//Get assignment progress for a teacher
+router.get('/teacher/:teacherId/progress', async (req, res) => {
+  const teacherId = req.params.teacherId;
+
+  if (!teacherId) {
+    return res.status(400).json({ error: 'Teacher ID is required' });
+  }
+
+  try {
+    const query = `
+      SELECT
+        A.AS_ID AS id,
+        A.NAME AS title,
+        A.DESCRIPTION AS description,
+        A.END_DATE AS dueDate,
+        C.COURSE_ID AS courseId,
+        C.NAME AS courseName,
+        C.NUMBER_STU AS studentsCount, -- Total students in the course
+        COUNT(S.STUDENT_ID) AS submissionsCount -- Submissions for this specific assignment
+      FROM ASSIGNMENT A
+      JOIN COURSE C ON A.COURSE_ID = C.COURSE_ID
+      JOIN TEACHER_COURSE TC ON C.COURSE_ID = TC.COURSE_ID
+      LEFT JOIN SUBMITION S ON A.AS_ID = S.AS_ID
+      WHERE TC.TEACHER_ID = ?
+      GROUP BY A.AS_ID, A.NAME, A.DESCRIPTION, A.END_DATE, C.COURSE_ID, C.NAME, C.NUMBER_STU
+      ORDER BY A.END_DATE ASC;
+    `;
+    const [assignments] = await db.execute(query, [teacherId]);
+
+    const now = new Date();
+    const upcomingAssignments = assignments.filter(assignment => { // Removed ': any' type annotation
+      const assignmentDueDate = new Date(assignment.dueDate);
+      assignmentDueDate.setHours(23, 59, 59, 999); // Set to end of day for comparison
+      return assignmentDueDate >= now;
+    });
+
+    res.status(200).json(upcomingAssignments);
+  } catch (error) {
+    console.error('Error fetching teacher assignment progress:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 
 module.exports = router;

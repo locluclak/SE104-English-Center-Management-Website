@@ -140,6 +140,44 @@
     padding: 20px;
     border-top: 1px solid rgba(255, 255, 255, 0.1);
 
+    .sidebar-user-profile {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+
+      &:hover {
+        background-color: rgba(255, 255, 255, 0.08);
+      }
+
+      .profile-avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        object-fit: cover;
+        flex-shrink: 0;
+        border: 2px solid get-color($accent, "100");
+      }
+
+      .profile-info {
+        display: flex;
+        flex-direction: column;
+
+        .profile-name {
+          font-size: 14px;
+          font-weight: 600;
+          color: white;
+        }
+
+        .profile-role {
+          font-size: 12px;
+          color: rgba(255, 255, 255, 0.6);
+        }
+      }
+    }
+
     .logout-btn {
       display: flex;
       align-items: center;

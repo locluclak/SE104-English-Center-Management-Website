@@ -21,7 +21,7 @@ const upload = multer({ storage: storage });
 
 // POST /documents - Upload document
 router.post('/', upload.single('file'), async (req, res) => {
-  const { name, description, course_id } = req.body;
+  const { name, description, course_id, uploadedname } = req.body;
   const filePath = req.file ? `/uploads/${req.file.filename}` : null;
 
   if (!name || !course_id || !filePath) {
@@ -29,8 +29,8 @@ router.post('/', upload.single('file'), async (req, res) => {
   }
 
   try {
-    const sql = `INSERT INTO DOCUMENT (NAME, DESCRIPTION, FILE, COURSE_ID) VALUES (?, ?, ?, ?)`;
-    const [result] = await db.execute(sql, [name, description, filePath, course_id]);
+    const sql = `INSERT INTO DOCUMENT (NAME, DESCRIPTION, FILENAME, FILE, COURSE_ID) VALUES (?, ?, ?, ?, ?)`;
+    const [result] = await db.execute(sql, [name, description, uploadedname, filePath, course_id]);
     res.status(201).json({ message: 'Document uploaded', doc_id: result.insertId });
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -100,17 +100,13 @@ router.get('/getbycourse/:id', async (req, res) => {
   const courseId = req.params.id;
 
   try {
-    // Fetch document information excluding the file link
     const [rows] = await db.execute(
-      'SELECT DOC_ID, NAME, DESCRIPTION, COURSE_ID FROM DOCUMENT WHERE COURSE_ID = ?',
+      'SELECT DOC_ID, NAME, DESCRIPTION, FILE, COURSE_ID FROM DOCUMENT WHERE COURSE_ID = ?',
       [courseId]
     );
 
-    if (rows.length === 0) {
-      return res.status(404).json({ message: 'No documents found for this course' });
-    }
-
-    res.json(rows);
+    // Ensure we always return an array, even if empty
+    res.status(200).json(rows); // rows will be an empty array if no results found
   } catch (err) {
     console.error('Error fetching documents:', err);
     res.status(500).json({ error: 'Internal server error' });
