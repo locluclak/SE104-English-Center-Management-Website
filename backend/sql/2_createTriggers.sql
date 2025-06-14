@@ -1,0 +1,67 @@
+USE ENGLISH_CENTER_DATABASE
+
+-- Trigger: Increment NUM_STU in COURSE when a student is added
+-- DROP TRIGGER IF EXISTS trg_increment_number_stu;
+DELIMITER $$
+CREATE TRIGGER trg_increment_number_stu
+AFTER INSERT ON STUDENT_COURSE
+FOR EACH ROW
+BEGIN
+    UPDATE COURSE
+    SET NUMBER_STU = NUMBER_STU + 1
+    WHERE COURSE_ID = NEW.COURSE_ID;
+END$$
+DELIMITER ;
+
+-- Trigger: Increment NUM_STU in COURSE when a student is deleted
+DELIMITER $$
+CREATE TRIGGER trg_decrement_number_stu
+AFTER DELETE ON STUDENT_COURSE
+FOR EACH ROW
+BEGIN
+    UPDATE COURSE
+    SET NUMBER_STU = NUMBER_STU - 1
+    WHERE COURSE_ID = OLD.COURSE_ID;
+END$$
+
+-- Trigger: Ensure only students can be added to STUDENT_COURSE
+
+DELIMITER $$
+CREATE TRIGGER trg_check_student_role
+BEFORE INSERT ON STUDENT_COURSE
+FOR EACH ROW
+BEGIN
+    DECLARE role_value ENUM('STUDENT', 'STAFF');
+    SELECT ROLE INTO role_value FROM PERSON WHERE ID = NEW.STUDENT_ID;
+    IF role_value <> 'STUDENT' THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'Only students can be added to STUDENT_COURSE';
+    END IF;
+END$$
+DELIMITER ;
+
+-- Trigger: Increment NUM_SUBMISSION in ASSIGNMENT when a submission is added
+DELIMITER $$
+CREATE TRIGGER trg_increment_num_submission
+AFTER INSERT ON SUBMITION
+FOR EACH ROW
+BEGIN
+    UPDATE ASSIGNMENT
+    SET NUM_SUBMISSION = NUM_SUBMISSION + 1
+    WHERE AS_ID = NEW.AS_ID;
+END$$
+DELIMITER ;
+
+-- Trigger: Decrement NUM_SUBMISSION in ASSIGNMENT when a submission is deleted
+DELIMITER $$
+CREATE TRIGGER trg_decrement_num_submission
+AFTER DELETE ON SUBMITION
+FOR EACH ROW
+BEGIN
+    UPDATE ASSIGNMENT
+    SET NUM_SUBMISSION = NUM_SUBMISSION - 1
+    WHERE AS_ID = OLD.AS_ID;
+END$$
+DELIMITER ;
+
+SHOW TRIGGERS

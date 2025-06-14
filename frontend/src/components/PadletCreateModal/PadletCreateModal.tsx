@@ -30,31 +30,36 @@ const PadletCreateModal: React.FC<PadletCreateModalProps> = ({ open, onClose, on
   const isReadOnly = mode === "view"
 
   useEffect(() => {
-    if (open) {
-      if (defaultData) {
-        form.setFieldsValue({
-          title: defaultData.title,
-          color: defaultData.color,
-        })
-        setContent(defaultData.content || "")
-        const defaultAttachments = defaultData.attachments?.map((att: any) => ({
-          uid: att.id,
-          name: att.fileName,
-          status: 'done',
-          url: att.downloadUrl
-        })) || []
-        setFileList(defaultAttachments)
-        setKeepOldAudio(!!defaultData.audio)
-      } else {
-        form.resetFields()
-        setContent("")
-        setFileList([])
-        setAudioBlob(null)
-        setKeepOldAudio(false)
-      }
-      setRemovedAttachmentIds([])
+  if (open) {
+    if (defaultData) {
+      form.setFieldsValue({
+        title: defaultData.padletName || defaultData.title,
+        color: defaultData.color,
+      })
+      setContent(defaultData.padletContent || defaultData.content || "")
+
+      const defaultAttachments = defaultData.attachmentsData?.filter((att: any) => att.mediaType === 'attachment')?.map((att: any) => ({
+        uid: att.id?.toString(),
+        name: att.fileName,
+        status: 'done',
+        url: `/${att.downloadUrl}` // thêm dấu `/` nếu path là tương đối
+      })) || []
+
+      setFileList(defaultAttachments)
+
+      const hasAudio = !!defaultData.attachmentsData?.find((att: any) => att.mediaType === 'audio')
+      setKeepOldAudio(hasAudio)
+    } else {
+      form.resetFields()
+      setContent("")
+      setFileList([])
+      setAudioBlob(null)
+      setKeepOldAudio(false)
     }
-  }, [defaultData, form, open])
+    setRemovedAttachmentIds([])
+  }
+}, [defaultData, form, open])
+
 
   const handleFinish = async (values: any) => {
     try {
