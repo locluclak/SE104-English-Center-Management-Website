@@ -1,13 +1,11 @@
-"use client"
-
 import "@/App.scss"
 import { useSystemContext } from "@/hooks/useSystemContext"
 import { useEffect } from "react"
-import { Route, Routes, useLocation, useNavigate } from "react-router-dom"
+import { Route, Routes, useLocation, useNavigate, Navigate } from "react-router-dom"
 
 import Layout from "@/layouts/Layout/Layout"
 import StudentLayout from "@/layouts/StudentLayout/StudentLayout"
-import { routePath } from "@/layouts/Navbar/Navbar"
+import TeacherLayout from "@/layouts/TeacherLayout/TeacherLayout"
 import PageNotFound from "@/layouts/PageNotFound"
 
 import CoursesList from "@/pages/Admin/Courses/CoursesList"
@@ -20,71 +18,80 @@ import Reports from "@/pages/Accountant/Reports/Report"
 import StudentFeeList from "@/pages/Accountant/Students/StudentFeesList"
 
 import StudentPage from "@/pages/Student/StudentPage"
-
-import TeacherLayout from "@/layouts/TeacherLayout/TeacherLayout"
 import TeacherPage from "@/pages/Teacher/TeacherPage"
 
+import Home from "@/pages/Home/Home"
+import Login from "@/pages/Login/Login"
+import Register from "@/pages/Register/Register"
+
 export default function MainRoutes() {
-  // const navigate = useNavigate()
-  const context = useSystemContext()
-  const { isLoggedIn } = context
+  const { isLoggedIn } = useSystemContext()
   const location = useLocation()
-
-  const flattenRoutes = routePath.reduce((acc: any[], item: any) => {
-    if (item.children) {
-      return [...acc, ...item.children.map((child: any) => ({ ...child, link: `${item.link}/${child.link}` }))]
-    }
-    return [...acc, item]
-  }, [])
-
-  const currentPath = location.pathname
-  const findPath = flattenRoutes.find((item: any) => currentPath.includes(item.link))
-  const isRole = findPath?.roles?.includes(localStorage.getItem("role"))
-
-  // Log current path for debugging
-  console.log("MainRoutes - Current path:", currentPath)
+  const navigate = useNavigate()
 
   useEffect(() => {
-    // if (!isLoggedIn) {
-    //   navigate("/login");
-    // } else if (!isRole) {
-    //   //message.error("Bạn không có quyền truy cập trang này.");
-    //   navigate("/home");
-    // }
-  }, [isLoggedIn, isRole])
+    if (isLoggedIn) {
+      const publicPages = ["/login", "/register", "/"]
+      if (publicPages.includes(location.pathname)) {
+        const role = localStorage.getItem("role")
+        switch (role) {
+          case "ADMIN":
+            navigate("/admin/courses")
+            break
+          case "ACCOUNTANT":
+            navigate("/accountant/dashboard")
+            break
+          case "TEACHER":
+            navigate("/teacher")
+            break
+          case "STUDENT":
+            navigate("/student")
+            break
+          default:
+            navigate("/")
+        }
+      }
+    }
+  }, [isLoggedIn, location.pathname])
 
   return (
-    <>
-      <Routes>
-        {/* <Route path="/login" element={<Login />}/> */}
+    <Routes>
+      {/* Redirect root sang login luôn */}
+      <Route path="/" element={<Navigate to="/login" replace />} />
 
-        {/* Main Layout for Admin and Accountant */}
-        <Route path="/" element={<Layout />}>
-          {/* Admin Routes */}
-          <Route path="/admin/courses" element={<CoursesList />} />
-          <Route path="/admin/students" element={<StudentsList />} />
-          <Route path="/admin/teachers" element={<TeachersList />} />
-          <Route path="/admin/accountants" element={<AccountantList />} />
+      {/* Public routes */}
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
 
-          {/* Accountant Routes */}
-          <Route path="/accountant/dashboard" element={<DashboardCharts />} />
-          <Route path="/accountant/studentfees" element={<StudentFeeList />} />
-          <Route path="/accountant/reports" element={<Reports />} />
+      {/* Optional: giữ Home nếu cần */}
+      <Route path="/home" element={<Home />} />
 
-          <Route path="*" element={<PageNotFound />} />
-        </Route>
+      {/* Admin & Accountant routes */}
+      <Route path="/" element={<Layout />}>
+        {/* Admin */}
+        <Route path="admin/courses" element={<CoursesList />} />
+        <Route path="admin/students" element={<StudentsList />} />
+        <Route path="admin/teachers" element={<TeachersList />} />
+        <Route path="admin/accountants" element={<AccountantList />} />
 
-        {/* Student Layout - Separate from main layout */}
-        <Route path="/student" element={<StudentLayout />}>
-          <Route path="*" element={<StudentPage />} />
-        </Route>
+        {/* Accountant */}
+        <Route path="accountant/dashboard" element={<DashboardCharts />} />
+        <Route path="accountant/studentfees" element={<StudentFeeList />} />
+        <Route path="accountant/reports" element={<Reports />} />
+      </Route>
 
-        <Route path="/teacher" element={<TeacherLayout />}>
-          <Route path="*" element={<TeacherPage />} />
-        </Route>
+      {/* Student */}
+      <Route path="/student" element={<StudentLayout />}>
+        <Route path="*" element={<StudentPage />} />
+      </Route>
 
-        <Route path="*" element={<PageNotFound />} />
-      </Routes>
-    </>
+      {/* Teacher */}
+      <Route path="/teacher" element={<TeacherLayout />}>
+        <Route path="*" element={<TeacherPage />} />
+      </Route>
+
+      {/* 404 fallback */}
+      <Route path="*" element={<PageNotFound />} />
+    </Routes>
   )
 }
