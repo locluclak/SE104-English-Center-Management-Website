@@ -20,35 +20,24 @@ const Sidebar: React.FC = () => {
   const [currentPath, setCurrentPath] = useState('');
   const [openSubRoutes, setOpenSubRoutes] = useState<SubRoutesState>({});
 
-  useEffect(() => {
-    let storedRole = localStorage.getItem('role');
+  const roleRoutes: Record<string, Route[]> = {
+    ADMIN: [
+      { title: 'COURSES', link: '/admin/courses', icon: 'fas fa-book', roles: ['ADMIN'] },
+      { title: 'STUDENTS', link: '/admin/students', icon: 'fas fa-user-graduate', roles: ['ADMIN'] },
+      { title: 'TEACHERS', link: '/admin/teachers', icon: 'fas fa-chalkboard-teacher', roles: ['ADMIN'] },
+      { title: 'ACCOUNTANTS', link: '/admin/accountants', icon: 'fas fa-money-bill', roles: ['ADMIN'] },
+    ],
+    ACCOUNTANT: [
+      { title: 'DASHBOARD', link: '/accountant/dashboard', icon: 'fas fa-tachometer-alt', roles: ['ACCOUNTANT'] },
+      { title: 'STUDENT FEES', link: '/accountant/studentfees', icon: 'fas fa-file-invoice-dollar', roles: ['ACCOUNTANT'] },
+      { title: 'REPORTS', link: '/accountant/reports', icon: 'fas fa-chart-line', roles: ['ACCOUNTANT'] },
+    ],
+  };
 
+  useEffect(() => {
+    const storedRole = localStorage.getItem('role');
     setRole(storedRole);
     setCurrentPath(location.pathname);
-
-    const roleRoutes: Record<string, Route[]> = {
-      ROLE_ADMIN: [
-        { title: 'COURSES', link: '/admin/courses', icon: 'fas fa-book', roles: ['ROLE_ADMIN'] },
-        { title: 'STUDENTS', link: '/admin/students', icon: 'fas fa-user-graduate', roles: ['ROLE_ADMIN'] },
-        { title: 'TEACHERS', link: '/admin/teachers', icon: 'fas fa-chalkboard-teacher', roles: ['ROLE_ADMIN'] },
-        { title: 'ACCOUNTANTS', link: '/admin/accountants', icon: 'fas fa-money-bill', roles: ['ROLE_ADMIN'] },
-      ],
-      ROLE_ACCOUNTANT: [
-        { title: 'DASHBOARD', link: '/accountant/dashboard', icon: 'fas fa-tachometer-alt', roles: ['ROLE_ACCOUNTANT'] },
-        { title: 'STUDENT FEES', link: '/accountant/studentfees', icon: 'fas fa-file-invoice-dollar', roles: ['ROLE_ACCOUNTANT'] },
-        { title: 'REPORTS', link: '/accountant/reports', icon: 'fas fa-chart-line', roles: ['ROLE_ACCOUNTANT'] },
-      ],
-
-      // ROLE_TEACHER: [
-      //   { title: 'DASHBOARD', link: '/teacher/dashboard', icon: 'fas fa-tachometer-alt', roles: ['ROLE_TEACHER'] },
-      //   { title: 'STUDENTS', link: '/teacher/students', icon: 'fas fa-user-graduate', roles: ['ROLE_TEACHER'] },
-      //   { title: 'REPORT', link: '/teacher/reports', icon: 'fas fa-chart-line', roles: ['ROLE_TEACHER'] },
-      // ],
-      // ROLE_STUDENT: [
-      //   { title: 'COURSES', link: '/student/courses', icon: 'fas fa-book', roles: ['ROLE_STUDENT'] },
-      //   { title: 'STUDY', link: '/student/study', icon: 'fas fa-book', roles: ['ROLE_STUDENT'] },
-      // ],
-    };
 
     if (storedRole && roleRoutes[storedRole]) {
       setRoutes(roleRoutes[storedRole]);
@@ -60,9 +49,17 @@ const Sidebar: React.FC = () => {
   };
 
   const handleLogout = () => {
-    localStorage.clear();
-    window.location.href = '/login';
+  localStorage.removeItem('token');
+  localStorage.removeItem('role');
+  window.location.href = '/';
+};
+
+  const handleLogin = (selectedRole: string) => {
+    localStorage.setItem('role', selectedRole);
+    setRole(selectedRole);
+    setRoutes(roleRoutes[selectedRole]);
   };
+
 
   const renderNavigationList = () => {
     return routes.map((route, index) => {
@@ -126,15 +123,15 @@ const Sidebar: React.FC = () => {
     <div className="sidebar">
       <ul className="side side-pills">
         <h1 className="logo">
-          {/* Logo SVG như cũ */}
           <svg width="90" height="50" viewBox="0 0 100 61" fill="none" xmlns="http://www.w3.org/2000/svg">
-            {/* ... giữ nguyên phần logo ... */}
           </svg>
         </h1>
-        {renderNavigationList()}
-        <button className="logout-box" onClick={handleLogout}>
-          <i className="fa-solid fa-sign-out"></i> LOG OUT
-        </button>
+          <>
+            {renderNavigationList()}
+            <button className="logout-box" onClick={handleLogout}>
+              <i className="fa-solid fa-sign-out"></i> LOG OUT
+            </button>
+          </>
       </ul>
     </div>
   );

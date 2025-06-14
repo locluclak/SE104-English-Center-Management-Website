@@ -87,6 +87,8 @@ interface Document {
   fileType: "pdf" | "doc" | "ppt" | "image" | "video" | "other";
   fileSize: string;
   downloadUrl: string;
+  // Thêm trường file để lưu trữ đối tượng File khi chỉnh sửa
+  file?: File | null;
 }
 
 interface BackendStudent {
@@ -140,7 +142,7 @@ const TeacherCourseDetail: React.FC = () => {
     }
     try {
       const courseResponse = await MainApiRequest.get<BackendCourseDetail>(`/course/${courseId}`);
-      
+
       const now = new Date();
       const startDate = new Date(courseResponse.data.START_DATE);
       const endDate = new Date(courseResponse.data.END_DATE);
@@ -150,7 +152,7 @@ const TeacherCourseDetail: React.FC = () => {
       } else if (now > endDate) {
         status = "completed";
       }
-      
+
       const schedule = `From ${formatDate(courseResponse.data.START_DATE)} to ${formatDate(courseResponse.data.END_DATE)}`;
       const nextClass = (status === "active" || status === "upcoming") ? startDate.toISOString() : "";
 
@@ -180,7 +182,7 @@ const TeacherCourseDetail: React.FC = () => {
         attachments: assign.FILENAME && assign.FILE ? [{
           id: 'file-' + assign.AS_ID,
           fileName: assign.FILENAME,
-          fileSize: 'N/A',
+          fileSize: 'N/A', // Cần lấy kích thước file thật nếu có
           fileType: assign.FILENAME.split('.').pop() || 'other',
           downloadUrl: assign.FILE,
         }] : [],
@@ -192,9 +194,10 @@ const TeacherCourseDetail: React.FC = () => {
         id: doc.DOC_ID,
         title: doc.NAME,
         description: doc.DESCRIPTION,
+        // Backend không có uploadDate, tạm thời dùng ngày hiện tại hoặc mock data
         uploadDate: new Date().toISOString().split('T')[0],
         fileType: (doc.FILENAME?.split('.').pop() || 'other') as Document['fileType'],
-        fileSize: 'N/A',
+        fileSize: 'N/A', // Cần lấy kích thước file thật nếu có
         downloadUrl: doc.FILE || '#',
       }));
       setDocuments(fetchedDocuments);
@@ -264,10 +267,10 @@ const TeacherCourseDetail: React.FC = () => {
       const formData = new FormData();
       formData.append('name', newAssignment.title);
       formData.append('description', newAssignment.description);
-      formData.append('start_date', new Date().toISOString().split('T')[0] + ' ' + new Date().toTimeString().split(' ')[0]); 
+      formData.append('start_date', new Date().toISOString().split('T')[0] + ' ' + new Date().toTimeString().split(' ')[0]);
       formData.append('end_date', newAssignment.dueDate ? new Date(newAssignment.dueDate).toISOString().slice(0, 19).replace('T', ' ') : '');
       formData.append('course_id', courseId);
-        
+
       if (newAssignment.attachments.length > 0) {
         formData.append('file', newAssignment.attachments[0]);
         formData.append('uploadedname', newAssignment.attachments[0].name);
@@ -281,9 +284,16 @@ const TeacherCourseDetail: React.FC = () => {
         },
       });
 
-      const createdAssignment = response.data;
+      // Kiểm tra phản hồi API và cập nhật danh sách assignments
+      if (response.data && response.data.AS_ID) { // Giả sử API trả về AS_ID khi tạo thành công
+        // Thay vì fetch lại toàn bộ dữ liệu, có thể thêm assignment mới vào state
+        // Nhưng gọi fetchCourseData() là cách an toàn và đảm bảo dữ liệu luôn đồng bộ.
+        fetchCourseData();
+      } else {
+        console.error("API did not return expected data for new assignment.");
+        setError("Failed to create assignment: Invalid API response.");
+      }
 
-      fetchCourseData();
       setNewAssignment({ title: "", description: "", dueDate: "", attachments: [] });
       setIsNewAssignmentDialogOpen(false);
     } catch (err) {
@@ -328,9 +338,15 @@ const TeacherCourseDetail: React.FC = () => {
         },
       });
 
-      const createdDocument = response.data;
+      // Kiểm tra phản hồi API và cập nhật danh sách documents
+      if (response.data && response.data.DOC_ID) { // Giả sử API trả về DOC_ID khi tạo thành công
+        // Thay vì fetch lại toàn bộ dữ liệu, có thể thêm document mới vào state
+        fetchCourseData();
+      } else {
+        console.error("API did not return expected data for new document.");
+        setError("Failed to upload document: Invalid API response.");
+      }
 
-      fetchCourseData();
       setNewDocument({ title: "", description: "", file: null });
       setIsNewDocumentDialogOpen(false);
     } catch (err) {
@@ -340,6 +356,72 @@ const TeacherCourseDetail: React.FC = () => {
       setIsSubmitting(false);
     }
   }
+
+  const handleDeleteDocument = async (documentId: string): Promise<boolean> => {
+    setError(null);
+    try {
+      const response = await MainApiRequest.delete(`/document/${documentId}`);
+        if (response.status === 200 || response.data.success) {
+        console.log(`Document ${documentId} deleted successfully from backend.`);
+        return true;
+      } else {
+        console.error(`Failed to delete document ${documentId} from backend:`, response.data);
+        setError("Failed to delete document from server.");
+        return false;
+      }
+    } catch (err) {
+      console.error("Error deleting document:", err);
+      setError("An error occurred while deleting the document.");
+      return false;
+    }
+  };
+
+  const handleRemoveDocumentFromUI = (documentId: string) => {
+    setDocuments(prevDocuments => prevDocuments.filter(doc => doc.id !== documentId));
+    console.log(`Document ${documentId} removed from UI state.`);
+  };
+
+  // --- Hàm xử lý chỉnh sửa tài liệu ---
+  // Bạn sẽ cần một API endpoint để xử lý việc cập nhật tài liệu
+  const handleEditDocument = async (updatedDocument: Document) => {
+    setError(null);
+    try {
+      const formData = new FormData();
+      formData.append('name', updatedDocument.title);
+      formData.append('description', updatedDocument.description);
+      formData.append('course_id', courseId || ''); // Đảm bảo courseId có giá trị
+      // Nếu có file mới được chọn, thêm vào formData
+      if (updatedDocument.file) {
+        formData.append('file', updatedDocument.file);
+        formData.append('uploadedname', updatedDocument.file.name);
+      } else {
+        // Nếu không có file mới, có thể gửi null hoặc bỏ qua trường file
+        // Tùy thuộc vào cách API của bạn xử lý cập nhật file.
+        // Có thể cần gửi lại filename/downloadUrl cũ nếu API yêu cầu.
+        // formData.append('uploadedname', updatedDocument.downloadUrl.split('/').pop() || '');
+      }
+
+      // API call cho chỉnh sửa tài liệu
+      const response = await MainApiRequest.put(`/document/${updatedDocument.id}`, formData, { // Sử dụng PUT hoặc PATCH
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      });
+
+      if (response.status === 200) {
+        console.log(`Document ${updatedDocument.id} updated successfully.`);
+        // Sau khi cập nhật thành công, có thể fetch lại dữ liệu hoặc cập nhật state cục bộ
+        fetchCourseData(); // Cách đơn giản và đảm bảo đồng bộ
+      } else {
+        console.error("Failed to update document:", response.data);
+        setError("Failed to update document.");
+      }
+    } catch (err) {
+      console.error("Error updating document:", err);
+      setError("An error occurred while updating the document.");
+    }
+  };
+
 
   const filteredStudents = students.filter(
     (student) =>
@@ -412,7 +494,6 @@ const TeacherCourseDetail: React.FC = () => {
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="assignments">Assignments</TabsTrigger>
           <TabsTrigger value="materials">Materials</TabsTrigger>
-          <TabsTrigger value="students">Students</TabsTrigger>
         </TabsList>
 
         {activeTab === "overview" && (
@@ -425,45 +506,6 @@ const TeacherCourseDetail: React.FC = () => {
                 <p>{courseDetail.description}</p>
               </CardContent>
             </Card>
-
-            <div className="overview-grid">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Course Details</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="detail-item">
-                    <strong>Start Date:</strong>
-                    <span>{formatDate(courseDetail.startDate)}</span>
-                  </div>
-                  <div className="detail-item">
-                    <strong>End Date:</strong>
-                    <span>{formatDate(courseDetail.endDate)}</span>
-                  </div>
-                  <div className="detail-item">
-                    <strong>Schedule:</strong>
-                    <span>{courseDetail.schedule}</span>
-                  </div>
-                  <div className="detail-item">
-                    <strong>Status:</strong>
-                    <Badge className={`status-${courseDetail.status}`}>{courseDetail.status}</Badge>
-                  </div>
-                  <div className="detail-item">
-                    <strong>Price:</strong>
-                    <span>{courseDetail.price.toLocaleString('vi-VN')} VND</span>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Syllabus</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p>{courseDetail.syllabus}</p> 
-                </CardContent>
-              </Card>
-            </div>
 
             <Card>
               <CardHeader>
@@ -516,10 +558,11 @@ const TeacherCourseDetail: React.FC = () => {
 
             <div className="assignments-list">
               {assignments.map((assignment) => (
-                <TeacherAssignmentItem 
-                  key={assignment.id} 
-                  assignment={assignment} 
-                  courseId={courseDetail.id} 
+                <TeacherAssignmentItem
+                  key={assignment.id}
+                  assignment={assignment}
+                  courseId={courseDetail.id}
+                  // Bạn cũng cần truyền onDelete/onEdit cho TeacherAssignmentItem tương tự nếu có
                 />
               ))}
               {assignments.length === 0 && <p className="no-content">No assignments available</p>}
@@ -613,9 +656,11 @@ const TeacherCourseDetail: React.FC = () => {
 
             <div className="documents-list">
               {documents.map((document) => (
-                <TeacherDocumentItem 
-                  key={document.id} 
-                  document={document} 
+                <TeacherDocumentItem
+                  key={document.id}
+                  document={document}
+                  onRemoveFromUI={handleRemoveDocumentFromUI}
+                  onEdit={handleEditDocument}
                 />
               ))}
               {documents.length === 0 && <p className="no-content">No materials available</p>}
@@ -672,35 +717,6 @@ const TeacherCourseDetail: React.FC = () => {
                 </DialogFooter>
               </DialogContent>
             </Dialog>
-          </div>
-        )}
-
-        {activeTab === "students" && (
-          <div className="tab-content">
-            <div className="tab-header">
-              <h2>Enrolled Students</h2>
-              <div className="search-input">
-                <Search className="search-icon" />
-                <Input
-                  placeholder="Search students..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </div>
-            </div>
-
-            <div className="students-list">
-              {filteredStudents.map((student) => (
-                <TeacherStudentItem 
-                  key={student.id} 
-                  student={student} 
-                  courseId={courseDetail.id} 
-                />
-              ))}
-              {filteredStudents.length === 0 && (
-                <p className="no-content">{searchTerm ? "No students match your search" : "No students enrolled"}</p>
-              )}
-            </div>
           </div>
         )}
       </Tabs>
