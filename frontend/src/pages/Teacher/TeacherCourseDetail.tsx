@@ -361,7 +361,7 @@ const TeacherCourseDetail: React.FC = () => {
     setError(null);
     try {
       const response = await MainApiRequest.delete(`/document/${documentId}`);
-if (response.status === 200 || response.data.success) { // Thay đổi tùy thuộc vào cấu trúc phản hồi của API
+        if (response.status === 200 || response.data.success) {
         console.log(`Document ${documentId} deleted successfully from backend.`);
         return true;
       } else {
@@ -659,9 +659,8 @@ if (response.status === 200 || response.data.success) { // Thay đổi tùy thu�
                 <TeacherDocumentItem
                   key={document.id}
                   document={document}
-                  onDelete={handleDeleteDocument} // Truyền hàm xóa xuống component con
-                  onRemoveFromUI={handleRemoveDocumentFromUI} // Truyền hàm cập nhật UI xuống component con
-                  onEdit={handleEditDocument} // Truyền hàm chỉnh sửa xuống component con
+                  onRemoveFromUI={handleRemoveDocumentFromUI}
+                  onEdit={handleEditDocument}
                 />
               ))}
               {documents.length === 0 && <p className="no-content">No materials available</p>}
