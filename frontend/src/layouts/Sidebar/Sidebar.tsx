@@ -22,16 +22,16 @@ const Sidebar: React.FC = () => {
   const [openSubRoutes, setOpenSubRoutes] = useState<SubRoutesState>({});
 
   const roleRoutes: Record<string, Route[]> = {
-    ROLE_ADMIN: [
-      { title: 'COURSES', link: '/admin/courses', icon: 'fas fa-book', roles: ['ROLE_ADMIN'] },
-      { title: 'STUDENTS', link: '/admin/students', icon: 'fas fa-user-graduate', roles: ['ROLE_ADMIN'] },
-      { title: 'TEACHERS', link: '/admin/teachers', icon: 'fas fa-chalkboard-teacher', roles: ['ROLE_ADMIN'] },
-      { title: 'ACCOUNTANTS', link: '/admin/accountants', icon: 'fas fa-money-bill', roles: ['ROLE_ADMIN'] },
+    ADMIN: [
+      { title: 'COURSES', link: '/admin/courses', icon: 'fas fa-book', roles: ['ADMIN'] },
+      { title: 'STUDENTS', link: '/admin/students', icon: 'fas fa-user-graduate', roles: ['ADMIN'] },
+      { title: 'TEACHERS', link: '/admin/teachers', icon: 'fas fa-chalkboard-teacher', roles: ['ADMIN'] },
+      { title: 'ACCOUNTANTS', link: '/admin/accountants', icon: 'fas fa-money-bill', roles: ['ADMIN'] },
     ],
-    ROLE_ACCOUNTANT: [
-      { title: 'DASHBOARD', link: '/accountant/dashboard', icon: 'fas fa-tachometer-alt', roles: ['ROLE_ACCOUNTANT'] },
-      { title: 'STUDENT FEES', link: '/accountant/studentfees', icon: 'fas fa-file-invoice-dollar', roles: ['ROLE_ACCOUNTANT'] },
-      { title: 'REPORTS', link: '/accountant/reports', icon: 'fas fa-chart-line', roles: ['ROLE_ACCOUNTANT'] },
+    ACCOUNTANT: [
+      { title: 'DASHBOARD', link: '/accountant/dashboard', icon: 'fas fa-tachometer-alt', roles: ['ACCOUNTANT'] },
+      { title: 'STUDENT FEES', link: '/accountant/studentfees', icon: 'fas fa-file-invoice-dollar', roles: ['ACCOUNTANT'] },
+      { title: 'REPORTS', link: '/accountant/reports', icon: 'fas fa-chart-line', roles: ['ACCOUNTANT'] },
     ],
   };
 

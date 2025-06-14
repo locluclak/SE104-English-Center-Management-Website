@@ -1,42 +1,53 @@
-import React, { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { motion } from 'framer-motion'
-import { FaEnvelope, FaLock } from 'react-icons/fa'
-import { MainApiRequest } from '@/services/MainApiRequest'
-import { useSystemContext } from '@/hooks/useSystemContext'
-import './Login.scss'
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
+import { FaEnvelope, FaLock } from 'react-icons/fa';
+import { MainApiRequest } from '@/services/MainApiRequest';
+import { useSystemContext } from '@/hooks/useSystemContext';
+import './Login.scss';
 
 const Login = () => {
-  const navigate = useNavigate()
-  const { isLoggedIn, setToken } = useSystemContext()
+  const navigate = useNavigate();
+  const { isLoggedIn, setToken } = useSystemContext();
 
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [error, setError] = useState('')
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
 
   const handleLogin = async () => {
     try {
-      const res = await MainApiRequest.post('/login', { email, password })
+      const res = await MainApiRequest.post('/login', { email, password });
 
       if (res.status === 200) {
-        const { token, role, userId } = res.data
+        const { token, role, userId } = res.data;
 
-        setToken(token)
-        localStorage.setItem('token', token)
-        localStorage.setItem('role', role)
-        localStorage.setItem('userId', userId)
+        // Log token and role to check if they are received correctly
+        console.log('Received token:', token);
+        console.log('Received role:', role);
+
+        // Set token and role in context and localStorage
+        setToken(token);
+        localStorage.setItem('token', token);
+        localStorage.setItem('role', role);
+        localStorage.setItem('userId', userId);
+
+        // Log the token saved in localStorage
+        console.log('Token saved in localStorage:', localStorage.getItem('token'));
+
+        // Optionally, navigate to home or other page after login
+        navigate('/');
       }
     } catch (err: any) {
-      console.error('Login error:', err)
-      setError(err?.response?.data?.message || 'Đăng nhập thất bại')
+      console.error('Login error:', err);
+      setError(err?.response?.data?.message || 'Đăng nhập thất bại');
     }
-  }
+  };
 
   useEffect(() => {
     if (isLoggedIn) {
-      navigate('/')
+      navigate('/');
     }
-  }, [isLoggedIn])
+  }, [isLoggedIn]);
 
   return (
     <div className="bg-login">
@@ -81,7 +92,7 @@ const Login = () => {
         </form>
       </motion.div>
     </div>
-  )
-}
+  );
+};
 
-export default Login
+export default Login;
