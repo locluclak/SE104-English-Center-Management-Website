@@ -507,45 +507,6 @@ if (response.status === 200 || response.data.success) { // Thay đổi tùy thu�
               </CardContent>
             </Card>
 
-            <div className="overview-grid">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Course Details</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="detail-item">
-                    <strong>Start Date:</strong>
-                    <span>{formatDate(courseDetail.startDate)}</span>
-                  </div>
-                  <div className="detail-item">
-                    <strong>End Date:</strong>
-                    <span>{formatDate(courseDetail.endDate)}</span>
-                  </div>
-                  <div className="detail-item">
-                    <strong>Schedule:</strong>
-                    <span>{courseDetail.schedule}</span>
-                  </div>
-                  <div className="detail-item">
-                    <strong>Status:</strong>
-                    <Badge className={`status-${courseDetail.status}`}>{courseDetail.status}</Badge>
-                  </div>
-                  <div className="detail-item">
-                    <strong>Price:</strong>
-                    <span>{courseDetail.price.toLocaleString('vi-VN')} VND</span>
-                  </div>
-                </CardContent>
-              </Card>
-
-              <Card>
-                <CardHeader>
-                  <CardTitle>Syllabus</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p>{courseDetail.syllabus}</p>
-                </CardContent>
-              </Card>
-            </div>
-
             <Card>
               <CardHeader>
                 <CardTitle>Recent Activity</CardTitle>
