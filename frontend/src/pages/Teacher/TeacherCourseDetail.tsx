@@ -412,7 +412,6 @@ const TeacherCourseDetail: React.FC = () => {
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="assignments">Assignments</TabsTrigger>
           <TabsTrigger value="materials">Materials</TabsTrigger>
-          <TabsTrigger value="students">Students</TabsTrigger>
         </TabsList>
 
         {activeTab === "overview" && (
@@ -687,19 +686,6 @@ const TeacherCourseDetail: React.FC = () => {
                   onChange={(e) => setSearchTerm(e.target.value)}
                 />
               </div>
-            </div>
-
-            <div className="students-list">
-              {filteredStudents.map((student) => (
-                <TeacherStudentItem 
-                  key={student.id} 
-                  student={student} 
-                  courseId={courseDetail.id} 
-                />
-              ))}
-              {filteredStudents.length === 0 && (
-                <p className="no-content">{searchTerm ? "No students match your search" : "No students enrolled"}</p>
-              )}
             </div>
           </div>
         )}
