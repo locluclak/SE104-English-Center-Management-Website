@@ -62,15 +62,6 @@ const Sidebar: React.FC = () => {
     setRoutes(roleRoutes[selectedRole]);
   };
 
-  const renderLogin = () => {
-    return (
-      <div className="login-box">
-        <h3>Select Role to Login</h3>
-        <button onClick={() => handleLogin('ROLE_ADMIN')}>Login as Admin</button>
-        <button onClick={() => handleLogin('ROLE_ACCOUNTANT')}>Login as Accountant</button>
-      </div>
-    );
-  };
 
   const renderNavigationList = () => {
     return routes.map((route, index) => {
@@ -137,16 +128,12 @@ const Sidebar: React.FC = () => {
           <svg width="90" height="50" viewBox="0 0 100 61" fill="none" xmlns="http://www.w3.org/2000/svg">
           </svg>
         </h1>
-        {role ? (
           <>
             {renderNavigationList()}
             <button className="logout-box" onClick={handleLogout}>
               <i className="fa-solid fa-sign-out"></i> LOG OUT
             </button>
           </>
-        ) : (
-          renderLogin()
-        )}
       </ul>
     </div>
   );
