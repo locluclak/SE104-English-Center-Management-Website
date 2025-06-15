@@ -433,7 +433,7 @@ const CoursesList = () => {
           <div className="flex-grow-1 d-flex justify-content-center">
             <Form layout="inline" className="search-form d-flex">
               <SearchInput
-                placeholder="Search courses..." //  
+                placeholder="Search courses..." 
                 value={searchKeyword}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleSearch(e.target.value)}
                 onSearch={() => handleSearch(searchKeyword)}
@@ -446,7 +446,6 @@ const CoursesList = () => {
             icon={<i className="fas fa-plus"></i>}
             onClick={() => openCourseModal()}
           >
-            Add New Course {/*   */}
           </Button>
         </div>
       </div>
@@ -464,47 +463,47 @@ const CoursesList = () => {
       >
         <Form form={form} layout="vertical">
           <FloatingLabelInput
-            label="Course Name" //  
+            label="Course Name" 
             name="name"
             required
             component="input"
           />
           <FloatingLabelInput
-            label="Description" //  
+            label="Description"  
             name="description"
             required
             component="input"
           />
           <FloatingLabelInput
-            label="Start Date" //  
+            label="Start Date" 
             name="startDate"
             required
             component="date"
             componentProps={{ format: "DD-MM-YYYY" }}
           />
           <FloatingLabelInput
-            label="End Date" //  
+            label="End Date" 
             name="endDate"
             required
             component="date"
             componentProps={{ format: "DD-MM-YYYY" }}
           />
           <FloatingLabelInput
-            label="Minimum Students" //  
+            label="Minimum Students"   
             name="minStu"
             required
             component="input"
             type="number"
           />
           <FloatingLabelInput
-            label="Maximum Students" //  
+            label="Maximum Students"   
             name="maxStu"
             required
             component="input"
             type="number"
           />
           <FloatingLabelInput
-            label="Price" //  
+            label="Price"  
             name="price"
             required
             component="input"
@@ -519,16 +518,16 @@ const CoursesList = () => {
         pagination={{ pageSize: 5, showSizeChanger: true }}
         columns={[
           { title: "ID", dataIndex: "id" },
-          { title: "Name", dataIndex: "name" }, //  
-          { title: "Description", dataIndex: "description" }, //  
-          { title: "Teacher", dataIndex: "teacherName" }, //  
+          { title: "Name", dataIndex: "name" },  
+          { title: "Description", dataIndex: "description" },   
+          { title: "Teacher", dataIndex: "teacherName" },   
           {
-            title: "Start Date", //  
+            title: "Start Date",   
             dataIndex: "startDate",
             render: (text) => moment(text).format("DD-MM-YYYY"),
           },
           {
-            title: "End Date", //  
+            title: "End Date",   
             dataIndex: "endDate",
             render: (text) => moment(text).format("DD-MM-YYYY"),
           },
@@ -539,8 +538,7 @@ const CoursesList = () => {
             title: "Price", //  
             dataIndex: "price",
             render: (text) =>
-              new Intl.NumberFormat("en-US", { //   format for currency, you can choose 'vi-VN' for VND again if preferred.
-                style: "currency",
+              new Intl.NumberFormat("en-US", { 
                 currency: "VND",
               }).format(text),
           },
@@ -549,25 +547,25 @@ const CoursesList = () => {
             title: "Actions", //  
             render: (_, record: Course) => (
               <Space>
-                <Button onClick={() => openCourseModal(record)} title="Edit"> {/*   */}
+                <Button onClick={() => openCourseModal(record)} title="Edit"> 
                   <i className="fas fa-edit"></i>
                 </Button>
-                <Button onClick={() => fetchStudentsInCourse(record.id)} title="Manage Students"> {/*   */}
+                <Button onClick={() => fetchStudentsInCourse(record.id)} title="Manage Students"> 
                   <i className="fas fa-users"></i>
                 </Button>
-                <Button onClick={() => fetchTeachersInCourse(record.id)} title="Manage Teachers"> {/*   */}
+                <Button onClick={() => fetchTeachersInCourse(record.id)} title="Manage Teachers"> 
                   <i className="fas fa-user-tie"></i>
                 </Button>
-                <Button onClick={() => handleViewCourseReport(record.id)} title="View Report"> {/*   */}
+                <Button onClick={() => handleViewCourseReport(record.id)} title="View Report"> 
                   <i className="fas fa-chart-bar"></i>
                 </Button>
                 <Popconfirm
-                  title="Are you sure you want to delete this course?" //  
+                  title="Are you sure you want to delete this course?" 
                   onConfirm={() => onDeleteCourses(record.id)}
-                  okText="Yes" //  
-                  cancelText="No" //  
+                  okText="Yes"
+                  cancelText="No" 
                 >
-                  <Button danger title="Delete"> {/*   */}
+                  <Button danger title="Delete">
                     <i className="fas fa-trash"></i>
                   </Button>
                 </Popconfirm>
@@ -612,7 +610,7 @@ const CoursesList = () => {
             onClick={handleAddSelectedStudent}
             disabled={!selectedStudentToAdd}
           >
-            Add Student {/*   */}
+            Add Student
           </Button>
         </div>
 
