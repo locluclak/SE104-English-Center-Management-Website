@@ -76,7 +76,7 @@ const CoursesList = () => {
           minStu: cls.MIN_STU,
           maxStu: cls.MAX_STU,
           price: cls.PRICE,
-          status: cls.STATUS || "waiting",
+          status: cls.STATUS || "upcoming",
         };
       })
     );
@@ -447,9 +447,9 @@ const CoursesList = () => {
             required
             component="select"
             options={[
-              { label: "Waiting", value: "waiting" },
-              { label: "Ongoing", value: "active" },
-              { label: "Finished", value: "finished" },
+              { label: "upcoming", value: "upcoming" },
+              { label: "active", value: "active" },
+              { label: "completed", value: "completed" },
             ]}
           />
         </Form>
