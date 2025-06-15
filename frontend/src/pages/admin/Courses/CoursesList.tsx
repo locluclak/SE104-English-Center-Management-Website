@@ -10,6 +10,7 @@ import {
   Popconfirm,
   message,
   Select,
+  Radio, // Import Radio for mode selection
 } from "antd"
 import moment from "moment"
 import "./CoursesList.scss"
@@ -28,7 +29,7 @@ interface Course {
   maxStu: number
   price: number
   status: string
-  teacherId?: number | null // Can be null if no teacher is assigned
+  teacherId?: number | null
 }
 
 interface Teacher {
@@ -52,16 +53,15 @@ const CoursesList = () => {
     number | null
   >(null)
 
-  const [teachersInCourse, setTeachersInCourse] = useState<Teacher[]>([]); // List of teachers in the course
-  const [teacherModalVisible, setTeacherModalVisible] = useState(false); // Teacher management modal state
-  const [allTeachers, setAllTeachers] = useState<Teacher[]>([]); // List of all available teachers
-  const [selectedTeacherToAdd, setSelectedTeacherToAdd] = useState<number | null>(null); // Selected teacher to add
-  const [selectedTeacherRole, setSelectedTeacherRole] = useState<"LECTURER" | "ASSISTANT" | null>(null); // Role for the selected teacher
+  const [teachersInCourse, setTeachersInCourse] = useState<Teacher[]>([]);
+  const [teacherModalVisible, setTeacherModalVisible] = useState(false);
+  const [allTeachers, setAllTeachers] = useState<Teacher[]>([]);
+  const [selectedTeacherToAdd, setSelectedTeacherToAdd] = useState<number | null>(null);
+  const [selectedTeacherRole, setSelectedTeacherRole] = useState<"LECTURER" | "ASSISTANT" | null>(null);
 
   const [reportModalVisible, setReportModalVisible] = useState(false)
-  const [reportMode, setReportMode] = useState<"course" | "assignment">(
-    "course"
-  )
+  // reportMode: 'initial' for selection, 'course' for overall, 'assignment' for individual
+  const [reportMode, setReportMode] = useState<"initial" | "course" | "assignment">("initial")
   const [courseReport, setCourseReport] = useState<any[]>([])
   const [assignmentReport, setAssignmentReport] = useState<any[]>([])
   const [assignments, setAssignments] = useState<any[]>([])
@@ -81,20 +81,20 @@ const CoursesList = () => {
           const currentDate = moment()
           const startDate = moment(cls.START_DATE)
           const endDate = moment(cls.END_DATE)
-          let status = "Upcoming" //  
+          let status = "Upcoming"
 
           if (currentDate.isBetween(startDate, endDate, null, "[]")) {
-            status = "Active" //  
+            status = "Active"
           } else if (currentDate.isAfter(endDate)) {
-            status = "Completed" //  
+            status = "Completed"
           }
 
           return {
             id: cls.COURSE_ID,
             name: cls.NAME,
             description: cls.DESCRIPTION,
-            teacherName: teacher.name, // Assigned teacher's name
-            teacherId: teacher.id, // Assigned teacher's ID
+            teacherName: teacher.name,
+            teacherId: teacher.id,
             startDate: cls.START_DATE,
             endDate: cls.END_DATE,
             minStu: cls.MIN_STU,
@@ -109,7 +109,7 @@ const CoursesList = () => {
       setCoursesList(coursesWithDetails)
     } catch (error) {
       console.error("Failed to fetch courses:", error)
-      message.error("Unable to load courses.") //  
+      message.error("Unable to load courses.")
     }
   }
 
@@ -119,9 +119,9 @@ const CoursesList = () => {
       const teacher = res.data[0]
       return teacher
         ? { id: teacher.ID, name: teacher.NAME }
-        : { id: null, name: "Unassigned" } //  
+        : { id: null, name: "Unassigned" }
     } catch {
-      return { id: null, name: "Unassigned" } //  
+      return { id: null, name: "Unassigned" }
     }
   }
 
@@ -131,19 +131,19 @@ const CoursesList = () => {
       setAllTeachers(res.data);
     } catch (error) {
       console.error("Failed to fetch all teachers:", error);
-      message.error("Unable to load teacher list."); //  
+      message.error("Unable to load teacher list.");
     }
   };
 
   const fetchTeachersInCourse = async (courseId: number) => {
     try {
       setSelectedCourseId(courseId);
-      const res = await MainApiRequest.get(`/course/teacher/${courseId}`); // Get teachers for the course
+      const res = await MainApiRequest.get(`/course/teacher/${courseId}`);
       setTeachersInCourse(res.data);
       setTeacherModalVisible(true);
     } catch (error) {
       console.error("Failed to fetch teachers in course:", error);
-      message.error("Unable to load course teachers."); //  
+      message.error("Unable to load course teachers.");
     }
   };
 
@@ -155,15 +155,15 @@ const CoursesList = () => {
         courseId: selectedCourseId,
         role: role,
       });
-      message.success("Teacher added to course successfully."); //  
-      fetchTeachersInCourse(selectedCourseId); // Reload teachers in modal
-      fetchCoursesList(); // Update main course list to reflect new teacher
+      message.success("Teacher added to course successfully.");
+      fetchTeachersInCourse(selectedCourseId);
+      fetchCoursesList();
     } catch (error: any) {
       if (error?.response?.status === 409) {
-        message.warning("Teacher is already assigned to this course!"); //  
+        message.warning("Teacher is already assigned to this course!");
       } else {
         console.error("Failed to add teacher:", error);
-        message.error("Unable to add teacher."); //  
+        message.error("Unable to add teacher.");
       }
     }
   };
@@ -174,12 +174,12 @@ const CoursesList = () => {
       await MainApiRequest.delete("/course/remove-teacher", {
         data: { teacherId: teacherId, courseId: selectedCourseId },
       });
-      message.success("Teacher removed from course."); //  
-      fetchTeachersInCourse(selectedCourseId); // Reload teachers in modal
-      fetchCoursesList(); // Update main course list
+      message.success("Teacher removed from course.");
+      fetchTeachersInCourse(selectedCourseId);
+      fetchCoursesList();
     } catch (error) {
       console.error("Failed to remove teacher:", error);
-      message.error("Unable to remove teacher."); //  
+      message.error("Unable to remove teacher.");
     }
   };
 
@@ -189,13 +189,13 @@ const CoursesList = () => {
       setAllStudents(res.data);
     } catch (error) {
       console.error("Failed to fetch students:", error);
-      message.error("Unable to load student data."); //  
+      message.error("Unable to load student data.");
     }
   };
 
   const handleAddSelectedTeacher = () => {
     if (!selectedTeacherToAdd || !selectedTeacherRole) {
-      message.warning("Please select a teacher and a role."); //  
+      message.warning("Please select a teacher and a role.");
       return;
     }
     addTeacherToCourse(selectedTeacherToAdd, selectedTeacherRole);
@@ -216,7 +216,7 @@ const CoursesList = () => {
 
   useEffect(() => {
     if (teacherModalVisible) {
-      fetchAllTeachers(); // Load all teachers when teacher management modal opens
+      fetchAllTeachers();
     }
   }, [teacherModalVisible]);
 
@@ -228,7 +228,6 @@ const CoursesList = () => {
         ...course,
         startDate: moment(course.startDate),
         endDate: moment(course.endDate),
-        // Teacher field is managed separately now
       })
     } else {
       form.resetFields()
@@ -252,7 +251,7 @@ const CoursesList = () => {
       setStudentModalVisible(true)
     } catch (error: any) {
       console.error("Failed to fetch students:", error)
-      message.error("Unable to load students.") //  
+      message.error("Unable to load students.")
     }
   }
 
@@ -263,15 +262,15 @@ const CoursesList = () => {
         courseId: selectedCourseId,
         studentId,
       })
-      message.success("Student added successfully.") //  
+      message.success("Student added successfully.")
       fetchStudentsInCourse(selectedCourseId)
-      fetchCoursesList(); // Update student count in main table
+      fetchCoursesList();
     } catch (error: any) {
       if (error?.response?.status === 409) {
-        message.warning("Student is already added to this course!") //  
+        message.warning("Student is already added to this course!")
       } else {
         console.error("Failed to add student:", error)
-        message.error("Unable to add student.") //  
+        message.error("Unable to add student.")
       }
     }
   }
@@ -282,11 +281,11 @@ const CoursesList = () => {
       await MainApiRequest.delete("/course/remove-student", {
         data: { courseId: selectedCourseId, studentId },
       })
-      message.success("Student removed.") //  
+      message.success("Student removed.")
       fetchStudentsInCourse(selectedCourseId)
-      fetchCoursesList(); // Update student count in main table
+      fetchCoursesList();
     } catch (error) {
-      message.error("Unable to remove student.") //  
+      message.error("Unable to remove student.")
     }
   }
 
@@ -300,16 +299,16 @@ const CoursesList = () => {
         setAssignments(res.data.report)
         if (res.data.report.length === 0) {
           message.info(
-            res.data.message || "No assignments found for this course." //  
+            res.data.message || "No assignments found for this course."
           )
         }
       } else {
-        message.warning("Invalid response from server.") //  
+        message.warning("Invalid response from server.")
       }
     } catch (error: any) {
       const serverMsg =
         error?.response?.data?.message || error?.response?.data?.error
-      message.error(serverMsg || "Unable to load assignment list.") //  
+      message.error(serverMsg || "Unable to load assignment list.")
     }
   }
 
@@ -321,29 +320,50 @@ const CoursesList = () => {
       setAssignmentReport(res.data.report)
       setReportMode("assignment")
     } catch (error) {
-      message.error("Unable to load assignment report.") //  
+      message.error("Unable to load assignment report.")
     }
   }
 
+  // --- NEW/MODIFIED: handleViewCourseReport to initialize report modal ---
   const handleViewCourseReport = async (courseId: number) => {
-    try {
-      setSelectedCourseId(courseId)
-      const res = await MainApiRequest.get(`/submission/course_report/${courseId}`)
-      const reportData = res.data?.report || []
-
-      setCourseReport(reportData)
-      setReportMode("course")
-      setReportModalVisible(true)
-
-      if (reportData.length === 0) {
-        message.info(res.data?.message || "No students have submitted for this course.") //  
-      }
-
-      await fetchAssignmentsByCourse(courseId)
-    } catch (err) {
-      message.error("Unable to load course report.") //  
-    }
+    setSelectedCourseId(courseId);
+    setReportMode("initial"); // Start with initial selection mode
+    setReportModalVisible(true);
+    // Fetch assignments for the dropdown as soon as the modal opens, regardless of initial view
+    await fetchAssignmentsByCourse(courseId);
   }
+
+  // --- NEW: Function to load course report data ---
+  const loadCourseReport = async () => {
+    if (!selectedCourseId) return;
+    try {
+      const res = await MainApiRequest.get(`/submission/course_report/${selectedCourseId}`);
+      const reportData = res.data?.report || [];
+      setCourseReport(reportData);
+      setReportMode("course");
+      if (reportData.length === 0) {
+        message.info(res.data?.message || "No students have submitted for this course.");
+      }
+    } catch (err) {
+      console.error("Error fetching course report:", err);
+      message.error("Unable to load course report.");
+    }
+  };
+
+  // --- NEW: Function to handle mode change in report modal ---
+  const handleReportModeChange = (e: any) => {
+    const mode = e.target.value;
+    setReportMode(mode);
+    if (mode === "course") {
+      loadCourseReport();
+      setSelectedAssignmentId(null); // Reset selected assignment if switching to course view
+      setAssignmentReport([]); // Clear assignment report data
+    } else if (mode === "assignment") {
+      // User will select an assignment from dropdown, data will be loaded then
+      setCourseReport([]); // Clear course report data
+    }
+  };
+
 
   const onOKCreateCourses = async () => {
     try {
@@ -352,12 +372,12 @@ const CoursesList = () => {
       const currentDate = moment()
       const startDate = moment(values.startDate)
       const endDate = moment(values.endDate)
-      let status = "Upcoming" //  
+      let status = "Upcoming"
 
       if (currentDate.isBetween(startDate, endDate, null, "[]")) {
-        status = "Active" //  
+        status = "Active"
       } else if (currentDate.isAfter(endDate)) {
-        status = "Completed" //  
+        status = "Completed"
       }
 
       const payload = {
@@ -369,22 +389,19 @@ const CoursesList = () => {
         maxStu: values.maxStu,
         price: values.price,
         status,
-        // No longer sending teacherName/teacherId directly here
       }
 
       let courseId: number;
 
       if (editingCourses) {
         await MainApiRequest.put(`/course/update/${editingCourses.id}`, payload);
-        courseId = editingCourses.id; // Get ID of the course being edited
-        message.success("Course updated successfully!"); //  
+        courseId = editingCourses.id;
+        message.success("Course updated successfully!");
       } else {
         const createRes = await MainApiRequest.post("/course/create", payload);
-        courseId = createRes.data.courseId; // Get ID of the newly created course
-        message.success("Course created successfully!"); //  
+        courseId = createRes.data.courseId;
+        message.success("Course created successfully!");
       }
-
-      // Teacher add/remove logic is now separate
 
       await fetchCoursesList();
       setOpenCreateCoursesModal(false);
@@ -393,7 +410,7 @@ const CoursesList = () => {
     } catch (error: any) {
       console.error("Failed to save course:", error);
       message.error(
-        error?.response?.data?.error || "Failed to save course information." //  
+        error?.response?.data?.error || "Failed to save course information."
       );
     }
   };
@@ -403,12 +420,53 @@ const CoursesList = () => {
     try {
       await MainApiRequest.delete(`/courses/${id}`)
       fetchCoursesList()
-      message.success("Course deleted successfully!") //  
+      message.success("Course deleted successfully!")
     } catch (error) {
       console.error("Delete failed:", error)
-      message.error("Unable to delete course.") //  
+      message.error("Unable to delete course.")
     }
   }
+
+const downloadCsvFromBlob = (data: Blob, filename: string) => {
+  const url = window.URL.createObjectURL(data);
+  const link = document.createElement('a');
+  link.href = url;
+  link.setAttribute('download', filename);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  window.URL.revokeObjectURL(url);
+};
+
+const handleExportCourseCsv = async (courseId: number) => {
+  try {
+    const res = await MainApiRequest.get(`/submission/export_csv_course/${courseId}`, {
+      responseType: 'blob',
+    });
+
+    const filename = `course_${courseId}_report_scores.csv`;
+    downloadCsvFromBlob(res.data, filename);
+
+    message.success("Course report exported successfully!");
+  } catch (error) {
+    console.error("Failed to export course report CSV:", error);
+    message.error("Unable to export course report CSV.");
+  }
+};
+
+const handleExportAssignmentCsv = async (assignmentId: number) => {
+    try {
+        const res = await MainApiRequest.get(`/submission/export_csv_assignment/${assignmentId}`, {
+            responseType: 'blob',
+        });
+        const filename = `assignment_${assignmentId}_report.csv`;
+        downloadCsvFromBlob(res.data, filename);
+        message.success("Assignment report exported successfully!");
+    } catch (error) {
+        console.error("Failed to export assignment report CSV:", error);
+        message.error("Unable to export assignment report CSV.");
+    }
+};
 
   const handleSearch = (value: string) => {
     const keyword = value.trim().toLowerCase()
@@ -433,7 +491,7 @@ const CoursesList = () => {
           <div className="flex-grow-1 d-flex justify-content-center">
             <Form layout="inline" className="search-form d-flex">
               <SearchInput
-                placeholder="Search courses..." 
+                placeholder="Search courses..."
                 value={searchKeyword}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleSearch(e.target.value)}
                 onSearch={() => handleSearch(searchKeyword)}
@@ -452,7 +510,7 @@ const CoursesList = () => {
 
       <Modal
         className="courses-modal"
-        title={editingCourses ? "Edit Course" : "Add New Course"} //  
+        title={editingCourses ? "Edit Course" : "Add New Course"}
         open={openCreateCoursesModal}
         onOk={onOKCreateCourses}
         onCancel={() => {
@@ -463,47 +521,47 @@ const CoursesList = () => {
       >
         <Form form={form} layout="vertical">
           <FloatingLabelInput
-            label="Course Name" 
+            label="Course Name"
             name="name"
             required
             component="input"
           />
           <FloatingLabelInput
-            label="Description"  
+            label="Description"
             name="description"
             required
             component="input"
           />
           <FloatingLabelInput
-            label="Start Date" 
+            label="Start Date"
             name="startDate"
             required
             component="date"
             componentProps={{ format: "DD-MM-YYYY" }}
           />
           <FloatingLabelInput
-            label="End Date" 
+            label="End Date"
             name="endDate"
             required
             component="date"
             componentProps={{ format: "DD-MM-YYYY" }}
           />
           <FloatingLabelInput
-            label="Minimum Students"   
+            label="Minimum Students"
             name="minStu"
             required
             component="input"
             type="number"
           />
           <FloatingLabelInput
-            label="Maximum Students"   
+            label="Maximum Students"
             name="maxStu"
             required
             component="input"
             type="number"
           />
           <FloatingLabelInput
-            label="Price"  
+            label="Price"
             name="price"
             required
             component="input"
@@ -518,52 +576,52 @@ const CoursesList = () => {
         pagination={{ pageSize: 5, showSizeChanger: true }}
         columns={[
           { title: "ID", dataIndex: "id" },
-          { title: "Name", dataIndex: "name" },  
-          { title: "Description", dataIndex: "description" },   
-          { title: "Teacher", dataIndex: "teacherName" },   
+          { title: "Name", dataIndex: "name" },
+          { title: "Description", dataIndex: "description" },
+          { title: "Teacher", dataIndex: "teacherName" },
           {
-            title: "Start Date",   
+            title: "Start Date",
             dataIndex: "startDate",
             render: (text) => moment(text).format("DD-MM-YYYY"),
           },
           {
-            title: "End Date",   
+            title: "End Date",
             dataIndex: "endDate",
             render: (text) => moment(text).format("DD-MM-YYYY"),
           },
-          { title: "Min Stu", dataIndex: "minStu" }, //  
-          { title: "Max Stu", dataIndex: "maxStu" }, //  
-          { title: "No. Students", dataIndex: "numberStu" }, //  
+          { title: "Min Stu", dataIndex: "minStu" },
+          { title: "Max Stu", dataIndex: "maxStu" },
+          { title: "No. Students", dataIndex: "numberStu" },
           {
-            title: "Price", //  
+            title: "Price",
             dataIndex: "price",
             render: (text) =>
-              new Intl.NumberFormat("en-US", { 
+              new Intl.NumberFormat("en-US", {
                 currency: "VND",
               }).format(text),
           },
-          { title: "Status", dataIndex: "status" }, //  
+          { title: "Status", dataIndex: "status" },
           {
-            title: "Actions", //  
+            title: "Actions",
             render: (_, record: Course) => (
               <Space>
-                <Button onClick={() => openCourseModal(record)} title="Edit"> 
+                <Button onClick={() => openCourseModal(record)} title="Edit">
                   <i className="fas fa-edit"></i>
                 </Button>
-                <Button onClick={() => fetchStudentsInCourse(record.id)} title="Manage Students"> 
+                <Button onClick={() => fetchStudentsInCourse(record.id)} title="Manage Students">
                   <i className="fas fa-users"></i>
                 </Button>
-                <Button onClick={() => fetchTeachersInCourse(record.id)} title="Manage Teachers"> 
+                <Button onClick={() => fetchTeachersInCourse(record.id)} title="Manage Teachers">
                   <i className="fas fa-user-tie"></i>
                 </Button>
-                <Button onClick={() => handleViewCourseReport(record.id)} title="View Report"> 
+                <Button onClick={() => handleViewCourseReport(record.id)} title="View Report">
                   <i className="fas fa-chart-bar"></i>
                 </Button>
                 <Popconfirm
-                  title="Are you sure you want to delete this course?" 
+                  title="Are you sure you want to delete this course?"
                   onConfirm={() => onDeleteCourses(record.id)}
                   okText="Yes"
-                  cancelText="No" 
+                  cancelText="No"
                 >
                   <Button danger title="Delete">
                     <i className="fas fa-trash"></i>
@@ -576,7 +634,7 @@ const CoursesList = () => {
       />
 
       <Modal
-        title={`Students in Course #${selectedCourseId}`} //  
+        title={`Students in Course #${selectedCourseId}`}
         open={studentModalVisible}
         onCancel={() => {
           setStudentModalVisible(false)
@@ -595,7 +653,7 @@ const CoursesList = () => {
         >
           <Select
             style={{ width: 300 }}
-            placeholder="Select Student to Add" //  
+            placeholder="Select Student to Add"
             value={selectedStudentToAdd}
             onChange={(value) => setSelectedStudentToAdd(value)}
           >
@@ -618,7 +676,7 @@ const CoursesList = () => {
           rowKey="ID"
           dataSource={studentsInCourse.map((s) => ({
             ...s,
-            NAME: s.NAME?.trim() || "(No Name)", //  
+            NAME: s.NAME?.trim() || "(No Name)",
             EMAIL: s.EMAIL || "-",
             PHONE_NUMBER: s.PHONE_NUMBER || "N/A",
             DATE_OF_BIRTH: s.DATE_OF_BIRTH
@@ -627,26 +685,26 @@ const CoursesList = () => {
             ENROLL_DATE: s.ENROLL_DATE
               ? moment(s.ENROLL_DATE).format("DD-MM-YYYY")
               : "-",
-            PAYMENT_STATUS: s.PAYMENT_STATUS || "UNPAID", //  
+            PAYMENT_STATUS: s.PAYMENT_STATUS || "UNPAID",
           }))}
           columns={[
-            { title: "Name", dataIndex: "NAME" }, //  
-            { title: "Email", dataIndex: "EMAIL" }, //  
+            { title: "Name", dataIndex: "NAME" },
+            { title: "Email", dataIndex: "EMAIL" },
             { title: "Phone", dataIndex: "PHONE_NUMBER" },
-            { title: "DOB", dataIndex: "DATE_OF_BIRTH" }, 
-            { title: "Enroll Date", dataIndex: "ENROLL_DATE" }, 
-            { title: "Payment", dataIndex: "PAYMENT_STATUS" }, 
+            { title: "DOB", dataIndex: "DATE_OF_BIRTH" },
+            { title: "Enroll Date", dataIndex: "ENROLL_DATE" },
+            { title: "Payment", dataIndex: "PAYMENT_STATUS" },
             {
-              title: "Actions", 
+              title: "Actions",
               render: (_, record) => (
                 <Space>
                   <Popconfirm
-                    title="Are you sure you want to remove this student?" 
+                    title="Are you sure you want to remove this student?"
                     onConfirm={() => removeStudentFromCourse(record.ID)}
                     okText="Yes"
-                    cancelText="No" 
+                    cancelText="No"
                   >
-                    <Button danger>Remove</Button> 
+                    <Button danger>Remove</Button>
                   </Popconfirm>
                 </Space>
               ),
@@ -657,12 +715,12 @@ const CoursesList = () => {
 
       {/* Teacher management modal */}
       <Modal
-        title={`Teachers in Course #${selectedCourseId}`} 
+        title={`Teachers in Course #${selectedCourseId}`}
         open={teacherModalVisible}
         onCancel={() => {
           setTeacherModalVisible(false);
           setSelectedTeacherToAdd(null);
-          setSelectedTeacherRole(null); 
+          setSelectedTeacherRole(null);
         }}
         footer={null}
         width={800}
@@ -677,7 +735,7 @@ const CoursesList = () => {
         >
           <Select
             style={{ width: 300 }}
-            placeholder="Select Teacher to Add" //  
+            placeholder="Select Teacher to Add"
             value={selectedTeacherToAdd}
             onChange={(value) => setSelectedTeacherToAdd(value)}
           >
@@ -689,7 +747,7 @@ const CoursesList = () => {
           </Select>
           <Select
             style={{ width: 150 }}
-            placeholder="Select Role" //  
+            placeholder="Select Role"
             value={selectedTeacherRole}
             onChange={(value: "LECTURER" | "ASSISTANT") => setSelectedTeacherRole(value)}
           >
@@ -701,7 +759,7 @@ const CoursesList = () => {
             onClick={handleAddSelectedTeacher}
             disabled={!selectedTeacherToAdd || !selectedTeacherRole}
           >
-            Add Teacher {/*   */}
+            Add Teacher
           </Button>
         </div>
 
@@ -709,24 +767,24 @@ const CoursesList = () => {
           rowKey="ID"
           dataSource={teachersInCourse.map((t) => ({
             ...t,
-            NAME: t.NAME?.trim() || "(No Name)", //  
+            NAME: t.NAME?.trim() || "(No Name)",
             EMAIL: t.EMAIL || "-",
           }))}
           columns={[
-            { title: "Name", dataIndex: "NAME" }, //  
-            { title: "Email", dataIndex: "EMAIL" }, //  
-            { title: "Role", dataIndex: "ROLE" }, // Assuming API returns 'ROLE' field for teacher in course
+            { title: "Name", dataIndex: "NAME" },
+            { title: "Email", dataIndex: "EMAIL" },
+            { title: "Role", dataIndex: "ROLE" }, 
             {
-              title: "Actions", //  
+              title: "Actions",
               render: (_, record) => (
                 <Space>
                   <Popconfirm
-                    title="Are you sure you want to remove this teacher?" //  
+                    title="Are you sure you want to remove this teacher?"
                     onConfirm={() => removeTeacherFromCourse(record.ID)}
-                    okText="Yes" //  
-                    cancelText="No" //  
+                    okText="Yes"
+                    cancelText="No"
                   >
-                    <Button danger>Remove</Button> {/*   */}
+                    <Button danger>Remove</Button>
                   </Popconfirm>
                 </Space>
               ),
@@ -737,48 +795,74 @@ const CoursesList = () => {
 
 
       <Modal
-        title={`Grade Report for Course #${selectedCourseId}`} //  
+        title={`Grade Report for Course #${selectedCourseId}`}
         open={reportModalVisible}
-        onCancel={() => setReportModalVisible(false)}
+        onCancel={() => {
+            setReportModalVisible(false);
+            setReportMode("initial"); 
+            setCourseReport([]); 
+            setAssignmentReport([]); 
+            setSelectedAssignmentId(null); 
+        }}
         footer={null}
         width={800}
       >
+
+        <div style={{ marginBottom: 20 }}>
+          <Radio.Group onChange={handleReportModeChange} value={reportMode}>
+            <Radio.Button value="course">Overall Course Report</Radio.Button>
+            <Radio.Button value="assignment">Individual Assignment Report</Radio.Button>
+          </Radio.Group>
+        </div>
+
+        {reportMode === "initial" && (
+          <p>Please select a report type above to view.</p>
+        )}
+
+        {/* Overall Course Report View */}
         {reportMode === "course" && (
           <>
             <Table
               dataSource={courseReport}
               rowKey={(r) => `${r.STUDENT_NAME}-${r.ASSIGNMENT_NAME}`}
               columns={[
-                { title: "Student", dataIndex: "STUDENT_NAME" }, //  
-                { title: "Assignment", dataIndex: "ASSIGNMENT_NAME" }, //  
-                { title: "Score", dataIndex: "SCORE" }, //  
+                { title: "Student", dataIndex: "STUDENT_NAME" },
+                { title: "Assignment", dataIndex: "ASSIGNMENT_NAME" },
+                { title: "Score", dataIndex: "SCORE" },
               ]}
               pagination={false}
+              // Conditional message if no data
+              locale={{ emptyText: "No submissions yet for this course." }}
             />
 
             <div style={{ marginTop: 20 }}>
               <Button
                 type="primary"
-                onClick={() =>
-                  window.open(
-                    `/api/submission/export_csv_course/${selectedCourseId}`,
-                    "_blank"
-                  )
-                }
+                onClick={() => handleExportCourseCsv(selectedCourseId!)}
+                disabled={!selectedCourseId || courseReport.length === 0} 
               >
-                Export All Assignments CSV {/*   */}
+                Export Overall Course CSV
               </Button>
             </div>
+          </>
+        )}
 
-            <div style={{ marginTop: 30 }}>
-              <h4>View Report by Assignment</h4> {/*   */}
+        {/* Individual Assignment Report View */}
+        {reportMode === "assignment" && (
+          <>
+            <div style={{ marginBottom: 20 }}>
+              <h4>Select Assignment</h4>
               <Select
                 style={{ width: 300 }}
-                placeholder="Select Assignment" //  
+                placeholder="Select Assignment"
                 value={selectedAssignmentId}
                 onChange={(id) => {
                   setSelectedAssignmentId(id);
-                  fetchAssignmentReport(id);
+                  if (id) {
+                      fetchAssignmentReport(id); 
+                  } else {
+                      setAssignmentReport([]); 
+                  }
                 }}
               >
                 {assignments.map((a) => (
@@ -788,44 +872,36 @@ const CoursesList = () => {
                 ))}
               </Select>
             </div>
-          </>
-        )}
 
-        {reportMode === "assignment" && (
-          <>
-            <Table
-              style={{ marginTop: 20 }}
-              dataSource={assignmentReport}
-              rowKey={(r) => `${r.STUDENT_NAME}-${r.STUDENT_EMAIL}`}
-              columns={[
-                { title: "Student", dataIndex: "STUDENT_NAME" }, //  
-                { title: "Email", dataIndex: "STUDENT_EMAIL" }, //  
-                { title: "Submit Date", dataIndex: "SUBMIT_DATE" }, //  
-                { title: "Score", dataIndex: "SCORE" }, //  
-              ]}
-              pagination={false}
-            />
-            <div style={{ marginTop: 20 }}>
-              <Button
-                type="primary"
-                onClick={() =>
-                  window.open(
-                    `/api/submission/export_csv_assignment/${selectedAssignmentId}`,
-                    "_blank"
-                  )
-                }
-                disabled={!selectedAssignmentId}
-              >
-                Export Assignment CSV {/*   */}
-              </Button>
-
-              <Button
-                style={{ marginLeft: 10 }}
-                onClick={() => setReportMode("course")}
-              >
-                ← Back to Course Report {/*   */}
-              </Button>
-            </div>
+            {selectedAssignmentId && (
+                <>
+                    <Table
+                        style={{ marginTop: 20 }}
+                        dataSource={assignmentReport}
+                        rowKey={(r) => `${r.STUDENT_NAME}-${r.STUDENT_EMAIL}`}
+                        columns={[
+                            { title: "Student", dataIndex: "STUDENT_NAME" },
+                            { title: "Email", dataIndex: "STUDENT_EMAIL" },
+                            { title: "Submit Date", dataIndex: "SUBMIT_DATE", render: (text) => text ? moment(text).format("DD-MM-YYYY HH:mm:ss") : '-' },
+                            { title: "Score", dataIndex: "SCORE" },
+                        ]}
+                        pagination={false}
+                        locale={{ emptyText: "No submissions yet for this assignment." }}
+                    />
+                    <div style={{ marginTop: 20 }}>
+                        <Button
+                            type="primary"
+                            onClick={() => handleExportAssignmentCsv(selectedAssignmentId!)}
+                            disabled={!selectedAssignmentId || assignmentReport.length === 0} // Disable if no data
+                        >
+                            Export Assignment CSV
+                        </Button>
+                    </div>
+                </>
+            )}
+            {!selectedAssignmentId && (
+                <p style={{marginTop: 20}}>Please select an assignment from the dropdown above to view its report.</p>
+            )}
           </>
         )}
       </Modal>
