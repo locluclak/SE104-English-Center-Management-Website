@@ -6,6 +6,7 @@ import { Link } from "react-router-dom"
 import { Home, BookOpen, Calendar, FileText, LogOut } from "../Ui/Icons/icons"
 import AvtImg from "@/assets/profile.jpg"
 import "./TeacherSidebar.scss"
+import { useSystemContext } from "@/hooks/useSystemContext"
 
 interface TeacherRoute {
   title: string
@@ -56,32 +57,33 @@ const teacherRoutes: TeacherRoute[] = [
 ]
 
 const TeacherSidebar: React.FC<TeacherSidebarProps> = ({ currentPath, onNavigate }) => {
-  const [userName, setUserName] = useState<string>("")
-  const [userRole, setUserRole] = useState<string>("")
+  const { userId, token, logout } = useSystemContext()
+  const [userName, setUserName] = useState("Teacher")
+  const [userRole, setUserRole] = useState("TEACHER")
 
   useEffect(() => {
-    // Mock dữ liệu người dùng cho giáo viên
-    const mockTeacher = {
-      id: 8,
-      email: "helen@example.com",
-      role: "STAFF", // Hoặc "TEACHER" nếu bạn muốn cụ thể hơn
-      name: "Helen Wood",
+    // Giả định bạn có API lấy thông tin user từ userId
+    const fetchUserInfo = async () => {
+      try {
+        // Nếu bạn có API thì gọi, ví dụ:
+        // const res = await MainApiRequest.get(`/users/${userId}`, {
+        //   headers: { Authorization: `Bearer ${token}` },
+        // })
+        // setUserName(res.data.name)
+        // setUserRole(res.data.role)
+
+        // Nếu chưa có API thì tạm dùng localStorage:
+        const storedName = localStorage.getItem("userName")
+        const storedRole = localStorage.getItem("role")
+        if (storedName) setUserName(storedName)
+        if (storedRole) setUserRole(storedRole)
+      } catch (err) {
+        console.error("Failed to fetch teacher info", err)
+      }
     }
 
-    setUserName(mockTeacher.name)
-    setUserRole(mockTeacher.role)
-    // Lưu vào localStorage để TeacherPage và ProfileUser có thể truy cập
-    localStorage.setItem("userId", String(mockTeacher.id));
-    localStorage.setItem("userRole", mockTeacher.role);
-
-    console.log("TeacherSidebar set userId in localStorage:", localStorage.getItem("userId"));
-    localStorage.setItem("token", JSON.stringify(mockTeacher)); // Giả sử ProfileUser cần token
-  }, [])
-
-  const handleLogout = () => {
-    localStorage.clear()
-    window.location.href = "/login"
-  }
+    fetchUserInfo()
+  }, [userId, token])
 
   const isActiveRoute = (routeUrl: string) => {
     if (routeUrl === "/teacher") {
@@ -154,7 +156,7 @@ const TeacherSidebar: React.FC<TeacherSidebarProps> = ({ currentPath, onNavigate
           </div>
         </div>
 
-        <button className="logout-btn" onClick={handleLogout}>
+        <button className="logout-btn" onClick={logout}>
           <LogOut className="logout-icon" />
           <span className="logout-text">LOG OUT</span>
         </button>
