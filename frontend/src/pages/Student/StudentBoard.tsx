@@ -1,38 +1,38 @@
 "use client"
 
-import React from "react"
-import { useState } from "react"
-import { Routes, Route, useNavigate, useLocation } from "react-router-dom"
+import React, { useState, useEffect } from "react"
+import { Routes, Route, useNavigate, useLocation, Navigate } from "react-router-dom"
 import { Tabs, TabsList, TabsTrigger } from "../../components/Ui/Tabs/tabs"
 import { Calendar, FileText } from "../../components/Ui/Icons/icons"
 import StudentCalendar from "./StudentCalendar"
 import StudentPadlet from "./StudentPadlet"
+import { useSystemContext } from "@/hooks/useSystemContext"
 
-interface StudentBoardProps {
-  studentId: string
-  userRole: string
-}
-
-const StudentBoard: React.FC<StudentBoardProps> = ({ studentId, userRole }) => {
+const StudentBoard: React.FC = () => {
   const [activeTab, setActiveTab] = useState("calendar")
   const navigate = useNavigate()
   const location = useLocation()
+  const { token } = useSystemContext()
 
-  const handleTabChange = (value: string) => {
-    setActiveTab(value)
-    navigate(`/student/board/${value}`)
-  }
+  useEffect(() => {
+    if (!token) {
+      navigate("/login")
+    }
+  }, [token, navigate])
 
-  // Determine active tab from URL
-  React.useEffect(() => {
-    const pathSegments = location.pathname.split("/")
-    const lastSegment = pathSegments[pathSegments.length - 1]
+  useEffect(() => {
+    const lastSegment = location.pathname.split("/").pop()
     if (lastSegment === "calendar" || lastSegment === "padlet") {
       setActiveTab(lastSegment)
     } else {
       setActiveTab("calendar")
     }
   }, [location.pathname])
+
+  const handleTabChange = (value: string) => {
+    setActiveTab(value)
+    navigate(`/student/board/${value}`)
+  }
 
   return (
     <div className="student-board">
@@ -51,13 +51,13 @@ const StudentBoard: React.FC<StudentBoardProps> = ({ studentId, userRole }) => {
             Padlet Attachment
           </TabsTrigger>
         </TabsList>
-
-        <Routes>
-          <Route index element={<StudentCalendar />} />
-          <Route path="calendar" element={<StudentCalendar />} />
-          <Route path="padlet" element={<StudentPadlet />} />
-        </Routes>
       </Tabs>
+
+      <Routes>
+        <Route index element={<Navigate to="calendar" replace />} />
+        <Route path="calendar" element={<StudentCalendar />} />
+        <Route path="padlet" element={<StudentPadlet />} />
+      </Routes>
     </div>
   )
 }

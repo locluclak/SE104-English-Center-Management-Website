@@ -9,6 +9,7 @@ import {
 } from "../Ui/Icons/icons";
 import "./StudentSidebar.scss";
 import AvtImg from "@/assets/profile.jpg";
+import { MainApiRequest } from "@/services/MainApiRequest";
 
 interface StudentRoute {
   title: string;
@@ -49,20 +50,33 @@ const studentRoutes: StudentRoute[] = [
 ];
 
 const StudentSidebar: React.FC<StudentSidebarProps> = ({ currentPath, onNavigate }) => {
-  const [userName, setUserName] = useState<string>("");
-  const [userRole, setUserRole] = useState<string>("");
+  const [userName, setUserName] = useState<string>("Họ và tên");
+  const [userRole, setUserRole] = useState<string>("Loại người dùng");
 
   useEffect(() => {
-    const mockUser = {
-      id: 1,
-      email: "alice@example.com",
-      role: "STUDENT",
-      name: "Alice Johnson",
+    const fetchUserInfo = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) return;
+
+        const payloadBase64 = token.split(".")[1];
+        const payloadJson = atob(payloadBase64);
+        const decodedToken = JSON.parse(payloadJson);
+
+        const email = decodedToken.email;
+        const role = decodedToken.role;
+        setUserRole(role || "Unknown");
+
+        const res = await MainApiRequest.get(`/person?email=${email}`);
+        const data = res.data;
+
+        setUserName(data.NAME || "Họ và tên");
+      } catch (error) {
+        console.error("Lỗi khi lấy thông tin người dùng:", error);
+      }
     };
 
-    setUserName(mockUser.name);
-    setUserRole(mockUser.role);
-    localStorage.setItem("token", JSON.stringify(mockUser));
+    fetchUserInfo();
   }, []);
 
   const handleLogout = () => {
