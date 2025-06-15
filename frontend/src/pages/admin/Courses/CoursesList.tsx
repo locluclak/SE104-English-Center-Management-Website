@@ -65,6 +65,19 @@ const CoursesList = () => {
     const coursesWithTeachers = await Promise.all(
       rawCourses.map(async (cls: any) => {
         const teacher = await fetchTeacherForCourse(cls.COURSE_ID);
+
+        // Tính toán trạng thái tự động
+        const currentDate = moment();
+        const startDate = moment(cls.START_DATE);
+        const endDate = moment(cls.END_DATE);
+        let status = "upcoming"; // Mặc định là upcoming
+
+        if (currentDate.isBetween(startDate, endDate, null, "[]")) {
+          status = "active"; // Nếu ngày hiện tại trong khoảng từ startDate đến endDate
+        } else if (currentDate.isAfter(endDate)) {
+          status = "completed"; // Nếu ngày hiện tại sau endDate
+        }
+
         return {
           id: cls.COURSE_ID,
           name: cls.NAME,
@@ -76,7 +89,7 @@ const CoursesList = () => {
           minStu: cls.MIN_STU,
           maxStu: cls.MAX_STU,
           price: cls.PRICE,
-          status: cls.STATUS || "waiting",
+          status, // Trạng thái đã tính toán
         };
       })
     );
@@ -87,6 +100,7 @@ const CoursesList = () => {
     message.error("Unable to load courses.");
   }
 };
+
 
   const fetchTeacherForCourse = async (courseId: number) => {
     try {
@@ -271,60 +285,77 @@ const CoursesList = () => {
 
 
   const onOKCreateCourses = async () => {
-    try {
-      const values = await form.validateFields();
-      const selectedTeacher = teacherOptions.find(
-        (t) => t.value === values.teacherId
-      );
-      const teacherName = selectedTeacher?.label;
+  try {
+    const values = await form.validateFields();
+    const selectedTeacher = teacherOptions.find(
+      (t) => t.value === values.teacherId
+    );
+    const teacherName = selectedTeacher?.label;
 
-      const payload = {
-        name: values.name,
-        description: values.description,
-        startDate: values.startDate.format("YYYY-MM-DD"),
-        endDate: values.endDate.format("YYYY-MM-DD"),
-        minStu: values.minStu,
-        maxStu: values.maxStu,
-        price: values.price,
-        status: values.status,
-        teacherName,
-      };
+    // Tính toán trạng thái tự động
+    const currentDate = moment();
+    const startDate = moment(values.startDate);
+    const endDate = moment(values.endDate);
+    let status = "upcoming"; 
 
-      let courseId: number;
-
-      if (editingCourses) {
-        await MainApiRequest.put(`/course/update/${editingCourses.id}`, payload);
-        const courseId = editingCourses.id;
-      
-        if (editingCourses.teacherId !== values.teacherId) {
-          if (editingCourses.teacherId) {
-            await MainApiRequest.delete("/course/remove-teacher", {
-              data: { teacherId: editingCourses.teacherId, courseId },
-            });
-          }
-          if (values.teacherId) {
-            await MainApiRequest.post("/course/add-teacher", {
-              teacherId: values.teacherId,
-              courseId,
-              role: "LECTURER",
-            });
-          }
-        }
-  
-        message.success("Course updated successfully!");
-      }      
-
-      await fetchCoursesList();
-      setOpenCreateCoursesModal(false);
-      form.resetFields();
-      setEditingCourses(null);
-    } catch (error: any) {
-      console.error("Failed to save course:", error);
-      message.error(
-        error?.response?.data?.error || "Failed to save course information."
-      );
+    if (currentDate.isBetween(startDate, endDate, null, "[]")) {
+      status = "active"; 
+    } else if (currentDate.isAfter(endDate)) {
+      status = "completed"; 
     }
-  };
+
+    const payload = {
+      name: values.name,
+      description: values.description,
+      startDate: startDate.format("YYYY-MM-DD"),
+      endDate: endDate.format("YYYY-MM-DD"),
+      minStu: values.minStu,
+      maxStu: values.maxStu,
+      price: values.price,
+      status,  // Sử dụng trạng thái đã tính toán
+      teacherName,
+    };
+
+    let courseId: number;
+
+    if (editingCourses) {
+      await MainApiRequest.put(`/course/update/${editingCourses.id}`, payload);
+      const courseId = editingCourses.id;
+    
+      if (editingCourses.teacherId !== values.teacherId) {
+        if (editingCourses.teacherId) {
+          await MainApiRequest.delete("/course/remove-teacher", {
+            data: { teacherId: editingCourses.teacherId, courseId },
+          });
+        }
+        if (values.teacherId) {
+          await MainApiRequest.post("/course/add-teacher", {
+            teacherId: values.teacherId,
+            courseId,
+            role: "LECTURER",
+          });
+        }
+      }
+
+      message.success("Course updated successfully!");
+    } else {
+      // Gửi yêu cầu tạo khóa học mới
+      await MainApiRequest.post("/course/create", payload);
+      message.success("Course created successfully!");
+    }
+
+    await fetchCoursesList();
+    setOpenCreateCoursesModal(false);
+    form.resetFields();
+    setEditingCourses(null);
+  } catch (error: any) {
+    console.error("Failed to save course:", error);
+    message.error(
+      error?.response?.data?.error || "Failed to save course information."
+    );
+  }
+};
+
 
   const onDeleteCourses = async (id: number) => {
     try {
@@ -441,17 +472,7 @@ const CoursesList = () => {
             component="input"
             type="number"
           />
-          <FloatingLabelInput
-            label="Status"
-            name="status"
-            required
-            component="select"
-            options={[
-              { label: "Waiting", value: "waiting" },
-              { label: "Ongoing", value: "active" },
-              { label: "Finished", value: "finished" },
-            ]}
-          />
+          
         </Form>
       </Modal>
 

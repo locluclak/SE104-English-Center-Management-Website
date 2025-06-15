@@ -100,8 +100,6 @@ const TeacherCourses: React.FC<TeacherCoursesProps> = ({ teacherId, userRole }) 
         return "status-active"
       case "completed":
         return "status-completed"
-      case "paused":
-        return "status-paused"
       case "upcoming":
         return "status-upcoming"
       default:
