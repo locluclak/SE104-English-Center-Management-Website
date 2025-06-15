@@ -18,8 +18,9 @@ interface TeacherCourse {
   schedule: string
   nextClass: string
   status: "active" | "completed" | "paused" | "upcoming"
-  START_DATE?: string; 
+  START_DATE?: string;
   END_DATE?: string;
+  progress?: number;
 }
 
 interface TeacherCoursesProps {
@@ -27,9 +28,23 @@ interface TeacherCoursesProps {
   userRole: string
 }
 
+const getCourseStatus = (
+  startDate: string,
+  endDate: string
+): "active" | "completed" | "upcoming" | "paused" => {
+  const now = new Date();
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+
+  if (now < start) return "upcoming";
+  if (now > end) return "completed";
+  return "active";
+};
+
+
 const TeacherCourses: React.FC<TeacherCoursesProps> = ({ teacherId, userRole }) => {
   console.log("TeacherCourses rendered. Prop teacherId:", teacherId);
-  
+
   const [courses, setCourses] = useState<TeacherCourse[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -49,7 +64,20 @@ const TeacherCourses: React.FC<TeacherCoursesProps> = ({ teacherId, userRole }) 
 
     try {
       const response = await MainApiRequest.get<TeacherCourse[]>(`/course/teacher-courses/${teacherId}`)
-      setCourses(response.data);
+      
+      const mappedCourses: TeacherCourse[] = response.data.map(course => {
+        const status = getCourseStatus(course.START_DATE || '', course.END_DATE || '');
+        const progress = status === "completed" ? 100 : status === "active" ? 50 : 0; // Demo logic for teachers
+        
+        return {
+          ...course,
+          status: status,
+          progress: progress,
+          schedule: `${new Date(course.START_DATE!).toLocaleDateString("vi-VN")} - ${new Date(course.END_DATE!).toLocaleDateString("vi-VN")}`
+        };
+      });
+
+      setCourses(mappedCourses);
     } catch (err) {
       console.error("Failed to fetch teacher courses:", err)
       setError("Failed to load courses. Please try again.")
@@ -79,13 +107,6 @@ const TeacherCourses: React.FC<TeacherCoursesProps> = ({ teacherId, userRole }) 
       default:
         return "status-default"
     }
-  }
-
-  const formatNextClass = (dateString: string) => {
-    if (!dateString) return "No upcoming classes"
-    const date = new Date(dateString)
-    if (isNaN(date.getTime())) return "Invalid date"
-    return date.toLocaleDateString() + " at " + date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
   }
 
   if (loading) {
@@ -142,10 +163,18 @@ const TeacherCourses: React.FC<TeacherCoursesProps> = ({ teacherId, userRole }) 
                   </div>
                 </div>
 
-                {(course.status === "active" || course.status === "upcoming") && (
-                  <div className="next-class">
-                    <p className="next-class-label">Next Class:</p>
-                    <p className="next-class-time">{formatNextClass(course.nextClass)}</p>
+                {typeof course.progress === 'number' && (
+                  <div className="progress-section">
+                    <div className="progress-header">
+                      <span>Progress</span>
+                      <span>{course.progress}%</span>
+                    </div>
+                    <div className="progress-bar">
+                      <div
+                        className="progress-fill"
+                        style={{ width: `${course.progress}%` }}
+                      />
+                    </div>
                   </div>
                 )}
 
