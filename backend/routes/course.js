@@ -222,39 +222,50 @@ router.post('/add-student', async (req, res) => {
 // Route to update a course by ID
 router.put('/update/:id', async (req, res) => {
   const courseId = req.params.id;
-  const { name, description, startDate, endDate, minStu, maxStu, price, teacherName } = req.body;
+  const {
+    name,
+    description,
+    startDate,
+    endDate,
+    minStu,
+    maxStu,
+    price,
+  } = req.body;
 
-  if (!name && !description && !startDate && !endDate && !minStu && !maxStu && price === undefined && !teacherName) {
+  if (
+    !name &&
+    !description &&
+    !startDate &&
+    !endDate &&
+    !minStu &&
+    !maxStu &&
+    price === undefined
+  ) {
     return res.status(400).json({ error: 'No fields provided for update' });
   }
-
-  const updatedDescription = teacherName
-    ? `[Giáo viên: ${teacherName}] ${description || ''}`
-    : description;
 
   try {
     const query = `
       UPDATE COURSE
-      SET 
-        NAME = COALESCE(?, NAME),
-        DESCRIPTION = COALESCE(?, DESCRIPTION),
-        START_DATE = COALESCE(?, START_DATE),
-        END_DATE = COALESCE(?, END_DATE),
-        MIN_STU = COALESCE(?, MIN_STU),
-        MAX_STU = COALESCE(?, MAX_STU),
-        PRICE = COALESCE(?, PRICE)
+      SET NAME = COALESCE(?, NAME),
+          DESCRIPTION = COALESCE(?, DESCRIPTION),
+          START_DATE = COALESCE(?, START_DATE),
+          END_DATE = COALESCE(?, END_DATE),
+          MIN_STU = COALESCE(?, MIN_STU),
+          MAX_STU = COALESCE(?, MAX_STU),
+          PRICE = COALESCE(?, PRICE)
       WHERE COURSE_ID = ?
     `;
 
     const [result] = await db.execute(query, [
       name || null,
-      updatedDescription || null,
+      description || null,
       startDate || null,
       endDate || null,
       minStu || null,
       maxStu || null,
       price !== undefined ? price : null,
-      courseId
+      courseId,
     ]);
 
     if (result.affectedRows === 0) {
