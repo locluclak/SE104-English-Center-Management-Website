@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import './Sidebar.scss';
 import { comparePathname } from '@/utils/uri';
+import AvtImg from '@/assets/profile.jpg';
+import { MainApiRequest } from '@/services/MainApiRequest';
 
 type Route = {
   title: string;
@@ -15,9 +17,12 @@ type SubRoutesState = { [key: string]: boolean };
 
 const Sidebar: React.FC = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [role, setRole] = useState<string | null>(null);
   const [routes, setRoutes] = useState<Route[]>([]);
   const [currentPath, setCurrentPath] = useState('');
+  const [userName, setUserName] = useState<string>("User Name");
+  const [userRole, setUserRole] = useState<string>("User Role");
   const [openSubRoutes, setOpenSubRoutes] = useState<SubRoutesState>({});
 
   const roleRoutes: Record<string, Route[]> = {
@@ -35,31 +40,65 @@ const Sidebar: React.FC = () => {
   };
 
   useEffect(() => {
-    const storedRole = localStorage.getItem('role');
-    setRole(storedRole);
+    const fetchAndSetSidebarData = async () => {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        navigate('/login');
+        return;
+      }
+
+      try {
+        const payloadBase64 = token.split(".")[1];
+        const payloadJson = atob(payloadBase64);
+        const decodedToken = JSON.parse(payloadJson);
+
+        const storedEmail = decodedToken.email;
+        const storedRole = decodedToken.role;
+
+        setRole(storedRole);
+
+        setUserRole(storedRole || "Unknown");
+
+        if (storedRole && roleRoutes[storedRole]) {
+          setRoutes(roleRoutes[storedRole]);
+        } else {
+          setRoutes([]); 
+        }
+
+        const res = await MainApiRequest.get(`/person?email=${storedEmail}`);
+        const data = res.data;
+        setUserName(data.NAME || "Họ và tên");
+
+      } catch (error) {
+        console.error("Error fetching user info or setting sidebar data:", error);
+        localStorage.clear();
+        navigate('/login');
+      }
+    };
+
+    fetchAndSetSidebarData();
+
     setCurrentPath(location.pathname);
 
-    if (storedRole && roleRoutes[storedRole]) {
-      setRoutes(roleRoutes[storedRole]);
-    }
-  }, [location]);
+  }, [location.pathname, navigate]); // Depend on location.pathname to update active state, and navigate for potential redirects
 
   const toggleSubRoutes = (path: string) => {
     setOpenSubRoutes(prev => ({ ...prev, [path]: !prev[path] }));
   };
 
   const handleLogout = () => {
-  localStorage.removeItem('token');
-  localStorage.removeItem('role');
-  window.location.href = '/';
-};
-
-  const handleLogin = (selectedRole: string) => {
-    localStorage.setItem('role', selectedRole);
-    setRole(selectedRole);
-    setRoutes(roleRoutes[selectedRole]);
+    localStorage.removeItem('token');
+    localStorage.removeItem('role');
+    window.location.href = '/login';
   };
 
+  const handleProfileClick = () => {
+    if (role) {
+      navigate(`/${role.toLowerCase()}/profile`);
+    } else {
+      navigate('/login'); 
+    }
+  };
 
   const renderNavigationList = () => {
     return routes.map((route, index) => {
@@ -98,7 +137,7 @@ const Sidebar: React.FC = () => {
             <ul className="nav-children nav nav-pills">
               {route.children?.map((subRoute, subIndex) => {
                 if (!subRoute.roles.includes(role)) return null;
-                const fullLink = `${route.link}/${subRoute.link}`;
+                const fullLink = `${route.link}${subRoute.link.startsWith('/') ? subRoute.link : '/' + subRoute.link}`; // Ensure correct path construction
                 const active = comparePathname(fullLink, currentPath);
 
                 return (
@@ -119,20 +158,53 @@ const Sidebar: React.FC = () => {
     });
   };
 
+  const getPortalTitle = () => {
+    if (role === 'ADMIN') {
+      return 'ADMIN';
+    } else if (role === 'ACCOUNTANT') {
+      return 'ACCOUNTANT';
+    }
+    return 'PORTAL';
+  };
+
+  const getPortalIcon = () => {
+    if (role === 'ADMIN') {
+      return <i className="fas fa-user-shield logo-icon"></i>;
+    } else if (role === 'ACCOUNTANT') {
+      return <i className="fas fa-calculator logo-icon"></i>;
+    }
+    return <i className="fas fa-home logo-icon"></i>;
+  };
+
   return (
     <div className="sidebar">
-      <ul className="side side-pills">
-        <h1 className="logo">
-          <svg width="90" height="50" viewBox="0 0 100 61" fill="none" xmlns="http://www.w3.org/2000/svg">
-          </svg>
-        </h1>
-          <>
-            {renderNavigationList()}
-            <button className="logout-box" onClick={handleLogout}>
-              <i className="fa-solid fa-sign-out"></i> LOG OUT
-            </button>
-          </>
-      </ul>
+      <div className="sidebar-header">
+        <div className="logo">
+          {getPortalIcon()}
+          <span className="logo-text">{getPortalTitle()}</span>
+        </div>
+      </div>
+
+      <nav className="sidebar-nav">
+        <ul className="side side-pills">
+          {renderNavigationList()}
+        </ul>
+      </nav>
+
+      <div className="sidebar-footer">
+        <div className="sidebar-user-profile" onClick={handleProfileClick}>
+          <img src={AvtImg} alt="User Avatar" className="profile-avatar" />
+          <div className="profile-info">
+            <div className="profile-name">{userName}</div>
+            <div className="profile-role">{userRole}</div> 
+          </div>
+        </div>
+
+        <button className="logout-btn" onClick={handleLogout}>
+          <i className="fa-solid fa-sign-out"></i>
+          <span className="logout-text">LOG OUT</span>
+        </button>
+      </div>
     </div>
   );
 };

@@ -23,6 +23,7 @@ import TeacherPage from "@/pages/Teacher/TeacherPage"
 import Home from "@/pages/Home/Home"
 import Login from "@/pages/Login/Login"
 import Register from "@/pages/Register/Register"
+import ProfileUser from "@/pages/ProfileUser/ProfileUser"
 
 export default function MainRoutes() {
   const { isLoggedIn } = useSystemContext(); // userRole đã được bỏ ở đây
@@ -78,10 +79,12 @@ export default function MainRoutes() {
         <Route path="admin/students" element={<StudentsList />} />
         <Route path="admin/teachers" element={<TeachersList />} />
         <Route path="admin/accountants" element={<AccountantList />} />
+        <Route path="admin/profile" element={<ProfileUser />} />
 
         <Route path="accountant/dashboard" element={<DashboardCharts />} />
         <Route path="accountant/studentfees" element={<StudentFeeList />} />
         <Route path="accountant/reports" element={<Reports />} />
+        <Route path="accountant/profile" element={<ProfileUser/>} />
       </Route>
 
       <Route path="/student" element={<StudentLayout />}>

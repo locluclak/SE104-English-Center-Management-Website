@@ -38,7 +38,7 @@ const TeacherPage: React.FC = () => {
       setCurrentUserRole(storedUserRole)
     } else {
       console.warn("User role not found in localStorage. Defaulting to 'teacher'.")
-      setCurrentUserRole("teacher")
+      setCurrentUserRole("TEACHER")
     }
 
   }, [])
@@ -62,8 +62,6 @@ const TeacherPage: React.FC = () => {
     return (
       <div className="teacher-page-error">
         <p>User not logged in or teacher ID missing. Please log in.</p>
-        {/* Bạn có thể chuyển hướng về trang đăng nhập ở đây */}
-        {/* <Navigate to="/login" replace /> */}
       </div>
     );
   }
@@ -75,15 +73,15 @@ const TeacherPage: React.FC = () => {
 
         <div className="teacher-page-content">
           <Routes>
-            <Route path="/home" element={<TeacherHome teacherId={currentTeacherId} userRole={currentUserRole || "teacher"} />} />
+            <Route path="/home" element={<TeacherHome teacherId={currentTeacherId} userRole={currentUserRole || "TEACHER"} />} />
 
             <Route
               path="/courses"
-              element={<TeacherCourses teacherId={currentTeacherId} userRole={currentUserRole || "teacher"} />}
+              element={<TeacherCourses teacherId={currentTeacherId} userRole={currentUserRole || "TEACHER"} />}
             />
             <Route path="/courses/:courseId" element={<TeacherCourseDetail />} />
 
-            <Route path="/board/*" element={<TeacherBoard teacherId={currentTeacherId} userRole={currentUserRole || "teacher"} />} />
+            <Route path="/board/*" element={<TeacherBoard teacherId={currentTeacherId} userRole={currentUserRole || "TEACHER"} />} />
 
             <Route path="/profile" element={<ProfileUser />} />
 

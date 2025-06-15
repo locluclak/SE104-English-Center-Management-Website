@@ -430,4 +430,43 @@ router.get('/export_csv_course/:course_id', async (req, res) => {
   }
 });
 
+// GET /submission/export_csv_assignment/:assignment_id - Export assignment report as CSV
+router.get('/export_csv_assignment/:assignment_id', async (req, res) => {
+  const { assignment_id } = req.params;
+
+  try {
+    const conn = await db.getConnection();
+    const query = `
+      SELECT
+        p.NAME AS STUDENT_NAME,
+        p.EMAIL AS STUDENT_EMAIL,
+        s.SUBMIT_DATE,
+        s.SCORE
+      FROM SUBMITION s
+      JOIN PERSON p ON s.STUDENT_ID = p.ID
+      WHERE s.AS_ID = ?
+      ORDER BY p.NAME
+    `;
+    const [rows] = await conn.query(query, [assignment_id]);
+    conn.release();
+
+    if (rows.length === 0) {
+      res.header('Content-Type', 'text/csv');
+      res.attachment(`assignment_${assignment_id}_report.csv`);
+      return res.status(200).send('STUDENT_NAME,STUDENT_EMAIL,SUBMIT_DATE,SCORE\n');
+    }
+
+    const fields = ['STUDENT_NAME', 'STUDENT_EMAIL', 'SUBMIT_DATE', 'SCORE'];
+    const json2csvParser = new Parser({ fields });
+    const csv = json2csvParser.parse(rows);
+
+    res.header('Content-Type', 'text/csv');
+    res.attachment(`assignment_${assignment_id}_report.csv`);
+    res.send(csv);
+  } catch (err) {
+    console.error('Error exporting assignment report as CSV:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
 module.exports = router;
