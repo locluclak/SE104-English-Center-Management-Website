@@ -64,20 +64,19 @@ const CoursesList = () => {
 
     const coursesWithTeachers = await Promise.all(
       rawCourses.map(async (cls: any) => {
-        const teacherName = await fetchTeacherForCourse(cls.COURSE_ID);
-
+        const teacher = await fetchTeacherForCourse(cls.COURSE_ID);
         return {
           id: cls.COURSE_ID,
           name: cls.NAME,
-          description: cls.DESCRIPTION, 
-          teacherName,
+          description: cls.DESCRIPTION,
+          teacherName: teacher.name,
+          teacherId: teacher.id,
           startDate: cls.START_DATE,
           endDate: cls.END_DATE,
           minStu: cls.MIN_STU,
           maxStu: cls.MAX_STU,
           price: cls.PRICE,
           status: cls.STATUS || "waiting",
-          teacherId: null,
         };
       })
     );
@@ -89,14 +88,15 @@ const CoursesList = () => {
   }
 };
 
-
-  const fetchTeacherForCourse = async (courseId: number): Promise<string> => {
+  const fetchTeacherForCourse = async (courseId: number) => {
     try {
       const res = await MainApiRequest.get(`/course/teacher/${courseId}`);
       const teacher = res.data[0];
-      return teacher ? teacher.NAME : "Unknown";
-    } catch (error) {
-      return "Unknown";
+      return teacher
+        ? { id: teacher.ID, name: teacher.NAME }
+        : { id: null,    name: "Unknown" };
+    } catch {
+      return { id: null, name: "Unknown" };
     }
   };
 
@@ -293,38 +293,26 @@ const CoursesList = () => {
       let courseId: number;
 
       if (editingCourses) {
-        await MainApiRequest.put(
-          `/course/update/${editingCourses.id}`,
-          payload
-        );
-        courseId = editingCourses.id;
-
+        await MainApiRequest.put(`/course/update/${editingCourses.id}`, payload);
+        const courseId = editingCourses.id;
+      
         if (editingCourses.teacherId !== values.teacherId) {
           if (editingCourses.teacherId) {
             await MainApiRequest.delete("/course/remove-teacher", {
               data: { teacherId: editingCourses.teacherId, courseId },
             });
           }
-          await MainApiRequest.post("/course/add-teacher", {
-            teacherId: values.teacherId,
-            courseId,
-            role: "LECTURER",
-          });
+          if (values.teacherId) {
+            await MainApiRequest.post("/course/add-teacher", {
+              teacherId: values.teacherId,
+              courseId,
+              role: "LECTURER",
+            });
+          }
         }
-
+  
         message.success("Course updated successfully!");
-      } else {
-        const res = await MainApiRequest.post("/course/create", payload);
-        courseId = res.data.courseId;
-
-        await MainApiRequest.post("/course/add-teacher", {
-          teacherId: values.teacherId,
-          courseId,
-          role: "LECTURER",
-        });
-
-        message.success("Course created successfully!");
-      }
+      }      
 
       await fetchCoursesList();
       setOpenCreateCoursesModal(false);
