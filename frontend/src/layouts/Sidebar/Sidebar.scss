@@ -1,35 +1,34 @@
 @import "../../scss/variables"; // Make sure this path is correct
 
 .sidebar {
-  width: 200px; // Reduced width
+  width: 200px; 
   min-height: 100vh;
-  background-color: get-color($primary, "100"); // Assuming primary-100 is your dark background
+  background-color: get-color($primary, "100"); 
   color: white;
   display: flex;
   flex-direction: column;
   box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
-  overflow-y: auto; // Add for scrollability if content exceeds height
-  position: sticky; // Keep it sticky on larger screens
+  position: sticky;
   top: 0;
   left: 0;
   z-index: 1000;
 
 
-  @media (max-width: 768px) { // Adjust breakpoint if needed for mobile/tablet
-    width: 250px; // Slightly wider for tablets if still sticky
+  @media (max-width: 768px) { 
+    width: 250px; 
   }
 
-  @media (max-width: 576px) { // Mobile view
+  @media (max-width: 576px) { 
     width: 100%;
-    min-height: auto; // Allow height to adjust
+    min-height: auto;
     position: fixed;
     top: 0;
     left: 0;
     transform: translateX(-100%);
     transition: transform 0.3s ease;
-    box-shadow: none; // Remove box-shadow on fixed sidebar for mobile
+    box-shadow: none; 
 
-    &.open { // Class to show/hide on mobile
+    &.open {
       transform: translateX(0);
     }
   }
