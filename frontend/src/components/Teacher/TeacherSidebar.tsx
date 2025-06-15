@@ -1,24 +1,25 @@
-"use client"
+"use client";
 
-import type React from "react"
-import { useEffect, useState } from "react"
-import { Link } from "react-router-dom"
-import { Home, BookOpen, Calendar, FileText, LogOut } from "../Ui/Icons/icons"
-import AvtImg from "@/assets/profile.jpg"
-import "./TeacherSidebar.scss"
-import { useSystemContext } from "@/hooks/useSystemContext"
+import type React from "react";
+import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import { Home, BookOpen, Calendar, FileText, LogOut } from "../Ui/Icons/icons";
+import AvtImg from "@/assets/profile.jpg";
+import "./TeacherSidebar.scss";
+import { useSystemContext } from "@/hooks/useSystemContext";
+import { MainApiRequest } from "@/services/MainApiRequest";
 
 interface TeacherRoute {
-  title: string
-  url: string
-  icon: React.ComponentType<any>
-  roles: string[]
-  children?: TeacherRoute[]
+  title: string;
+  url: string;
+  icon: React.ComponentType<any>;
+  roles: string[];
+  children?: TeacherRoute[];
 }
 
 interface TeacherSidebarProps {
-  currentPath: string
-  onNavigate: (path: string) => void
+  currentPath: string;
+  onNavigate: (path: string) => void;
 }
 
 const teacherRoutes: TeacherRoute[] = [
@@ -54,43 +55,44 @@ const teacherRoutes: TeacherRoute[] = [
       },
     ],
   },
-]
+];
 
 const TeacherSidebar: React.FC<TeacherSidebarProps> = ({ currentPath, onNavigate }) => {
-  const { userId, token, logout } = useSystemContext()
-  const [userName, setUserName] = useState("Teacher")
-  const [userRole, setUserRole] = useState("TEACHER")
+  const { token, logout } = useSystemContext();
+  const [userName, setUserName] = useState("Teacher");
+  const [userRole, setUserRole] = useState("TEACHER");
 
   useEffect(() => {
-    // Giả định bạn có API lấy thông tin user từ userId
     const fetchUserInfo = async () => {
       try {
-        // Nếu bạn có API thì gọi, ví dụ:
-        // const res = await MainApiRequest.get(`/users/${userId}`, {
-        //   headers: { Authorization: `Bearer ${token}` },
-        // })
-        // setUserName(res.data.name)
-        // setUserRole(res.data.role)
+        if (!token) return;
 
-        // Nếu chưa có API thì tạm dùng localStorage:
-        const storedName = localStorage.getItem("userName")
-        const storedRole = localStorage.getItem("role")
-        if (storedName) setUserName(storedName)
-        if (storedRole) setUserRole(storedRole)
+        const payloadBase64 = token.split(".")[1];
+        const payloadJson = atob(payloadBase64);
+        const decodedToken = JSON.parse(payloadJson);
+
+        const email = decodedToken.email;
+        const role = decodedToken.role;
+        setUserRole(role || "Unknown");
+
+        const res = await MainApiRequest.get(`/person?email=${email}`);
+        const data = res.data;
+
+        setUserName(data.NAME || "Teacher");
       } catch (err) {
-        console.error("Failed to fetch teacher info", err)
+        console.error("Failed to fetch teacher info", err);
       }
-    }
+    };
 
-    fetchUserInfo()
-  }, [userId, token])
+    fetchUserInfo();
+  }, [token]);
 
   const isActiveRoute = (routeUrl: string) => {
     if (routeUrl === "/teacher") {
-      return currentPath === "/teacher" || currentPath === "/teacher/"
+      return currentPath === "/teacher" || currentPath === "/teacher/";
     }
-    return currentPath.startsWith(routeUrl)
-  }
+    return currentPath.startsWith(routeUrl);
+  };
 
   return (
     <div className="teacher-sidebar">
@@ -104,9 +106,9 @@ const TeacherSidebar: React.FC<TeacherSidebarProps> = ({ currentPath, onNavigate
       <nav className="sidebar-nav">
         <ul className="nav-list">
           {teacherRoutes.map((route) => {
-            const isActive = isActiveRoute(route.url)
-            const hasChildren = route.children && route.children.length > 0
-            const isParentActive = hasChildren && route.children?.some((child) => isActiveRoute(child.url))
+            const isActive = isActiveRoute(route.url);
+            const hasChildren = route.children && route.children.length > 0;
+            const isParentActive = hasChildren && route.children?.some((child) => isActiveRoute(child.url));
 
             return (
               <li key={route.title} className="nav-item">
@@ -114,24 +116,24 @@ const TeacherSidebar: React.FC<TeacherSidebarProps> = ({ currentPath, onNavigate
                   to={route.url}
                   className={`nav-link ${isActive || isParentActive ? "active" : ""}`}
                   onClick={(e) => {
-                    e.preventDefault()
-                    onNavigate(route.url)
+                    e.preventDefault();
+                    onNavigate(route.url);
                   }}
                 >
                   <route.icon className="nav-icon" />
                   <span className="nav-text">{route.title}</span>
                 </Link>
 
-                {hasChildren && (isActive || isParentActive) && route.children && (
+                {hasChildren && (isActive || isParentActive) && (
                   <ul className="nav-children">
-                    {route.children.map((subRoute) => (
+                    {route.children?.map((subRoute) => (
                       <li key={subRoute.title} className="nav-child-item">
                         <Link
                           to={subRoute.url}
                           className={`nav-child-link ${isActiveRoute(subRoute.url) ? "active" : ""}`}
                           onClick={(e) => {
-                            e.preventDefault()
-                            onNavigate(subRoute.url)
+                            e.preventDefault();
+                            onNavigate(subRoute.url);
                           }}
                         >
                           <subRoute.icon className="nav-child-icon" />
@@ -142,7 +144,7 @@ const TeacherSidebar: React.FC<TeacherSidebarProps> = ({ currentPath, onNavigate
                   </ul>
                 )}
               </li>
-            )
+            );
           })}
         </ul>
       </nav>
@@ -162,7 +164,7 @@ const TeacherSidebar: React.FC<TeacherSidebarProps> = ({ currentPath, onNavigate
         </button>
       </div>
     </div>
-  )
-}
+  );
+};
 
-export default TeacherSidebar
+export default TeacherSidebar;
