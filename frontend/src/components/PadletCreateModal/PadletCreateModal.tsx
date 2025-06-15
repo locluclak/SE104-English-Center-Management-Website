@@ -1,4 +1,3 @@
-// components/Padlet/PadletCreateModal.tsx
 "use client"
 
 import React, { useEffect, useState } from "react"
@@ -15,12 +14,12 @@ interface PadletCreateModalProps {
   open: boolean
   onClose: () => void
   onSuccess: () => void
-  studentId: string
   mode: "create" | "edit" | "view"
   defaultData?: any
+  ownerId: string; // THÊM PROP NÀY ĐỂ NHẬN OWNERID TỪ COMPONENT CHA
 }
 
-const PadletCreateModal: React.FC<PadletCreateModalProps> = ({ open, onClose, onSuccess, studentId, mode, defaultData }) => {
+const PadletCreateModal: React.FC<PadletCreateModalProps> = ({ open, onClose, onSuccess, mode, defaultData, ownerId }) => { // NHẬN ownerId Ở ĐÂY
   const [form] = Form.useForm()
   const [content, setContent] = useState<string>("")
   const [fileList, setFileList] = useState<UploadFile[]>([])
@@ -30,43 +29,49 @@ const PadletCreateModal: React.FC<PadletCreateModalProps> = ({ open, onClose, on
   const isReadOnly = mode === "view"
 
   useEffect(() => {
-  if (open) {
-    if (defaultData) {
-      form.setFieldsValue({
-        title: defaultData.padletName || defaultData.title,
-        color: defaultData.color,
-      })
-      setContent(defaultData.padletContent || defaultData.content || "")
+    if (open) {
+      if (defaultData) {
+        form.setFieldsValue({
+          title: defaultData.padletName || defaultData.title,
+          color: defaultData.color,
+        })
+        setContent(defaultData.padletContent || defaultData.content || "")
 
-      const defaultAttachments = defaultData.attachmentsData?.filter((att: any) => att.mediaType === 'attachment')?.map((att: any) => ({
-        uid: att.id?.toString(),
-        name: att.fileName,
-        status: 'done',
-        url: `/${att.downloadUrl}` // thêm dấu `/` nếu path là tương đối
-      })) || []
+        const defaultAttachments = defaultData.attachmentsData
+          ?.filter((att: any) => att.mediaType === 'attachment')
+          .map((att: any) => ({
+            uid: att.id ? String(att.id) : `new-${Math.random()}`,
+            name: att.fileName,
+            status: 'done',
+            url: att.downloadUrl ? (att.downloadUrl.startsWith('/') ? att.downloadUrl : `/${att.downloadUrl}`) : undefined,
+          })) || [];
 
-      setFileList(defaultAttachments)
+        setFileList(defaultAttachments)
 
-      const hasAudio = !!defaultData.attachmentsData?.find((att: any) => att.mediaType === 'audio')
-      setKeepOldAudio(hasAudio)
-    } else {
-      form.resetFields()
-      setContent("")
-      setFileList([])
-      setAudioBlob(null)
-      setKeepOldAudio(false)
+        const hasAudio = defaultData.attachmentsData?.some((att: any) => att.mediaType === 'audio')
+        setKeepOldAudio(hasAudio)
+      } else {
+        form.resetFields()
+        setContent("")
+        setFileList([])
+        setAudioBlob(null)
+        setKeepOldAudio(false)
+      }
+      setRemovedAttachmentIds([])
     }
-    setRemovedAttachmentIds([])
-  }
-}, [defaultData, form, open])
-
+  }, [defaultData, form, open])
 
   const handleFinish = async (values: any) => {
     try {
+      if (!ownerId) {
+        message.error("Không xác định được người dùng sở hữu ghi chú.")
+        return
+      }
+
       const formData = new FormData()
       formData.append("name", values.title)
       formData.append("content", content)
-      formData.append("ownerId", studentId)
+      formData.append("ownerId", ownerId) // SỬ DỤNG ownerId TỪ PROPS Ở ĐÂY
       formData.append("color", values.color || "#ffffff")
 
       fileList.forEach((file) => {
@@ -96,18 +101,23 @@ const PadletCreateModal: React.FC<PadletCreateModalProps> = ({ open, onClose, on
       }
       onSuccess()
       onClose()
-    } catch (err) {
-      console.error("Lỗi lưu ghi chú:", err)
-      message.error("Lỗi khi lưu ghi chú.")
+    } catch (err: any) {
+      console.error("Lỗi lưu ghi chú:", err.response?.data?.error || err.message || err);
+      message.error(`Lỗi khi lưu ghi chú: ${err.response?.data?.error || err.message || "Không xác định"}`);
     }
   }
 
   const handleFileChange = ({ fileList: newList, file }: { fileList: UploadFile[], file: UploadFile }) => {
-    if (file.status === 'removed' && file.uid) {
-      setRemovedAttachmentIds((prev) => [...prev, file.uid as string])
+    if (file.status === 'removed' && file.uid && typeof file.uid === 'string' && !file.originFileObj) {
+        setRemovedAttachmentIds((prev) => {
+            if (!prev.includes(file.uid as string)) {
+                return [...prev, file.uid as string];
+            }
+            return prev;
+        });
     }
-    setFileList(newList)
-  }
+    setFileList(newList.filter(f => f.status !== 'removed' || (f.status === 'removed' && f.originFileObj)));
+  };
 
   const handleAudioRecorded = (file: Blob | null, url: string | null) => {
     setAudioBlob(file)
@@ -123,9 +133,10 @@ const PadletCreateModal: React.FC<PadletCreateModalProps> = ({ open, onClose, on
       okText={mode === "view" ? "Đóng" : "Lưu"}
       okButtonProps={{ disabled: isReadOnly }}
       cancelButtonProps={{ style: { display: isReadOnly ? "none" : undefined } }}
+      destroyOnClose={true}
     >
       <Form layout="vertical" form={form} onFinish={handleFinish}>
-        <Form.Item label="Tiêu đề" name="title" rules={[{ required: true, message: "Nhập tiêu đề" }]}> 
+        <Form.Item label="Tiêu đề" name="title" rules={[{ required: true, message: "Nhập tiêu đề" }]}>
           <Input disabled={isReadOnly} />
         </Form.Item>
 
@@ -158,9 +169,21 @@ const PadletCreateModal: React.FC<PadletCreateModalProps> = ({ open, onClose, on
             fileList={fileList}
             beforeUpload={() => false}
             onChange={handleFileChange}
-            onRemove={() => true}
+            onRemove={(file) => {
+              if (file.uid && typeof file.uid === 'string') {
+                if (!file.originFileObj) {
+                    setRemovedAttachmentIds((prev) => {
+                        if (!prev.includes(file.uid)) {
+                            return [...prev, file.uid];
+                        }
+                        return prev;
+                    });
+                }
+              }
+              return true;
+            }}
           >
-            <span><InboxOutlined /> Tải tệp</span>
+            <span><InboxOutlined /> Kéo thả hoặc nhấn để tải tệp</span>
           </Dragger>
         </Form.Item>
 
@@ -168,7 +191,7 @@ const PadletCreateModal: React.FC<PadletCreateModalProps> = ({ open, onClose, on
           <AudioRecorderPlayer
             disabled={isReadOnly}
             onAudioRecorded={handleAudioRecorded}
-            defaultAudioUrl={defaultData?.audio?.downloadUrl || null}
+            defaultAudioUrl={defaultData?.attachmentsData?.find((att:any) => att.mediaType === 'audio')?.downloadUrl || null}
           />
         </Form.Item>
       </Form>
