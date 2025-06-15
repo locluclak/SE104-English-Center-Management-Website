@@ -42,7 +42,11 @@ const Login = () => {
       setError(err?.response?.data?.message || 'Đăng nhập thất bại');
     }
   };
-  
+
+  const handleGoToRegister = () => {
+    navigate('/register');
+  };
+
   return (
     <div className="bg-login">
       <motion.div
@@ -69,7 +73,7 @@ const Login = () => {
           </div>
           <div className="mb-4">
             <label htmlFor="password" className="form-label">
-              <FaLock className="me-2" /> Mật khẩu
+              <FaLock className="me-2" /> Password
             </label>
             <input
               type="password"
@@ -81,9 +85,14 @@ const Login = () => {
             />
           </div>
           <button type="button" className="btn btn-primary w-100" onClick={handleLogin}>
-            Đăng nhập
+            Login
           </button>
         </form>
+        <div className="text-center mt-3">
+          <button type="button" className="btn btn-link" onClick={handleGoToRegister}>
+            Have not an account? Register now
+          </button>
+        </div>
       </motion.div>
     </div>
   );
