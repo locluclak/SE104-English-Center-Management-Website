@@ -92,6 +92,16 @@
     display: flex;
     justify-content: flex-end;
     margin-top: 16px;
+
+    .delete-btn {
+      color: #ef4444;
+      border-color: #ef4444;
+      margin-left: 15px;
+      
+      &:hover {
+        background-color: #fef2f2;
+      }
+    }
   }
 }
 

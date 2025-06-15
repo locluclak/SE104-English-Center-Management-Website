@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../..
 import { Button } from "../../components/Ui/Button/button"
 import { Badge } from "../../components/Ui/Badge/badge"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "../../components/Ui/Dialog/dialog"
-import { FileText, Eye, Download } from "../../components/Ui/Icons/icons"
+import { FileText, Eye, Download, Trash } from "../../components/Ui/Icons/icons"
 import { GradingDialog } from "./GradingDialog"
 import type { StudentSubmission, AssignmentAttachment } from "../../types/teacher"
 import { MainApiRequest } from "../../services/MainApiRequest"
@@ -24,15 +24,17 @@ interface Assignment {
 interface TeacherAssignmentItemProps {
   assignment: Assignment
   courseId: string
+  onRemoveFromUI?: (assignmentId: string) => void
 }
 
-export const TeacherAssignmentItem: React.FC<TeacherAssignmentItemProps> = ({ assignment, courseId }) => {
+export const TeacherAssignmentItem: React.FC<TeacherAssignmentItemProps> = ({ assignment, courseId, onRemoveFromUI }) => {
   const [isViewSubmissionsDialogOpen, setIsViewSubmissionsDialogOpen] = useState(false)
   const [isGradingDialogOpen, setIsGradingDialogOpen] = useState(false)
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
   const [selectedSubmission, setSelectedSubmission] = useState<StudentSubmission | null>(null)
   const [submissions, setSubmissions] = useState<StudentSubmission[]>([])
   const attachments = assignment.attachments ?? []
-
 
   useEffect(() => {
     if (!isViewSubmissionsDialogOpen) return
@@ -99,17 +101,29 @@ export const TeacherAssignmentItem: React.FC<TeacherAssignmentItemProps> = ({ as
     window.open(attachment.downloadUrl, "_blank")
   }
 
+  const handleDeleteAssignment = async () => {
+    setIsDeleting(true)
+    try {
+      await MainApiRequest.delete(`/assignment/delete/${assignment.id}`)
+      onRemoveFromUI?.(assignment.id)
+      setIsDeleteDialogOpen(false)
+    } catch (error) {
+      console.error("Lỗi xoá assignment:", error)
+    } finally {
+      setIsDeleting(false)
+    }
+  }
+
   const formatDate = (dateString: string) => {
-  if (!dateString) return "N/A";
-  const date = new Date(dateString);
-  if (isNaN(date.getTime())) return "Invalid Date";
+    if (!dateString) return "N/A";
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return "Invalid Date";
 
-  const day = String(date.getDate()).padStart(2, '0'); 
-  const month = String(date.getMonth() + 1).padStart(2, '0'); 
-  const year = date.getFullYear();
-  return `${day}/${month}/${year}`;
-}
-
+    const day = String(date.getDate()).padStart(2, '0'); 
+    const month = String(date.getMonth() + 1).padStart(2, '0'); 
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+  }
 
   const getSubmissionStatusColor = (status: string) => {
     switch (status) {
@@ -140,51 +154,76 @@ export const TeacherAssignmentItem: React.FC<TeacherAssignmentItemProps> = ({ as
 
         <CardContent>
           {attachments.length > 0 && (
-  <div className="assignment-attachments">
-    <h4>Assignment Files:</h4>
-    <div className="attachments-list">
-      {attachments.map((attachment) => (
-        <div key={attachment.id} className="attachment-item">
-          <div className="attachment-info">
-            <FileText className="icon" />
-            <div className="file-details">
-              <span className="file-name">{attachment.fileName}</span>
-              <span className="file-size">{attachment.fileSize}</span>
+            <div className="assignment-attachments">
+              <h4>Assignment Files:</h4>
+              <div className="attachments-list">
+                {attachments.map((attachment) => (
+                  <div key={attachment.id} className="attachment-item">
+                    <div className="attachment-info">
+                      <FileText className="icon" />
+                      <div className="file-details">
+                        <span className="file-name">{attachment.fileName}</span>
+                        <span className="file-size">{attachment.fileSize}</span>
+                      </div>
+                    </div>
+                    <Button variant="outline" size="sm" onClick={() => handleDownloadAttachment(attachment)}>
+                      <Download className="icon" />
+                      Download
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+          <div className="submissions-progress">
+            <div className="progress-header">
+              <span>Submissions</span>
+              <span>
+                {submissions.length}/{assignment.totalStudents}
+              </span>
+            </div>
+            <div className="progress-bar">
+              <div
+                className="progress-fill"
+                style={{ width: `${(submissions.length / assignment.totalStudents) * 100}%` }}
+              />
             </div>
           </div>
-          <Button variant="outline" size="sm" onClick={() => handleDownloadAttachment(attachment)}>
-            <Download className="icon" />
-            Download
-          </Button>
-        </div>
-      ))}
-    </div>
-  </div>
-)}
-          <div className="submissions-progress">
-  <div className="progress-header">
-    <span>Submissions</span>
-    <span>
-      {submissions.length}/{assignment.totalStudents}
-    </span>
-  </div>
-  <div className="progress-bar">
-    <div
-      className="progress-fill"
-      style={{ width: `${(submissions.length / assignment.totalStudents) * 100}%` }}
-    />
-  </div>
-</div>
-
 
           <div className="assignment-actions">
             <Button onClick={() => setIsViewSubmissionsDialogOpen(true)}>
               <Eye className="icon" />
               View Submissions
             </Button>
+            <Button variant="outline" className="delete-btn" onClick={() => setIsDeleteDialogOpen(true)}>
+              <Trash className="icon" />
+              Delete
+            </Button>
           </div>
         </CardContent>
       </Card>
+
+      {/* Delete Dialog */}
+      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Assignment</DialogTitle>
+          </DialogHeader>
+          <div className="delete-confirmation">
+            <p>
+              Are you sure you want to delete <strong>{assignment.title}</strong>? This action cannot be undone.
+            </p>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button variant="danger" onClick={handleDeleteAssignment} disabled={isDeleting} loading={isDeleting}>
+              {isDeleting ? "Deleting..." : "Delete"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={isViewSubmissionsDialogOpen} onOpenChange={setIsViewSubmissionsDialogOpen}>
         <DialogContent className="submissions-dialog">
