@@ -30,36 +30,34 @@ export default function MainRoutes() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (isLoggedIn) {
-      const publicPages = ["/login", "/register", "/"];
-      if (publicPages.includes(location.pathname)) {
-        const role = localStorage.getItem("role"); // Lấy vai trò từ localStorage
-        switch (role) { // Sử dụng biến role mới
-          case "ADMIN":
-            navigate("/admin/courses", { replace: true });
-            break;
-          case "ACCOUNTANT":
-            navigate("/accountant/dashboard", { replace: true });
-            break;
-          case "TEACHER":
-            navigate("/teacher", { replace: true });
-            break;
-          case "STUDENT":
-            navigate("/student", { replace: true });
-            break;
-          default:
-            navigate("/", { replace: true });
-        }
-      }
-    } else {
-      const protectedPathsStart = ["/admin", "/accountant", "/student", "/teacher"];
-      const isProtectedPath = protectedPathsStart.some(path => location.pathname.startsWith(path));
-
-      if (isProtectedPath) {
+    if (!isLoggedIn) {
+      const needAuth = ["/admin", "/accountant", "/student", "/teacher"]
+        .some(path => location.pathname.startsWith(path));
+  
+      if (needAuth && location.pathname !== "/login") {
         navigate("/login", { replace: true });
       }
+      return;
     }
-  }, [isLoggedIn, location.pathname, navigate]); // userRole đã được bỏ khỏi dependency array
+  
+    const publicPages = ["/login", "/register", "/"];
+    if (!publicPages.includes(location.pathname)) return;
+  
+    const role = localStorage.getItem("role");
+    
+    const roleMap: Record<string, string> = {
+      ADMIN: "/admin/courses",
+      ACCOUNTANT: "/accountant/dashboard",
+      TEACHER: "/teacher",
+      STUDENT: "/student",
+    };
+  
+    const target = role ? roleMap[role] : "/";
+    if (location.pathname !== target) {
+      navigate(target, { replace: true });
+    }
+  }, [isLoggedIn, location.pathname]);
+  
 
 
   return (
