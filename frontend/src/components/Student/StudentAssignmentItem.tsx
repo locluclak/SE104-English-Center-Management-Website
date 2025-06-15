@@ -1,162 +1,197 @@
-"use client"
+"use client";
 
-import type React from "react"
-import { useEffect, useState } from "react"
-import {
-  Card, CardContent, CardDescription, CardHeader, CardTitle
-} from "../../components/Ui/Card/card"
-import { Button } from "../../components/Ui/Button/button"
-import { Badge } from "../../components/Ui/Badge/badge"
-import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter
-} from "../../components/Ui/Dialog/dialog"
-import { Textarea } from "../../components/Ui/Textarea/textarea"
-import { Input } from "../../components/Ui/Input/input"
-import { FileText, Upload } from "../../components/Ui/Icons/icons"
-import { MainApiRequest } from "@/services/MainApiRequest"
-import { message } from "antd"
-import "./StudentAssignmentItem.scss"
+import type React from "react";
+import { useEffect, useState, useCallback } from "react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, } from "../../components/Ui/Card/card";
+import { Button } from "../../components/Ui/Button/button";
+import { Badge } from "../../components/Ui/Badge/badge";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, } from "../../components/Ui/Dialog/dialog";
+import { Textarea } from "../../components/Ui/Textarea/textarea";
+import { Input } from "../../components/Ui/Input/input";
+import { FileText, Upload } from "../../components/Ui/Icons/icons";
+import { MainApiRequest } from "@/services/MainApiRequest";
+import { message } from "antd";
+import "./StudentAssignmentItem.scss";
+
+function parseJwt<T = any>(token: string): T | null {
+  try {
+    const base64Url = token.split(".")[1];
+    if (!base64Url) return null;
+    const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split("")
+        .map((c) => `%${("00" + c.charCodeAt(0).toString(16)).slice(-2)}`)
+        .join("")
+    );
+    return JSON.parse(jsonPayload);
+  } catch (err) {
+    console.error("Token decode error:", err);
+    return null;
+  }
+}
 
 interface Submission {
-  STUDENT_ID: string
-  SUBMIT_DATE: string
-  SUBMISSION_DESCRIPTION: string
-  SUBMISSION_FILE?: string
-  SCORE?: number
+  STUDENT_ID: string;
+  SUBMIT_DATE: string;
+  SUBMISSION_DESCRIPTION: string;
+  SUBMISSION_FILE?: string;
+  SCORE?: number;
 }
 
 interface Assignment {
-  id: string
-  title: string
-  description: string
-  dueDate: string
-  status: "pending" | "submitted" | "graded"
-  grade?: number
-  feedback?: string
+  id: string;
+  title: string;
+  description: string;
+  dueDate: string;
+  status: "pending" | "submitted" | "graded";
+  grade?: number;
+  feedback?: string;
 }
 
 interface StudentAssignmentItemProps {
-  assignment: Assignment
-  courseId: string
-  onStatusChange?: (status: string) => void
+  assignment: Assignment;
+  courseId: string;
+  onStatusChange?: (status: "pending" | "submitted" | "graded") => void;
 }
 
-export const StudentAssignmentItem: React.FC<StudentAssignmentItemProps> = ({ assignment, courseId, onStatusChange }) => {
-  const [isSubmitDialogOpen, setIsSubmitDialogOpen] = useState(false)
-  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false)
-  const [submissionText, setSubmissionText] = useState("")
-  const [selectedFile, setSelectedFile] = useState<File | null>(null)
-  const [submissions, setSubmissions] = useState<Submission[]>([])
-  const [submitting, setSubmitting] = useState(false)
+export const StudentAssignmentItem: React.FC<StudentAssignmentItemProps> = ({
+  assignment,
+  courseId,
+  onStatusChange,
+}) => {
+  const [isSubmitDialogOpen, setIsSubmitDialogOpen] = useState(false);
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
+  const [submissionText, setSubmissionText] = useState("");
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [submissions, setSubmissions] = useState<Submission[]>([]);
+  const [submitting, setSubmitting] = useState(false);
 
   const formatDateTime = (dateStr: string) => {
-    const date = new Date(dateStr)
-    const dd = String(date.getDate()).padStart(2, '0')
-    const mm = String(date.getMonth() + 1).padStart(2, '0')
-    const yyyy = date.getFullYear()
-    const hh = String(date.getHours()).padStart(2, '0')
-    const min = String(date.getMinutes()).padStart(2, '0')
-    return `${dd}/${mm}/${yyyy} ${hh}:${min}`
-  }
+    const date = new Date(dateStr);
+    const dd = String(date.getDate()).padStart(2, "0");
+    const mm = String(date.getMonth() + 1).padStart(2, "0");
+    const yyyy = date.getFullYear();
+    const hh = String(date.getHours()).padStart(2, "0");
+    const min = String(date.getMinutes()).padStart(2, "0");
+    return `${dd}/${mm}/${yyyy} ${hh}:${min}`;
+  };
 
-  const fetchSubmissions = async () => {
+  const fetchSubmissions = useCallback(async () => {
     try {
-      const token = localStorage.getItem("token")
-      const studentId = token ? JSON.parse(token).id : null
-      if (!studentId) return
+      const token = localStorage.getItem("token");
+      const decoded = token ? parseJwt<{ id: string }>(token) : null;
+      const studentId = decoded?.id;
+      if (!studentId) return;
 
-      const res = await MainApiRequest.get(`/submission/submissions_byassignment/${assignment.id}`)
+      const res = await MainApiRequest.get(
+        `/submission/submissions_byassignment/${assignment.id}`
+      );
 
-      const filtered = (res.data.submissions || []).filter(
+      const filtered: Submission[] = (res.data.submissions || []).filter(
         (s: Submission) => s.STUDENT_ID === studentId
-      )
+      );
 
-      setSubmissions(filtered)
+      setSubmissions(filtered);
 
       if (filtered.length > 0 && assignment.status === "pending") {
-        assignment.status = "submitted"
-        onStatusChange?.("submitted")
+        assignment.status = "submitted";
+        onStatusChange?.("submitted");
       }
     } catch (err: any) {
       if (err?.response?.status === 404) {
-        setSubmissions([])
+        setSubmissions([]);
       } else {
-        console.error("Lỗi khi lấy submission:", err)
-        message.error("Đã xảy ra lỗi khi tải bài nộp.")
+        console.error("Lỗi khi lấy submission:", err);
+        message.error("Đã xảy ra lỗi khi tải bài nộp.");
       }
     }
-  }
+  }, [assignment.id]);
 
   useEffect(() => {
-    fetchSubmissions()
-  }, [assignment.id, onStatusChange]) 
+    fetchSubmissions();
+  }, [fetchSubmissions]);
 
   const handleEditSubmission = () => {
-    const latest = submissions[submissions.length - 1]
-    setSubmissionText(latest.SUBMISSION_DESCRIPTION || "")
-    setSelectedFile(null)
-    setIsSubmitDialogOpen(true)
-  }
+    const latest = submissions[submissions.length - 1];
+    setSubmissionText(latest?.SUBMISSION_DESCRIPTION || "");
+    setSelectedFile(null);
+    setIsSubmitDialogOpen(true);
+  };
 
   const handleSubmit = async () => {
-    setSubmitting(true)
+    setSubmitting(true);
     try {
-      const token = localStorage.getItem("token")
-      const studentId = token ? JSON.parse(token).id : null
-      if (!studentId) throw new Error("Student ID not found")
+      const token = localStorage.getItem("token");
+      const decoded = token ? parseJwt<{ id: string }>(token) : null;
+      const studentId = decoded?.id;
+      if (!studentId) throw new Error("Student ID not found");
 
-      const latest = submissions[submissions.length - 1]
-      const isEditable = latest && (latest.SCORE === undefined || latest.SCORE === null)
+      const latest = submissions[submissions.length - 1];
+      const isEditable =
+        latest && (latest.SCORE === undefined || latest.SCORE === null);
 
-      const formData = new FormData()
-      formData.append("description", submissionText)
+      const formData = new FormData();
+      formData.append("description", submissionText);
       if (selectedFile) {
-      formData.append("file", selectedFile)
-      formData.append("uploadedname", selectedFile.name) 
+        formData.append("file", selectedFile);
+        formData.append("uploadedname", selectedFile.name);
       }
 
       if (isEditable) {
-        await MainApiRequest.put(`/submission/update/${studentId}/${assignment.id}`, formData, { headers: { "Content-Type": "multipart/form-data" } })
+        await MainApiRequest.put(
+          `/submission/update/${studentId}/${assignment.id}`,
+          formData,
+          { headers: { "Content-Type": "multipart/form-data" } }
+        );
       } else {
-        formData.append("student_id", studentId)
-        formData.append("assignment_id", assignment.id)
-        await MainApiRequest.post(`/submission/upload`, formData, { headers: { "Content-Type": "multipart/form-data" } })
-        assignment.status = "submitted" 
-        onStatusChange?.("submitted")
+        formData.append("student_id", studentId);
+        formData.append("assignment_id", assignment.id);
+        await MainApiRequest.post(`/submission/upload`, formData, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+        assignment.status = "submitted";
+        onStatusChange?.("submitted");
       }
 
-      message.success("Submission saved successfully!")
-      setIsSubmitDialogOpen(false)
-      fetchSubmissions()
+      message.success("Submission saved successfully!");
+      setIsSubmitDialogOpen(false);
+      fetchSubmissions();
     } catch (error) {
-      console.error("Error submitting:", error)
-      message.error("Submission failed.")
+      console.error("Error submitting:", error);
+      message.error("Submission failed.");
     } finally {
-      setSubmitting(false)
+      setSubmitting(false);
     }
-  }
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      setSelectedFile(e.target.files[0])
+      setSelectedFile(e.target.files[0]);
     }
-  }
+  };
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status: Assignment["status"]) => {
     switch (status) {
-      case "pending": return "status-pending"
-      case "submitted": return "status-submitted"
-      case "graded": return "status-graded"
-      default: return "status-default"
+      case "pending":
+        return "status-pending";
+      case "submitted":
+        return "status-submitted";
+      case "graded":
+        return "status-graded";
+      default:
+        return "status-default";
     }
-  }
+  };
 
   const isOverdue = () => {
-    const due = new Date(assignment.dueDate)
-    return due < new Date() && assignment.status === "pending"
-  }
+    const due = new Date(assignment.dueDate);
+    return due < new Date() && assignment.status === "pending";
+  };
 
-  const latestUnscored = submissions.findLast(sub => sub.SCORE === undefined || sub.SCORE === null);
+  const latestUnscored = submissions.findLast(
+    (sub) => sub.SCORE === undefined || sub.SCORE === null
+  );
   const canEdit = latestUnscored !== undefined;
   const hasSubmission = submissions.length > 0;
 
@@ -172,9 +207,7 @@ export const StudentAssignmentItem: React.FC<StudentAssignmentItemProps> = ({ as
             {isOverdue() ? "Overdue" : assignment.status}
           </Badge>
         </div>
-        <CardDescription>
-          Due: {formatDateTime(assignment.dueDate)}
-        </CardDescription>
+        <CardDescription>Due: {formatDateTime(assignment.dueDate)}</CardDescription>
       </CardHeader>
 
       <CardContent>
@@ -189,10 +222,14 @@ export const StudentAssignmentItem: React.FC<StudentAssignmentItemProps> = ({ as
           <div className="submission-buttons">
             {hasSubmission && (
               <>
-                <Button variant="outline" onClick={() => setIsViewDialogOpen(true)} className="mr-2">
+                <Button
+                  variant="outline"
+                  onClick={() => setIsViewDialogOpen(true)}
+                  className="mr-2"
+                >
                   View Submission
                 </Button>
-                {canEdit && ( 
+                {canEdit && (
                   <Button variant="default" onClick={handleEditSubmission}>
                     Edit Submission
                   </Button>
@@ -200,12 +237,13 @@ export const StudentAssignmentItem: React.FC<StudentAssignmentItemProps> = ({ as
               </>
             )}
 
-            {assignment.status === "graded" && assignment.grade !== undefined && (
-              <div className="grade-display">
-                <span>Grade: </span>
-                <strong>{assignment.grade}/100</strong>
-              </div>
-            )}
+            {assignment.status === "graded" &&
+              assignment.grade !== undefined && (
+                <div className="grade-display">
+                  <span>Grade: </span>
+                  <strong>{assignment.grade}/100</strong>
+                </div>
+              )}
           </div>
         </div>
       </CardContent>
@@ -214,9 +252,7 @@ export const StudentAssignmentItem: React.FC<StudentAssignmentItemProps> = ({ as
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              {canEdit
-                ? "Edit Your Submission"
-                : `Submit Assignment: ${assignment.title}`}
+              {canEdit ? "Edit Your Submission" : `Submit Assignment: ${assignment.title}`}
             </DialogTitle>
           </DialogHeader>
           <div className="submission-form">
@@ -242,15 +278,14 @@ export const StudentAssignmentItem: React.FC<StudentAssignmentItemProps> = ({ as
             </div>
           </div>
           <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setIsSubmitDialogOpen(false)}
-            >
+            <Button variant="outline" onClick={() => setIsSubmitDialogOpen(false)}>
               Cancel
             </Button>
             <Button
               onClick={handleSubmit}
-              disabled={submitting || (!submissionText.trim() && !selectedFile)}
+              disabled={
+                submitting || (!submissionText.trim() && !selectedFile)
+              }
             >
               {submitting ? "Submitting..." : "Submit"}
             </Button>
