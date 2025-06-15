@@ -16,7 +16,7 @@ const Register = () => {
 
   const handleRegister = async () => {
     try {
-      const res = await MainApiRequest.post('/auth/signup', {
+      const res = await MainApiRequest.post('/signup', {
         name,
         email,
         password,
