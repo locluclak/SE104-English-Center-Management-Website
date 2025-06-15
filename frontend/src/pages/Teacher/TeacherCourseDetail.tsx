@@ -146,7 +146,7 @@ const TeacherCourseDetail: React.FC = () => {
       const now = new Date();
       const startDate = new Date(courseResponse.data.START_DATE);
       const endDate = new Date(courseResponse.data.END_DATE);
-      let status: "active" | "completed" | "paused" | "upcoming" = "active";
+      let status: "active" | "completed" | "upcoming" = "active";
       if (now < startDate) {
         status = "upcoming";
       } else if (now > endDate) {
@@ -555,7 +555,6 @@ const formatDate = (dateString: string) => {
                   key={assignment.id}
                   assignment={assignment}
                   courseId={courseDetail.id}
-                  // Bạn cũng cần truyền onDelete/onEdit cho TeacherAssignmentItem tương tự nếu có
                 />
               ))}
               {assignments.length === 0 && <p className="no-content">No assignments available</p>}
