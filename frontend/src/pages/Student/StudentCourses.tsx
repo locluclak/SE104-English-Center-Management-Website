@@ -1,115 +1,124 @@
-import type React from "react"
-import { useEffect, useState } from "react"
-import { useNavigate } from "react-router-dom"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/Ui/Card/card"
-import { Button } from "@/components/Ui/Button/button"
-import { Badge } from "@/components/Ui/Badge/badge"
-import { BookOpen, Users, Calendar, ArrowRight } from "@/components/Ui/Icons/icons"
-import { MainApiRequest } from "@/services/MainApiRequest"
-import { message } from "antd"
+import type React from "react";
+import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, } from "@/components/Ui/Card/card";
+import { Button } from "@/components/Ui/Button/button";
+import { Badge } from "@/components/Ui/Badge/badge";
+import { BookOpen, Users, Calendar, ArrowRight, } from "@/components/Ui/Icons/icons";
+import { MainApiRequest } from "@/services/MainApiRequest";
+import { message } from "antd";
+import { useSystemContext } from "@/hooks/useSystemContext";
 
 interface EnrolledCourse {
-  id: string
-  name: string
-  description: string
-  instructor: string
-  schedule: string
-  progress: number
-  status: "active" | "completed" | "upcoming"
-  nextClass: string
+  id: string;
+  name: string;
+  description: string;
+  instructor: string;
+  schedule: string;
+  progress: number;
+  status: "active" | "completed" | "upcoming";
+  nextClass?: string;
 }
 
+const getCourseStatus = (
+  startDate: string,
+  endDate: string
+): "active" | "completed" | "upcoming" => {
+  const now = new Date();
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+
+  if (now < start) return "upcoming";
+  if (now > end) return "completed";
+  return "active";
+};
+
+const fetchTeacher = async (courseId: string): Promise<string> => {
+  try {
+    const { data } = await MainApiRequest.get(`/course/teacher/${courseId}`);
+    return data?.[0]?.NAME || "N/A";
+  } catch (err) {
+    console.error("Failed to fetch teacher", err);
+    return "N/A";
+  }
+};
+
 const StudentCourses: React.FC = () => {
-  const navigate = useNavigate()
-  const [enrolledCourses, setEnrolledCourses] = useState<EnrolledCourse[]>([])
+  const navigate = useNavigate();
+  const { token, userId } = useSystemContext();
 
-  const rawUser = localStorage.getItem("token")
-  const parsedUser = rawUser ? JSON.parse(rawUser) : null
-  const studentId = parsedUser?.id
-
-
-  const fetchTeacherForCourse = async (courseId: string): Promise<string> => {
-    try {
-      const res = await MainApiRequest.get(`/course/teacher/${courseId}`)
-      const teachers = res.data
-      return teachers?.[0]?.NAME || "N/A"
-    } catch (err) {
-      console.error("Failed to fetch teacher", err)
-      return "N/A"
-    }
-  }
-
-  const determineStatus = (startDate: string, endDate: string): "active" | "completed" | "upcoming" => {
-    const now = new Date()
-    const start = new Date(startDate)
-    const end = new Date(endDate)
-
-    if (now < start) return "upcoming"
-    if (now > end) return "completed"
-    return "active"
-  }
+  const [enrolledCourses, setEnrolledCourses] = useState<EnrolledCourse[]>([]);
 
   useEffect(() => {
-  if (!studentId) return;
-
-  const loadEnrolledCourses = async () => {
-    try {
-      const res = await MainApiRequest.get(`/course/enrolled-courses/${studentId}`);
-      const rawCourses = res.data.courses;
-
-      const mappedCourses = await Promise.all(
-        rawCourses.map(async (c: any) => {
-          const teacher = await fetchTeacherForCourse(c.COURSE_ID);
-          const cleanDescription = c.DESCRIPTION?.replace(/^\[Giáo viên:.*?\]\s*/, "");
-
-          const status = determineStatus(c.START_DATE, c.END_DATE);
-
-          return {
-            id: c.COURSE_ID,
-            name: c.NAME,
-            description: cleanDescription || "",
-            instructor: teacher,
-            schedule: `${new Date(c.START_DATE).toLocaleDateString("vi-VN")} - ${new Date(c.END_DATE).toLocaleDateString("vi-VN")}`,
-            progress: status === "completed" ? 100 : status === "active" ? 50 : 0,
-            status,
-          };
-        })
-      );
-
-      setEnrolledCourses(mappedCourses);
-    } catch (err) {
-      console.error("Failed to fetch enrolled courses", err);
-      message.error("Không thể tải danh sách khoá học đã đăng ký.");
+    if (!token) {
+      navigate("/login", { replace: true });
     }
-  };
+  }, [token, navigate]);
 
-  loadEnrolledCourses();
-}, [studentId]);
+  useEffect(() => {
+    const studentId = userId || localStorage.getItem("userId");
+    if (!studentId) return;
 
+    (async () => {
+      try {
+        const { data } = await MainApiRequest.get(
+          `/course/enrolled-courses/${studentId}`
+        );
+        const rawCourses = data.courses || [];
+
+        const mapped: EnrolledCourse[] = await Promise.all(
+          rawCourses.map(async (c: any) => {
+            const teacher = await fetchTeacher(c.COURSE_ID);
+            const cleanDesc = c.DESCRIPTION?.replace(/^[\[\(]Giáo viên:.*?[\]\)]\s*/, "");
+            const status = getCourseStatus(c.START_DATE, c.END_DATE);
+            const progress = status === "completed" ? 100 : status === "active" ? 50 : 0; // demo logic
+
+            return {
+              id: c.COURSE_ID,
+              name: c.NAME,
+              description: cleanDesc || "",
+              instructor: teacher,
+              schedule: `${new Date(c.START_DATE).toLocaleDateString("vi-VN")} - ${new Date(
+                c.END_DATE
+              ).toLocaleDateString("vi-VN")}`,
+              progress,
+              status,
+            } as EnrolledCourse;
+          })
+        );
+
+        setEnrolledCourses(mapped);
+      } catch (err) {
+        console.error("Failed to fetch enrolled courses", err);
+        message.error("Không thể tải danh sách khoá học đã đăng ký.");
+      }
+    })();
+  }, [userId]);
 
   const handleCourseClick = (courseId: string) => {
-    navigate(`/student/courses/${courseId}`)
-  }
+    navigate(`/student/courses/${courseId}`);
+  };
 
-  const getStatusColor = (status: string) => {
+  const statusColor = (status: string) => {
     switch (status) {
       case "active":
-        return "status-active"
+        return "status-active";
       case "completed":
-        return "status-completed"
+        return "status-completed";
       case "upcoming":
-        return "status-upcoming"
+        return "status-upcoming";
       default:
-        return "status-default"
+        return "";
     }
-  }
+  };
 
   return (
     <div className="student-courses">
       <div className="page-header">
         <h1>My Courses</h1>
         <Badge variant="secondary">
-          {enrolledCourses.filter((c) => c.status === "active").length} Active Courses
+          {enrolledCourses.filter((c) => c.status === "active").length} Active
+          Courses
         </Badge>
       </div>
 
@@ -122,7 +131,9 @@ const StudentCourses: React.FC = () => {
                   <BookOpen className="icon" />
                   <CardTitle>{course.name}</CardTitle>
                 </div>
-                <Badge className={getStatusColor(course.status)}>{course.status}</Badge>
+                <Badge className={statusColor(course.status)}>
+                  {course.status}
+                </Badge>
               </div>
               <CardDescription>{course.description}</CardDescription>
             </CardHeader>
@@ -145,11 +156,17 @@ const StudentCourses: React.FC = () => {
                   <span>{course.progress}%</span>
                 </div>
                 <div className="progress-bar">
-                  <div className="progress-fill" style={{ width: `${course.progress}%` }} />
+                  <div
+                    className="progress-fill"
+                    style={{ width: `${course.progress}%` }}
+                  />
                 </div>
               </div>
 
-              <Button className="view-course-btn" onClick={() => handleCourseClick(course.id)}>
+              <Button
+                className="view-course-btn"
+                onClick={() => handleCourseClick(course.id)}
+              >
                 <span>View Course</span>
                 <ArrowRight className="icon" />
               </Button>
@@ -166,7 +183,7 @@ const StudentCourses: React.FC = () => {
         </div>
       )}
     </div>
-  )
-}
+  );
+};
 
-export default StudentCourses
+export default StudentCourses;

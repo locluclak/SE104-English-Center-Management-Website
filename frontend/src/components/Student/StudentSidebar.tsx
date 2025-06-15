@@ -53,17 +53,18 @@ const StudentSidebar: React.FC<StudentSidebarProps> = ({ currentPath, onNavigate
   const [userRole, setUserRole] = useState<string>("");
 
   useEffect(() => {
-    const mockUser = {
-      id: 1,
-      email: "alice@example.com",
-      role: "STUDENT",
-      name: "Alice Johnson",
-    };
-
-    setUserName(mockUser.name);
-    setUserRole(mockUser.role);
-    localStorage.setItem("token", JSON.stringify(mockUser));
-  }, []);
+    const token = localStorage.getItem("token");
+  
+    if (token) {
+      try {
+        const user = JSON.parse(token);
+        setUserName(user.name || "Unknown");
+        setUserRole(user.role || "Unknown");
+      } catch (error) {
+        console.error("Invalid token format", error);
+      }
+    }
+  }, []);  
 
   const handleLogout = () => {
     localStorage.clear();
