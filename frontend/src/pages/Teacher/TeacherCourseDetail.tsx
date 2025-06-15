@@ -282,13 +282,12 @@ const formatDate = (dateString: string) => {
       });
 
       // Kiểm tra phản hồi API và cập nhật danh sách assignments
-      if (response.data && response.data.AS_ID) { // Giả sử API trả về AS_ID khi tạo thành công
-        // Thay vì fetch lại toàn bộ dữ liệu, có thể thêm assignment mới vào state
-        // Nhưng gọi fetchCourseData() là cách an toàn và đảm bảo dữ liệu luôn đồng bộ.
-        fetchCourseData();
+      if (response.status === 200 || response.status === 201) {
+        // ‑ Nếu backend có AS_ID thì dùng luôn,
+        // ‑ nếu không, chỉ cần refresh để đồng bộ.
+        await fetchCourseData();
       } else {
-        console.error("API did not return expected data for new assignment.");
-        setError("Failed to create assignment: Invalid API response.");
+        setError("Failed to create assignment (unexpected status code).");
       }
 
       setNewAssignment({ title: "", description: "", dueDate: "", attachments: [] });
@@ -336,12 +335,10 @@ const formatDate = (dateString: string) => {
       });
 
       // Kiểm tra phản hồi API và cập nhật danh sách documents
-      if (response.data && response.data.DOC_ID) { // Giả sử API trả về DOC_ID khi tạo thành công
-        // Thay vì fetch lại toàn bộ dữ liệu, có thể thêm document mới vào state
-        fetchCourseData();
+      if (response.status === 200 || response.status === 201) {
+        await fetchCourseData();
       } else {
-        console.error("API did not return expected data for new document.");
-        setError("Failed to upload document: Invalid API response.");
+        setError("Failed to upload document (unexpected status code).");
       }
 
       setNewDocument({ title: "", description: "", file: null });
