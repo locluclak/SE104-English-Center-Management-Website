@@ -325,12 +325,33 @@ router.put('/update/:id', async (req, res) => {
   const courseId = req.params.id;
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
   const { name, description, startDate, endDate, minStu, maxStu, price, teacherName } = req.body;
+=======
+  const {
+    name,
+    description,
+    startDate,
+    endDate,
+    minStu,
+    maxStu,
+    price,
+  } = req.body;
+>>>>>>> 9af3ebbed (fix auto add teacher name to description)
 
-  if (!name && !description && !startDate && !endDate && !minStu && !maxStu && price === undefined && !teacherName) {
+  if (
+    !name &&
+    !description &&
+    !startDate &&
+    !endDate &&
+    !minStu &&
+    !maxStu &&
+    price === undefined
+  ) {
     return res.status(400).json({ error: 'No fields provided for update' });
   }
 
+<<<<<<< HEAD
   const updatedDescription = teacherName
     ? `[Giáo viên: ${teacherName}] ${description || ''}`
     : description;
@@ -353,22 +374,24 @@ router.put('/update/:id', async (req, res) => {
     : description;
 
 >>>>>>> b5c13c1ed (feat: update course management API and frontend to include teacher information, add category management routes, and enhance course creation with teacher assignment)
+=======
+>>>>>>> 9af3ebbed (fix auto add teacher name to description)
   try {
     const query = `
       UPDATE COURSE
-      SET 
-        NAME = COALESCE(?, NAME),
-        DESCRIPTION = COALESCE(?, DESCRIPTION),
-        START_DATE = COALESCE(?, START_DATE),
-        END_DATE = COALESCE(?, END_DATE),
-        MIN_STU = COALESCE(?, MIN_STU),
-        MAX_STU = COALESCE(?, MAX_STU),
-        PRICE = COALESCE(?, PRICE)
+      SET NAME = COALESCE(?, NAME),
+          DESCRIPTION = COALESCE(?, DESCRIPTION),
+          START_DATE = COALESCE(?, START_DATE),
+          END_DATE = COALESCE(?, END_DATE),
+          MIN_STU = COALESCE(?, MIN_STU),
+          MAX_STU = COALESCE(?, MAX_STU),
+          PRICE = COALESCE(?, PRICE)
       WHERE COURSE_ID = ?
     `;
 
     const [result] = await db.execute(query, [
       name || null,
+<<<<<<< HEAD
 <<<<<<< HEAD
 <<<<<<< HEAD
       updatedDescription || null,
@@ -378,12 +401,15 @@ router.put('/update/:id', async (req, res) => {
 =======
       updatedDescription || null,
 >>>>>>> b5c13c1ed (feat: update course management API and frontend to include teacher information, add category management routes, and enhance course creation with teacher assignment)
+=======
+      description || null,
+>>>>>>> 9af3ebbed (fix auto add teacher name to description)
       startDate || null,
       endDate || null,
       minStu || null,
       maxStu || null,
       price !== undefined ? price : null,
-      courseId
+      courseId,
     ]);
 
     if (result.affectedRows === 0) {
