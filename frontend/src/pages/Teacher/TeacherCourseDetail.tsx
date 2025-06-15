@@ -225,22 +225,19 @@ const TeacherCourseDetail: React.FC = () => {
   }, [fetchCourseData]);
 
   const handleBack = () => {
-    navigate("/teacher/course")
+    navigate("/teacher/courses")
   }
 
-  const formatDate = (dateString: string) => {
-    if (!dateString) return "N/A";
-    const date = new Date(dateString);
-    if (isNaN(date.getTime())) return "Invalid Date";
-    return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-  }
+const formatDate = (dateString: string) => {
+  if (!dateString) return "N/A";
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) return "Invalid Date";
 
-  const formatNextClass = (dateString: string) => {
-    if (!dateString) return "No upcoming classes"
-    const date = new Date(dateString)
-    if (isNaN(date.getTime())) return "Invalid date"
-    return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }) + " at " + date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })
-  }
+  const day = String(date.getDate()).padStart(2, '0'); 
+  const month = String(date.getMonth() + 1).padStart(2, '0'); 
+  const year = date.getFullYear();
+  return `${day}/${month}/${year}`;
+}
 
   const handleAssignmentFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -481,10 +478,6 @@ const TeacherCourseDetail: React.FC = () => {
           <div className="meta-item">
             <Calendar className="icon" />
             <span>{courseDetail.schedule}</span>
-          </div>
-          <div className="meta-item">
-            <Clock className="icon" />
-            <span>Next Class: {formatNextClass(courseDetail.nextClass || courseDetail.startDate)}</span>
           </div>
         </div>
       </div>
