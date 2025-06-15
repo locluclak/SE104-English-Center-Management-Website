@@ -195,8 +195,8 @@ const Sidebar: React.FC = () => {
         <div className="sidebar-user-profile" onClick={handleProfileClick}>
           <img src={AvtImg} alt="User Avatar" className="profile-avatar" />
           <div className="profile-info">
-            <div className="profile-name">{userName}</div> {/* Displays the fetched name */}
-            <div className="profile-role">{userRole}</div> {/* Displays the user role */}
+            <div className="profile-name">{userName}</div>
+            <div className="profile-role">{userRole}</div> 
           </div>
         </div>
 
