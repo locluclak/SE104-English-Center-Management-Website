@@ -88,6 +88,7 @@ const CoursesList = () => {
           endDate: cls.END_DATE,
           minStu: cls.MIN_STU,
           maxStu: cls.MAX_STU,
+          numberStu: cls.NUMBER_STU,
           price: cls.PRICE,
           status, // Trạng thái đã tính toán
         };
@@ -482,21 +483,22 @@ const CoursesList = () => {
         pagination={{ pageSize: 5, showSizeChanger: true }}
         columns={[
           { title: "ID", dataIndex: "id" },
-          { title: "Course Name", dataIndex: "name" },
+          { title: "Name", dataIndex: "name" },
           { title: "Description", dataIndex: "description" },
           { title: "Teacher", dataIndex: "teacherName" },
           {
-            title: "Start Date",
+            title: "Start",
             dataIndex: "startDate",
             render: (text) => moment(text).format("DD-MM-YYYY"),
           },
           {
-            title: "End Date",
+            title: "End",
             dataIndex: "endDate",
             render: (text) => moment(text).format("DD-MM-YYYY"),
           },
-          { title: "Min Students", dataIndex: "minStu" },
-          { title: "Max Students", dataIndex: "maxStu" },
+          { title: "Min", dataIndex: "minStu" },
+          { title: "Max", dataIndex: "maxStu" },
+          { title: "Number Students", dataIndex: "numberStu" },
           {
             title: "Price",
             dataIndex: "price",
