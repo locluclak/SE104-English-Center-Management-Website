@@ -5,6 +5,7 @@ import { Button } from "@/components/Ui/Button/button"
 import { BookOpen, Clock, Users } from "@/components/Ui/Icons/icons"
 import { MainApiRequest } from "@/services/MainApiRequest"
 import { message } from "antd"
+import { useSystemContext } from "@/hooks/useSystemContext"
 
 interface Course {
   id: string
@@ -40,9 +41,8 @@ const StudentHome: React.FC = () => {
   const [coursesList, setCoursesList] = useState<Course[]>([])
   const [assignments, setAssignments] = useState<Assignment[]>([])
 
-  const rawUser = localStorage.getItem("token")
-  const parsedUser = rawUser ? JSON.parse(rawUser) : null
-  const studentId = parsedUser?.id
+  const { userId } = useSystemContext();
+  const studentId = userId || localStorage.getItem("userId");
 
   useEffect(() => {
     if (!studentId) return
@@ -87,17 +87,14 @@ const StudentHome: React.FC = () => {
       return;
     }
     try {
-      // Make sure this API endpoint matches your backend route
-      // It should be '/course/add-student'
-      await MainApiRequest.post("/course/add-student", { studentId, courseId }); // <--- CHANGE THIS LINE
+      await MainApiRequest.post("/course/add-student", { studentId, courseId });
       message.success("Ghi danh khoá học thành công!");
-  
+
       setCoursesList((prevCourses) =>
         prevCourses.filter((course) => course.id !== courseId)
       );
-    } catch (error: any) { // Add any to the error type for better handling
+    } catch (error: any) {
       console.error("Failed to enroll in course:", error);
-      // Check if it's a duplicate entry error
       if (error.response && error.response.status === 409) {
         message.warning("Bạn đã ghi danh vào khoá học này rồi.");
       } else {

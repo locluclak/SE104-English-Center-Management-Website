@@ -48,8 +48,8 @@ export default function MainRoutes() {
     const roleMap: Record<string, string> = {
       ADMIN: "/admin/courses",
       ACCOUNTANT: "/accountant/dashboard",
-      TEACHER: "/teacher",
-      STUDENT: "/student",
+      TEACHER: "/teacher/home",
+      STUDENT: "/student/home",
     };
   
     const target = role ? roleMap[role] : "/";

@@ -6,6 +6,7 @@ import { Button } from "@/components/Ui/Button/button"
 import { Select, SelectItem } from "@/components/Ui/Select/Select"
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react"
 import { MainApiRequest } from "@/services/MainApiRequest"
+import { useSystemContext } from "@/hooks/useSystemContext"
 import "./StudentCalendar.scss"
 
 interface CalendarEvent {
@@ -26,9 +27,7 @@ interface Course {
 }
 
 const StudentCalendar: React.FC = () => {
-  const storedUser = typeof window !== "undefined" ? localStorage.getItem("token") : null
-  const parsedUser = storedUser ? JSON.parse(storedUser) : null
-  const studentId = parsedUser?.id
+  const { userId: studentId } = useSystemContext()
 
   const [events, setEvents] = useState<CalendarEvent[]>([])
   const [currentDate, setCurrentDate] = useState(new Date())
@@ -37,7 +36,6 @@ const StudentCalendar: React.FC = () => {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  // Load danh sách khóa học + assignments dựa theo selectedCourse
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -46,15 +44,13 @@ const StudentCalendar: React.FC = () => {
         setLoading(true)
         setError(null)
 
-        // Lấy danh sách course đã đăng ký
         const res = await MainApiRequest.get(`/course/student/${studentId}`)
-        const courseList = res.data.map((c: any) => ({
+        const courseList = (res.data as any[]).map((c) => ({
           id: String(c.COURSE_ID),
           name: c.NAME,
-        }))
+        }))        
         setCourses(courseList)
 
-        // Lấy assignment theo filter selectedCourse
         let assignments: any[] = []
 
         if (selectedCourse === "all") {
@@ -71,10 +67,10 @@ const StudentCalendar: React.FC = () => {
           description: a.assignmentDescription || a.DESCRIPTION || "",
           startDate: a.assignmentStartDate || a.START_DATE,
           endDate: a.assignmentEndDate || a.END_DATE,
-          time: "23:59",
-          type: "assignment" as const,
+          time: "23:59", // có thể đổi nếu backend trả về giờ cụ thể
+          type: "assignment",
           courseId: a.COURSE_ID?.toString() || selectedCourse,
-          courseName: courseList.find((c: Course) => c.id === (a.COURSE_ID?.toString() || selectedCourse))?.name || "Khóa học",
+          courseName: courseList.find((c) => c.id === (a.COURSE_ID?.toString() || selectedCourse))?.name || "Khóa học",
         }))
 
         setEvents(mapped)
@@ -136,9 +132,7 @@ const StudentCalendar: React.FC = () => {
                 {event.title}
               </div>
             ))}
-            {dayEvents.length > 2 && (
-              <div className="event-more">+{dayEvents.length - 2} sự kiện</div>
-            )}
+            {dayEvents.length > 2 && <div className="event-more">+{dayEvents.length - 2} sự kiện</div>}
           </div>
         </div>
       )
@@ -153,6 +147,7 @@ const StudentCalendar: React.FC = () => {
   ]
   const weekDays = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"]
 
+  if (!studentId) return <div className="error">Không tìm thấy thông tin sinh viên.</div>
   if (loading) return <div className="loading">Đang tải dữ liệu...</div>
   if (error) return <div className="error">{error}</div>
 

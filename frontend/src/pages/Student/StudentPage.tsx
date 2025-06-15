@@ -1,7 +1,6 @@
 "use client";
 
-import type React from "react";
-import { useEffect, useState, useCallback } from "react";
+import React, { useCallback } from "react";
 import {
   Routes,
   Route,
@@ -15,36 +14,13 @@ import StudentCourses from "./StudentCourses";
 import StudentCourseDetail from "./StudentCourseDetail";
 import StudentBoard from "./StudentBoard";
 import ProfileUser from "@/pages/ProfileUser/ProfileUser";
+import { useSystemContext } from "@/hooks/useSystemContext";
 import "./Student.scss";
 
 const StudentPage: React.FC = () => {
-  const [currentStudentId, setCurrentStudentId] = useState<string>("");
-  const [currentUserRole, setCurrentUserRole] = useState<string>("");
+  const { token } = useSystemContext();
   const navigate = useNavigate();
   const location = useLocation();
-
-  useEffect(() => {
-    const storedStudentId = localStorage.getItem("userId");
-    const storedUserRole = localStorage.getItem("userRole");
-
-    console.log("Stored studentId from localStorage:", storedStudentId);
-    console.log("Stored userRole from localStorage:", storedUserRole);
-
-    if (storedStudentId) {
-      setCurrentStudentId(storedStudentId);
-    } else {
-      console.warn("Student ID not found in localStorage.");
-    }
-
-    if (storedUserRole) {
-      setCurrentUserRole(storedUserRole);
-    } else {
-      console.warn(
-        "User role not found in localStorage. Defaulting to 'student'."
-      );
-      setCurrentUserRole("student");
-    }
-  }, []);
 
   const handleNavigation = useCallback(
     (path: string) => {
@@ -52,6 +28,10 @@ const StudentPage: React.FC = () => {
     },
     [navigate]
   );
+
+  if (!token) {
+    return <Navigate to="/login" replace />;
+  }
 
   return (
     <div className="student-page-wrapper">
@@ -63,20 +43,15 @@ const StudentPage: React.FC = () => {
 
         <div className="student-page-content">
           <Routes>
-            <Route path="/home" element={<StudentHome/>}/>
-
+            <Route path="/home" element={<StudentHome />} />
             <Route path="/courses" element={<StudentCourses />} />
-
-            <Route path="/courses/:courseId" element={<StudentCourseDetail />}/>
-
-            <Route path="/board/*" element={ <StudentBoard studentId={currentStudentId} userRole={currentUserRole}/>}/>
-
-            {/* ✅ THÊM PROFILE */}
+            <Route path="/courses/:courseId" element={<StudentCourseDetail />} />
+            <Route path="/board/*" element={<StudentBoard />} />
             <Route path="/profile" element={<ProfileUser />} />
-
-            {/* Redirect empty path to home */}
-            <Route path="" element={<Navigate to="/student" replace />} />
-            <Route path="*" element={<Navigate to="/student" replace />} />
+            
+            {/* Redirect empty or unknown path */}
+            <Route path="" element={<Navigate to="/student/home" replace />} />
+            <Route path="*" element={<Navigate to="/student/home" replace />} />
           </Routes>
         </div>
       </div>
