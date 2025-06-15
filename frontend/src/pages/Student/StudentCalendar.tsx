@@ -1,13 +1,15 @@
 "use client"
 
-import { useState, useEffect } from "react"
-import { Card } from "antd"
+import { useState, useEffect, useCallback } from "react"
+import { Card, Spin, message } from "antd" // Thêm Spin và message từ antd
 import { Button } from "@/components/Ui/Button/button"
 import { Select, SelectItem } from "@/components/Ui/Select/Select"
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react"
 import { MainApiRequest } from "@/services/MainApiRequest"
-import { useSystemContext } from "@/hooks/useSystemContext"
+// import { useSystemContext } from "@/hooks/useSystemContext" // Bỏ dòng này nếu bạn muốn xử lý token trực tiếp ở đây
 import "./StudentCalendar.scss"
+
+import { jwtDecode } from "jwt-decode"; // Import jwtDecode
 
 interface CalendarEvent {
   id: string
@@ -27,63 +29,94 @@ interface Course {
 }
 
 const StudentCalendar: React.FC = () => {
-  const { userId: studentId } = useSystemContext()
+  // Thay thế việc lấy userId từ useSystemContext bằng state cục bộ
+  const [studentId, setStudentId] = useState<string | null>(null);
 
   const [events, setEvents] = useState<CalendarEvent[]>([])
   const [currentDate, setCurrentDate] = useState(new Date())
   const [selectedCourse, setSelectedCourse] = useState<string>("all")
   const [courses, setCourses] = useState<Course[]>([])
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(true) // Đặt mặc định là true để hiển thị loading khi khởi tạo
   const [error, setError] = useState<string | null>(null)
 
+  // Logic lấy studentId từ localStorage bằng cách giải mã token
   useEffect(() => {
-    const fetchData = async () => {
+    const tokenString = localStorage.getItem("token");
+    if (tokenString) {
       try {
-        if (!studentId) return
-
-        setLoading(true)
-        setError(null)
-
-        const res = await MainApiRequest.get(`/course/student/${studentId}`)
-        const courseList = (res.data as any[]).map((c) => ({
-          id: String(c.COURSE_ID),
-          name: c.NAME,
-        }))        
-        setCourses(courseList)
-
-        let assignments: any[] = []
-
-        if (selectedCourse === "all") {
-          const allRes = await MainApiRequest.get(`/course/student/${studentId}/calendar`)
-          assignments = allRes.data.assignments || []
+        const decodedToken: any = jwtDecode(tokenString);
+        if (decodedToken && decodedToken.id) { // Giả định ID user nằm trong trường 'id'
+          setStudentId(decodedToken.id.toString());
+        } else if (decodedToken && decodedToken.sub) { // Hoặc trong trường 'sub' (subject)
+          setStudentId(decodedToken.sub.toString());
         } else {
-          const oneRes = await MainApiRequest.get(`/course/${selectedCourse}/assignments_time`)
-          assignments = oneRes.data.assignments || []
+          console.warn("JWT token không chứa 'id' hoặc 'sub' trong payload.");
+          setLoading(false); // Dừng loading nếu không có ID hợp lệ
+          setError("Thông tin người dùng không hợp lệ. Vui lòng đăng nhập lại.");
+          localStorage.removeItem("token");
         }
-
-        const mapped: CalendarEvent[] = assignments.map((a: any) => ({
-          id: a.AS_ID,
-          title: a.assignmentName || a.NAME,
-          description: a.assignmentDescription || a.DESCRIPTION || "",
-          startDate: a.assignmentStartDate || a.START_DATE,
-          endDate: a.assignmentEndDate || a.END_DATE,
-          time: "23:59", // có thể đổi nếu backend trả về giờ cụ thể
-          type: "assignment",
-          courseId: a.COURSE_ID?.toString() || selectedCourse,
-          courseName: courseList.find((c) => c.id === (a.COURSE_ID?.toString() || selectedCourse))?.name || "Khóa học",
-        }))
-
-        setEvents(mapped)
-      } catch (err) {
-        console.error("Lỗi khi tải dữ liệu:", err)
-        setError("Không thể tải dữ liệu. Vui lòng thử lại sau.")
-      } finally {
-        setLoading(false)
+      } catch (error) {
+        console.error("Lỗi khi giải mã token:", error);
+        setLoading(false); // Dừng loading nếu có lỗi
+        setError("Phiên đăng nhập không hợp lệ. Vui lòng đăng nhập lại.");
+        localStorage.removeItem("token");
       }
+    } else {
+      setLoading(false); // Dừng loading nếu không có token
+      setError("Bạn chưa đăng nhập. Vui lòng đăng nhập để xem lịch.");
+    }
+  }, []); // Chạy một lần khi component mount
+
+  const fetchEventsAndCourses = useCallback(async () => {
+    if (!studentId) {
+      setLoading(false);
+      return;
     }
 
-    fetchData()
-  }, [studentId, selectedCourse])
+    setLoading(true);
+    setError(null);
+    try {
+      const resCourses = await MainApiRequest.get(`/course/student/${studentId}`);
+      const courseList = (resCourses.data as any[]).map((c) => ({
+        id: String(c.COURSE_ID),
+        name: c.NAME,
+      }));
+      setCourses(courseList);
+
+      let assignments: any[] = [];
+      if (selectedCourse === "all") {
+        const allRes = await MainApiRequest.get(`/course/student/${studentId}/calendar`);
+        assignments = allRes.data.assignments || [];
+      } else {
+        const oneRes = await MainApiRequest.get(`/course/${selectedCourse}/assignments_time`);
+        assignments = oneRes.data.assignments || [];
+      }
+
+      const mapped: CalendarEvent[] = assignments.map((a: any) => ({
+        id: a.AS_ID,
+        title: a.assignmentName || a.NAME,
+        description: a.assignmentDescription || a.DESCRIPTION || "",
+        startDate: a.assignmentStartDate || a.START_DATE,
+        endDate: a.assignmentEndDate || a.END_DATE,
+        time: "23:59",
+        type: "assignment",
+        courseId: a.COURSE_ID?.toString() || selectedCourse,
+        courseName: courseList.find((c) => c.id === (a.COURSE_ID?.toString() || selectedCourse))?.name || "Khóa học",
+      }));
+
+      setEvents(mapped);
+    } catch (err) {
+      console.error("Lỗi khi tải dữ liệu:", err);
+      setError("Không thể tải dữ liệu. Vui lòng thử lại sau.");
+    } finally {
+      setLoading(false);
+    }
+  }, [studentId, selectedCourse]); // Thêm studentId vào dependency
+
+  // Gọi fetchEventsAndCourses khi studentId hoặc selectedCourse thay đổi
+  useEffect(() => {
+    fetchEventsAndCourses();
+  }, [fetchEventsAndCourses]); // Chỉ phụ thuộc vào fetchEventsAndCourses
 
   const getDaysInMonth = (date: Date) => new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate()
   const getFirstDayOfMonth = (date: Date) => {
@@ -147,9 +180,11 @@ const StudentCalendar: React.FC = () => {
   ]
   const weekDays = ["T2", "T3", "T4", "T5", "T6", "T7", "CN"]
 
-  if (!studentId) return <div className="error">Không tìm thấy thông tin sinh viên.</div>
-  if (loading) return <div className="loading">Đang tải dữ liệu...</div>
-  if (error) return <div className="error">{error}</div>
+  // Hiển thị loading/error khi studentId chưa có hoặc có lỗi
+  if (loading) return <div style={{ textAlign: 'center', padding: 40 }}><Spin size="large" tip="Đang tải dữ liệu..." /></div>
+  if (error) return <div className="error-message" style={{ textAlign: 'center', padding: 40, color: 'red' }}>{error}</div>
+  if (!studentId) return <div className="info-message" style={{ textAlign: 'center', padding: 40 }}>Không tìm thấy thông tin sinh viên. Vui lòng đăng nhập.</div>
+
 
   return (
     <div className="student-calendar-container">
@@ -157,7 +192,7 @@ const StudentCalendar: React.FC = () => {
         <div className="calendar-controls">
           <Select
             value={selectedCourse}
-            onChange={setSelectedCourse}
+            onChange={setSelectedCourse} // Sử dụng onValueChange cho Select từ component của bạn
             placeholder="Tất cả các khóa học"
             className="course-filter"
           >
