@@ -9,6 +9,7 @@ import {
 } from "../Ui/Icons/icons";
 import "./StudentSidebar.scss";
 import AvtImg from "@/assets/profile.jpg";
+import { MainApiRequest } from "@/services/MainApiRequest";
 
 interface StudentRoute {
   title: string;
@@ -48,38 +49,35 @@ const studentRoutes: StudentRoute[] = [
   },
 ];
 
-function parseJwtPayload(token: string) {
-  try {
-    const base64Url = token.split('.')[1];
-    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-    const jsonPayload = decodeURIComponent(
-      atob(base64)
-        .split('')
-        .map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
-        .join('')
-    );
-    return JSON.parse(jsonPayload);
-  } catch (err) {
-    console.error('Invalid token format', err);
-    return null;
-  }
-}
-
 const StudentSidebar: React.FC<StudentSidebarProps> = ({ currentPath, onNavigate }) => {
-  const [userName, setUserName] = useState<string>("");
-  const [userRole, setUserRole] = useState<string>("");
+  const [userName, setUserName] = useState<string>("Họ và tên");
+  const [userRole, setUserRole] = useState<string>("Loại người dùng");
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-  
-    if (token) {
-      const user = parseJwtPayload(token);
-      if (user) {
-        setUserName(user.name || "Unknown");
-        setUserRole(user.role || "Unknown");
+    const fetchUserInfo = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) return;
+
+        const payloadBase64 = token.split(".")[1];
+        const payloadJson = atob(payloadBase64);
+        const decodedToken = JSON.parse(payloadJson);
+
+        const email = decodedToken.email;
+        const role = decodedToken.role;
+        setUserRole(role || "Unknown");
+
+        const res = await MainApiRequest.get(`/person?email=${email}`);
+        const data = res.data;
+
+        setUserName(data.NAME || "Họ và tên");
+      } catch (error) {
+        console.error("Lỗi khi lấy thông tin người dùng:", error);
       }
-    }
-  }, []);  
+    };
+
+    fetchUserInfo();
+  }, []);
 
   const handleLogout = () => {
     localStorage.clear();

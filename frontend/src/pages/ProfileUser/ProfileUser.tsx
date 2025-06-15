@@ -6,49 +6,44 @@ import { Button, Card, Col, Container, Form, Row } from "react-bootstrap";
 import imgProfile from "../../assets/profile.jpg";
 import "./ProfileUser.scss";
 
-interface JwtPayload {
-  id: number;
-  email: string;
-  role: string;
-}
-
 const ProfileUser = () => {
   const [loading, setLoading] = useState(false);
-
   const [id, setId] = useState<number | null>(null);
   const [name, setName] = useState<string>("");
   const [birth, setBirth] = useState<string>("");
   const [phone, setPhone] = useState<string>("");
   const [typeStaff, setTypeStaff] = useState<string>("");
 
-  const fetchUserProfile = async () => {
-    try {
-      // ✅ MOCK dữ liệu nếu chưa có token
-      const mockUser = {
-        id: 1,
-        email: "alice@example.com",
-        name: "Alice Johnson",
-        role: "STUDENT",
-      };
-      localStorage.setItem("token", JSON.stringify(mockUser));
-
-      const email = mockUser.email;
-      const userId = mockUser.id;
-      setId(userId);
-
-      const res = await MainApiRequest.get(`/person?email=${email}`);
-      const data = res.data;
-
-      setName(data.NAME);
-      setBirth(data.DATE_OF_BIRTH ? moment(data.DATE_OF_BIRTH).format("DD-MM-YYYY") : "");
-      setPhone(data.PHONE_NUMBER);
-      setTypeStaff(data.ROLE);
-    } catch (error) {
-      console.error("Lỗi khi lấy thông tin tài khoản:", error);
-    }
-  };
-
   useEffect(() => {
+    const fetchUserProfile = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        if (!token) {
+          message.error("Không tìm thấy token. Vui lòng đăng nhập lại.");
+          return;
+        }
+
+        const payloadBase64 = token.split(".")[1];
+        const payloadJson = atob(payloadBase64);
+        const decodedToken = JSON.parse(payloadJson);
+
+        const email = decodedToken.email;
+        const userId = decodedToken.id;
+        setId(userId);
+
+        const res = await MainApiRequest.get(`/person?email=${email}`);
+        const data = res.data;
+
+        setName(data.NAME);
+        setBirth(data.DATE_OF_BIRTH ? moment(data.DATE_OF_BIRTH).format("DD-MM-YYYY") : "");
+        setPhone(data.PHONE_NUMBER);
+        setTypeStaff(data.ROLE);
+      } catch (error) {
+        console.error("Lỗi khi lấy thông tin tài khoản:", error);
+        message.error("Token không hợp lệ hoặc lỗi khi tải dữ liệu.");
+      }
+    };
+
     fetchUserProfile();
   }, []);
 
@@ -88,12 +83,7 @@ const ProfileUser = () => {
               <Card.Body>
                 <Spin spinning={loading}>
                   <Form onSubmit={handleUpdateProfile}>
-                    <Row
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-around",
-                      }}
-                    >
+                    <Row style={{ display: "flex", justifyContent: "space-around" }}>
                       <Col md={6}>
                         <Form.Group controlId="name" className="mb-3">
                           <Form.Label>Họ và tên</Form.Label>
@@ -126,11 +116,7 @@ const ProfileUser = () => {
                         </Form.Group>
                         <Form.Group controlId="typeStaff" className="mb-3">
                           <Form.Label>Loại người dùng</Form.Label>
-                          <Form.Control
-                            type="text"
-                            value={typeStaff}
-                            disabled
-                          />
+                          <Form.Control type="text" value={typeStaff} disabled />
                         </Form.Group>
                       </Col>
                       <Button type="submit" className="custom-update-btn" disabled={loading}>
