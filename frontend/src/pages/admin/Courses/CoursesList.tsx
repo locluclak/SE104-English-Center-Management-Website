@@ -203,7 +203,6 @@ const CoursesList = () => {
     setSelectedTeacherRole(null);
   };
 
-
   useEffect(() => {
     fetchCoursesList()
   }, [])
@@ -324,16 +323,13 @@ const CoursesList = () => {
     }
   }
 
-  // --- NEW/MODIFIED: handleViewCourseReport to initialize report modal ---
   const handleViewCourseReport = async (courseId: number) => {
     setSelectedCourseId(courseId);
-    setReportMode("initial"); // Start with initial selection mode
+    setReportMode("initial"); 
     setReportModalVisible(true);
-    // Fetch assignments for the dropdown as soon as the modal opens, regardless of initial view
     await fetchAssignmentsByCourse(courseId);
   }
 
-  // --- NEW: Function to load course report data ---
   const loadCourseReport = async () => {
     if (!selectedCourseId) return;
     try {
