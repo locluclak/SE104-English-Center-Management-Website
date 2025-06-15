@@ -9,7 +9,7 @@ import { Badge } from "../../components/Ui/Badge/badge"
 import { Tabs, TabsList, TabsTrigger } from "../../components/Ui/Tabs/tabs"
 import { Input } from "../../components/Ui/Input/input"
 import { Textarea } from "../../components/Ui/Textarea/textarea"
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle,} from "../../components/Ui/Dialog/dialog"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "../../components/Ui/Dialog/dialog"
 import { Users, Calendar, ArrowLeft, Clock, Plus, Search, FileText } from "../../components/Ui/Icons/icons"
 import { TeacherAssignmentItem } from "../../components/Teacher/TeacherAssignmentItem"
 import { TeacherDocumentItem } from "../../components/Teacher/TeacherDocumentItem"
@@ -87,7 +87,6 @@ interface Document {
   fileType: "pdf" | "doc" | "ppt" | "image" | "video" | "other";
   fileSize: string;
   downloadUrl: string;
-  // Thêm trường file để lưu trữ đối tượng File khi chỉnh sửa
   file?: File | null;
 }
 
@@ -177,12 +176,12 @@ const TeacherCourseDetail: React.FC = () => {
         title: assign.NAME,
         description: assign.DESCRIPTION,
         dueDate: assign.END_DATE,
-        submissionsCount: Math.floor(Math.random() * (courseResponse.data.NUMBER_STU || 0) * 0.8), // Mock
+        submissionsCount: Math.floor(Math.random() * (courseResponse.data.NUMBER_STU || 0) * 0.8),
         totalStudents: courseResponse.data.NUMBER_STU || 0,
         attachments: assign.FILENAME && assign.FILE ? [{
           id: 'file-' + assign.AS_ID,
           fileName: assign.FILENAME,
-          fileSize: 'N/A', // Cần lấy kích thước file thật nếu có
+          fileSize: 'N/A',
           fileType: assign.FILENAME.split('.').pop() || 'other',
           downloadUrl: assign.FILE,
         }] : [],
@@ -194,10 +193,9 @@ const TeacherCourseDetail: React.FC = () => {
         id: doc.DOC_ID,
         title: doc.NAME,
         description: doc.DESCRIPTION,
-        // Backend không có uploadDate, tạm thời dùng ngày hiện tại hoặc mock data
         uploadDate: new Date().toISOString().split('T')[0],
         fileType: (doc.FILENAME?.split('.').pop() || 'other') as Document['fileType'],
-        fileSize: 'N/A', // Cần lấy kích thước file thật nếu có
+        fileSize: 'N/A',
         downloadUrl: doc.FILE || '#',
       }));
       setDocuments(fetchedDocuments);
@@ -228,16 +226,16 @@ const TeacherCourseDetail: React.FC = () => {
     navigate("/teacher/courses")
   }
 
-const formatDate = (dateString: string) => {
-  if (!dateString) return "N/A";
-  const date = new Date(dateString);
-  if (isNaN(date.getTime())) return "Invalid Date";
+  const formatDate = (dateString: string) => {
+    if (!dateString) return "N/A";
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return "Invalid Date";
 
-  const day = String(date.getDate()).padStart(2, '0'); 
-  const month = String(date.getMonth() + 1).padStart(2, '0'); 
-  const year = date.getFullYear();
-  return `${day}/${month}/${year}`;
-}
+    const day = String(date.getDate()).padStart(2, '0'); 
+    const month = String(date.getMonth() + 1).padStart(2, '0'); 
+    const year = date.getFullYear();
+    return `${day}/${month}/${year}`;
+  }
 
   const handleAssignmentFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -281,14 +279,10 @@ const formatDate = (dateString: string) => {
         },
       });
 
-      // Kiểm tra phản hồi API và cập nhật danh sách assignments
-      if (response.data && response.data.AS_ID) { // Giả sử API trả về AS_ID khi tạo thành công
-        // Thay vì fetch lại toàn bộ dữ liệu, có thể thêm assignment mới vào state
-        // Nhưng gọi fetchCourseData() là cách an toàn và đảm bảo dữ liệu luôn đồng bộ.
-        fetchCourseData();
+      if (response.status === 200 || response.status === 201) {
+        await fetchCourseData();
       } else {
-        console.error("API did not return expected data for new assignment.");
-        setError("Failed to create assignment: Invalid API response.");
+        setError("Failed to create assignment (unexpected status code).");
       }
 
       setNewAssignment({ title: "", description: "", dueDate: "", attachments: [] });
@@ -335,13 +329,10 @@ const formatDate = (dateString: string) => {
         },
       });
 
-      // Kiểm tra phản hồi API và cập nhật danh sách documents
-      if (response.data && response.data.DOC_ID) { // Giả sử API trả về DOC_ID khi tạo thành công
-        // Thay vì fetch lại toàn bộ dữ liệu, có thể thêm document mới vào state
-        fetchCourseData();
+      if (response.status === 200 || response.status === 201) {
+        await fetchCourseData();
       } else {
-        console.error("API did not return expected data for new document.");
-        setError("Failed to upload document: Invalid API response.");
+        setError("Failed to upload document (unexpected status code).");
       }
 
       setNewDocument({ title: "", description: "", file: null });
@@ -375,31 +366,44 @@ const formatDate = (dateString: string) => {
 
   const handleRemoveDocumentFromUI = (documentId: string) => {
     setDocuments(prevDocuments => prevDocuments.filter(doc => doc.id !== documentId));
-    console.log(`Document ${documentId} removed from UI state.`);
   };
 
-  // --- Hàm xử lý chỉnh sửa tài liệu ---
-  // Bạn sẽ cần một API endpoint để xử lý việc cập nhật tài liệu
+  const handleDeleteAssignment = async (assignmentId: string): Promise<boolean> => {
+    setError(null);
+    try {
+      const response = await MainApiRequest.delete(`/assignment/delete/${assignmentId}`);
+      if (response.status === 200 || response.data.success) {
+        console.log(`Assignment ${assignmentId} deleted successfully from backend.`);
+        return true;
+      } else {
+        console.error(`Failed to delete assignment ${assignmentId} from backend:`, response.data);
+        setError("Failed to delete assignment from server.");
+        return false;
+      }
+    } catch (err) {
+      console.error("Error deleting assignment:", err);
+      setError("An error occurred while deleting the assignment.");
+      return false;
+    }
+  };
+
+  const handleRemoveAssignmentFromUI = (assignmentId: string) => {
+    setAssignments(prevAssignments => prevAssignments.filter(assign => assign.id !== assignmentId));
+  };
+
   const handleEditDocument = async (updatedDocument: Document) => {
     setError(null);
     try {
       const formData = new FormData();
       formData.append('name', updatedDocument.title);
       formData.append('description', updatedDocument.description);
-      formData.append('course_id', courseId || ''); // Đảm bảo courseId có giá trị
-      // Nếu có file mới được chọn, thêm vào formData
+      formData.append('course_id', courseId || '');
       if (updatedDocument.file) {
         formData.append('file', updatedDocument.file);
         formData.append('uploadedname', updatedDocument.file.name);
-      } else {
-        // Nếu không có file mới, có thể gửi null hoặc bỏ qua trường file
-        // Tùy thuộc vào cách API của bạn xử lý cập nhật file.
-        // Có thể cần gửi lại filename/downloadUrl cũ nếu API yêu cầu.
-        // formData.append('uploadedname', updatedDocument.downloadUrl.split('/').pop() || '');
       }
 
-      // API call cho chỉnh sửa tài liệu
-      const response = await MainApiRequest.put(`/document/${updatedDocument.id}`, formData, { // Sử dụng PUT hoặc PATCH
+      const response = await MainApiRequest.put(`/document/${updatedDocument.id}`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -407,8 +411,7 @@ const formatDate = (dateString: string) => {
 
       if (response.status === 200) {
         console.log(`Document ${updatedDocument.id} updated successfully.`);
-        // Sau khi cập nhật thành công, có thể fetch lại dữ liệu hoặc cập nhật state cục bộ
-        fetchCourseData(); // Cách đơn giản và đảm bảo đồng bộ
+        fetchCourseData();
       } else {
         console.error("Failed to update document:", response.data);
         setError("Failed to update document.");
@@ -418,7 +421,6 @@ const formatDate = (dateString: string) => {
       setError("An error occurred while updating the document.");
     }
   };
-
 
   const filteredStudents = students.filter(
     (student) =>
@@ -555,6 +557,7 @@ const formatDate = (dateString: string) => {
                   key={assignment.id}
                   assignment={assignment}
                   courseId={courseDetail.id}
+                  onRemoveFromUI={handleRemoveAssignmentFromUI}
                 />
               ))}
               {assignments.length === 0 && <p className="no-content">No assignments available</p>}
