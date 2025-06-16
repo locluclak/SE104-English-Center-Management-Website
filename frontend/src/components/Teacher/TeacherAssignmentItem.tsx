@@ -1,11 +1,20 @@
 "use client"
 
 import React, { useEffect, useState } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/Ui/Card/card"
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "../../components/Ui/Card/card"
+import { Input } from "../../components/Ui/Input/input"
 import { Button } from "../../components/Ui/Button/button"
 import { Badge } from "../../components/Ui/Badge/badge"
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "../../components/Ui/Dialog/dialog"
+import { Textarea } from "../../components/Ui/Textarea/textarea"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "../../components/Ui/Dialog/dialog"
 import { FileText, Eye, Download, Trash } from "../../components/Ui/Icons/icons"
+import { Edit } from "lucide-react" 
 import { GradingDialog } from "./GradingDialog"
 import type { StudentSubmission, AssignmentAttachment } from "../../types/teacher"
 import { MainApiRequest } from "../../services/MainApiRequest"
@@ -27,15 +36,30 @@ interface TeacherAssignmentItemProps {
   onRemoveFromUI?: (assignmentId: string) => void
 }
 
-export const TeacherAssignmentItem: React.FC<TeacherAssignmentItemProps> = ({ assignment, courseId, onRemoveFromUI }) => {
+export const TeacherAssignmentItem: React.FC<TeacherAssignmentItemProps> = ({
+  assignment,
+  courseId,
+  onRemoveFromUI,
+}) => {
+  /* ---------- state ---------- */
   const [isViewSubmissionsDialogOpen, setIsViewSubmissionsDialogOpen] = useState(false)
   const [isGradingDialogOpen, setIsGradingDialogOpen] = useState(false)
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
   const [selectedSubmission, setSelectedSubmission] = useState<StudentSubmission | null>(null)
   const [submissions, setSubmissions] = useState<StudentSubmission[]>([])
   const attachments = assignment.attachments ?? []
 
+  const [editForm, setEditForm] = useState({
+    title: assignment.title,
+    description: assignment.description,
+    dueDate: assignment.dueDate.slice(0, 16), // "YYYY-MM-DDTHH:mm"
+    attachments: [] as File[],
+  })
+  
+
+  /* ---------- fetch submissions when dialog mở ---------- */
   useEffect(() => {
     if (!isViewSubmissionsDialogOpen) return
 
@@ -73,6 +97,18 @@ export const TeacherAssignmentItem: React.FC<TeacherAssignmentItemProps> = ({ as
     fetchSubmissions()
   }, [isViewSubmissionsDialogOpen, assignment.id])
 
+  /* ---------- helper ---------- */
+  const formatDate = (dateString: string) =>
+    dateString ? new Date(dateString).toLocaleDateString("vi-VN") : "N/A"
+
+  const getSubmissionStatusColor = (status: string) =>
+    ({
+      submitted: "status-submitted",
+      graded: "status-graded",
+      late: "status-late",
+    } as Record<string, string>)[status] ?? "status-default"
+
+  /* ---------- actions ---------- */
   const handleGradeSubmission = (submission: StudentSubmission) => {
     setSelectedSubmission(submission)
     setIsGradingDialogOpen(true)
@@ -81,25 +117,65 @@ export const TeacherAssignmentItem: React.FC<TeacherAssignmentItemProps> = ({ as
   const handleGradeSubmit = async (submissionId: string, grade: number, feedback: string) => {
     const submission = submissions.find((s) => s.id === submissionId)
     if (!submission) return
-
     try {
-      await MainApiRequest.put(`/submission/score/${submission.studentId}/${assignment.id}`, {
-        score: grade,
-      })
-
+      await MainApiRequest.put(
+        `/submission/score/${submission.studentId}/${assignment.id}`,
+        { score: grade },
+      )
       setSubmissions((prev) =>
         prev.map((s) =>
-          s.id === submissionId ? { ...s, grade, feedback, status: "graded" as const } : s
-        )
+          s.id === submissionId ? { ...s, grade, feedback, status: "graded" as const } : s,
+        ),
       )
     } catch (err) {
       console.error("Chấm điểm thất bại:", err)
     }
   }
 
-  const handleDownloadAttachment = (attachment: AssignmentAttachment) => {
-    window.open(attachment.downloadUrl, "_blank")
+  const handleEditFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files
+    if (files) {
+      setEditForm((prev) => ({
+        ...prev,
+        attachments: Array.from(files),
+      }))
+    }
+  }  
+
+  const removeEditFile = (index: number) => {
+    const newFiles = [...editForm.attachments]
+    newFiles.splice(index, 1)
+    setEditForm((prev) => ({
+      ...prev,
+      attachments: newFiles,
+    }))
+  }  
+
+  const handleSaveEdit = async () => {
+    try {
+      const formData = new FormData()
+      formData.append("title", editForm.title)
+      formData.append("description", editForm.description)
+      formData.append("dueDate", editForm.dueDate)
+      formData.append("courseId", courseId)
+  
+      editForm.attachments.forEach((file) => {
+        formData.append("attachments", file)
+      })
+  
+      await MainApiRequest.put(`/assignment/update/${assignment.id}`, formData, {
+        headers: { "Content-Type": "multipart/form-data" }
+      })
+  
+      setIsEditDialogOpen(false)
+    } catch (error) {
+      console.error("Lỗi khi cập nhật assignment:", error)
+    }
   }
+  
+
+  const handleDownloadAttachment = (attachment: AssignmentAttachment) =>
+    window.open(attachment.downloadUrl, "_blank")
 
   const handleDeleteAssignment = async () => {
     setIsDeleting(true)
@@ -114,30 +190,7 @@ export const TeacherAssignmentItem: React.FC<TeacherAssignmentItemProps> = ({ as
     }
   }
 
-  const formatDate = (dateString: string) => {
-    if (!dateString) return "N/A";
-    const date = new Date(dateString);
-    if (isNaN(date.getTime())) return "Invalid Date";
-
-    const day = String(date.getDate()).padStart(2, '0'); 
-    const month = String(date.getMonth() + 1).padStart(2, '0'); 
-    const year = date.getFullYear();
-    return `${day}/${month}/${year}`;
-  }
-
-  const getSubmissionStatusColor = (status: string) => {
-    switch (status) {
-      case "submitted":
-        return "status-submitted"
-      case "graded":
-        return "status-graded"
-      case "late":
-        return "status-late"
-      default:
-        return "status-default"
-    }
-  }
-
+  /* ---------- UI ---------- */
   return (
     <>
       <Card className="assignment-item">
@@ -153,6 +206,7 @@ export const TeacherAssignmentItem: React.FC<TeacherAssignmentItemProps> = ({ as
         </CardHeader>
 
         <CardContent>
+          {/* Attachments */}
           {attachments.length > 0 && (
             <div className="assignment-attachments">
               <h4>Assignment Files:</h4>
@@ -166,7 +220,11 @@ export const TeacherAssignmentItem: React.FC<TeacherAssignmentItemProps> = ({ as
                         <span className="file-size">{attachment.fileSize}</span>
                       </div>
                     </div>
-                    <Button variant="outline" size="sm" onClick={() => handleDownloadAttachment(attachment)}>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleDownloadAttachment(attachment)}
+                    >
                       <Download className="icon" />
                       Download
                     </Button>
@@ -175,6 +233,8 @@ export const TeacherAssignmentItem: React.FC<TeacherAssignmentItemProps> = ({ as
               </div>
             </div>
           )}
+
+          {/* Progress */}
           <div className="submissions-progress">
             <div className="progress-header">
               <span>Submissions</span>
@@ -185,20 +245,42 @@ export const TeacherAssignmentItem: React.FC<TeacherAssignmentItemProps> = ({ as
             <div className="progress-bar">
               <div
                 className="progress-fill"
-                style={{ width: `${(submissions.length / assignment.totalStudents) * 100}%` }}
+                style={{
+                  width: `${(submissions.length / assignment.totalStudents) * 100}%`,
+                }}
               />
             </div>
           </div>
 
+          {/* Actions */}
           <div className="assignment-actions">
-            <Button onClick={() => setIsViewSubmissionsDialogOpen(true)}>
-              <Eye className="icon" />
-              View Submissions
-            </Button>
-            <Button variant="outline" className="delete-btn" onClick={() => setIsDeleteDialogOpen(true)}>
-              <Trash className="icon" />
-              Delete
-            </Button>
+            {/* Trái */}
+            <div className="left-actions">
+              <Button onClick={() => setIsViewSubmissionsDialogOpen(true)}>
+                <Eye className="icon" />
+                View Submissions
+              </Button>
+            </div>
+
+            {/* Phải */}
+            <div className="right-actions">
+              <Button
+                variant="outline"
+                className="edit-btn"
+                onClick={() => setIsEditDialogOpen(true)}
+              >
+                <Edit size={16} className="icon" />
+                Edit
+              </Button>
+              <Button
+                variant="outline"
+                className="delete-btn"
+                onClick={() => setIsDeleteDialogOpen(true)}
+              >
+                <Trash className="icon" />
+                Delete
+              </Button>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -211,27 +293,40 @@ export const TeacherAssignmentItem: React.FC<TeacherAssignmentItemProps> = ({ as
           </DialogHeader>
           <div className="delete-confirmation">
             <p>
-              Are you sure you want to delete <strong>{assignment.title}</strong>? This action cannot be undone.
+              Are you sure you want to delete <strong>{assignment.title}</strong>? This action
+              cannot be undone.
             </p>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>
               Cancel
             </Button>
-            <Button variant="danger" onClick={handleDeleteAssignment} disabled={isDeleting} loading={isDeleting}>
+            <Button
+              variant="danger"
+              onClick={handleDeleteAssignment}
+              disabled={isDeleting}
+              loading={isDeleting}
+            >
               {isDeleting ? "Deleting..." : "Delete"}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      <Dialog open={isViewSubmissionsDialogOpen} onOpenChange={setIsViewSubmissionsDialogOpen}>
+      {/* View Submissions Dialog */}
+      <Dialog
+        open={isViewSubmissionsDialogOpen}
+        onOpenChange={setIsViewSubmissionsDialogOpen}
+      >
         <DialogContent className="submissions-dialog">
           <DialogHeader>
             <DialogTitle>Submissions: {assignment.title}</DialogTitle>
           </DialogHeader>
 
+          {/* Submissions list ... (giữ nguyên code cũ) */}
+          {/* --- phần danh sách submissons không đổi --- */}
           <div className="submissions-list">
+            {/* header */}
             <div className="submissions-header">
               <span>Student</span>
               <span>Submitted</span>
@@ -248,13 +343,21 @@ export const TeacherAssignmentItem: React.FC<TeacherAssignmentItemProps> = ({ as
                 </div>
                 <div className="submission-date">{formatDate(submission.submittedAt)}</div>
                 <div className="submission-status">
-                  <Badge className={getSubmissionStatusColor(submission.status)}>{submission.status}</Badge>
+                  <Badge className={getSubmissionStatusColor(submission.status)}>
+                    {submission.status}
+                  </Badge>
                 </div>
                 <div className="submission-grade">
-                  {submission.grade !== undefined ? `${submission.grade}/${submission.maxGrade}` : "Not graded"}
+                  {submission.grade !== undefined
+                    ? `${submission.grade}/${submission.maxGrade}`
+                    : "Not graded"}
                 </div>
                 <div className="submission-actions">
-                  <Button variant="outline" size="sm" onClick={() => handleGradeSubmission(submission)}>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleGradeSubmission(submission)}
+                  >
                     {submission.status === "graded" ? "Edit Grade" : "Grade"}
                   </Button>
                 </div>
@@ -274,12 +377,88 @@ export const TeacherAssignmentItem: React.FC<TeacherAssignmentItemProps> = ({ as
         </DialogContent>
       </Dialog>
 
+      {/* Grading Dialog */}
       <GradingDialog
         open={isGradingDialogOpen}
         onOpenChange={setIsGradingDialogOpen}
         submission={selectedSubmission}
         onGradeSubmit={handleGradeSubmit}
       />
+
+      {/* Edit Dialog – placeholder form, bạn tự thay bằng form thật */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Edit Assignment</DialogTitle>
+            <DialogDescription>
+              Update assignment information and re-upload files if needed.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="dialog-form">
+            <div className="form-field">
+              <label>Title</label>
+              <Input
+                placeholder="Assignment title"
+                value={editForm.title}
+                onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
+              />
+            </div>
+
+            <div className="form-field">
+              <label>Description</label>
+              <Textarea
+                placeholder="Assignment description"
+                value={editForm.description}
+                onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
+              />
+            </div>
+
+            <div className="form-field">
+              <label>Due Date</label>
+              <Input
+                type="datetime-local"
+                value={editForm.dueDate}
+                onChange={(e) => setEditForm({ ...editForm, dueDate: e.target.value })}
+              />
+            </div>
+
+            <div className="form-field">
+              <label>Replace Attachments (Optional)</label>
+              <Input type="file" multiple onChange={handleEditFileChange} />
+              {editForm.attachments && editForm.attachments.length > 0 && (
+                <div className="attached-files">
+                  <h5>New Attached Files:</h5>
+                  {editForm.attachments.map((file, index) => (
+                    <div key={index} className="attached-file-item">
+                      <div className="file-info">
+                        <FileText className="icon" />
+                        <div className="file-details">
+                          <span className="file-name">{file.name}</span>
+                          <span className="file-size">({(file.size / 1024).toFixed(1)} KB)</span>
+                        </div>
+                      </div>
+                      <Button variant="outline" size="sm" onClick={() => removeEditFile(index)}>
+                        Remove
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsEditDialogOpen(false)}>
+              Cancel
+            </Button>
+            <Button onClick={handleSaveEdit}>
+              Save Changes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
     </>
   )
 }
