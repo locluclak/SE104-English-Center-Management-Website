@@ -61,6 +61,7 @@ const ProfileUser: React.FC = () => {
     setLoading(true);
 
     const updateData = {
+      email, // Add email to update data
       name,
       phone_number: phone,
       date_of_birth: moment(birth, "DD-MM-YYYY").format("YYYY-MM-DD"),
@@ -174,6 +175,15 @@ const ProfileUser: React.FC = () => {
                         </Form.Group>
                       </Col>
                       <Col md={6}>
+                        <Form.Group controlId="email" className="mb-3"> {/* Added email field */}
+                          <Form.Label>Email Address</Form.Label>
+                          <Form.Control
+                            type="email"
+                            placeholder="Enter your email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                          />
+                        </Form.Group>
                         <Form.Group controlId="phone" className="mb-3">
                           <Form.Label>Phone Number</Form.Label>
                           <Form.Control
