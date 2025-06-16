@@ -1,76 +1,253 @@
--- Insert sample data into PERSON table
+-- Insert virtual data for PERSON table
 INSERT INTO PERSON (NAME, EMAIL, PHONE_NUMBER, DATE_OF_BIRTH, ROLE, PASSWORD)
-VALUES 
-('Alice Johnson', 'alice@example.com', '123-456-7890', '2000-05-15', 'STUDENT', '$2b$10$aqT9n/DCyJCSvSwbTsL.VeOjvBcnjHZDQSZvv/Bd7Mm/9zgcOfAbe'),
-('Bob Smith', 'bob@example.com', '234-567-8901', '1985-09-20', 'STAFF', '$2b$10$aqT9n/DCyJCSvSwbTsL.VeOjvBcnjHZDQSZvv/Bd7Mm/9zgcOfAbe'),
-('Charlie Davis', 'charlie@example.com', '345-678-9012', '1995-02-10', 'STUDENT', '$2b$10$aqT9n/DCyJCSvSwbTsL.VeOjvBcnjHZDQSZvv/Bd7Mm/9zgcOfAbe'),
-('SUPER ADMIN', 'root@gmail.com', '456-789-0123', '1978-11-03', 'STAFF', '$2b$10$aqT9n/DCyJCSvSwbTsL.VeOjvBcnjHZDQSZvv/Bd7Mm/9zgcOfAbe'),
-('Edward Blake', 'edward@example.com', '567-890-1234', '1998-04-12', 'STUDENT', '$2b$10$aqT9n/DCyJCSvSwbTsL.VeOjvBcnjHZDQSZvv/Bd7Mm/9zgcOfAbe'),
-('Fiona Grey', 'fiona@example.com', '678-901-2345', '1982-12-05', 'STAFF', '$2b$10$aqT9n/DCyJCSvSwbTsL.VeOjvBcnjHZDQSZvv/Bd7Mm/9zgcOfAbe'),
-('George King', 'george@example.com', '789-012-3456', '2001-07-30', 'STUDENT', '$2b$10$aqT9n/DCyJCSvSwbTsL.VeOjvBcnjHZDQSZvv/Bd7Mm/9zgcOfAbe'),
-('Helen Wood', 'helen@example.com', '890-123-4567', '1975-03-18', 'STAFF', '$2b$10$aqT9n/DCyJCSvSwbTsL.VeOjvBcnjHZDQSZvv/Bd7Mm/9zgcOfAbe'),
-('Ian Sharp', 'ian@example.com', '901-234-5678', '1990-06-25', 'STUDENT', '$2b$10$aqT9n/DCyJCSvSwbTsL.VeOjvBcnjHZDQSZvv/Bd7Mm/9zgcOfAbe'),
-('Julia Stone', 'julia@example.com', '012-345-6789', '1987-01-09', 'STAFF', '$2b$10$aqT9n/DCyJCSvSwbTsL.VeOjvBcnjHZDQSZvv/Bd7Mm/9zgcOfAbe');
+VALUES
+-- Students
+('Student 1', 'student1@example.com', '1234567890', '2005-01-01', 'STUDENT', '$2b$10$GLmyuJWbkoRIxLDN7bYHgeZb9bA.6qLpLsy1X5D.C8jw61bIhottS'),
+('Student 2', 'student2@example.com', '1234567891', '2005-02-01', 'STUDENT', '$2b$10$GLmyuJWbkoRIxLDN7bYHgeZb9bA.6qLpLsy1X5D.C8jw61bIhottS'),
+('Student 3', 'student3@example.com', '1234567892', '2005-03-01', 'STUDENT', '$2b$10$GLmyuJWbkoRIxLDN7bYHgeZb9bA.6qLpLsy1X5D.C8jw61bIhottS'),
+('Student 4', 'student4@example.com', '1234567893', '2005-04-01', 'STUDENT', '$2b$10$GLmyuJWbkoRIxLDN7bYHgeZb9bA.6qLpLsy1X5D.C8jw61bIhottS'),
+('Student 5', 'student5@example.com', '1234567894', '2005-05-01', 'STUDENT', '$2b$10$GLmyuJWbkoRIxLDN7bYHgeZb9bA.6qLpLsy1X5D.C8jw61bIhottS'),
+('Student 6', 'student6@example.com', '1234567895', '2005-06-01', 'STUDENT', '$2b$10$GLmyuJWbkoRIxLDN7bYHgeZb9bA.6qLpLsy1X5D.C8jw61bIhottS'),
+('Student 7', 'student7@example.com', '1234567896', '2005-07-01', 'STUDENT', '$2b$10$GLmyuJWbkoRIxLDN7bYHgeZb9bA.6qLpLsy1X5D.C8jw61bIhottS'),
+('Student 8', 'student8@example.com', '1234567897', '2005-08-01', 'STUDENT', '$2b$10$GLmyuJWbkoRIxLDN7bYHgeZb9bA.6qLpLsy1X5D.C8jw61bIhottS'),
+('Student 9', 'student9@example.com', '1234567898', '2005-09-01', 'STUDENT', '$2b$10$GLmyuJWbkoRIxLDN7bYHgeZb9bA.6qLpLsy1X5D.C8jw61bIhottS'),
+('Student 10', 'student10@example.com', '1234567899', '2005-10-01', 'STUDENT', '$2b$10$GLmyuJWbkoRIxLDN7bYHgeZb9bA.6qLpLsy1X5D.C8jw61bIhottS'),
+('Student 11', 'student11@example.com', '1234567800', '2005-11-01', 'STUDENT', '$2b$10$GLmyuJWbkoRIxLDN7bYHgeZb9bA.6qLpLsy1X5D.C8jw61bIhottS'),
+('Student 12', 'student12@example.com', '1234567801', '2005-12-01', 'STUDENT', '$2b$10$GLmyuJWbkoRIxLDN7bYHgeZb9bA.6qLpLsy1X5D.C8jw61bIhottS'),
+('Student 13', 'student13@example.com', '1234567802', '2006-01-01', 'STUDENT', '$2b$10$GLmyuJWbkoRIxLDN7bYHgeZb9bA.6qLpLsy1X5D.C8jw61bIhottS'),
+('Student 14', 'student14@example.com', '1234567803', '2006-02-01', 'STUDENT', '$2b$10$GLmyuJWbkoRIxLDN7bYHgeZb9bA.6qLpLsy1X5D.C8jw61bIhottS'),
+('Student 15', 'student15@example.com', '1234567804', '2006-03-01', 'STUDENT', '$2b$10$GLmyuJWbkoRIxLDN7bYHgeZb9bA.6qLpLsy1X5D.C8jw61bIhottS'),
+('Student 16', 'student16@example.com', '1234567805', '2006-04-01', 'STUDENT', '$2b$10$GLmyuJWbkoRIxLDN7bYHgeZb9bA.6qLpLsy1X5D.C8jw61bIhottS'),
+('Student 17', 'student17@example.com', '1234567806', '2006-05-01', 'STUDENT', '$2b$10$GLmyuJWbkoRIxLDN7bYHgeZb9bA.6qLpLsy1X5D.C8jw61bIhottS'),
+('Student 18', 'student18@example.com', '1234567807', '2006-06-01', 'STUDENT', '$2b$10$GLmyuJWbkoRIxLDN7bYHgeZb9bA.6qLpLsy1X5D.C8jw61bIhottS'),
+('Student 19', 'student19@example.com', '1234567808', '2006-07-01', 'STUDENT', '$2b$10$GLmyuJWbkoRIxLDN7bYHgeZb9bA.6qLpLsy1X5D.C8jw61bIhottS'),
+('Student 20', 'student20@example.com', '1234567809', '2006-08-01', 'STUDENT', '$2b$10$GLmyuJWbkoRIxLDN7bYHgeZb9bA.6qLpLsy1X5D.C8jw61bIhottS'),
+('Student 21', 'student21@example.com', '1234567810', '2006-09-01', 'STUDENT', '$2b$10$GLmyuJWbkoRIxLDN7bYHgeZb9bA.6qLpLsy1X5D.C8jw61bIhottS'),
+('Student 22', 'student22@example.com', '1234567811', '2006-10-01', 'STUDENT', '$2b$10$GLmyuJWbkoRIxLDN7bYHgeZb9bA.6qLpLsy1X5D.C8jw61bIhottS'),
+('Student 23', 'student23@example.com', '1234567812', '2006-11-01', 'STUDENT', '$2b$10$GLmyuJWbkoRIxLDN7bYHgeZb9bA.6qLpLsy1X5D.C8jw61bIhottS'),
+('Student 24', 'student24@example.com', '1234567813', '2006-12-01', 'STUDENT', '$2b$10$GLmyuJWbkoRIxLDN7bYHgeZb9bA.6qLpLsy1X5D.C8jw61bIhottS'),
+('Student 25', 'student25@example.com', '1234567814', '2007-01-01', 'STUDENT', '$2b$10$GLmyuJWbkoRIxLDN7bYHgeZb9bA.6qLpLsy1X5D.C8jw61bIhottS'),
+('Student 26', 'student26@example.com', '1234567815', '2007-02-01', 'STUDENT', '$2b$10$GLmyuJWbkoRIxLDN7bYHgeZb9bA.6qLpLsy1X5D.C8jw61bIhottS'),
+('Student 27', 'student27@example.com', '1234567816', '2007-03-01', 'STUDENT', '$2b$10$GLmyuJWbkoRIxLDN7bYHgeZb9bA.6qLpLsy1X5D.C8jw61bIhottS'),
+('Student 28', 'student28@example.com', '1234567817', '2007-04-01', 'STUDENT', '$2b$10$GLmyuJWbkoRIxLDN7bYHgeZb9bA.6qLpLsy1X5D.C8jw61bIhottS'),
+('Student 29', 'student29@example.com', '1234567818', '2007-05-01', 'STUDENT', '$2b$10$GLmyuJWbkoRIxLDN7bYHgeZb9bA.6qLpLsy1X5D.C8jw61bIhottS'),
+('Student 30', 'student30@example.com', '1234567819', '2007-06-01', 'STUDENT', '$2b$10$GLmyuJWbkoRIxLDN7bYHgeZb9bA.6qLpLsy1X5D.C8jw61bIhottS'),
+('Student 31', 'student31@example.com', '1234567820', '2007-07-01', 'STUDENT', '$2b$10$GLmyuJWbkoRIxLDN7bYHgeZb9bA.6qLpLsy1X5D.C8jw61bIhottS'),
+('Student 32', 'student32@example.com', '1234567821', '2007-08-01', 'STUDENT', '$2b$10$GLmyuJWbkoRIxLDN7bYHgeZb9bA.6qLpLsy1X5D.C8jw61bIhottS'),
+('Student 33', 'student33@example.com', '1234567822', '2007-09-01', 'STUDENT', '$2b$10$GLmyuJWbkoRIxLDN7bYHgeZb9bA.6qLpLsy1X5D.C8jw61bIhottS'),
+('Student 34', 'student34@example.com', '1234567823', '2007-10-01', 'STUDENT', '$2b$10$GLmyuJWbkoRIxLDN7bYHgeZb9bA.6qLpLsy1X5D.C8jw61bIhottS'),
+('Student 35', 'student35@example.com', '1234567824', '2007-11-01', 'STUDENT', '$2b$10$GLmyuJWbkoRIxLDN7bYHgeZb9bA.6qLpLsy1X5D.C8jw61bIhottS'),
+('Student 36', 'student36@example.com', '1234567825', '2007-12-01', 'STUDENT', '$2b$10$GLmyuJWbkoRIxLDN7bYHgeZb9bA.6qLpLsy1X5D.C8jw61bIhottS'),
+('Student 37', 'student37@example.com', '1234567826', '2008-01-01', 'STUDENT', '$2b$10$GLmyuJWbkoRIxLDN7bYHgeZb9bA.6qLpLsy1X5D.C8jw61bIhottS'),
+('Student 38', 'student38@example.com', '1234567827', '2008-02-01', 'STUDENT', '$2b$10$GLmyuJWbkoRIxLDN7bYHgeZb9bA.6qLpLsy1X5D.C8jw61bIhottS'),
+('Student 39', 'student39@example.com', '1234567828', '2008-03-01', 'STUDENT', '$2b$10$GLmyuJWbkoRIxLDN7bYHgeZb9bA.6qLpLsy1X5D.C8jw61bIhottS'),
+('Student 40', 'student40@example.com', '1234567829', '2008-04-01', 'STUDENT', '$2b$10$GLmyuJWbkoRIxLDN7bYHgeZb9bA.6qLpLsy1X5D.C8jw61bIhottS'),
+('Student 41', 'student41@example.com', '1234567830', '2008-05-01', 'STUDENT', '$2b$10$GLmyuJWbkoRIxLDN7bYHgeZb9bA.6qLpLsy1X5D.C8jw61bIhottS'),
+('Student 42', 'student42@example.com', '1234567831', '2008-06-01', 'STUDENT', '$2b$10$GLmyuJWbkoRIxLDN7bYHgeZb9bA.6qLpLsy1X5D.C8jw61bIhottS'),
+('Student 43', 'student43@example.com', '1234567832', '2008-07-01', 'STUDENT', '$2b$10$GLmyuJWbkoRIxLDN7bYHgeZb9bA.6qLpLsy1X5D.C8jw61bIhottS'),
+('Student 44', 'student44@example.com', '1234567833', '2008-08-01', 'STUDENT', '$2b$10$GLmyuJWbkoRIxLDN7bYHgeZb9bA.6qLpLsy1X5D.C8jw61bIhottS'),
+('Student 45', 'student45@example.com', '1234567834', '2008-09-01', 'STUDENT', '$2b$10$GLmyuJWbkoRIxLDN7bYHgeZb9bA.6qLpLsy1X5D.C8jw61bIhottS'),
+('Student 46', 'student46@example.com', '1234567835', '2008-10-01', 'STUDENT', '$2b$10$GLmyuJWbkoRIxLDN7bYHgeZb9bA.6qLpLsy1X5D.C8jw61bIhottS'),
+('Student 47', 'student47@example.com', '1234567836', '2008-11-01', 'STUDENT', '$2b$10$GLmyuJWbkoRIxLDN7bYHgeZb9bA.6qLpLsy1X5D.C8jw61bIhottS'),
+('Student 48', 'student48@example.com', '1234567837', '2008-12-01', 'STUDENT', '$2b$10$GLmyuJWbkoRIxLDN7bYHgeZb9bA.6qLpLsy1X5D.C8jw61bIhottS'),
+('Student 49', 'student49@example.com', '1234567838', '2009-01-01', 'STUDENT', '$2b$10$GLmyuJWbkoRIxLDN7bYHgeZb9bA.6qLpLsy1X5D.C8jw61bIhottS'),
+('Student 50', 'student50@example.com', '1234567839', '2009-02-01', 'STUDENT', '$2b$10$GLmyuJWbkoRIxLDN7bYHgeZb9bA.6qLpLsy1X5D.C8jw61bIhottS'),
+('Student 51', 'student51@example.com', '1234567840', '2009-03-01', 'STUDENT', '$2b$10$GLmyuJWbkoRIxLDN7bYHgeZb9bA.6qLpLsy1X5D.C8jw61bIhottS'),
+('Student 52', 'student52@example.com', '1234567841', '2009-04-01', 'STUDENT', '$2b$10$GLmyuJWbkoRIxLDN7bYHgeZb9bA.6qLpLsy1X5D.C8jw61bIhottS'),
+('Student 53', 'student53@example.com', '1234567842', '2009-05-01', 'STUDENT', '$2b$10$GLmyuJWbkoRIxLDN7bYHgeZb9bA.6qLpLsy1X5D.C8jw61bIhottS'),
+('Student 54', 'student54@example.com', '1234567843', '2009-06-01', 'STUDENT', '$2b$10$GLmyuJWbkoRIxLDN7bYHgeZb9bA.6qLpLsy1X5D.C8jw61bIhottS'),
+('Student 55', 'student55@example.com', '1234567844', '2009-07-01', 'STUDENT', '$2b$10$GLmyuJWbkoRIxLDN7bYHgeZb9bA.6qLpLsy1X5D.C8jw61bIhottS'),
+('Student 56', 'student56@example.com', '1234567845', '2009-08-01', 'STUDENT', '$2b$10$GLmyuJWbkoRIxLDN7bYHgeZb9bA.6qLpLsy1X5D.C8jw61bIhottS'),
+('Student 57', 'student57@example.com', '1234567846', '2009-09-01', 'STUDENT', '$2b$10$GLmyuJWbkoRIxLDN7bYHgeZb9bA.6qLpLsy1X5D.C8jw61bIhottS'),
+('Student 58', 'student58@example.com', '1234567847', '2009-10-01', 'STUDENT', '$2b$10$GLmyuJWbkoRIxLDN7bYHgeZb9bA.6qLpLsy1X5D.C8jw61bIhottS'),
+('Student 59', 'student59@example.com', '1234567848', '2009-11-01', 'STUDENT', '$2b$10$GLmyuJWbkoRIxLDN7bYHgeZb9bA.6qLpLsy1X5D.C8jw61bIhottS'),
+('Student 60', 'student60@example.com', '1234567849', '2009-12-01', 'STUDENT', '$2b$10$GLmyuJWbkoRIxLDN7bYHgeZb9bA.6qLpLsy1X5D.C8jw61bIhottS'),
+('Student 61', 'student61@example.com', '1234567850', '2010-01-01', 'STUDENT', '$2b$10$GLmyuJWbkoRIxLDN7bYHgeZb9bA.6qLpLsy1X5D.C8jw61bIhottS'),
+('Student 62', 'student62@example.com', '1234567851', '2010-02-01', 'STUDENT', '$2b$10$GLmyuJWbkoRIxLDN7bYHgeZb9bA.6qLpLsy1X5D.C8jw61bIhottS'),
+('Student 63', 'student63@example.com', '1234567852', '2010-03-01', 'STUDENT', '$2b$10$GLmyuJWbkoRIxLDN7bYHgeZb9bA.6qLpLsy1X5D.C8jw61bIhottS'),
+('Student 64', 'student64@example.com', '1234567853', '2010-04-01', 'STUDENT', '$2b$10$GLmyuJWbkoRIxLDN7bYHgeZb9bA.6qLpLsy1X5D.C8jw61bIhottS'),
+('Student 65', 'student65@example.com', '1234567854', '2010-05-01', 'STUDENT', '$2b$10$GLmyuJWbkoRIxLDN7bYHgeZb9bA.6qLpLsy1X5D.C8jw61bIhottS'),
+('Student 66', 'student66@example.com', '1234567855', '2010-06-01', 'STUDENT', '$2b$10$GLmyuJWbkoRIxLDN7bYHgeZb9bA.6qLpLsy1X5D.C8jw61bIhottS'),
+('Student 67', 'student67@example.com', '1234567856', '2010-07-01', 'STUDENT', '$2b$10$GLmyuJWbkoRIxLDN7bYHgeZb9bA.6qLpLsy1X5D.C8jw61bIhottS'),
+('Student 68', 'student68@example.com', '1234567857', '2010-08-01', 'STUDENT', '$2b$10$GLmyuJWbkoRIxLDN7bYHgeZb9bA.6qLpLsy1X5D.C8jw61bIhottS'),
+('Student 69', 'student69@example.com', '1234567858', '2010-09-01', 'STUDENT', '$2b$10$GLmyuJWbkoRIxLDN7bYHgeZb9bA.6qLpLsy1X5D.C8jw61bIhottS'),
+('Student 70', 'student70@example.com', '1234567859', '2010-10-01', 'STUDENT', '$2b$10$GLmyuJWbkoRIxLDN7bYHgeZb9bA.6qLpLsy1X5D.C8jw61bIhottS'),
+('Teacher 1', 'teacher1@example.com', '1234567892', '1980-01-01', 'STAFF', '$2b$10$GLmyuJWbkoRIxLDN7bYHgeZb9bA.6qLpLsy1X5D.C8jw61bIhottS'),
+('Teacher 2', 'teacher2@example.com', '1234567893', '1981-01-01', 'STAFF', '$2b$10$GLmyuJWbkoRIxLDN7bYHgeZb9bA.6qLpLsy1X5D.C8jw61bIhottS'),
+('Teacher 3', 'teacher3@example.com', '1234567894', '1982-01-01', 'STAFF', '$2b$10$GLmyuJWbkoRIxLDN7bYHgeZb9bA.6qLpLsy1X5D.C8jw61bIhottS'),
+('Teacher 4', 'teacher4@example.com', '1234567895', '1983-01-01', 'STAFF', '$2b$10$GLmyuJWbkoRIxLDN7bYHgeZb9bA.6qLpLsy1X5D.C8jw61bIhottS'),
+('Teacher 5', 'teacher5@example.com', '1234567896', '1984-01-01', 'STAFF', '$2b$10$GLmyuJWbkoRIxLDN7bYHgeZb9bA.6qLpLsy1X5D.C8jw61bIhottS'),
+('Teacher 6', 'teacher6@example.com', '1234567897', '1985-01-01', 'STAFF', '$2b$10$GLmyuJWbkoRIxLDN7bYHgeZb9bA.6qLpLsy1X5D.C8jw61bIhottS'),
+('Teacher 7', 'teacher7@example.com', '1234567898', '1986-01-01', 'STAFF', '$2b$10$GLmyuJWbkoRIxLDN7bYHgeZb9bA.6qLpLsy1X5D.C8jw61bIhottS'),
+('Teacher 8', 'teacher8@example.com', '1234567899', '1987-01-01', 'STAFF', '$2b$10$GLmyuJWbkoRIxLDN7bYHgeZb9bA.6qLpLsy1X5D.C8jw61bIhottS'),
+('Teacher 9', 'teacher9@example.com', '1234567800', '1988-01-01', 'STAFF', '$2b$10$GLmyuJWbkoRIxLDN7bYHgeZb9bA.6qLpLsy1X5D.C8jw61bIhottS'),
+('Teacher 10', 'teacher10@example.com', '1234567801', '1989-01-01', 'STAFF', '$2b$10$GLmyuJWbkoRIxLDN7bYHgeZb9bA.6qLpLsy1X5D.C8jw61bIhottS'),
+('Admin 1', 'admin1@example.com', '1234567894', '1975-01-01', 'STAFF', '$2b$10$GLmyuJWbkoRIxLDN7bYHgeZb9bA.6qLpLsy1X5D.C8jw61bIhottS'),
+('Admin 2', 'admin2@example.com', '1234567895', '1976-01-01', 'STAFF', '$2b$10$GLmyuJWbkoRIxLDN7bYHgeZb9bA.6qLpLsy1X5D.C8jw61bIhottS'),
+('Admin 3', 'admin3@example.com', '1234567896', '1977-01-01', 'STAFF', '$2b$10$GLmyuJWbkoRIxLDN7bYHgeZb9bA.6qLpLsy1X5D.C8jw61bIhottS'),
+('Accountant 1', 'accountant1@example.com', '1234567897', '1985-01-01', 'STAFF', '$2b$10$GLmyuJWbkoRIxLDN7bYHgeZb9bA.6qLpLsy1X5D.C8jw61bIhottS'),
+('Accountant 2', 'accountant2@example.com', '1234567898', '1986-01-01', 'STAFF', '$2b$10$GLmyuJWbkoRIxLDN7bYHgeZb9bA.6qLpLsy1X5D.C8jw61bIhottS');
 
--- Insert sample data into STUDENT table
+-- Insert virtual data for STUDENT table
 INSERT INTO STUDENT (ID, ENROLL_DATE)
-VALUES 
-(1, '2019-09-01'),
-(3, '2021-01-15'),
-(5, '2020-09-01'),
-(7, '2022-01-10'),
-(9, '2023-03-05');
+VALUES
+(1, '2023-09-01'),
+(2, '2023-09-02'),
+(3, '2023-09-03'),
+(4, '2023-09-04'),
+(5, '2023-09-05'),
+(6, '2023-09-06'),
+(7, '2023-09-07'),
+(8, '2023-09-08'),
+(9, '2023-09-09'),
+(10, '2023-09-10'),
+(11, '2023-09-11'),
+(12, '2023-09-12'),
+(13, '2023-09-13'),
+(14, '2023-09-14'),
+(15, '2023-09-15'),
+(16, '2023-09-16'),
+(17, '2023-09-17'),
+(18, '2023-09-18'),
+(19, '2023-09-19'),
+(20, '2023-09-20'),
+(21, '2023-09-21'),
+(22, '2023-09-22'),
+(23, '2023-09-23'),
+(24, '2023-09-24'),
+(25, '2023-09-25'),
+(26, '2023-09-26'),
+(27, '2023-09-27'),
+(28, '2023-09-28'),
+(29, '2023-09-29'),
+(30, '2023-09-30'),
+(31, '2023-10-01'),
+(32, '2023-10-02'),
+(33, '2023-10-03'),
+(34, '2023-10-04'),
+(35, '2023-10-05'),
+(36, '2023-10-06'),
+(37, '2023-10-07'),
+(38, '2023-10-08'),
+(39, '2023-10-09'),
+(40, '2023-10-10'),
+(41, '2023-10-11'),
+(42, '2023-10-12'),
+(43, '2023-10-13'),
+(44, '2023-10-14'),
+(45, '2023-10-15'),
+(46, '2023-10-16'),
+(47, '2023-10-17'),
+(48, '2023-10-18'),
+(49, '2023-10-19'),
+(50, '2023-10-20'),
+(51, '2023-10-21'),
+(52, '2023-10-22'),
+(53, '2023-10-23'),
+(54, '2023-10-24'),
+(55, '2023-10-25'),
+(56, '2023-10-26'),
+(57, '2023-10-27'),
+(58, '2023-10-28'),
+(59, '2023-10-29'),
+(60, '2023-10-30'),
+(61, '2023-11-01'),
+(62, '2023-11-02'),
+(63, '2023-11-03'),
+(64, '2023-11-04'),
+(65, '2023-11-05'),
+(66, '2023-11-06'),
+(67, '2023-11-07'),
+(68, '2023-11-08'),
+(69, '2023-11-09'),
+(70, '2023-11-10');
 
--- Insert sample data into STAFF table
+-- Insert virtual data for STAFF table
 INSERT INTO STAFF (ID, HIRE_DAY, STAFF_TYPE)
-VALUES 
-(2, '2010-06-10', 'TEACHER'),
-(4, '2015-08-25', 'ADMIN'),
-(6, '2012-02-14', 'ACCOUNTANT'),
-(8, '2008-11-30', 'TEACHER'),
-(10, '2017-04-20', 'ADMIN');
+VALUES
+(71, '2020-01-01', 'TEACHER'),
+(72, '2020-02-01', 'TEACHER'),
+(73, '2020-03-01', 'TEACHER'),
+(74, '2020-04-01', 'TEACHER'),
+(75, '2020-05-01', 'TEACHER'),
+(76, '2020-06-01', 'TEACHER'),
+(77, '2020-07-01', 'TEACHER'),
+(78, '2020-08-01', 'TEACHER'),
+(79, '2020-09-01', 'TEACHER'),
+(80, '2020-10-01', 'TEACHER'),
+(81, '2015-01-01', 'ADMIN'),
+(82, '2015-02-01', 'ADMIN'),
+(83, '2015-03-01', 'ADMIN'),
+(84, '2018-01-01', 'ACCOUNTANT'),
+(85, '2019-01-01', 'ACCOUNTANT');
 
--- Insert sample data into COURSE table
+-- Insert virtual data for COURSE table
 INSERT INTO COURSE (NAME, PRICE, DESCRIPTION, START_DATE, END_DATE, MIN_STU, MAX_STU)
-VALUES 
-('English Basics', 5000000, 'Introduction to English for beginners.', '2025-06-01', '2025-08-01', 5, 20),
-('Advanced English', 8000000, 'Advanced English course for professionals.', '2025-01-01', '2025-09-01', 10, 25),
-('TOEIC Preparation', 10000000, 'Comprehensive TOEIC preparation course.', '2025-05-15', '2025-07-15', 8, 30),
-('Business English', 7000000, 'English for business communication.', '2025-06-10', '2025-08-10', 6, 20),
-('Conversational English', 6000000, 'Focus on improving speaking skills.', '2025-07-20', '2025-09-20', 5, 15);
+VALUES
+('Course 1', 0, 'Free course', '2025-01-01', '2025-06-01', 1, 30),
+('Course 2', 50000, 'Paid course', '2025-01-01', '2025-12-01', 1, 20),
+('Course 3', 1000000, 'Premium course', '2025-01-01', '2025-06-01', 1, 5),
+('Course 4', 75000, 'Standard course', '2025-07-01', '2025-12-01', 1, 25),
+('Course 5', 0, 'Free trial course', '2025-05-01', '2025-07-01', 1, 30);
 
-INSERT INTO CATEGORY (cate_id, name, description) VALUES
-('SPEAK', 'Speaking', 'Courses focused on improving spoken English and pronunciation.'),
-('WRITE', 'Writing', 'Courses that enhance grammar, sentence structure, and essay writing.'),
-('READ', 'Reading', 'Courses to improve reading comprehension and vocabulary.'),
-('LISTEN', 'Listening', 'Courses aimed at developing listening skills through various media.'),
-('GRAMMAR', 'Grammar', 'Courses focused on understanding and applying English grammar rules.'),
-('PRONUNCE', 'Pronunciation', 'Specialized courses for mastering English sounds and intonation.');
 
--- Insert sample data into TUITION table
+-- Insert virtual data for TUITION table
 INSERT INTO TUITION (PRICE, TYPE, DESCRIPTION, PAID_DATE, STATUS)
-VALUES 
-(5000000, 'CASH', 'Payment for English Basics course.', '2025-06-01', 'PAID'),
-(8000000, 'TRANSFER', 'Payment for Advanced English course.', '2025-01-05', 'PAID'),
-(10000000, 'CARD', 'Payment for IELTS Preparation course.', '2025-05-20', 'PAID'),
-(7000000, 'CASH', 'Payment for Business English course.', NULL, 'UNPAID'),
-(6000000, 'TRANSFER', 'Payment for Conversational English course.', '2025-07-25', 'PAID');
+VALUES
+(500, 'CARD', 'Payment for Course 2', '2025-01-15', 'PAID'),
+(500, 'TRANSFER', 'Payment for Course 2', '2025-01-16', 'PAID'),
+(1000, 'CASH', 'Payment for Course 3', '2025-01-10', 'PAID'),
+(1000, 'CARD', 'Payment for Course 3', '2025-01-11', 'PAID'),
+(750, 'TRANSFER', 'Payment for Course 4', '2025-07-05', 'PAID'),
+(750, 'CASH', 'Payment for Course 4', '2025-07-06', 'PAID'),
+(750, 'CARD', 'Payment for Course 4', '2025-07-07', 'PAID'),
+(500, 'CARD', 'Payment for Course 2', '2025-01-17', 'PAID'),
+(1000, 'TRANSFER', 'Payment for Course 3', '2025-01-12', 'PAID'),
+(750, 'CASH', 'Payment for Course 4', '2025-07-08', 'PAID'),
+(750, 'CARD', 'Payment for Course 4', '2025-07-09', 'PAID'),
+(1000, 'TRANSFER', 'Payment for Course 3', '2025-01-13', 'PAID'),
+(500, 'CASH', 'Payment for Course 2', '2025-01-18', 'PAID'),
+(750, 'TRANSFER', 'Payment for Course 4', '2025-07-10', 'PAID'),
+(1000, 'CARD', 'Payment for Course 3', '2025-01-14', 'PAID'),
+(500, 'TRANSFER', 'Payment for Course 2', '2025-01-19', 'PAID'),
+(750, 'CASH', 'Payment for Course 4', '2025-07-11', 'PAID');
 
--- Insert sample data into STUDENT_COURSE table
+-- Insert virtual data for STUDENT_COURSE table
 INSERT INTO STUDENT_COURSE (STUDENT_ID, COURSE_ID, PAYMENT_ID)
-VALUES 
-(1, 1, 1), -- Alice Johnson enrolled in English Basics
-(3, 2, 2), -- Charlie Davis enrolled in Advanced English
-(5, 3, 3), -- Edward Blake enrolled in IELTS Preparation
-(7, 4, 4), -- George King enrolled in Business English
-(9, 5, 5); -- Ian Sharp enrolled in Conversational English
+VALUES
+(1, 1, NULL),
+(2, 1, NULL),
+(3, 2, 1),
+(4, 2, 2),
+(5, 3, 3),
+(6, 3, 4),
+(7, 4, 5),
+(8, 4, 6),
+(9, 4, 7),
+(10, 5, NULL),
+(11, 2, 8),
+(12, 3, 9),
+(13, 4, 10),
+(14, 4, 11),
+(15, 3, 12),
+(16, 2, 13),
+(17, 4, 14),
+(18, 3, 15),
+(19, 2, 16),
+(20, 4, 17);
 
--- Insert sample data into ASSIGNMENT table without file
-INSERT INTO ASSIGNMENT (NAME, DESCRIPTION, START_DATE, END_DATE, COURSE_ID)
-VALUES 
-('Essay Writing', 'Write an essay on a given topic.', '2025-01-05 09:00:00', '2025-12-15 23:59:59', 1),
-('Grammar Test', 'Complete the grammar test.', '2025-01-10 09:00:00', '2025-12-20 23:59:59', 2),
-('Mock Test', 'Take a full-length IELTS mock test.', '2025-01-15 09:00:00', '2025-12-25 23:59:59', 3),
-('Business Presentation', 'Prepare a business presentation.', '2025-01-20 09:00:00', '2025-12-30 23:59:59', 4),
-('Conversational Practice', 'Record a conversation with a partner.', '2025-01-25 09:00:00', '2025-12-05 23:59:59', 5);
+
+
+-- Insert virtual data for TEACHER_COURSE table
+INSERT INTO TEACHER_COURSE (TEACHER_ID, COURSE_ID, ROLE)
+VALUES
+(71, 1, 'LECTURER'),
+(72, 1, 'ASSISTANT'),
+(73, 2, 'LECTURER'),
+(74, 2, 'ASSISTANT'),
+(75, 3, 'LECTURER'),
+(76, 4, 'LECTURER'),
+(77, 4, 'ASSISTANT'),
+(78, 5, 'LECTURER');
+
 

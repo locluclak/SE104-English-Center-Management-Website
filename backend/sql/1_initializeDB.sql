@@ -1,7 +1,3 @@
--- Delete existing database
-DROP TRIGGER IF EXISTS trg_increment_number_stu;
-DROP TRIGGER IF EXISTS trg_decrement_number_stu;
-
 USE ENGLISH_CENTER_DATABASE;
 DROP DATABASE ENGLISH_CENTER_DATABASE;
 
@@ -67,25 +63,25 @@ CREATE TABLE COURSE (
     NUMBER_STU INT DEFAULT 0
 );
 
--- CATEGORY table
-CREATE TABLE CATEGORY (
-    cate_id VARCHAR(50) PRIMARY KEY,
-    name VARCHAR(100) NOT NULL,
-    description TEXT
-);
+-- -- CATEGORY table
+-- CREATE TABLE CATEGORY (
+--     cate_id VARCHAR(50) PRIMARY KEY,
+--     name VARCHAR(100) NOT NULL,
+--     description TEXT
+-- );
 
--- COURSE_CATEGORY join table
-CREATE TABLE COURSE_CATEGORY (
-    course_id INT,
-    cate_id VARCHAR(30),
-    PRIMARY KEY (course_id, cate_id),
-    FOREIGN KEY (course_id) REFERENCES COURSE(course_id)
-        ON DELETE CASCADE
-        ON UPDATE CASCADE,
-    FOREIGN KEY (cate_id) REFERENCES CATEGORY(cate_id)
-        ON DELETE CASCADE
-        ON UPDATE CASCADE
-);
+-- -- COURSE_CATEGORY join table
+-- CREATE TABLE COURSE_CATEGORY (
+--     course_id INT,
+--     cate_id VARCHAR(30),
+--     PRIMARY KEY (course_id, cate_id),
+--     FOREIGN KEY (course_id) REFERENCES COURSE(course_id)
+--         ON DELETE CASCADE
+--         ON UPDATE CASCADE,
+--     FOREIGN KEY (cate_id) REFERENCES CATEGORY(cate_id)
+--         ON DELETE CASCADE
+--         ON UPDATE CASCADE
+-- );
 -- Create TUITION table
 CREATE TABLE TUITION (
     T_ID INT PRIMARY KEY AUTO_INCREMENT,
