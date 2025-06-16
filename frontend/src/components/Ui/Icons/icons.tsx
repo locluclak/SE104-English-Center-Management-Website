@@ -5,20 +5,20 @@ interface IconProps {
   size?: number
 }
 
-export const Home: React.FC<IconProps> = ({ className = "", size = 16 }) => (
-  <i className={`fas fa-home ${className}`} style={{ fontSize: size }}></i>
+export const Home: React.FC<IconProps> = ({ className = "",  }) => (
+  <i className={`fas fa-home ${className}`}></i>
 )
 
-export const BookOpen: React.FC<IconProps> = ({ className = "", size = 16 }) => (
-  <i className={`fas fa-book-open ${className}`} style={{ fontSize: size }}></i>
+export const BookOpen: React.FC<IconProps> = ({ className = "",  }) => (
+  <i className={`fas fa-book-open ${className}`} ></i>
 )
 
 export const Calendar: React.FC<IconProps> = ({ className = "", size = 16 }) => (
   <i className={`fas fa-calendar ${className}`} style={{ fontSize: size }}></i>
 )
 
-export const FileText: React.FC<IconProps> = ({ className = "", size = 16 }) => (
-  <i className={`fas fa-file-text ${className}`} style={{ fontSize: size }}></i>
+export const FileText: React.FC<IconProps> = ({ className = "", }) => (
+  <i className={`fas fa-file-text ${className}`}></i>
 )
 
 export const Users: React.FC<IconProps> = ({ className = "", size = 16 }) => (
