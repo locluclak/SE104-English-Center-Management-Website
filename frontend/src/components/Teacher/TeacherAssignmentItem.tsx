@@ -14,33 +14,26 @@ import { Badge } from "../../components/Ui/Badge/badge"
 import { Textarea } from "../../components/Ui/Textarea/textarea"
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "../../components/Ui/Dialog/dialog"
 import { FileText, Eye, Download, Trash } from "../../components/Ui/Icons/icons"
-import { Edit } from "lucide-react" 
+import { Edit } from "lucide-react"
 import { GradingDialog } from "./GradingDialog"
-import type { StudentSubmission, AssignmentAttachment } from "../../types/teacher"
+import type { StudentSubmission, AssignmentAttachment, Assignment } from "../../types/teacher"
 import { MainApiRequest } from "../../services/MainApiRequest"
 import "./TeacherAssignmentItem.scss"
 
-interface Assignment {
-  id: string
-  title: string
-  description: string
-  dueDate: string
-  submissionsCount: number
-  totalStudents: number
-  attachments?: AssignmentAttachment[]
-}
 
 interface TeacherAssignmentItemProps {
   assignment: Assignment
   courseId: string
-   isCourseCompleted: boolean;
+  isCourseCompleted: boolean;
   onRemoveFromUI?: (assignmentId: string) => void
+  onUpdateAssignment?: (updatedAssignment: Assignment) => void;
 }
 
 export const TeacherAssignmentItem: React.FC<TeacherAssignmentItemProps> = ({
   assignment,
   courseId,
   onRemoveFromUI,
+  onUpdateAssignment,
 }) => {
   /* ---------- state ---------- */
   const [isViewSubmissionsDialogOpen, setIsViewSubmissionsDialogOpen] = useState(false)
@@ -55,10 +48,11 @@ export const TeacherAssignmentItem: React.FC<TeacherAssignmentItemProps> = ({
   const [editForm, setEditForm] = useState({
     title: assignment.title,
     description: assignment.description,
+    startDate: assignment.startDate.slice(0, 16), // Initialize with existing start date
     dueDate: assignment.dueDate.slice(0, 16), // "YYYY-MM-DDTHH:mm"
     attachments: [] as File[],
   })
-  
+
 
   /* ---------- fetch submissions when dialog mở ---------- */
   useEffect(() => {
@@ -141,7 +135,7 @@ export const TeacherAssignmentItem: React.FC<TeacherAssignmentItemProps> = ({
         attachments: Array.from(files),
       }))
     }
-  }  
+  }
 
   const removeEditFile = (index: number) => {
     const newFiles = [...editForm.attachments]
@@ -150,30 +144,43 @@ export const TeacherAssignmentItem: React.FC<TeacherAssignmentItemProps> = ({
       ...prev,
       attachments: newFiles,
     }))
-  }  
+  }
 
   const handleSaveEdit = async () => {
     try {
       const formData = new FormData()
       formData.append("title", editForm.title)
       formData.append("description", editForm.description)
+      formData.append("startDate", editForm.startDate) // Include startDate
       formData.append("dueDate", editForm.dueDate)
       formData.append("courseId", courseId)
-  
+
       editForm.attachments.forEach((file) => {
         formData.append("attachments", file)
       })
-  
-      await MainApiRequest.put(`/assignment/update/${assignment.id}`, formData, {
+
+      const response = await MainApiRequest.put(`/assignment/update/${assignment.id}`, formData, {
         headers: { "Content-Type": "multipart/form-data" }
       })
-  
-      setIsEditDialogOpen(false)
+      if (response.status === 200) {
+        const updatedAssignmentData = {
+          ...assignment,
+          title: editForm.title,
+          description: editForm.description,
+          startDate: editForm.startDate,
+          dueDate: editForm.dueDate, // Cập nhật dueDate ở đây
+          // Bạn có thể cần xử lý lại attachments nếu API trả về danh sách file mới
+        };
+      if (onUpdateAssignment) {
+          onUpdateAssignment(updatedAssignmentData);
+        } 
+        setIsEditDialogOpen(false) // Đóng dialog
+      }
     } catch (error) {
       console.error("Lỗi khi cập nhật assignment:", error)
     }
   }
-  
+
 
   const handleDownloadAttachment = (attachment: AssignmentAttachment) =>
     window.open(attachment.downloadUrl, "_blank")
@@ -294,7 +301,7 @@ export const TeacherAssignmentItem: React.FC<TeacherAssignmentItemProps> = ({
           </DialogHeader>
           <div className="delete-confirmation">
             <p>
-              Are you sure you want to delete <strong>{assignment.title}</strong>? This action
+              Are you sure you want to delete **{assignment.title}**? This action
               cannot be undone.
             </p>
           </div>
@@ -324,8 +331,6 @@ export const TeacherAssignmentItem: React.FC<TeacherAssignmentItemProps> = ({
             <DialogTitle>Submissions: {assignment.title}</DialogTitle>
           </DialogHeader>
 
-          {/* Submissions list ... (giữ nguyên code cũ) */}
-          {/* --- phần danh sách submissons không đổi --- */}
           <div className="submissions-list">
             {/* header */}
             <div className="submissions-header">
@@ -386,7 +391,7 @@ export const TeacherAssignmentItem: React.FC<TeacherAssignmentItemProps> = ({
         onGradeSubmit={handleGradeSubmit}
       />
 
-      {/* Edit Dialog – placeholder form, bạn tự thay bằng form thật */}
+      {/* Edit Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
         <DialogContent>
           <DialogHeader>
@@ -412,6 +417,16 @@ export const TeacherAssignmentItem: React.FC<TeacherAssignmentItemProps> = ({
                 placeholder="Assignment description"
                 value={editForm.description}
                 onChange={(e) => setEditForm({ ...editForm, description: e.target.value })}
+              />
+            </div>
+
+            {/* New: Start Date field */}
+            <div className="form-field">
+              <label>Start Date</label>
+              <Input
+                type="datetime-local"
+                value={editForm.startDate}
+                onChange={(e) => setEditForm({ ...editForm, startDate: e.target.value })}
               />
             </div>
 
@@ -459,7 +474,6 @@ export const TeacherAssignmentItem: React.FC<TeacherAssignmentItemProps> = ({
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
     </>
   )
 }
