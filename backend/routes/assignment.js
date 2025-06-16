@@ -9,7 +9,11 @@ const router = express.Router();
 // Configure multer for file uploads
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
-    cb(null, path.join(__dirname, '../uploads')); // Save files to ./uploads
+    const uploadDir = path.join(__dirname, '../uploads');
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+    cb(null, uploadDir);
   },
   filename: function (req, file, cb) {
     const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
@@ -24,7 +28,6 @@ router.post('/upload', upload.single('file'), async (req, res) => {
   const { name, description, start_date, end_date, uploadedname, course_id } = req.body;
   const filePath = req.file ? `/uploads/${req.file.filename}` : null;
 
-  // Validate required fields
   if (!name || !start_date || !end_date || !course_id) {
     return res.status(400).json({ error: 'Missing required fields: name, start_date, end_date, or course_id' });
   }
@@ -70,7 +73,10 @@ router.delete('/delete/:id', async (req, res) => {
       const fullPath = path.join(__dirname, '../', filePath);
       fs.unlink(fullPath, (err) => {
         if (err) {
-          console.error('Error deleting file:', err);
+          console.error('Error deleting file from filesystem:', err);
+          // Log error but don't prevent DB deletion if file system delete fails
+        } else {
+          console.log(`Deleted file: ${fullPath}`);
         }
       });
     }
@@ -79,7 +85,7 @@ router.delete('/delete/:id', async (req, res) => {
     const [result] = await db.execute('DELETE FROM ASSIGNMENT WHERE AS_ID = ?', [assignmentId]);
 
     if (result.affectedRows === 0) {
-      return res.status(404).json({ error: 'Assignment not found' });
+      return res.status(404).json({ error: 'Assignment not found in database after file deletion attempt' });
     }
 
     res.status(200).json({ message: 'Assignment deleted successfully' });
@@ -95,13 +101,14 @@ router.get('/download/:id', async (req, res) => {
 
   try {
     // Fetch the file path of the assignment from the database
-    const [rows] = await db.execute('SELECT FILE FROM ASSIGNMENT WHERE AS_ID = ?', [assignmentId]);
+    const [rows] = await db.execute('SELECT FILE, FILENAME FROM ASSIGNMENT WHERE AS_ID = ?', [assignmentId]);
 
     if (rows.length === 0) {
       return res.status(404).json({ error: 'Assignment not found' });
     }
 
     const filePath = rows[0].FILE;
+    const originalFileName = rows[0].FILENAME;
 
     if (!filePath) {
       return res.status(404).json({ error: 'File not found for this assignment' });
@@ -109,11 +116,15 @@ router.get('/download/:id', async (req, res) => {
 
     const fullPath = path.join(__dirname, '../', filePath);
 
-    // Send the file to the client
-    res.download(fullPath, (err) => {
+    // Send the file to the client using the original file name
+    res.download(fullPath, originalFileName, (err) => {
       if (err) {
         console.error('Error downloading file:', err);
-        res.status(500).json({ error: 'Internal server error' });
+        // Check if the error is due to file not found on disk
+        if (err.code === 'ENOENT') {
+          return res.status(404).json({ error: 'File not found on server.' });
+        }
+        res.status(500).json({ error: 'Internal server error during download' });
       }
     });
   } catch (err) {
@@ -134,71 +145,124 @@ router.get('/getbycourse/:courseId', async (req, res) => {
     );
 
     if (rows.length === 0) {
-      return res.status(200).json({ message: 'No assignments found for this course' });
+      return res.status(200).json({ message: 'No assignments found for this course', assignments: [] }); // Return empty array for consistency
     }
 
     res.status(200).json({ assignments: rows });
   } catch (err) {
-    console.error('Error fetching assignments:', err);
+    console.error('Error fetching assignments by course:', err);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
 
-// NEW ROUTE: GET /assignments/all - Get all assignments
+// GET /assignments/all - Get all assignments
 router.get('/all', async (req, res) => {
   try {
-      // Include COURSE_ID for frontend mapping
-      const [rows] = await db.execute('SELECT AS_ID, NAME, DESCRIPTION, START_DATE, END_DATE, COURSE_ID FROM ASSIGNMENT');
-      // Ensure the response structure matches what frontend expects: data.assignments
-      res.status(200).json({ assignments: rows });
+    const [rows] = await db.execute('SELECT AS_ID, NAME, DESCRIPTION, START_DATE, END_DATE, COURSE_ID FROM ASSIGNMENT');
+    res.status(200).json({ assignments: rows });
   } catch (error) {
-      console.error('Error fetching all assignments:', error);
-      res.status(500).json({ error: 'Internal server error' });
+    console.error('Error fetching all assignments:', error);
+    res.status(500).json({ error: 'Internal server error' });
   }
 });
 
-// PUT /assignments/update/:id - Update assignment details (excluding course_id)
-router.put('/update/:id', async (req, res) => {
+// PUT /assignments/update/:id - Update assignment details and optionally replace file
+router.put('/update/:id', upload.array('attachments'), async (req, res) => {
   const assignmentId = req.params.id;
-  const { name, description, start_date, end_date } = req.body;
+  const { title, description, dueDate } = req.body;
 
-  if (!name && !description && !start_date && !end_date) {
-    return res.status(400).json({ message: 'No fields to update' });
+  let newFilePath = null;
+  let newFileName = null;
+
+  if (req.files && req.files.length > 0) {
+    const uploadedFile = req.files[0];
+    newFilePath = `/uploads/${uploadedFile.filename}`;
+    newFileName = uploadedFile.originalname;
   }
 
   try {
-    // Build dynamic query for updating fields
     const fields = [];
     const values = [];
-    if (name) {
-      fields.push('NAME = ?');
-      values.push(name);
+
+    // --- Fetch current assignment details to get existing file path for deletion ---
+    let oldFilePath = null;
+    let oldFileName = null;
+    const [currentAssignmentRows] = await db.execute('SELECT FILE, FILENAME FROM ASSIGNMENT WHERE AS_ID = ?', [assignmentId]);
+    if (currentAssignmentRows.length > 0) {
+      oldFilePath = currentAssignmentRows[0].FILE;
+      oldFileName = currentAssignmentRows[0].FILENAME;
+    } else {
+      return res.status(404).json({ message: 'Assignment not found.' }); // If assignment doesn't exist, return 404 early
     }
-    if (description) {
+
+    if (title !== undefined) {
+      fields.push('NAME = ?');
+      values.push(title);
+    }
+    if (description !== undefined) {
       fields.push('DESCRIPTION = ?');
       values.push(description);
     }
-    if (start_date) {
-      fields.push('START_DATE = ?');
-      values.push(start_date);
-    }
-    if (end_date) {
+    if (dueDate !== undefined) { 
       fields.push('END_DATE = ?');
-      values.push(end_date);
+      values.push(dueDate);
     }
+
+    // --- Handle file attachment update logic ---
+    if (newFilePath) {
+      fields.push('FILE = ?');
+      values.push(newFilePath);
+      fields.push('FILENAME = ?');
+      values.push(newFileName);
+
+      // Delete the old file from the filesystem if it existed
+      if (oldFilePath) {
+        const fullOldPath = path.join(__dirname, '../', oldFilePath);
+        if (fs.existsSync(fullOldPath)) {
+          fs.unlink(fullOldPath, (err) => {
+            if (err) {
+              console.error(`Error deleting old file ${fullOldPath}:`, err);
+              // Log the error but continue the database update
+            } else {
+              console.log(`Old file ${fullOldPath} deleted.`);
+            }
+          });
+        } else {
+          console.warn(`Old file ${fullOldPath} not found on disk for deletion. Continuing update.`);
+        }
+      }
+    }
+
+    // If no fields to update and no new file was provided, return 400
+    if (fields.length === 0) {
+      return res.status(400).json({ message: 'No fields to update or no new file provided.' });
+    }
+
+    // Add assignmentId to values for the WHERE clause
     values.push(assignmentId);
 
     const sql = `UPDATE ASSIGNMENT SET ${fields.join(', ')} WHERE AS_ID = ?`;
     const [result] = await db.execute(sql, values);
 
     if (result.affectedRows === 0) {
-      return res.status(404).json({ message: 'Assignment not found' });
+      return res.status(404).json({ message: 'Assignment found but could not be updated.' });
     }
 
-    res.json({ message: 'Assignment updated successfully' });
+    res.json({ message: 'Assignment updated successfully.' });
+
   } catch (err) {
     console.error('Error updating assignment:', err);
-    res.status(500).json({ error: 'Internal server error' });
+    if (newFilePath) {
+      const fullNewPath = path.join(__dirname, '../', newFilePath);
+      if (fs.existsSync(fullNewPath)) {
+        fs.unlink(fullNewPath, (unlinkErr) => {
+          if (unlinkErr) {
+            console.error('Error deleting newly uploaded file after failed DB update:', unlinkErr);
+          }
+        });
+      }
+    }
+  res.status(500).json({ error: 'Internal server error' });
   }
 });
 
@@ -219,7 +283,7 @@ router.get('/teacher/:teacherId/progress', async (req, res) => {
         A.END_DATE AS dueDate,
         C.COURSE_ID AS courseId,
         C.NAME AS courseName,
-        C.NUMBER_STU AS studentsCount, -- Total students in the course
+        C.NUMBER_STU AS totalStudents, -- Renamed for clarity to match frontend type
         COUNT(S.STUDENT_ID) AS submissionsCount -- Submissions for this specific assignment
       FROM ASSIGNMENT A
       JOIN COURSE C ON A.COURSE_ID = C.COURSE_ID
@@ -232,9 +296,9 @@ router.get('/teacher/:teacherId/progress', async (req, res) => {
     const [assignments] = await db.execute(query, [teacherId]);
 
     const now = new Date();
-    const upcomingAssignments = assignments.filter(assignment => { // Removed ': any' type annotation
+    const upcomingAssignments = assignments.filter(assignment => {
       const assignmentDueDate = new Date(assignment.dueDate);
-      assignmentDueDate.setHours(23, 59, 59, 999); // Set to end of day for comparison
+      assignmentDueDate.setHours(23, 59, 59, 999); // Set to end of day for consistent comparison
       return assignmentDueDate >= now;
     });
 

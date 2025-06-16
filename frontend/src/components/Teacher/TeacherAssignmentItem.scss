@@ -1,6 +1,6 @@
 @import "../../scss/variables";
 
-.assignment-item {
+//.assignment-item {
   .assignment-header {
     display: flex;
     justify-content: space-between;
@@ -63,6 +63,38 @@
     }
   }
 
+  .assignment-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 16px;
+
+    .left-actions,
+    .right-actions {
+      display: flex;
+    }
+
+    /* nút Edit */
+    .edit-btn {
+      color: #2563eb;
+      border-color: #2563eb;
+
+      &:hover {
+        background-color: #eff6ff;
+      }
+    }
+
+    /* nút Delete */
+    .delete-btn {
+      color: #ef4444;
+      border-color: #ef4444;
+
+      &:hover {
+        background-color: #fef2f2;
+      }
+    }
+  }
+
   .submissions-progress {
     margin: 16px 0;
 
@@ -101,6 +133,25 @@
       &:hover {
         background-color: #fef2f2;
       }
+    }
+  }
+//}
+
+.edit-assignment-form {
+  label {
+    display: flex;
+    flex-direction: column;
+    font-weight: 500;
+    gap: 4px;
+
+    .input {
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+
+    textarea.input {
+      resize: vertical;
     }
   }
 }
