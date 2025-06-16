@@ -21,6 +21,7 @@ interface Document {
 
 interface TeacherDocumentItemProps {
   document: Document
+  isCourseCompleted: boolean;
   onEdit?: (document: Document) => Promise<void> | void
   onRemoveFromUI?: (documentId: string) => void
 }

@@ -489,6 +489,9 @@ const TeacherCourseDetail: React.FC = () => {
   // Check if parsing was successful and it's a valid number
   const isCourseIdValidNumber = !isNaN(numericCourseId) && numericCourseId > 0;
 
+  // Determine if the course is completed
+  const isCourseCompleted = courseDetail.status === "completed";
+
   return (
     <div className="teacher-course-detail">
       <div className="course-header">
@@ -580,10 +583,14 @@ const TeacherCourseDetail: React.FC = () => {
           <div className="tab-content">
             <div className="tab-header">
               <h2>Assignments</h2>
-              <Button onClick={() => setIsNewAssignmentDialogOpen(true)}>
-                <Plus className="icon" />
-                Create Assignment
-              </Button>
+              {isCourseCompleted ? (
+                <p className="course-completed-message">This course is completed. New assignments cannot be created.</p>
+              ) : (
+                <Button onClick={() => setIsNewAssignmentDialogOpen(true)}>
+                  <Plus className="icon" />
+                  Create Assignment
+                </Button>
+              )}
             </div>
 
             <div className="assignments-list">
@@ -593,6 +600,8 @@ const TeacherCourseDetail: React.FC = () => {
                   assignment={assignment}
                   courseId={courseDetail.id}
                   onRemoveFromUI={handleRemoveAssignmentFromUI}
+                  // Pass isCourseCompleted to allow or disallow actions within the item
+                  isCourseCompleted={isCourseCompleted}
                 />
               ))}
               {assignments.length === 0 && <p className="no-content">No assignments available</p>}
@@ -682,10 +691,14 @@ const TeacherCourseDetail: React.FC = () => {
           <div className="tab-content">
             <div className="tab-header">
               <h2>Course Materials</h2>
-              <Button onClick={() => setIsNewDocumentDialogOpen(true)}>
-                <Plus className="icon" />
-                Upload Material
-              </Button>
+              {isCourseCompleted ? (
+                <p className="course-completed-message">This course is completed. New materials cannot be uploaded.</p>
+              ) : (
+                <Button onClick={() => setIsNewDocumentDialogOpen(true)}>
+                  <Plus className="icon" />
+                  Upload Material
+                </Button>
+              )}
             </div>
 
             <div className="documents-list">
@@ -695,6 +708,8 @@ const TeacherCourseDetail: React.FC = () => {
                   document={document}
                   onRemoveFromUI={handleRemoveDocumentFromUI}
                   onEdit={handleEditDocument}
+                  // Pass isCourseCompleted to allow or disallow actions within the item
+                  isCourseCompleted={isCourseCompleted}
                 />
               ))}
               {documents.length === 0 && <p className="no-content">No materials available</p>}

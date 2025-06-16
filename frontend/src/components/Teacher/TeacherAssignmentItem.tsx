@@ -33,6 +33,7 @@ interface Assignment {
 interface TeacherAssignmentItemProps {
   assignment: Assignment
   courseId: string
+   isCourseCompleted: boolean;
   onRemoveFromUI?: (assignmentId: string) => void
 }
 
