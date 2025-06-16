@@ -18,142 +18,162 @@ import { MainApiRequest } from "@/services/MainApiRequest"
 import "./TeacherCourseDetail.scss"
 
 interface BackendCourseDetail {
-  COURSE_ID: string;
-  NAME: string;
-  DESCRIPTION: string;
-  NUMBER_STU: number;
-  MAX_STU: number;
-  PRICE: number;
-  START_DATE: string;
-  END_DATE: string;
+  COURSE_ID: string
+  NAME: string
+  DESCRIPTION: string
+  NUMBER_STU: number
+  MAX_STU: number
+  PRICE: number
+  START_DATE: string
+  END_DATE: string
 }
 
 interface CourseDetail {
-  id: string;
-  name: string;
-  description: string;
-  students: number;
-  maxStudents: number;
-  price: number;
-  startDate: string;
-  endDate: string;
-  schedule: string;
-  nextClass: string;
-  status: "active" | "completed" | "paused" | "upcoming";
-  syllabus: string;
+  id: string
+  name: string
+  description: string
+  students: number
+  maxStudents: number
+  price: number
+  startDate: string
+  endDate: string
+  schedule: string
+  nextClass: string
+  status: "active" | "completed" | "paused" | "upcoming"
+  syllabus: string
 }
 
 interface BackendAssignment {
-  AS_ID: string;
-  NAME: string;
-  DESCRIPTION: string;
-  START_DATE: string;
-  END_DATE: string;
-  FILENAME: string | null;
-  FILE: string | null;
-  COURSE_ID: string;
+  AS_ID: string
+  NAME: string
+  DESCRIPTION: string
+  START_DATE: string
+  END_DATE: string
+  FILENAME: string | null
+  FILE: string | null
+  COURSE_ID: string
 }
 
 interface Assignment {
-  id: string;
-  title: string;
-  description: string;
-  dueDate: string;
-  submissionsCount: number;
-  totalStudents: number;
+  id: string
+  title: string
+  description: string
+  dueDate: string
+  submissionsCount: number
+  totalStudents: number
   attachments: {
-    id: string;
-    fileName: string;
-    fileSize: string;
-    fileType: string;
-    downloadUrl: string;
-  }[];
+    id: string
+    fileName: string
+    fileSize: string
+    fileType: string
+    downloadUrl: string
+  }[]
 }
 
 interface BackendDocument {
-  DOC_ID: string;
-  NAME: string;
-  DESCRIPTION: string;
-  FILENAME: string | null;
-  FILE: string | null;
-  COURSE_ID: string;
+  DOC_ID: string
+  NAME: string
+  DESCRIPTION: string
+  FILENAME: string | null
+  FILE: string | null
+  COURSE_ID: string
 }
 
 interface Document {
-  id: string;
-  title: string;
-  description: string;
-  uploadDate: string;
-  fileType: "pdf" | "doc" | "ppt" | "image" | "video" | "other";
-  fileSize: string;
-  downloadUrl: string;
-  file?: File | null;
+  id: string
+  title: string
+  description: string
+  uploadDate: string
+  fileType: "pdf" | "doc" | "ppt" | "image" | "video" | "other"
+  fileSize: string
+  downloadUrl: string
+  file?: File | null
 }
 
 interface BackendStudent {
-  ID: string;
-  NAME: string;
-  EMAIL: string;
-  PHONE_NUMBER: string;
-  DATE_OF_BIRTH: string;
-  ENROLL_DATE: string;
-  PAYMENT_STATUS?: "UNPAID" | "PAID" | "DEFERRED";
+  ID: string
+  NAME: string
+  EMAIL: string
+  PHONE_NUMBER: string
+  DATE_OF_BIRTH: string
+  ENROLL_DATE: string
+  PAYMENT_STATUS?: "UNPAID" | "PAID" | "DEFERRED"
 }
 
 interface Student {
-  id: string;
-  name: string;
-  email: string;
-  progress: number;
-  lastActivity: string;
+  id: string
+  name: string
+  email: string
+  progress: number
+  lastActivity: string
 }
 
 const TeacherCourseDetail: React.FC = () => {
   const { courseId } = useParams<{ courseId: string }>()
   const navigate = useNavigate()
+
   const [activeTab, setActiveTab] = useState("overview")
   const [courseDetail, setCourseDetail] = useState<CourseDetail | null>(null)
   const [assignments, setAssignments] = useState<Assignment[]>([])
   const [documents, setDocuments] = useState<Document[]>([])
   const [students, setStudents] = useState<Student[]>([])
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null)
   const [searchTerm, setSearchTerm] = useState("")
 
   const [isNewAssignmentDialogOpen, setIsNewAssignmentDialogOpen] = useState(false)
   const [isNewDocumentDialogOpen, setIsNewDocumentDialogOpen] = useState(false)
+
   const [newAssignment, setNewAssignment] = useState({
     title: "",
     description: "",
     dueDate: "",
     attachments: [] as File[],
   })
-  const [newDocument, setNewDocument] = useState({ title: "", description: "", file: null as File | null })
+
+  const [newDocument, setNewDocument] = useState({
+    title: "",
+    description: "",
+    file: null as File | null,
+  })
+
   const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const formatDate = (dateString: string) => {
+    if (!dateString) return "N/A"
+    const date = new Date(dateString)
+    if (isNaN(date.getTime())) return "Invalid Date"
+
+    const day = String(date.getDate()).padStart(2, "0")
+    const month = String(date.getMonth() + 1).padStart(2, "0")
+    const year = date.getFullYear()
+    return `${day}/${month}/${year}`
+  }
 
   const fetchCourseData = useCallback(async () => {
     setLoading(true)
     setError(null)
+
     if (!courseId) {
-      setError("Course ID is missing.");
-      setLoading(false);
-      return;
+      setError("Course ID is missing.")
+      setLoading(false)
+      return
     }
+
     try {
-      const courseResponse = await MainApiRequest.get<BackendCourseDetail>(`/course/${courseId}`);
+      const courseResponse = await MainApiRequest.get<BackendCourseDetail>(`/course/${courseId}`)
 
-      const now = new Date();
-      const startDate = new Date(courseResponse.data.START_DATE);
-      const endDate = new Date(courseResponse.data.END_DATE);
-      let status: "active" | "completed" | "upcoming" = "active";
-      if (now < startDate) {
-        status = "upcoming";
-      } else if (now > endDate) {
-        status = "completed";
-      }
+      const now = new Date()
+      const startDate = new Date(courseResponse.data.START_DATE)
+      const endDate = new Date(courseResponse.data.END_DATE)
+      let status: "active" | "completed" | "upcoming" = "active"
+      if (now < startDate) status = "upcoming"
+      else if (now > endDate) status = "completed"
 
-      const schedule = `From ${formatDate(courseResponse.data.START_DATE)} to ${formatDate(courseResponse.data.END_DATE)}`;
-      const nextClass = (status === "active" || status === "upcoming") ? startDate.toISOString() : "";
+      const schedule = `From ${formatDate(courseResponse.data.START_DATE)} to ${formatDate(
+        courseResponse.data.END_DATE,
+      )}`
+      const nextClass = status === "active" || status === "upcoming" ? startDate.toISOString() : ""
 
       setCourseDetail({
         id: courseResponse.data.COURSE_ID,
@@ -168,259 +188,261 @@ const TeacherCourseDetail: React.FC = () => {
         nextClass,
         status,
         syllabus: courseResponse.data.DESCRIPTION,
-      });
+      })
 
-      const assignmentsResponse = await MainApiRequest.get<{ assignments: BackendAssignment[] }>(`/assignment/getbycourse/${courseId}`);
-      const fetchedAssignments = assignmentsResponse.data.assignments.map(assign => ({
+      const assignmentsResponse = await MainApiRequest.get<{ assignments: BackendAssignment[] }>(
+        `/assignment/getbycourse/${courseId}`,
+      )
+
+      const backendAssignments: BackendAssignment[] = Array.isArray(assignmentsResponse.data?.assignments)
+        ? assignmentsResponse.data.assignments
+        : []
+
+      const fetchedAssignments: Assignment[] = backendAssignments.map((assign) => ({
         id: assign.AS_ID,
         title: assign.NAME,
         description: assign.DESCRIPTION,
         dueDate: assign.END_DATE,
         submissionsCount: Math.floor(Math.random() * (courseResponse.data.NUMBER_STU || 0) * 0.8),
         totalStudents: courseResponse.data.NUMBER_STU || 0,
-        attachments: assign.FILENAME && assign.FILE ? [{
-          id: 'file-' + assign.AS_ID,
-          fileName: assign.FILENAME,
-          fileSize: 'N/A',
-          fileType: assign.FILENAME.split('.').pop() || 'other',
-          downloadUrl: assign.FILE,
-        }] : [],
-      }));
-      setAssignments(fetchedAssignments);
+        attachments:
+          assign.FILENAME && assign.FILE
+            ? [
+                {
+                  id: `file-${assign.AS_ID}`,
+                  fileName: assign.FILENAME,
+                  fileSize: "N/A",
+                  fileType: assign.FILENAME.split(".").pop() || "other",
+                  downloadUrl: assign.FILE,
+                },
+              ]
+            : [],
+      }))
+      setAssignments(fetchedAssignments)
 
-      const documentsResponse = await MainApiRequest.get<BackendDocument[]>(`/document/getbycourse/${courseId}`);
-      const fetchedDocuments = documentsResponse.data.map(doc => ({
+      const documentsResponse = await MainApiRequest.get<BackendDocument[]>(
+        `/document/getbycourse/${courseId}`,
+      )
+      const backendDocuments = Array.isArray(documentsResponse.data) ? documentsResponse.data : []
+
+      const fetchedDocuments: Document[] = backendDocuments.map((doc) => ({
         id: doc.DOC_ID,
         title: doc.NAME,
         description: doc.DESCRIPTION,
-        uploadDate: new Date().toISOString().split('T')[0],
-        fileType: (doc.FILENAME?.split('.').pop() || 'other') as Document['fileType'],
-        fileSize: 'N/A',
-        downloadUrl: doc.FILE || '#',
-      }));
-      setDocuments(fetchedDocuments);
+        uploadDate: new Date().toISOString().split("T")[0],
+        fileType: (doc.FILENAME?.split(".").pop() || "other") as Document["fileType"],
+        fileSize: "N/A",
+        downloadUrl: doc.FILE || "#",
+      }))
+      setDocuments(fetchedDocuments)
 
-      const studentsResponse = await MainApiRequest.get<BackendStudent[]>(`/course/${courseId}/students`);
-      const fetchedStudents = studentsResponse.data.map(student => ({
+      const studentsResponse = await MainApiRequest.get<BackendStudent[]>(
+        `/course/${courseId}/students`,
+      )
+
+      const backendStudents = Array.isArray(studentsResponse.data) ? studentsResponse.data : []
+
+      const fetchedStudents: Student[] = backendStudents.map((student) => ({
         id: student.ID,
         name: student.NAME,
         email: student.EMAIL,
         progress: Math.floor(Math.random() * 100),
         lastActivity: new Date(Date.now() - Math.random() * 7 * 24 * 60 * 60 * 1000).toISOString(),
-      }));
-      setStudents(fetchedStudents);
-
+      }))
+      setStudents(fetchedStudents)
     } catch (err) {
-      console.error("Failed to fetch course details:", err);
-      setError("Failed to load course details. Please try again.");
+      console.error("Failed to fetch course details:", err)
+      setError("Failed to load course details. Please try again.")
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  }, [courseId]);
+  }, [courseId])
 
   useEffect(() => {
-    fetchCourseData();
-  }, [fetchCourseData]);
+    fetchCourseData()
+  }, [fetchCourseData])
 
-  const handleBack = () => {
-    navigate("/teacher/courses")
-  }
-
-  const formatDate = (dateString: string) => {
-    if (!dateString) return "N/A";
-    const date = new Date(dateString);
-    if (isNaN(date.getTime())) return "Invalid Date";
-
-    const day = String(date.getDate()).padStart(2, '0'); 
-    const month = String(date.getMonth() + 1).padStart(2, '0'); 
-    const year = date.getFullYear();
-    return `${day}/${month}/${year}`;
-  }
+  const handleBack = () => navigate("/teacher/courses")
 
   const handleAssignmentFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
       const filesArray = Array.from(e.target.files)
-      setNewAssignment({ ...newAssignment, attachments: [...newAssignment.attachments, ...filesArray] })
+      setNewAssignment((prev) => ({ ...prev, attachments: [...prev.attachments, ...filesArray] }))
     }
   }
 
   const removeAssignmentFile = (index: number) => {
-    const updatedFiles = newAssignment.attachments.filter((_, i) => i !== index)
-    setNewAssignment({ ...newAssignment, attachments: updatedFiles })
+    setNewAssignment((prev) => ({ ...prev, attachments: prev.attachments.filter((_, i) => i !== index) }))
   }
 
   const handleCreateAssignment = async () => {
     setIsSubmitting(true)
-    setError(null);
+    setError(null)
 
     if (!courseId) {
-      setError("Course ID is missing for assignment creation.");
-      setIsSubmitting(false);
-      return;
+      setError("Course ID is missing for assignment creation.")
+      setIsSubmitting(false)
+      return
     }
+
     try {
-      const formData = new FormData();
-      formData.append('name', newAssignment.title);
-      formData.append('description', newAssignment.description);
-      formData.append('start_date', new Date().toISOString().split('T')[0] + ' ' + new Date().toTimeString().split(' ')[0]);
-      formData.append('end_date', newAssignment.dueDate ? new Date(newAssignment.dueDate).toISOString().slice(0, 19).replace('T', ' ') : '');
-      formData.append('course_id', courseId);
+      const formData = new FormData()
+      formData.append("name", newAssignment.title)
+      formData.append("description", newAssignment.description)
+      formData.append(
+        "start_date",
+        new Date().toISOString().split("T")[0] + " " + new Date().toTimeString().split(" ")[0],
+      )
+      formData.append(
+        "end_date",
+        newAssignment.dueDate ? new Date(newAssignment.dueDate).toISOString().slice(0, 19).replace("T", " ") : "",
+      )
+      formData.append("course_id", courseId)
 
       if (newAssignment.attachments.length > 0) {
-        formData.append('file', newAssignment.attachments[0]);
-        formData.append('uploadedname', newAssignment.attachments[0].name);
+        formData.append("file", newAssignment.attachments[0])
+        formData.append("uploadedname", newAssignment.attachments[0].name)
       } else {
-        formData.append('uploadedname', '');
+        formData.append("file", new Blob([""], { type: "application/octet-stream" }), "")
+        formData.append("uploadedname", "")
       }
 
-      const response = await MainApiRequest.post('/assignment/upload', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+      const response = await MainApiRequest.post("/assignment/upload", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      })
 
       if (response.status === 200 || response.status === 201) {
-        await fetchCourseData();
+        await fetchCourseData()
       } else {
-        setError("Failed to create assignment (unexpected status code).");
+        setError("Failed to create assignment (unexpected status code).")
       }
 
-      setNewAssignment({ title: "", description: "", dueDate: "", attachments: [] });
-      setIsNewAssignmentDialogOpen(false);
+      setNewAssignment({ title: "", description: "", dueDate: "", attachments: [] })
+      setIsNewAssignmentDialogOpen(false)
     } catch (err) {
-      console.error("Failed to create assignment:", err);
-      setError("Failed to create assignment. Please try again.");
+      console.error("Failed to create assignment:", err)
+      setError("Failed to create assignment. Please try again.")
     } finally {
-      setIsSubmitting(false);
+      setIsSubmitting(false)
     }
   }
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
-      setNewDocument({ ...newDocument, file: e.target.files[0] })
+      setNewDocument((prev) => ({ ...prev, file: e.target.files![0] }))
     }
   }
 
   const handleUploadDocument = async () => {
     setIsSubmitting(true)
-    setError(null);
+    setError(null)
+
     if (!courseId) {
-      setError("Course ID is missing for document upload.");
-      setIsSubmitting(false);
-      return;
+      setError("Course ID is missing for document upload.")
+      setIsSubmitting(false)
+      return
     }
     if (!newDocument.file) {
-      setError("No file selected for upload.");
-      setIsSubmitting(false);
-      return;
+      setError("No file selected for upload.")
+      setIsSubmitting(false)
+      return
     }
 
     try {
-      const formData = new FormData();
-      formData.append('name', newDocument.title);
-      formData.append('description', newDocument.description);
-      formData.append('course_id', courseId);
-      formData.append('file', newDocument.file);
-      formData.append('uploadedname', newDocument.file.name);
+      const formData = new FormData()
+      formData.append("name", newDocument.title)
+      formData.append("description", newDocument.description)
+      formData.append("course_id", courseId)
+      formData.append("file", newDocument.file)
+      formData.append("uploadedname", newDocument.file.name)
 
-      const response = await MainApiRequest.post('/document', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+      const response = await MainApiRequest.post("/document", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      })
 
       if (response.status === 200 || response.status === 201) {
-        await fetchCourseData();
+        await fetchCourseData()
       } else {
-        setError("Failed to upload document (unexpected status code).");
+        setError("Failed to upload document (unexpected status code).")
       }
 
-      setNewDocument({ title: "", description: "", file: null });
-      setIsNewDocumentDialogOpen(false);
+      setNewDocument({ title: "", description: "", file: null })
+      setIsNewDocumentDialogOpen(false)
     } catch (err) {
-      console.error("Failed to upload document:", err);
-      setError("Failed to upload document. Please try again.");
+      console.error("Failed to upload document:", err)
+      setError("Failed to upload document. Please try again.")
     } finally {
-      setIsSubmitting(false);
+      setIsSubmitting(false)
     }
   }
 
   const handleDeleteDocument = async (documentId: string): Promise<boolean> => {
-    setError(null);
+    setError(null)
     try {
-      const response = await MainApiRequest.delete(`/document/${documentId}`);
-        if (response.status === 200 || response.data.success) {
-        console.log(`Document ${documentId} deleted successfully from backend.`);
-        return true;
-      } else {
-        console.error(`Failed to delete document ${documentId} from backend:`, response.data);
-        setError("Failed to delete document from server.");
-        return false;
+      const response = await MainApiRequest.delete(`/document/${documentId}`)
+      if (response.status === 200 || (response.data && response.data.success)) {
+        return true
       }
+      setError("Failed to delete document from server.")
+      return false
     } catch (err) {
-      console.error("Error deleting document:", err);
-      setError("An error occurred while deleting the document.");
-      return false;
+      console.error("Error deleting document:", err)
+      setError("An error occurred while deleting the document.")
+      return false
     }
-  };
+  }
 
   const handleRemoveDocumentFromUI = (documentId: string) => {
-    setDocuments(prevDocuments => prevDocuments.filter(doc => doc.id !== documentId));
-  };
+    setDocuments((prev) => prev.filter((doc) => doc.id !== documentId))
+  }
 
   const handleDeleteAssignment = async (assignmentId: string): Promise<boolean> => {
-    setError(null);
+    setError(null)
     try {
-      const response = await MainApiRequest.delete(`/assignment/delete/${assignmentId}`);
-      if (response.status === 200 || response.data.success) {
-        console.log(`Assignment ${assignmentId} deleted successfully from backend.`);
-        return true;
-      } else {
-        console.error(`Failed to delete assignment ${assignmentId} from backend:`, response.data);
-        setError("Failed to delete assignment from server.");
-        return false;
+      const response = await MainApiRequest.delete(`/assignment/delete/${assignmentId}`)
+      if (response.status === 200 || (response.data && response.data.success)) {
+        return true
       }
+      setError("Failed to delete assignment from server.")
+      return false
     } catch (err) {
-      console.error("Error deleting assignment:", err);
-      setError("An error occurred while deleting the assignment.");
-      return false;
+      console.error("Error deleting assignment:", err)
+      setError("An error occurred while deleting the assignment.")
+      return false
     }
-  };
+  }
 
   const handleRemoveAssignmentFromUI = (assignmentId: string) => {
-    setAssignments(prevAssignments => prevAssignments.filter(assign => assign.id !== assignmentId));
-  };
+    setAssignments((prev) => prev.filter((assign) => assign.id !== assignmentId))
+  }
 
   const handleEditDocument = async (updatedDocument: Document) => {
-    setError(null);
+    setError(null)
     try {
-      const formData = new FormData();
-      formData.append('name', updatedDocument.title);
-      formData.append('description', updatedDocument.description);
-      formData.append('course_id', courseId || '');
+      const formData = new FormData()
+      formData.append("name", updatedDocument.title)
+      formData.append("description", updatedDocument.description)
+      formData.append("course_id", courseId || "")
+
       if (updatedDocument.file) {
-        formData.append('file', updatedDocument.file);
-        formData.append('uploadedname', updatedDocument.file.name);
+        formData.append("file", updatedDocument.file)
+        formData.append("uploadedname", updatedDocument.file.name)
       }
 
       const response = await MainApiRequest.put(`/document/${updatedDocument.id}`, formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-        },
-      });
+        headers: { "Content-Type": "multipart/form-data" },
+      })
 
       if (response.status === 200) {
-        console.log(`Document ${updatedDocument.id} updated successfully.`);
-        fetchCourseData();
+        fetchCourseData()
       } else {
-        console.error("Failed to update document:", response.data);
-        setError("Failed to update document.");
+        setError("Failed to update document.")
       }
     } catch (err) {
-      console.error("Error updating document:", err);
-      setError("An error occurred while updating the document.");
+      console.error("Error updating document:", err)
+      setError("An error occurred while updating the document.")
     }
-  };
+  }
 
   const filteredStudents = students.filter(
     (student) =>
@@ -431,7 +453,7 @@ const TeacherCourseDetail: React.FC = () => {
   if (loading) {
     return (
       <div className="course-detail-loading">
-        <div className="loading-spinner"></div>
+        <div className="loading-spinner" />
         <p>Loading course details...</p>
       </div>
     )
@@ -443,7 +465,9 @@ const TeacherCourseDetail: React.FC = () => {
         <h2>Error Loading Course</h2>
         <p>{error}</p>
         <Button onClick={fetchCourseData}>Retry</Button>
-        <Button onClick={handleBack} variant="outline" className="ml-2">Back to Courses</Button>
+        <Button onClick={handleBack} variant="outline" className="ml-2">
+          Back to Courses
+        </Button>
       </div>
     )
   }
@@ -513,7 +537,9 @@ const TeacherCourseDetail: React.FC = () => {
                       <Users className="icon" />
                     </div>
                     <div className="activity-content">
-                      <p className="activity-text">{courseDetail.students} students currently enrolled</p>
+                      <p className="activity-text">
+                        {courseDetail.students} students currently enrolled
+                      </p>
                       <p className="activity-time">Updated recently</p>
                     </div>
                   </div>
@@ -567,7 +593,9 @@ const TeacherCourseDetail: React.FC = () => {
               <DialogContent>
                 <DialogHeader>
                   <DialogTitle>Create New Assignment</DialogTitle>
-                  <DialogDescription>Create a new assignment for students in this course.</DialogDescription>
+                  <DialogDescription>
+                    Create a new assignment for students in this course.
+                  </DialogDescription>
                 </DialogHeader>
 
                 <div className="dialog-form">
@@ -585,7 +613,9 @@ const TeacherCourseDetail: React.FC = () => {
                     <Textarea
                       placeholder="Assignment description"
                       value={newAssignment.description}
-                      onChange={(e) => setNewAssignment({ ...newAssignment, description: e.target.value })}
+                      onChange={(e) =>
+                        setNewAssignment({ ...newAssignment, description: e.target.value })
+                      }
                     />
                   </div>
 
