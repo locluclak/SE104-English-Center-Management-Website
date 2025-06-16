@@ -16,10 +16,11 @@ export interface TeacherCourse {
   status: "active" | "completed" | "paused"
 }
 
-export interface TeacherAssignment {
+export interface Assignment {
   id: string
   title: string
   description: string
+  startDate: string
   dueDate: string
   submissionsCount: number
   totalStudents: number

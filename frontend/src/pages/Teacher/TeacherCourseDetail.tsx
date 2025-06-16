@@ -15,6 +15,7 @@ import { TeacherAssignmentItem } from "../../components/Teacher/TeacherAssignmen
 import { TeacherDocumentItem } from "../../components/Teacher/TeacherDocumentItem"
 import TeacherStudentItem from "../../components/Teacher/TeacherStudentItem"
 import { TeacherReportItem } from "../../components/Teacher/TeacherReportItem"
+import type { Assignment} from "../../types/teacher";
 import { MainApiRequest } from "@/services/MainApiRequest"
 import "./TeacherCourseDetail.scss"
 
@@ -55,21 +56,6 @@ interface BackendAssignment {
   COURSE_ID: string
 }
 
-interface Assignment {
-  id: string
-  title: string
-  description: string
-  dueDate: string
-  submissionsCount: number
-  totalStudents: number
-  attachments: {
-    id: string
-    fileName: string
-    fileSize: string
-    fileType: string
-    downloadUrl: string
-  }[]
-}
 
 interface BackendDocument {
   DOC_ID: string
@@ -121,7 +107,7 @@ const TeacherCourseDetail: React.FC = () => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [searchTerm, setSearchTerm] = useState("") // Search term state is here
-
+  
   const [isNewAssignmentDialogOpen, setIsNewAssignmentDialogOpen] = useState(false)
   const [isNewDocumentDialogOpen, setIsNewDocumentDialogOpen] = useState(false)
 
@@ -137,6 +123,14 @@ const TeacherCourseDetail: React.FC = () => {
     description: "",
     file: null as File | null,
   })
+
+  const handleAssignmentUpdated = (updatedAssignment: Assignment) => {
+    setAssignments((prevAssignments) =>
+      prevAssignments.map((assign) =>
+        assign.id === updatedAssignment.id ? updatedAssignment : assign,
+      ),
+    );
+  };
 
   const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -203,6 +197,7 @@ const TeacherCourseDetail: React.FC = () => {
         id: assign.AS_ID,
         title: assign.NAME,
         description: assign.DESCRIPTION,
+        startDate: assign.START_DATE,
         dueDate: assign.END_DATE,
         submissionsCount: Math.floor(Math.random() * (courseResponse.data.NUMBER_STU || 0) * 0.8),
         totalStudents: courseResponse.data.NUMBER_STU || 0,
@@ -600,8 +595,8 @@ const TeacherCourseDetail: React.FC = () => {
                   assignment={assignment}
                   courseId={courseDetail.id}
                   onRemoveFromUI={handleRemoveAssignmentFromUI}
-                  // Pass isCourseCompleted to allow or disallow actions within the item
                   isCourseCompleted={isCourseCompleted}
+                  onUpdateAssignment={handleAssignmentUpdated}
                 />
               ))}
               {assignments.length === 0 && <p className="no-content">No assignments available</p>}
