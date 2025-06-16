@@ -13,7 +13,8 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Users, Calendar, ArrowLeft, Clock, Plus, Search, FileText } from "../../components/Ui/Icons/icons"
 import { TeacherAssignmentItem } from "../../components/Teacher/TeacherAssignmentItem"
 import { TeacherDocumentItem } from "../../components/Teacher/TeacherDocumentItem"
-import { TeacherStudentItem } from "../../components/Teacher/TeacherStudentItem"
+import { TeacherStudentItem } from "../../components/Teacher/TeacherStudentItem" // Already imported, but now will be used in a tab
+import { TeacherReportItem } from "../../components/Teacher/TeacherReportItem"
 import { MainApiRequest } from "@/services/MainApiRequest"
 import "./TeacherCourseDetail.scss"
 
@@ -116,10 +117,10 @@ const TeacherCourseDetail: React.FC = () => {
   const [courseDetail, setCourseDetail] = useState<CourseDetail | null>(null)
   const [assignments, setAssignments] = useState<Assignment[]>([])
   const [documents, setDocuments] = useState<Document[]>([])
-  const [students, setStudents] = useState<Student[]>([])
+  const [students, setStudents] = useState<Student[]>([]) // Students state is here
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  const [searchTerm, setSearchTerm] = useState("")
+  const [searchTerm, setSearchTerm] = useState("") // Search term state is here
 
   const [isNewAssignmentDialogOpen, setIsNewAssignmentDialogOpen] = useState(false)
   const [isNewDocumentDialogOpen, setIsNewDocumentDialogOpen] = useState(false)
@@ -236,6 +237,7 @@ const TeacherCourseDetail: React.FC = () => {
       }))
       setDocuments(fetchedDocuments)
 
+      // Fetch students for the course
       const studentsResponse = await MainApiRequest.get<BackendStudent[]>(
         `/course/${courseId}/students`,
       )
@@ -444,6 +446,7 @@ const TeacherCourseDetail: React.FC = () => {
     }
   }
 
+  // Filter students based on search term
   const filteredStudents = students.filter(
     (student) =>
       student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -482,6 +485,11 @@ const TeacherCourseDetail: React.FC = () => {
     )
   }
 
+  // Ensure courseId is parsed to a number before passing
+  const numericCourseId = parseInt(courseId || '0', 10);
+  // Check if parsing was successful and it's a valid number
+  const isCourseIdValidNumber = !isNaN(numericCourseId) && numericCourseId > 0;
+
   return (
     <div className="teacher-course-detail">
       <div className="course-header">
@@ -513,6 +521,8 @@ const TeacherCourseDetail: React.FC = () => {
           <TabsTrigger value="overview">Overview</TabsTrigger>
           <TabsTrigger value="assignments">Assignments</TabsTrigger>
           <TabsTrigger value="materials">Materials</TabsTrigger>
+          <TabsTrigger value="students">Students</TabsTrigger> {/* New Students Tab */}
+          <TabsTrigger value="reports">Reports</TabsTrigger>
         </TabsList>
 
         {activeTab === "overview" && (
@@ -742,6 +752,48 @@ const TeacherCourseDetail: React.FC = () => {
                 </DialogFooter>
               </DialogContent>
             </Dialog>
+          </div>
+        )}
+
+        {/* New Students Tab Content */}
+        {activeTab === "students" && (
+          <div className="tab-content">
+            <div className="tab-header">
+              <h2>Enrolled Students</h2>
+              <div className="search-input-wrapper">
+                <Search className="search-icon" />
+                <Input
+                  placeholder="Search students by name or email..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="search-input"
+                />
+              </div>
+            </div>
+
+            <div className="students-list">
+              {filteredStudents.length > 0 ? (
+                filteredStudents.map((student) => (
+                  <TeacherStudentItem key={student.id} student={student} courseId={courseDetail.id} />
+                ))
+              ) : (
+                <p className="no-content">No students found matching your search.</p>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Reports Tab Content */}
+        {activeTab === "reports" && (
+          <div className="tab-content">
+            <div className="tab-header">
+              <h2>Course Reports</h2>
+            </div>
+            {isCourseIdValidNumber ? (
+                 <TeacherReportItem courseId={numericCourseId} />
+            ) : (
+                <p>Invalid Course ID for reports.</p>
+            )}
           </div>
         )}
       </Tabs>
