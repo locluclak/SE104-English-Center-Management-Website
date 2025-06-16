@@ -457,7 +457,7 @@ router.get('/unenrolled-courses/:personId', async (req, res) => {
   }
 });
 
-//Get all courses taught by a specific teacher
+// Route to get all courses taught by a specific teacher
 router.get('/teacher-courses/:teacherId', async (req, res) => {
   const teacherId = req.params.teacherId;
 
@@ -492,31 +492,34 @@ router.get('/teacher-courses/:teacherId', async (req, res) => {
       const now = new Date();
       const startDate = new Date(course.START_DATE);
       const endDate = new Date(course.END_DATE);
-    let status = "active";
+      let status = "active";
 
-    if (now < startDate) {
-      status = "upcoming";
-    } else if (now > endDate) {
-      status = "completed";
-    }
+      if (now < startDate) {
+        status = "upcoming";
+      } else if (now > endDate) {
+        status = "completed";
+      }
 
-    const schedule = "TBD";
-    let nextClass = "";
-    if (status === "active" || status === "upcoming") {
-      nextClass = startDate.toISOString(); 
-    }
+      const schedule = `${course.START_DATE.toISOString().split('T')[0]} - ${course.END_DATE.toISOString().split('T')[0]}`;
+      
+      let nextClass = "";
+      if (status === "active" || status === "upcoming") {
+        nextClass = course.START_DATE.toISOString(); 
+      }
 
-    return {
-      id: String(course.id),
-      name: course.name,
-      description: course.description,
-      students: course.students || 0, // Ensure students count is not null
-      maxStudents: course.maxStudents,
-      schedule: schedule,
-      nextClass: nextClass,
-      status: status,
-    };
-  });
+      return {
+        id: String(course.id),
+        name: course.name,
+        description: course.description,
+        students: course.students || 0,
+        maxStudents: course.maxStudents,
+        schedule: schedule,
+        nextClass: nextClass,
+        status: status,
+        START_DATE: course.START_DATE,
+        END_DATE: course.END_DATE
+      };
+    });
 
     res.status(200).json(formattedCourses);
   } catch (error) {

@@ -25,7 +25,7 @@ router.post('/upload', upload.single('file'), async (req, res) => {
   const filePath = req.file ? `/uploads/${req.file.filename}` : null;
 
   // Validate required fields
-  if (!name || !start_date || !end_date || !course_id || !uploadedname) {
+  if (!name || !start_date || !end_date || !course_id) {
     return res.status(400).json({ error: 'Missing required fields: name, start_date, end_date, or course_id' });
   }
 
@@ -38,7 +38,7 @@ router.post('/upload', upload.single('file'), async (req, res) => {
       name,
       description || null, // Use null if description is not provided
       uploadedname,
-      filePath, // File path can be null if no file is uploaded
+      filePath || null, // File path can be null if no file is uploaded
       start_date,
       end_date,
       course_id
