@@ -13,7 +13,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Users, Calendar, ArrowLeft, Clock, Plus, Search, FileText } from "../../components/Ui/Icons/icons"
 import { TeacherAssignmentItem } from "../../components/Teacher/TeacherAssignmentItem"
 import { TeacherDocumentItem } from "../../components/Teacher/TeacherDocumentItem"
-import { TeacherStudentItem } from "../../components/Teacher/TeacherStudentItem" // Already imported, but now will be used in a tab
+import TeacherStudentItem from "../../components/Teacher/TeacherStudentItem"
 import { TeacherReportItem } from "../../components/Teacher/TeacherReportItem"
 import { MainApiRequest } from "@/services/MainApiRequest"
 import "./TeacherCourseDetail.scss"
@@ -770,15 +770,8 @@ const TeacherCourseDetail: React.FC = () => {
               </div>
             </div>
 
-            <div className="students-list">
-              {filteredStudents.length > 0 ? (
-                filteredStudents.map((student) => (
-                  <TeacherStudentItem key={student.id} student={student} courseId={courseDetail.id} />
-                ))
-              ) : (
-                <p className="no-content">No students found matching your search.</p>
-              )}
-            </div>
+            {/* Truyền courseId và searchTerm vào TeacherStudentItem */}
+            <TeacherStudentItem courseId={courseDetail.id} searchTerm={searchTerm} />
           </div>
         )}
 

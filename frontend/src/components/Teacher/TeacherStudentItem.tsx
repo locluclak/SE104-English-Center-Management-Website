@@ -1,86 +1,98 @@
-"use client"
+// TeacherStudentItem.tsx
+import React, { useEffect, useState } from "react";
+import { Table, Button, Space, Popconfirm, message } from "antd";
+import moment from "moment";
+import { MainApiRequest } from "@/services/MainApiRequest";
+import { Users } from "../../components/Ui/Icons/icons";
 
-import type React from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../../components/Ui/Card/card"
-import { Button } from "../../components/Ui/Button/button"
-import { Users } from "../../components/Ui/Icons/icons"
-import "./TeacherStudentItem.scss"
+interface BackendStudent { // Giữ nguyên BackendStudent để map từ API
+  ID: string
+  NAME: string
+  EMAIL: string
+  PHONE_NUMBER: string
+  DATE_OF_BIRTH: string
+  ENROLL_DATE: string
+  PAYMENT_STATUS?: "UNPAID" | "PAID" | "DEFERRED"
+}
 
-interface Student {
-  id: string
-  name: string
-  email: string
-  progress: number
-  lastActivity: string
+interface StudentForTable { // Interface riêng cho dữ liệu hiển thị trong Table
+  key: string; // key cho Ant Design Table
+  id: string;
+  name: string;
+  email: string;
+  phone_number: string;
+  date_of_birth: string;
+  birthday: string; // Dạng đã format
+  status: string;
 }
 
 interface TeacherStudentItemProps {
-  student: Student
-  courseId: string
+  courseId: string;
+  searchTerm: string; // Thêm searchTerm vào props
 }
 
-export const TeacherStudentItem: React.FC<TeacherStudentItemProps> = ({ student, courseId }) => {
-  const formatLastActivity = (dateString: string) => {
-    const date = new Date(dateString)
-    const now = new Date()
-    const diffTime = Math.abs(now.getTime() - date.getTime())
-    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24))
+const formatDate = (dateString: string): string =>
+  dateString ? moment(dateString).format("YYYY-MM-DD") : "";
 
-    if (diffDays === 0) {
-      return "Today"
-    } else if (diffDays === 1) {
-      return "Yesterday"
-    } else {
-      return `${diffDays} days ago`
+const TeacherStudentItem: React.FC<TeacherStudentItemProps> = ({ courseId, searchTerm }) => {
+  const [students, setStudents] = useState<StudentForTable[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  const fetchStudents = async () => {
+    setLoading(true);
+    try {
+      // Endpoint API bạn đã dùng trong TeacherCourseDetail.tsx là `/course/${courseId}/students`
+      const res = await MainApiRequest.get<BackendStudent[]>(`/course/${courseId}/students`);
+      const fetchedStudents: StudentForTable[] = res.data.map((s: BackendStudent) => ({
+        key: s.ID, // Dùng ID làm key
+        id: s.ID,
+        name: s.NAME,
+        email: s.EMAIL,
+        phone_number: s.PHONE_NUMBER ?? "",
+        date_of_birth: s.DATE_OF_BIRTH,
+        birthday: formatDate(s.DATE_OF_BIRTH),
+        status: s.PAYMENT_STATUS ?? "active", // Giả định PAYMENT_STATUS có thể làm status
+      }));
+      setStudents(fetchedStudents);
+    } catch (err) {
+      console.error("Lỗi khi lấy danh sách học viên:", err);
+      message.error("Không thể lấy danh sách học viên.");
+    } finally {
+      setLoading(false);
     }
-  }
+  };
 
-  const getProgressColor = (progress: number) => {
-    if (progress >= 80) return "progress-high"
-    if (progress >= 60) return "progress-medium"
-    return "progress-low"
-  }
+  useEffect(() => {
+    fetchStudents();
+  }, [courseId]); // Fetch lại khi courseId thay đổi
+
+  // Lọc sinh viên dựa trên searchTerm
+  const filteredStudents = students.filter(
+    (student) =>
+      student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      student.email.toLowerCase().includes(searchTerm.toLowerCase()),
+  );
+
 
   return (
-    <Card className="student-item">
-      <CardHeader>
-        <div className="student-header">
-          <div className="student-avatar">
-            <Users className="avatar-icon" />
-          </div>
-          <div className="student-info">
-            <CardTitle>{student.name}</CardTitle>
-            <CardDescription>{student.email}</CardDescription>
-          </div>
-        </div>
-      </CardHeader>
+    <Table
+      dataSource={filteredStudents} // Sử dụng filteredStudents
+      rowKey="id"
+      pagination={{ pageSize: 5, showSizeChanger: true }}
+      loading={loading}
+      columns={[
+        { title: "ID", dataIndex: "id" },
+        { title: "Name", dataIndex: "name" },
+        { title: "Email", dataIndex: "email" },
+        { title: "Phone Number", dataIndex: "phone_number" },
+        {
+          title: "Date of Birth",
+          dataIndex: "birthday",
+          render: (text) => moment(text).format("DD-MM-YYYY"),
+        },
+      ]}
+    />
+  );
+};
 
-      <CardContent>
-        <div className="student-details">
-          <div className="detail-row">
-            <span>Last Activity:</span>
-            <span>{formatLastActivity(student.lastActivity)}</span>
-          </div>
-
-          <div className="progress-section">
-            <div className="progress-header">
-              <span>Course Progress</span>
-              <span>{student.progress}%</span>
-            </div>
-            <div className="progress-bar">
-              <div
-                className={`progress-fill ${getProgressColor(student.progress)}`}
-                style={{ width: `${student.progress}%` }}
-              />
-            </div>
-          </div>
-        </div>
-
-        <div className="student-actions">
-          <Button variant="outline">View Details</Button>
-          <Button>Send Message</Button>
-        </div>
-      </CardContent>
-    </Card>
-  )
-}
+export default TeacherStudentItem;
