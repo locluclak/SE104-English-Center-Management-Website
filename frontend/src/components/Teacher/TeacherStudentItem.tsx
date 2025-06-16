@@ -37,6 +37,8 @@ const formatDate = (dateString: string): string =>
 const TeacherStudentItem: React.FC<TeacherStudentItemProps> = ({ courseId, searchTerm }) => {
   const [students, setStudents] = useState<StudentForTable[]>([]);
   const [loading, setLoading] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(5);
 
   const fetchStudents = async () => {
     setLoading(true);
@@ -76,9 +78,22 @@ const TeacherStudentItem: React.FC<TeacherStudentItemProps> = ({ courseId, searc
 
   return (
     <Table
-      dataSource={filteredStudents} // Sử dụng filteredStudents
+      dataSource={filteredStudents} 
       rowKey="id"
-      pagination={{ pageSize: 5, showSizeChanger: true }}
+      pagination={{
+          current: currentPage, 
+          pageSize: pageSize,   
+          showSizeChanger: true,
+          pageSizeOptions: ['5', '10', '20', '50', '100'],
+          onChange: (page, newPageSize) => { 
+            setCurrentPage(page);
+            setPageSize(newPageSize);
+          },
+          onShowSizeChange: (current, size) => {
+            setCurrentPage(current);
+            setPageSize(size);
+          },
+        }}
       loading={loading}
       columns={[
         { title: "ID", dataIndex: "id" },

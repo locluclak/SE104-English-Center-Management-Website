@@ -35,6 +35,8 @@ const TeachersList = () => {
   const [openModal, setOpenModal] = useState(false);
   const [editingTeacher, setEditingTeacher] = useState<Teacher | null>(null);
   const [searchKeyword, setSearchKeyword] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(5);
 
   const fetchTeachers = async () => {
     try {
@@ -207,7 +209,20 @@ const TeachersList = () => {
       <Table
         dataSource={TeachersList}
         rowKey="id"
-        pagination={{ pageSize: 5, showSizeChanger: true }}
+        pagination={{
+          current: currentPage, 
+          pageSize: pageSize,   
+          showSizeChanger: true,
+          pageSizeOptions: ['5', '10', '20', '50', '100'],
+          onChange: (page, newPageSize) => { 
+            setCurrentPage(page);
+            setPageSize(newPageSize);
+          },
+          onShowSizeChange: (current, size) => {
+            setCurrentPage(current);
+            setPageSize(size);
+          },
+        }}
         columns={[
           { title: 'ID', dataIndex: 'id' },
           { title: 'Name', dataIndex: 'name' },

@@ -32,6 +32,8 @@ const AccountantsList = () => {
   const [openModal, setOpenModal] = useState(false);
   const [editingAccountant, setEditingAccountant] = useState<Accountant | null>(null);
   const [searchKeyword, setSearchKeyword] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(5);
 
   const fetchAccountants = async () => {
     try {
@@ -202,7 +204,20 @@ const AccountantsList = () => {
       <Table
         dataSource={accountants}
         rowKey="id"
-        pagination={{ pageSize: 5, showSizeChanger: true }}
+        pagination={{
+          current: currentPage, 
+          pageSize: pageSize,   
+          showSizeChanger: true,
+          pageSizeOptions: ['5', '10', '20', '50', '100'],
+          onChange: (page, newPageSize) => { 
+            setCurrentPage(page);
+            setPageSize(newPageSize);
+          },
+          onShowSizeChange: (current, size) => {
+            setCurrentPage(current);
+            setPageSize(size);
+          },
+        }}
         columns={[
           { title: 'ID', dataIndex: 'id' },
           { title: 'Name', dataIndex: 'name' },
