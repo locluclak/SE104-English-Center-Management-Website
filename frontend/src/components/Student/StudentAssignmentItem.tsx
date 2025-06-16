@@ -257,7 +257,7 @@ export const StudentAssignmentItem: React.FC<StudentAssignmentItemProps> = ({
           </DialogHeader>
           <div className="submission-form">
             <div className="form-field">
-              <label>Your Answer</label>
+              <label>Title</label>
               <Textarea
                 value={submissionText}
                 onChange={(e) => setSubmissionText(e.target.value)}
