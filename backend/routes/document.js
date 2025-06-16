@@ -24,7 +24,7 @@ router.post('/', upload.single('file'), async (req, res) => {
   const { name, description, course_id, uploadedname } = req.body;
   const filePath = req.file ? `/uploads/${req.file.filename}` : null;
 
-  if (!name || !course_id || !filePath) {
+  if (!name || !course_id ) {
     return res.status(400).json({ message: 'Missing required fields' });
   }
 
@@ -117,6 +117,7 @@ router.get('/getbycourse/:id', async (req, res) => {
 router.put('/update/:id', async (req, res) => {
   const docId = req.params.id;
   const { name, description } = req.body;
+  const file = req.file;
 
   if (!name && !description) {
     return res.status(400).json({ message: 'No fields to update' });

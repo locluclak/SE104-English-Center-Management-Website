@@ -344,19 +344,20 @@ const TeacherCourseDetail: React.FC = () => {
       setIsSubmitting(false)
       return
     }
-    if (!newDocument.file) {
-      setError("No file selected for upload.")
-      setIsSubmitting(false)
-      return
-    }
 
     try {
       const formData = new FormData()
       formData.append("name", newDocument.title)
       formData.append("description", newDocument.description)
       formData.append("course_id", courseId)
-      formData.append("file", newDocument.file)
-      formData.append("uploadedname", newDocument.file.name)
+
+      if (newDocument.file) {
+        formData.append("file", newDocument.file)
+        formData.append("uploadedname", newDocument.file.name)
+      } else {
+        formData.append("file", new Blob([""], { type: "application/octet-stream" }), "")
+        formData.append("uploadedname", "")
+      }
 
       const response = await MainApiRequest.post("/document", formData, {
         headers: { "Content-Type": "multipart/form-data" },
@@ -381,7 +382,7 @@ const TeacherCourseDetail: React.FC = () => {
   const handleDeleteDocument = async (documentId: string): Promise<boolean> => {
     setError(null)
     try {
-      const response = await MainApiRequest.delete(`/document/${documentId}`)
+      const response = await MainApiRequest.delete(`/document/delete/${documentId}`);
       if (response.status === 200 || (response.data && response.data.success)) {
         return true
       }
@@ -431,9 +432,7 @@ const TeacherCourseDetail: React.FC = () => {
         formData.append("uploadedname", updatedDocument.file.name)
       }
 
-      const response = await MainApiRequest.put(`/document/${updatedDocument.id}`, formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      })
+      const response = await MainApiRequest.put(`/document/update/${updatedDocument.id}`, formData)
 
       if (response.status === 200) {
         fetchCourseData()
@@ -745,7 +744,7 @@ const TeacherCourseDetail: React.FC = () => {
                   </Button>
                   <Button
                     onClick={handleUploadDocument}
-                    disabled={isSubmitting || !newDocument.title || !newDocument.file}
+                    disabled={isSubmitting || !newDocument.title }
                   >
                     {isSubmitting ? "Uploading..." : "Upload Material"}
                   </Button>
