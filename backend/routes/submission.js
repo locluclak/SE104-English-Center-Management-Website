@@ -33,7 +33,7 @@ router.post('/upload', async (req, res) => {
     const filePath = req.file ? `/uploads/${req.file.filename}` : null;
 
     // Validate required fields
-    if (!student_id || !assignment_id || !filePath || !uploadedname) {
+    if (!student_id || !assignment_id ) {
       return res.status(400).json({ error: 'Missing required fields: student_id, assignment_id, or file' });
     }
 
