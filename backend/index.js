@@ -20,7 +20,8 @@ app.use(cors());
 
 // Parse incoming JSON request bodies
 app.use(express.json());
-app.use('/uploads', express.static('uploads'));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')))
+
 
 // Mount authentication routes at the root path
 app.use('/', authRoutes);
