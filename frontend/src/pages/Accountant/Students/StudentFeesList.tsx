@@ -40,6 +40,8 @@ const StudentFeesList = () => {
   const [form] = Form.useForm();
   const [paymentStatus, setPaymentStatus] = useState<string | undefined>(undefined);
   const [paymentType, setPaymentType] = useState<string | undefined>("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(5);
 
   // Options for select components based on ENUM from the database
   const paymentStatusOptions = [
@@ -255,10 +257,19 @@ const StudentFeesList = () => {
             key: item.payment_id || item.student_id || `student-${index}`,
           }))}
           pagination={{
-            pageSize: 10,
-            showSizeChanger: true,
-            showTotal: (total) => `Total ${total} records`,
-          }}
+          current: currentPage, 
+          pageSize: pageSize,   
+          showSizeChanger: true,
+          pageSizeOptions: ['5', '10', '20', '50', '100'],
+          onChange: (page, newPageSize) => { 
+            setCurrentPage(page);
+            setPageSize(newPageSize);
+          },
+          onShowSizeChange: (current, size) => {
+            setCurrentPage(current);
+            setPageSize(size);
+          },
+        }}
         />
       )}
 
