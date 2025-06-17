@@ -175,6 +175,7 @@ router.get('/notes/:ownerId', async (req, res) => {
         p.CONTENT AS padletContent,
         p.COLOR AS color,
         p.CREATETIME AS createTime,
+        p.OWNERID AS ownerId,
         JSON_ARRAYAGG(
           JSON_OBJECT(
             'id', m.ID,
