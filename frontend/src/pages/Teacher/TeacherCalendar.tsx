@@ -39,67 +39,67 @@ const TeacherCalendar: React.FC<TeacherCalendarProps> = ({ teacherId }) => {
 
   useEffect(() => {
     const fetchData = async () => {
-      if (!teacherId) return
+      if (!teacherId) return;
 
-      setLoading(true)
-      setError(null)
+      setLoading(true);
+      setError(null);
 
       try {
-        const res = await MainApiRequest.get(`/course/teacher-courses/${teacherId}`)
+        const res = await MainApiRequest.get(`/course/teacher-courses/${teacherId}`);
         const courseList: Course[] = res.data.map((c: any) => ({
           id: String(c.id),
           name: c.name,
-        }))
-        setCourses(courseList)
+        }));
+        setCourses(courseList);
 
-        let assignments: CalendarEvent[] = []
+        let assignments: CalendarEvent[] = [];
 
         if (selectedCourse === "all") {
           const assignmentPromises = courseList.map(async (course) => {
-            const assignRes = await MainApiRequest.get(`/course/${course.id}/assignments_time`)
-            const items = assignRes.data.assignments || []
+            const assignRes = await MainApiRequest.get(`/course/${course.id}/assignments_time`);
+            const items = assignRes.data.assignments || [];
             return items.map((a: any) => ({
               id: a.AS_ID,
               title: a.NAME,
               description: a.DESCRIPTION || "",
               startDate: a.START_DATE,
               endDate: a.END_DATE,
-              time: "23:59",
+              time: a.END_DATE ? new Date(a.END_DATE).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) : "23:59", // Lấy giờ từ END_DATE
               type: "assignment",
               courseId: course.id,
               courseName: course.name,
-            }))
-          })
-          const allAssignments = (await Promise.all(assignmentPromises)).flat()
-          assignments = allAssignments
+            }));
+          });
+          const allAssignments = (await Promise.all(assignmentPromises)).flat();
+          assignments = allAssignments;
         } else {
-          const assignRes = await MainApiRequest.get(`/course/${selectedCourse}/assignments_time`)
-          const items = assignRes.data.assignments || []
-          const courseName = courseList.find(c => c.id === selectedCourse)?.name || "Khóa học"
+          const assignRes = await MainApiRequest.get(`/course/${selectedCourse}/assignments_time`);
+          const items = assignRes.data.assignments || [];
+          const courseName = courseList.find(c => c.id === selectedCourse)?.name || "Khóa học";
           assignments = items.map((a: any) => ({
             id: a.AS_ID,
             title: a.NAME,
             description: a.DESCRIPTION || "",
             startDate: a.START_DATE,
             endDate: a.END_DATE,
-            time: "23:59",
+            time: a.END_DATE ? new Date(a.END_DATE).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) : "23:59", // Lấy giờ từ END_DATE
             type: "assignment",
             courseId: selectedCourse,
             courseName,
-          }))
+          }));
         }
 
-        setEvents(assignments)
+        setEvents(assignments);
       } catch (err) {
-        console.error("Lỗi khi tải dữ liệu:", err)
-        setError("Không thể tải dữ liệu. Vui lòng thử lại sau.")
+        console.error("Lỗi khi tải dữ liệu:", err);
+        setError("Không thể tải dữ liệu. Vui lòng thử lại sau.");
       } finally {
-        setLoading(false)
+        setLoading(false);
       }
-    }
+    };
 
-    fetchData()
-  }, [teacherId, selectedCourse])
+    fetchData();
+  }, [teacherId, selectedCourse]);
 
   const getDaysInMonth = (date: Date) => new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate()
   const getFirstDayOfMonth = (date: Date) => {
@@ -107,14 +107,18 @@ const TeacherCalendar: React.FC<TeacherCalendarProps> = ({ teacherId }) => {
     return firstDay === 0 ? 6 : firstDay - 1
   }
 
-  const isDateInRange = (date: string, start: string, end: string) => {
-    const d = new Date(date)
-    return d >= new Date(start) && d <= new Date(end)
-  }
+  const isDateInRange = (currentCalendarDay: Date, eventStartString: string, eventEndString: string) => {
+    const eventStartDate = new Date(eventStartString);
+    const eventEndDate = new Date(eventEndString);
+
+    const currentDayStart = new Date(currentCalendarDay.getFullYear(), currentCalendarDay.getMonth(), currentCalendarDay.getDate(), 0, 0, 0, 0);
+    const currentDayEnd = new Date(currentCalendarDay.getFullYear(), currentCalendarDay.getMonth(), currentCalendarDay.getDate(), 23, 59, 59, 999);
+
+    return eventStartDate <= currentDayEnd && eventEndDate >= currentDayStart;
+  };
 
   const getEventsForDate = (date: Date) => {
-    const dateString = date.toISOString().split("T")[0]
-    return events.filter((event) => isDateInRange(dateString, event.startDate, event.endDate))
+    return events.filter((event) => isDateInRange(date, event.startDate, event.endDate))
   }
 
   const navigateMonth = (direction: "prev" | "next") => {
