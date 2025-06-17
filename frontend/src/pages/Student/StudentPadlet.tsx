@@ -1,21 +1,19 @@
 "use client"
 
 import React, { useState, useEffect, useCallback } from "react"
-import { Input, Card, message, Spin, Button as AntButton } from "antd"
-import { Plus, Search, StickyNote, Trash, Edit, Eye } from "lucide-react"
+import { Input, Card, message, Spin, Button as AntButton, List, Tag } from "antd"
+import { Plus, Search, StickyNote, Trash, Edit, Eye, File, Image, FileText } from "lucide-react"
 import { Button } from "@/components/Ui/Button/button"
 import PadletCreateModal from "@/components/PadletCreateModal/PadletCreateModal"
 import { MainApiRequest } from "@/services/MainApiRequest"
 import "./StudentPadlet.scss"
-
-import { jwtDecode } from "jwt-decode"; // Import jwtDecode
+import { jwtDecode } from "jwt-decode"
 
 interface Attachment {
   id: string
   fileName: string
-  fileSize: number
   fileType: string
-  mediaType: 'attachment' | 'audio'
+  mediaType: string
   downloadUrl: string
 }
 
@@ -26,7 +24,6 @@ interface PadletNote {
   createdDate: string
   updatedDate: string
   attachments: Attachment[]
-  audio?: Attachment
   color: string
   textFormat: {
     fontSize: string
@@ -46,38 +43,46 @@ const StudentPadlet: React.FC = () => {
   const [modalMode, setModalMode] = useState<"create" | "edit" | "view">("create")
   const [noteToOperate, setNoteToOperate] = useState<PadletNote | null>(null)
 
+  const getFileIcon = (fileType: string) => {
+    if (fileType.startsWith('image/')) return <Image className="w-4 h-4 mr-2" />
+    if (fileType === 'application/pdf') return <FileText className="w-4 h-4 mr-2" />
+    return <File className="w-4 h-4 mr-2" />
+  }
+
+  const getFileTypeTag = (fileType: string) => {
+    if (fileType.startsWith('image/')) return <Tag color="blue">Ảnh</Tag>
+    if (fileType === 'application/pdf') return <Tag color="red">PDF</Tag>
+    if (fileType.startsWith('text/')) return <Tag color="green">Tài liệu</Tag>
+    return <Tag>File</Tag>
+  }
+
   const getFullFileUrl = (filePath: string) => {
     const apiUrl = process.env.NEXT_PUBLIC_API_URL || ''
     return `${apiUrl.replace(/\/$/, '')}/${filePath.replace(/^\//, '')}`
   }
 
-  // Chỉnh sửa useEffect để lấy và giải mã token/user ID giống TeacherPadlet
   useEffect(() => {
     const tokenString = localStorage.getItem("token")
     if (tokenString) {
       try {
-        const decodedToken: any = jwtDecode(tokenString);
-        if (decodedToken && decodedToken.id) { // Giả định ID user nằm trong trường 'id'
-          setCurrentUserId(decodedToken.id.toString());
-        } else if (decodedToken && decodedToken.sub) { // Hoặc trong trường 'sub' (subject)
-          setCurrentUserId(decodedToken.sub.toString());
+        const decodedToken: any = jwtDecode(tokenString)
+        if (decodedToken && decodedToken.id) {
+          setCurrentUserId(decodedToken.id.toString())
+        } else if (decodedToken && decodedToken.sub) {
+          setCurrentUserId(decodedToken.sub.toString())
         } else {
-          console.warn("JWT token không chứa 'id' hoặc 'sub' trong payload.");
-          setLoadingNotes(false);
-          // Có thể xóa token không hợp lệ
-          // localStorage.removeItem("token");
+          console.warn("JWT token không chứa 'id' hoặc 'sub' trong payload.")
         }
       } catch (error) {
-        console.error("Lỗi khi giải mã token:", error);
-        setLoadingNotes(false);
-        localStorage.removeItem("token");
-        message.error("Phiên đăng nhập không hợp lệ. Vui lòng đăng nhập lại.");
+        console.error("Lỗi khi giải mã token:", error)
+        localStorage.removeItem("token")
+        message.error("Phiên đăng nhập không hợp lệ. Vui lòng đăng nhập lại.")
       }
     } else {
-      setLoadingNotes(false);
-      console.warn("Không tìm thấy token trong localStorage.");
+      setLoadingNotes(false)
+      console.warn("Không tìm thấy token trong localStorage.")
     }
-  }, []) // Chỉ chạy một lần khi component mount
+  }, [])
 
   const fetchNotes = useCallback(async (ownerId: string) => {
     setLoadingNotes(true)
@@ -97,25 +102,15 @@ const StudentPadlet: React.FC = () => {
         const createdDate = p.createTime ? formatDate(p.createTime) : "N/A"
         const updatedDate = p.updateTime ? formatDate(p.updateTime) : "N/A"
 
-        const allAttachments: Attachment[] = p.attachmentsData || []
-        const regularAttachments: Attachment[] = []
-        let audioAttachment: Attachment | undefined
-
-        allAttachments.forEach((att: any) => {
-          const attachment: Attachment = {
+        const attachments: Attachment[] = (p.attachmentsData || [])
+          .filter((att: any) => att.mediaType === 'attachment')
+          .map((att: any) => ({
             id: String(att.id),
             fileName: att.fileName,
-            fileSize: att.fileSize,
             fileType: att.fileType,
             mediaType: att.mediaType,
             downloadUrl: att.downloadUrl
-          }
-          if (attachment.mediaType === 'audio') {
-            audioAttachment = attachment
-          } else {
-            regularAttachments.push(attachment)
-          }
-        })
+          }))
 
         return {
           id: String(p.padletId),
@@ -123,8 +118,7 @@ const StudentPadlet: React.FC = () => {
           content: p.padletContent,
           createdDate,
           updatedDate,
-          attachments: regularAttachments,
-          audio: audioAttachment,
+          attachments,
           color: p.color || "#ffffff",
           textFormat: {
             fontSize: "14px",
@@ -187,6 +181,7 @@ const StudentPadlet: React.FC = () => {
           <Plus className="w-4 h-4 mr-2" /> Tạo ghi chú mới
         </Button>
       </div>
+
       <PadletCreateModal
         open={isModalOpen}
         onClose={() => setIsModalOpen(false)}
@@ -227,14 +222,29 @@ const StudentPadlet: React.FC = () => {
                 color: note.textFormat.textColor
               }} dangerouslySetInnerHTML={{ __html: note.content }} />
 
-              {note.audio && (
-                <div className="note-audio">
-                  <h5>Ghi âm:</h5>
-                  <audio controls>
-                    <source src={getFullFileUrl(note.audio.downloadUrl)} type="audio/webm" />
-                    <source src={getFullFileUrl(note.audio.downloadUrl)} type="audio/mp3" />
-                    Trình duyệt không hỗ trợ phát âm thanh.
-                  </audio>
+              {note.attachments.length > 0 && (
+                <div className="note-attachments">
+                  <h5>Tệp đính kèm:</h5>
+                  <List
+                    size="small"
+                    dataSource={note.attachments}
+                    renderItem={(file) => (
+                      <List.Item className="attachment-item">
+                        <div className="flex items-center">
+                          {getFileIcon(file.fileType)}
+                          <a 
+                            href={getFullFileUrl(file.downloadUrl)} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="mr-2"
+                          >
+                            {file.fileName}
+                          </a>
+                          {getFileTypeTag(file.fileType)}
+                        </div>
+                      </List.Item>
+                    )}
+                  />
                 </div>
               )}
             </Card>

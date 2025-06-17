@@ -34,15 +34,13 @@ const PadletCreateModal: React.FC<PadletCreateModalProps> = ({ open, onClose, on
         })
         setContent(defaultData.padletContent || defaultData.content || "")
 
-        // This crucial part correctly maps backend `downloadUrl` to Ant Design's `url`
         const defaultAttachments = defaultData.attachmentsData
           ?.filter((att: any) => att.mediaType === 'attachment' || att.mediaType === 'image' || att.mediaType === 'document' || att.mediaType === 'pdf')
           .map((att: any) => ({
             uid: att.id ? String(att.id) : `new-${Math.random()}`,
             name: att.fileName,
             status: 'done',
-            // Ensures the URL is correctly formatted for display/download
-            url: att.downloadUrl ? (att.downloadUrl.startsWith('/') ? att.downloadUrl : `/${att.downloadUrl}`) : undefined,
+            url: att.downloadUrl,
           })) || [];
 
         setFileList(defaultAttachments)
@@ -68,42 +66,48 @@ const PadletCreateModal: React.FC<PadletCreateModalProps> = ({ open, onClose, on
       formData.append("ownerId", ownerId)
       formData.append("color", values.color || "#ffffff")
 
+      // Append all files that are new uploads
       fileList.forEach((file) => {
         if (file.originFileObj) {
           formData.append("attachments", file.originFileObj)
         }
       })
 
-      if (mode === "edit" && defaultData) {
-        if (removedAttachmentIds.length > 0) {
-          formData.append("removeAttachment", JSON.stringify(removedAttachmentIds))
-        }
-        await MainApiRequest.put(`/padlet/edit/${defaultData.id}`, formData)
-        message.success("Đã cập nhật ghi chú.")
-      } else {
-        await MainApiRequest.post("/padlet/create", formData)
-        message.success("Đã tạo ghi chú mới.")
+      // Append removed attachment IDs if in edit mode
+      if (mode === "edit" && defaultData && removedAttachmentIds.length > 0) {
+        formData.append("removeAttachment", JSON.stringify(removedAttachmentIds))
       }
+
+      const endpoint = mode === "edit" && defaultData 
+        ? `/padlet/edit/${defaultData.id}`
+        : "/padlet/create"
+      const method = mode === "edit" ? "put" : "post"
+
+      await MainApiRequest[method](endpoint, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      })
+
+      message.success(mode === "edit" ? "Đã cập nhật ghi chú." : "Đã tạo ghi chú mới.")
       onSuccess()
       onClose()
     } catch (err: any) {
-      console.error("Lỗi lưu ghi chú:", err.response?.data?.error || err.message || err);
-      message.error(`Lỗi khi lưu ghi chú: ${err.response?.data?.error || err.message || "Không xác định"}`);
+      console.error("Lỗi lưu ghi chú:", err)
+      message.error(`Lỗi khi lưu ghi chú: ${err.response?.data?.error || err.message || "Không xác định"}`)
     }
   }
 
-  const handleFileChange = ({ fileList: newList, file }: { fileList: UploadFile[], file: UploadFile }) => {
-    if (file.status === 'removed' && file.uid && typeof file.uid === 'string' && !file.originFileObj) {
-        setRemovedAttachmentIds((prev) => {
-            if (!prev.includes(file.uid as string)) {
-                return [...prev, file.uid as string];
-            }
-            return prev;
-        });
+  const handleFileChange = ({ fileList: newFileList }: { fileList: UploadFile[] }) => {
+    setFileList(newFileList)
+  }
+
+  const handleRemove = (file: UploadFile) => {
+    if (file.uid && typeof file.uid === 'string' && !file.originFileObj) {
+      setRemovedAttachmentIds(prev => [...prev, file.uid])
     }
-    // Filters out files that were removed and were not new files (i.e., they were existing attachments)
-    setFileList(newList.filter(f => f.status !== 'removed' || (f.status === 'removed' && f.originFileObj)));
-  };
+    return true
+  }
 
   return (
     <Modal
@@ -112,11 +116,9 @@ const PadletCreateModal: React.FC<PadletCreateModalProps> = ({ open, onClose, on
       onCancel={onClose}
       onOk={form.submit}
       okText={mode === "view" ? "Đóng" : "Lưu"}
-      // OK button is disabled in "view" mode
       okButtonProps={{ disabled: isReadOnly }}
-      // Cancel button is hidden in "view" mode
       cancelButtonProps={{ style: { display: isReadOnly ? "none" : undefined } }}
-      destroyOnClose={true} // Ensures form state is reset on close
+      destroyOnClose={true}
     >
       <Form layout="vertical" form={form} onFinish={handleFinish}>
         <Form.Item label="Tiêu đề" name="title" rules={[{ required: true, message: "Nhập tiêu đề" }]}>
@@ -147,25 +149,20 @@ const PadletCreateModal: React.FC<PadletCreateModalProps> = ({ open, onClose, on
 
         <Form.Item label="Tệp đính kèm">
           <Dragger
-            className="h-14"
+            multiple
             disabled={isReadOnly}
             fileList={fileList}
-            beforeUpload={() => false} // Prevents Ant Design from auto-uploading files
+            beforeUpload={() => false}
             onChange={handleFileChange}
-            onRemove={(file) => {
-              // Marks existing files for removal when `onRemove` is triggered
-              if (file.uid && typeof file.uid === 'string' && !file.originFileObj) {
-                  setRemovedAttachmentIds((prev) => {
-                      if (!prev.includes(file.uid)) {
-                          return [...prev, file.uid];
-                      }
-                      return prev;
-                  });
-              }
-              return true; // Allows Ant Design to update its internal file list
-            }}
+            onRemove={handleRemove}
           >
-            <span><InboxOutlined /> Kéo thả hoặc nhấn để tải tệp (ảnh, tài liệu, PDF)</span>
+            <p className="ant-upload-drag-icon">
+              <InboxOutlined />
+            </p>
+            <p className="ant-upload-text">Kéo thả hoặc nhấn để tải tệp lên</p>
+            <p className="ant-upload-hint">
+              Hỗ trợ tải lên nhiều file cùng lúc (ảnh, tài liệu, PDF)
+            </p>
           </Dragger>
         </Form.Item>
       </Form>
