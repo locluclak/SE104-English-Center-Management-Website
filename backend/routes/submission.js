@@ -73,7 +73,7 @@ router.post('/upload', async (req, res) => {
         conn.release();
         // Remove the uploaded file if submission is outside the allowed time frame
         fs.unlinkSync(path.join(__dirname, `../uploads/${req.file.filename}`));
-        return res.status(400).json({ error: 'Submission is not allowed outside the assignment time frame' });
+        return res.status(405).json({ error: 'Submission is not allowed outside the assignment time frame' });
       }
 
       // Insert the submission into the database
@@ -157,7 +157,23 @@ router.put('/update/:student_id/:assignment_id', async (req, res) => {
 
     try {
       const conn = await db.getConnection();
+      const [assignment] = await db.query(
+          'SELECT START_DATE, END_DATE FROM ASSIGNMENT WHERE AS_ID = ?',
+          [assignment_id]
+      );
 
+      if (!assignment) {
+          return res.status(404).json({ message: 'Assignment not found' });
+      }
+
+      const currentTime = new Date();
+      const startDate = new Date(assignment.START_DATE);
+      const endDate = new Date(assignment.END_DATE);
+
+      // Check if the current time is within the allowed time frame
+      if (currentTime < startDate || currentTime > endDate) {
+          return res.status(403).json({ message: 'Submission update is not allowed outside the assignment time frame' });
+      }
       // Fetch the existing submission
       const [rows] = await conn.query(
         'SELECT FILE FROM SUBMITION WHERE STUDENT_ID = ? AND AS_ID = ?',
