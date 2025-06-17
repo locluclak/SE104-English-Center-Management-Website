@@ -88,21 +88,24 @@ const StudentPadlet: React.FC = () => {
     setLoadingNotes(true)
     try {
       const res = await MainApiRequest.get(`/padlet/notes/${ownerId}`)
-      const formatted = res.data.padlets.map((p: any) => ({
-        id: String(p.padletId),
+      const formatted = res.data.padlets
+      // Thêm bộ lọc này để loại bỏ các đối tượng rỗng hoặc thiếu ID
+      .filter((p: any) => p && p.id && typeof p.id !== 'undefined' && p.id !== null) 
+      .map((p: any) => ({
+        id: String(p.id), // Đảm bảo lấy id từ p.id (như trong response của bạn)
         title: p.padletName,
         content: p.padletContent,
         createdDate: p.createTime ? formatDate(p.createTime) : "N/A",
         updatedDate: p.updateTime ? formatDate(p.updateTime) : "N/A",
         attachments: (p.attachmentsData || [])
-          .filter((att: any) => att.mediaType === 'attachment')
-          .map((att: any) => ({
-            id: String(att.id),
-            fileName: att.fileName,
-            fileType: att.fileType,
-            mediaType: att.mediaType,
-            downloadUrl: att.downloadUrl
-          })),
+        .filter((att: any) => att && att.mediaType === 'attachment' && att.id) // Lọc attachment lỗi
+        .map((att: any) => ({
+          id: String(att.id),
+          fileName: att.fileName,
+          fileType: att.fileType,
+          mediaType: att.mediaType,
+          downloadUrl: att.downloadUrl
+        })),
         color: p.color || "#ffffff",
         ownerId: p.ownerId,
         textFormat: {
@@ -112,7 +115,7 @@ const StudentPadlet: React.FC = () => {
           textAlign: "left",
           textColor: "#000000",
         },
-      }))
+      }));
       setNotes(formatted)
     } catch (err) {
       console.error("Fetch notes error:", err)
@@ -203,13 +206,13 @@ const StudentPadlet: React.FC = () => {
                     onClick={() => handleOpenModal("edit", note)}
                     icon={<Edit />}
                     disabled={!currentUserId || note.ownerId !== currentUserId}
-                    className={note.ownerId !== currentUserId ? "opacity-50 cursor-not-allowed" : ""}
+                    //className={note.ownerId !== currentUserId ? "opacity-50 cursor-not-allowed" : ""}
                   />
                   <AntButton 
                     onClick={() => handleDelete(note.id)}
                     icon={<Trash />}
                     disabled={!currentUserId || note.ownerId !== currentUserId}
-                    className={note.ownerId !== currentUserId ? "opacity-50 cursor-not-allowed" : ""}
+                    //className={note.ownerId !== currentUserId ? "opacity-50 cursor-not-allowed" : ""}
                   />
                 </div>
               </div>

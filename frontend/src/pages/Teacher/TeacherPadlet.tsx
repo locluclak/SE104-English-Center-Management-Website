@@ -85,45 +85,45 @@ const TeacherPadlet: React.FC = () => {
   }, [])
 
   const fetchNotes = useCallback(async (ownerId: string) => {
-        setLoadingNotes(true)
-        try {
-          const res = await MainApiRequest.get(`/padlet/notes/${ownerId}`)
-          const formatted = res.data.padlets
-              // Thêm bộ lọc này để loại bỏ các đối tượng rỗng hoặc thiếu ID
-            .filter((p: any) => p && p.id && typeof p.id !== 'undefined' && p.id !== null) 
-            .map((p: any) => ({
-              id: String(p.id), // Đảm bảo lấy id từ p.id (như trong response của bạn)
-              title: p.padletName,
-              content: p.padletContent,
-              createdDate: p.createTime ? formatDate(p.createTime) : "N/A",
-              updatedDate: p.updateTime ? formatDate(p.updateTime) : "N/A",
-              attachments: (p.attachmentsData || [])
-                .filter((att: any) => att && att.mediaType === 'attachment' && att.id) // Lọc attachment lỗi
-                .map((att: any) => ({
-                  id: String(att.id),
-                  fileName: att.fileName,
-                  fileType: att.fileType,
-                  mediaType: att.mediaType,
-                  downloadUrl: att.downloadUrl
-                })),
-              color: p.color || "#ffffff",
-              ownerId: p.ownerId,
-              textFormat: {
-                fontSize: "14px",
-                fontWeight: "normal",
-                fontStyle: "normal",
-                textAlign: "left",
-                textColor: "#000000",
-              },
-            }));
-          setNotes(formatted)
-        } catch (err) {
-          console.error("Fetch notes error:", err)
-          message.error("Không thể tải ghi chú")
-        } finally {
-          setLoadingNotes(false)
-        }
-      }, [])
+    setLoadingNotes(true)
+    try {
+      const res = await MainApiRequest.get(`/padlet/notes/${ownerId}`)
+      const formatted = res.data.padlets
+      // Thêm bộ lọc này để loại bỏ các đối tượng rỗng hoặc thiếu ID
+      .filter((p: any) => p && p.id && typeof p.id !== 'undefined' && p.id !== null) 
+      .map((p: any) => ({
+        id: String(p.id), // Đảm bảo lấy id từ p.id (như trong response của bạn)
+        title: p.padletName,
+        content: p.padletContent,
+        createdDate: p.createTime ? formatDate(p.createTime) : "N/A",
+        updatedDate: p.updateTime ? formatDate(p.updateTime) : "N/A",
+        attachments: (p.attachmentsData || [])
+        .filter((att: any) => att && att.mediaType === 'attachment' && att.id) // Lọc attachment lỗi
+        .map((att: any) => ({
+          id: String(att.id),
+          fileName: att.fileName,
+          fileType: att.fileType,
+          mediaType: att.mediaType,
+          downloadUrl: att.downloadUrl
+        })),
+        color: p.color || "#ffffff",
+        ownerId: p.ownerId,
+        textFormat: {
+          fontSize: "14px",
+          fontWeight: "normal",
+          fontStyle: "normal",
+          textAlign: "left",
+          textColor: "#000000",
+        },
+      }));
+      setNotes(formatted)
+    } catch (err) {
+      console.error("Fetch notes error:", err)
+      message.error("Không thể tải ghi chú")
+    } finally {
+      setLoadingNotes(false)
+    }
+  }, [])
 
   useEffect(() => {
     if (currentUserId) {
