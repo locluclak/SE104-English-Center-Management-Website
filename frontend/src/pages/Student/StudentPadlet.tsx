@@ -25,6 +25,7 @@ interface PadletNote {
   updatedDate: string
   attachments: Attachment[]
   color: string
+  ownerId?: string
   textFormat: {
     fontSize: string
     fontWeight: string
@@ -61,26 +62,25 @@ const StudentPadlet: React.FC = () => {
     return `${apiUrl.replace(/\/$/, '')}/${filePath.replace(/^\//, '')}`
   }
 
+  const formatDate = (dateStr: string) => {
+    const date = new Date(dateStr)
+    const day = String(date.getDate()).padStart(2, '0')
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const year = date.getFullYear()
+    return `${day}/${month}/${year}`
+  }
+
   useEffect(() => {
     const tokenString = localStorage.getItem("token")
     if (tokenString) {
       try {
         const decodedToken: any = jwtDecode(tokenString)
-        if (decodedToken && decodedToken.id) {
-          setCurrentUserId(decodedToken.id.toString())
-        } else if (decodedToken && decodedToken.sub) {
-          setCurrentUserId(decodedToken.sub.toString())
-        } else {
-          console.warn("JWT token không chứa 'id' hoặc 'sub' trong payload.")
+        if (decodedToken && (decodedToken.id || decodedToken.sub)) {
+          setCurrentUserId(decodedToken.id || decodedToken.sub)
         }
       } catch (error) {
-        console.error("Lỗi khi giải mã token:", error)
-        localStorage.removeItem("token")
-        message.error("Phiên đăng nhập không hợp lệ. Vui lòng đăng nhập lại.")
+        console.error("Token decode error:", error)
       }
-    } else {
-      setLoadingNotes(false)
-      console.warn("Không tìm thấy token trong localStorage.")
     }
   }, [])
 
@@ -88,21 +88,13 @@ const StudentPadlet: React.FC = () => {
     setLoadingNotes(true)
     try {
       const res = await MainApiRequest.get(`/padlet/notes/${ownerId}`)
-      const data = res.data.padlets
-
-      const formatted: PadletNote[] = data.map((p: any) => {
-        const formatDate = (dateStr: string) => {
-          const date = new Date(dateStr)
-          const day = String(date.getDate()).padStart(2, '0')
-          const month = String(date.getMonth() + 1).padStart(2, '0')
-          const year = date.getFullYear()
-          return `${day}/${month}/${year}`
-        }
-
-        const createdDate = p.createTime ? formatDate(p.createTime) : "N/A"
-        const updatedDate = p.updateTime ? formatDate(p.updateTime) : "N/A"
-
-        const attachments: Attachment[] = (p.attachmentsData || [])
+      const formatted = res.data.padlets.map((p: any) => ({
+        id: String(p.padletId),
+        title: p.padletName,
+        content: p.padletContent,
+        createdDate: p.createTime ? formatDate(p.createTime) : "N/A",
+        updatedDate: p.updateTime ? formatDate(p.updateTime) : "N/A",
+        attachments: (p.attachmentsData || [])
           .filter((att: any) => att.mediaType === 'attachment')
           .map((att: any) => ({
             id: String(att.id),
@@ -110,30 +102,21 @@ const StudentPadlet: React.FC = () => {
             fileType: att.fileType,
             mediaType: att.mediaType,
             downloadUrl: att.downloadUrl
-          }))
-
-        return {
-          id: String(p.padletId),
-          title: p.padletName,
-          content: p.padletContent,
-          createdDate,
-          updatedDate,
-          attachments,
-          color: p.color || "#ffffff",
-          textFormat: {
-            fontSize: "14px",
-            fontWeight: "normal",
-            fontStyle: "normal",
-            textAlign: "left",
-            textColor: "#000000",
-          },
-        }
-      })
-
+          })),
+        color: p.color || "#ffffff",
+        ownerId: p.ownerId,
+        textFormat: {
+          fontSize: "14px",
+          fontWeight: "normal",
+          fontStyle: "normal",
+          textAlign: "left",
+          textColor: "#000000",
+        },
+      }))
       setNotes(formatted)
-    } catch (err: any) {
-      console.error("Lỗi tải ghi chú:", err)
-      message.error("Không thể tải ghi chú.")
+    } catch (err) {
+      console.error("Fetch notes error:", err)
+      message.error("Không thể tải ghi chú")
     } finally {
       setLoadingNotes(false)
     }
@@ -142,35 +125,42 @@ const StudentPadlet: React.FC = () => {
   useEffect(() => {
     if (currentUserId) {
       fetchNotes(currentUserId)
-    } else {
-      setNotes([])
-      setLoadingNotes(false)
     }
   }, [currentUserId, fetchNotes])
 
   const handleDelete = async (noteId: string) => {
     try {
+      const confirm = window.confirm("Bạn có chắc chắn muốn xóa ghi chú này?")
+      if (!confirm) return
+      
       await MainApiRequest.delete(`/padlet/delete/${noteId}`)
-      setNotes((prev) => prev.filter((n) => n.id !== noteId))
-      message.success("Đã xoá ghi chú.")
+      setNotes(prev => prev.filter(n => n.id !== noteId))
+      message.success("Đã xoá ghi chú thành công")
     } catch (err) {
-      message.error("Lỗi xoá ghi chú.")
+      const error = err as Error
+  console.error("Delete error:", error.message)
+  message.error(`Xoá ghi chú thất bại: ${error.message}`)
     }
   }
 
-  const handleOpenModal = (mode: typeof modalMode, note?: PadletNote) => {
+  const handleOpenModal = (mode: "create" | "edit" | "view", note?: PadletNote) => {
+    if (mode === "edit" && note?.ownerId !== currentUserId) {
+      message.warning("Bạn không có quyền chỉnh sửa ghi chú này")
+      return
+    }
+    
     setModalMode(mode)
     setNoteToOperate(note || null)
     setIsModalOpen(true)
   }
 
-  const filteredNotes = notes.filter((note) =>
+  const filteredNotes = notes.filter(note =>
     note.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
     note.content.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
   if (loadingNotes) {
-    return <div style={{ textAlign: 'center', padding: 40 }}><Spin size="large" tip="Đang tải..." /></div>
+    return <div className="flex justify-center p-10"><Spin size="large" tip="Đang tải..." /></div>
   }
 
   return (
@@ -208,19 +198,23 @@ const StudentPadlet: React.FC = () => {
                 <StickyNote className="icon" />
                 <h3>{note.title}</h3>
                 <div className="note-actions">
-                  <AntButton onClick={() => handleOpenModal("view", note)}><Eye /></AntButton>
-                  <AntButton onClick={() => handleOpenModal("edit", note)}><Edit /></AntButton>
-                  <AntButton onClick={() => handleDelete(note.id)}><Trash /></AntButton>
+                  <AntButton onClick={() => handleOpenModal("view", note)} icon={<Eye />} />
+                  <AntButton 
+                    onClick={() => handleOpenModal("edit", note)}
+                    icon={<Edit />}
+                    disabled={!currentUserId || note.ownerId !== currentUserId}
+                    className={note.ownerId !== currentUserId ? "opacity-50 cursor-not-allowed" : ""}
+                  />
+                  <AntButton 
+                    onClick={() => handleDelete(note.id)}
+                    icon={<Trash />}
+                    disabled={!currentUserId || note.ownerId !== currentUserId}
+                    className={note.ownerId !== currentUserId ? "opacity-50 cursor-not-allowed" : ""}
+                  />
                 </div>
               </div>
 
-              <div className="note-content" style={{
-                fontSize: note.textFormat.fontSize,
-                fontWeight: note.textFormat.fontWeight,
-                fontStyle: note.textFormat.fontStyle,
-                textAlign: note.textFormat.textAlign as any,
-                color: note.textFormat.textColor
-              }} dangerouslySetInnerHTML={{ __html: note.content }} />
+              <div className="note-content" dangerouslySetInnerHTML={{ __html: note.content }} />
 
               {note.attachments.length > 0 && (
                 <div className="note-attachments">
@@ -250,7 +244,7 @@ const StudentPadlet: React.FC = () => {
             </Card>
           ))
         ) : (
-          <p>Không có ghi chú nào được tìm thấy. Vui lòng tạo một ghi chú mới.</p>
+          <p className="text-center py-10">Không có ghi chú nào được tìm thấy</p>
         )}
       </div>
     </div>
