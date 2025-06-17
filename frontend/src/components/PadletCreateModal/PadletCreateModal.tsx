@@ -3,7 +3,6 @@
 import React, { useEffect, useState } from "react"
 import { Modal, Input, Form, Upload, message, Select, UploadFile } from "antd"
 import { InboxOutlined } from "@ant-design/icons"
-import AudioRecorderPlayer from "./AudioRecorderPlayer"
 import { MainApiRequest } from "@/services/MainApiRequest"
 
 const { Dragger } = Upload
@@ -16,16 +15,14 @@ interface PadletCreateModalProps {
   onSuccess: () => void
   mode: "create" | "edit" | "view"
   defaultData?: any
-  ownerId: string; // THÊM PROP NÀY ĐỂ NHẬN OWNERID TỪ COMPONENT CHA
+  ownerId: string
 }
 
-const PadletCreateModal: React.FC<PadletCreateModalProps> = ({ open, onClose, onSuccess, mode, defaultData, ownerId }) => { // NHẬN ownerId Ở ĐÂY
+const PadletCreateModal: React.FC<PadletCreateModalProps> = ({ open, onClose, onSuccess, mode, defaultData, ownerId }) => {
   const [form] = Form.useForm()
   const [content, setContent] = useState<string>("")
   const [fileList, setFileList] = useState<UploadFile[]>([])
   const [removedAttachmentIds, setRemovedAttachmentIds] = useState<string[]>([])
-  const [audioBlob, setAudioBlob] = useState<Blob | null>(null)
-  const [keepOldAudio, setKeepOldAudio] = useState<boolean>(false)
   const isReadOnly = mode === "view"
 
   useEffect(() => {
@@ -37,25 +34,22 @@ const PadletCreateModal: React.FC<PadletCreateModalProps> = ({ open, onClose, on
         })
         setContent(defaultData.padletContent || defaultData.content || "")
 
+        // This crucial part correctly maps backend `downloadUrl` to Ant Design's `url`
         const defaultAttachments = defaultData.attachmentsData
-          ?.filter((att: any) => att.mediaType === 'attachment')
+          ?.filter((att: any) => att.mediaType === 'attachment' || att.mediaType === 'image' || att.mediaType === 'document' || att.mediaType === 'pdf')
           .map((att: any) => ({
             uid: att.id ? String(att.id) : `new-${Math.random()}`,
             name: att.fileName,
             status: 'done',
+            // Ensures the URL is correctly formatted for display/download
             url: att.downloadUrl ? (att.downloadUrl.startsWith('/') ? att.downloadUrl : `/${att.downloadUrl}`) : undefined,
           })) || [];
 
         setFileList(defaultAttachments)
-
-        const hasAudio = defaultData.attachmentsData?.some((att: any) => att.mediaType === 'audio')
-        setKeepOldAudio(hasAudio)
       } else {
         form.resetFields()
         setContent("")
         setFileList([])
-        setAudioBlob(null)
-        setKeepOldAudio(false)
       }
       setRemovedAttachmentIds([])
     }
@@ -71,7 +65,7 @@ const PadletCreateModal: React.FC<PadletCreateModalProps> = ({ open, onClose, on
       const formData = new FormData()
       formData.append("name", values.title)
       formData.append("content", content)
-      formData.append("ownerId", ownerId) // SỬ DỤNG ownerId TỪ PROPS Ở ĐÂY
+      formData.append("ownerId", ownerId)
       formData.append("color", values.color || "#ffffff")
 
       fileList.forEach((file) => {
@@ -79,15 +73,6 @@ const PadletCreateModal: React.FC<PadletCreateModalProps> = ({ open, onClose, on
           formData.append("attachments", file.originFileObj)
         }
       })
-
-      if (audioBlob) {
-        formData.append("audio", audioBlob, "recording.webm")
-        if (mode === "edit" && defaultData?.audio) {
-          formData.append("removeAudio", "true")
-        }
-      } else if (mode === "edit" && defaultData?.audio && !keepOldAudio) {
-        formData.append("removeAudio", "true")
-      }
 
       if (mode === "edit" && defaultData) {
         if (removedAttachmentIds.length > 0) {
@@ -116,13 +101,9 @@ const PadletCreateModal: React.FC<PadletCreateModalProps> = ({ open, onClose, on
             return prev;
         });
     }
+    // Filters out files that were removed and were not new files (i.e., they were existing attachments)
     setFileList(newList.filter(f => f.status !== 'removed' || (f.status === 'removed' && f.originFileObj)));
   };
-
-  const handleAudioRecorded = (file: Blob | null, url: string | null) => {
-    setAudioBlob(file)
-    setKeepOldAudio(!!file || (!!defaultData?.audio && url !== null))
-  }
 
   return (
     <Modal
@@ -131,9 +112,11 @@ const PadletCreateModal: React.FC<PadletCreateModalProps> = ({ open, onClose, on
       onCancel={onClose}
       onOk={form.submit}
       okText={mode === "view" ? "Đóng" : "Lưu"}
+      // OK button is disabled in "view" mode
       okButtonProps={{ disabled: isReadOnly }}
+      // Cancel button is hidden in "view" mode
       cancelButtonProps={{ style: { display: isReadOnly ? "none" : undefined } }}
-      destroyOnClose={true}
+      destroyOnClose={true} // Ensures form state is reset on close
     >
       <Form layout="vertical" form={form} onFinish={handleFinish}>
         <Form.Item label="Tiêu đề" name="title" rules={[{ required: true, message: "Nhập tiêu đề" }]}>
@@ -167,32 +150,23 @@ const PadletCreateModal: React.FC<PadletCreateModalProps> = ({ open, onClose, on
             className="h-14"
             disabled={isReadOnly}
             fileList={fileList}
-            beforeUpload={() => false}
+            beforeUpload={() => false} // Prevents Ant Design from auto-uploading files
             onChange={handleFileChange}
             onRemove={(file) => {
-              if (file.uid && typeof file.uid === 'string') {
-                if (!file.originFileObj) {
-                    setRemovedAttachmentIds((prev) => {
-                        if (!prev.includes(file.uid)) {
-                            return [...prev, file.uid];
-                        }
-                        return prev;
-                    });
-                }
+              // Marks existing files for removal when `onRemove` is triggered
+              if (file.uid && typeof file.uid === 'string' && !file.originFileObj) {
+                  setRemovedAttachmentIds((prev) => {
+                      if (!prev.includes(file.uid)) {
+                          return [...prev, file.uid];
+                      }
+                      return prev;
+                  });
               }
-              return true;
+              return true; // Allows Ant Design to update its internal file list
             }}
           >
-            <span><InboxOutlined /> Kéo thả hoặc nhấn để tải tệp</span>
+            <span><InboxOutlined /> Kéo thả hoặc nhấn để tải tệp (ảnh, tài liệu, PDF)</span>
           </Dragger>
-        </Form.Item>
-
-        <Form.Item label="Ghi âm">
-          <AudioRecorderPlayer
-            disabled={isReadOnly}
-            onAudioRecorded={handleAudioRecorded}
-            defaultAudioUrl={defaultData?.attachmentsData?.find((att:any) => att.mediaType === 'audio')?.downloadUrl || null}
-          />
         </Form.Item>
       </Form>
     </Modal>
