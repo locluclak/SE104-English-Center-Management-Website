@@ -20,7 +20,6 @@ import StudentFeeList from "@/pages/Accountant/Students/StudentFeesList"
 import StudentPage from "@/pages/Student/StudentPage"
 import TeacherPage from "@/pages/Teacher/TeacherPage"
 
-import Home from "@/pages/Home/Home"
 import Login from "@/pages/Login/Login"
 import Register from "@/pages/Register/Register"
 import ProfileUser from "@/pages/ProfileUser/ProfileUser"
@@ -67,7 +66,6 @@ export default function MainRoutes() {
 
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
-      <Route path="/home" element={<Home />} />
 
       <Route
         path="/"
