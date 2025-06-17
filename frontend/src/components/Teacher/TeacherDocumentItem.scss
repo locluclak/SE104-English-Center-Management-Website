@@ -1,0 +1,186 @@
+@import "../../scss/variables";
+
+.document-item {
+  .document-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .document-title-section {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+  }
+
+  .document-description {
+    margin-bottom: 16px;
+    color: get-color($primary, "200");
+  }
+
+  .document-meta {
+    margin-bottom: 16px;
+    
+    .document-size {
+      font-size: 14px;
+      color: get-color($primary, "200");
+      background-color: get-color($background, "200");
+      padding: 4px 8px;
+      border-radius: 4px;
+    }
+  }
+
+  .document-actions {
+    display: flex;
+    gap: 12px;
+    
+    .action-group {
+      margin-left: auto;
+      display: flex;
+      gap: 12px;
+    }
+    
+    .edit-btn {
+      color: get-color($primary, "300");
+      border-color: get-color($primary, "300");
+      
+      &:hover {
+        background-color: get-color($background, "200");
+      }
+    }
+    
+    .delete-btn {
+      color: #ef4444;
+      border-color: #ef4444;
+      
+      &:hover {
+        background-color: #fef2f2;
+      }
+    }
+  }
+}
+
+.delete-confirmation,
+.edit-dialog-content {
+  margin: 20px 0;
+  padding: 16px;
+  border-radius: 8px;
+  
+  strong {
+    font-weight: 600;
+  }
+}
+
+.delete-confirmation {
+  background-color: #fef2f2;
+  color: #dc2626;
+}
+
+.edit-dialog-content {
+  background-color: get-color($background, "100");
+  
+  .form-group {
+    margin-bottom: 16px;
+    
+    label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 500;
+    }
+    
+    input,
+    textarea {
+      width: 100%;
+      padding: 8px 12px;
+      //border: 1px solid get-color($border, "200");
+      border-radius: 4px;
+      font-family: inherit;
+      
+      &:focus {
+        outline: none;
+        border-color: get-color($primary, "300");
+      }
+    }
+    
+    textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+  }
+  
+  .file-upload-container {
+    .file-upload-label {
+      display: block;
+      cursor: pointer;
+      
+      .file-upload-input {
+        display: none;
+      }
+      
+      .file-upload-button {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 16px;
+        background-color: get-color($background, "200");
+        border-radius: 4px;
+        //border: 1px dashed get-color($border, "300");
+        transition: all 0.2s;
+        
+        &:hover {
+          background-color: get-color($background, "300");
+        }
+      }
+    }
+    
+    .file-info {
+      margin-top: 8px;
+      display: flex;
+      justify-content: space-between;
+      font-size: 14px;
+      color: get-color($primary, "200");
+    }
+    
+    .file-preview {
+      margin-top: 12px;
+      
+      img {
+        max-width: 100%;
+        max-height: 200px;
+        border-radius: 4px;
+        //border: 1px solid get-color($border, "200");
+      }
+    }
+  }
+}
+
+// File type badges
+.file-pdf {
+  background-color: #fecaca;
+  color: #dc2626;
+}
+
+.file-doc {
+  background-color: #dbeafe;
+  color: #1e40af;
+}
+
+.file-ppt {
+  background-color: #ffedd5;
+  color: #c2410c;
+}
+
+.file-image {
+  background-color: #d1fae5;
+  color: #047857;
+}
+
+.file-video {
+  background-color: #f3e8ff;
+  color: #7c3aed;
+}
+
+.file-other {
+  background-color: get-color($secondary, "100");
+  color: get-color($primary, "100");
+}

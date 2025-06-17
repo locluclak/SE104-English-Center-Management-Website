@@ -1,0 +1,86 @@
+{
+  "name": "halocenter",
+  "version": "0.0.0",
+  "private": true,
+  "dependencies": {
+    "@achmadk/react-loading-overlay": "^3.0.5",
+    "@emotion/css": "^11.13.5",
+    "@mui/material": "^6.3.0",
+    "@radix-ui/react-dropdown-menu": "^2.1.15",
+    "@radix-ui/react-select": "^2.2.5",
+    "@testing-library/jest-dom": "5.17.0",
+    "@testing-library/react": "13.4.0",
+    "@testing-library/user-event": "13.5.0",
+    "@types/d3-color": "^3.1.3",
+    "@types/d3-ease": "^3.0.2",
+    "@types/recharts": "^1.8.29",
+    "antd": "^5.22.3",
+    "axios": "^1.7.9",
+    "bootstrap": "^5.3.3",
+    "chart.js": "^4.4.7",
+    "cors": "^2.8.5",
+    "framer-motion": "^11.18.0",
+    "jwt-decode": "^4.0.0",
+    "lucide-react": "^0.513.0",
+    "moment": "^2.30.1",
+    "npm": "^11.0.0",
+    "react": "18.3.1",
+    "react-bootstrap": "^2.10.7",
+    "react-chartjs-2": "^5.2.0",
+    "react-datepicker": "^7.5.0",
+    "react-dom": "18.3.1",
+    "react-icons": "^5.4.0",
+    "react-image-gallery": "^1.3.0",
+    "react-player": "^2.16.0",
+    "react-router-dom": "6.22.3",
+    "react-scripts": "5.0.1",
+    "react-signify": "1.5.1",
+    "react-slick": "^0.30.3",
+    "react-transition-group": "^4.4.5",
+    "recharts": "^2.15.0",
+    "slick-carousel": "^1.8.1",
+    "typescript": "^5.7.2",
+    "web-vitals": "2.1.4",
+    "xlsx": "^0.18.5",
+    "yet-another-react-lightbox": "^3.21.7"
+  },
+  "scripts": {
+    "start": "craco start",
+    "build": "craco build",
+    "test": "craco test",
+    "eject": "craco eject"
+  },
+  "devDependencies": {
+    "@craco/craco": "^7.1.0",
+    "@craco/types": "^7.1.0",
+    "@fortawesome/fontawesome-svg-core": "^6.7.2",
+    "@fortawesome/free-solid-svg-icons": "^6.7.2",
+    "@fortawesome/react-fontawesome": "^0.2.2",
+    "@types/jest": "^29.5.14",
+    "@types/node": "^22.10.2",
+    "@types/react": "^19.0.2",
+    "@types/react-dom": "^19.0.2",
+    "@types/react-image-gallery": "^1.2.4",
+    "@types/react-slick": "^0.23.13",
+    "@types/xlsx": "^0.0.36",
+    "sass": "^1.81.1"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}

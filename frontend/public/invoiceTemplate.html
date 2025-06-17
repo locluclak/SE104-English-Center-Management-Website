@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hóa Đơn Thanh Toán</title>
+    <style>
+        body {
+            font-family: "Arial", sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f4f4f4;
+            color: #333;
+        }
+
+        .invoice-container {
+            width: 320px;
+            margin: auto;
+            background-color: #fff;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .header {
+            font-size: 1.4em;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 5px;
+        }
+
+        .sub-header {
+            text-align: center;
+            font-size: 0.9em;
+            line-height: 1.4;
+            color: #555;
+        }
+
+        hr {
+            border: none;
+            border-top: 1px dashed #ccc;
+            margin: 10px 0;
+        }
+
+        .info {
+            font-size: 0.9em;
+            line-height: 1.5;
+        }
+
+        .info p {
+            margin: 4px 5px;
+            display: flex;
+        }
+
+        .info-row {
+            display: inline-grid;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        table th,
+        table td {
+            text-align: left;
+            padding: 8px;
+            font-size: 0.9em;
+        }
+
+        table th {
+            background-color: #f8f8f8;
+            border-bottom: 2px solid #ddd;
+        }
+
+        table td {
+            border-bottom: 1px solid #f1f1f1;
+        }
+
+        table td:nth-child(1),
+        table td:nth-child(3),
+        table td:nth-child(4),
+        table td:nth-child(5) {
+            text-align: center;
+        }
+
+        .total,
+        .discount {
+            font-weight: bold;
+            font-size: 1.1em;
+            margin-top: 15px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .footer {
+            margin-top: 15px;
+            font-size: 0.85em;
+            text-align: center;
+            color: #555;
+            line-height: 1.4;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="invoice-container">
+        <div class="header">Cafe w fen</div>
+        <div class="sub-header">
+            Đại học Công nghệ thông tin, Làng ĐHQG<br>
+            HÓA ĐƠN THANH TOÁN<br>
+            <small>(Nếu quý khách ở lại qua đêm, vui lòng giữ lại hóa đơn này)</small>
+        </div>
+        <hr>
+        <div class="info">
+            <div class="info-row">
+                <p><strong>Số HD:</strong> <span>{ORDER_ID}</span></p>
+                <p><strong>Bàn:</strong> <span>{SERVICE_TYPE}</span></p>
+            </div>
+            <div class="info-row">
+                <p><strong>Ngày:</strong> <span>{DATE}</span></p>
+            </div>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>TT</th>
+                    <th>Tên món</th>
+                    <th>SL</th>
+                    <th>Đơn giá</th>
+                    <th>Thành tiền</th>
+                </tr>
+            </thead>
+            <tbody>
+                {ITEM_ROWS}
+            </tbody>
+        </table>
+        <hr>
+        <div class="total">
+            <span><strong>Tổng cộng:</strong></span> <span>{TOTAL_AMOUNT} VND</span>
+        </div>
+        <div class="discount">
+            <span><strong>Chiết khấu:</strong></span> <span>- {DISCOUNT_AMOUNT} VND</span>
+        </div>
+        <div class="total">
+            <span><strong>Tổng hóa đơn:</strong></span> <span>{FINAL_TOTAL} VND</span>
+        </div>
+        <div class="footer">
+            Cảm ơn Quý khách và hẹn gặp lại!<br>
+            Wifi: <strong>Cafewfen</strong><br>
+        </div>
+    </div>
+</body>
+
+</html>

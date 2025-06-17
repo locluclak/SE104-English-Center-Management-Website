@@ -1,0 +1,251 @@
+@import "../../scss/variables"; // Make sure this path is correct
+
+.sidebar {
+  width: 200px; 
+  min-height: 100vh;
+  background-color: get-color($primary, "100"); 
+  color: white;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+  position: sticky;
+  top: 0;
+  left: 0;
+  z-index: 1000;
+
+
+  @media (max-width: 768px) { 
+    width: 250px; 
+  }
+
+  @media (max-width: 576px) { 
+    width: 100%;
+    min-height: auto;
+    position: fixed;
+    top: 0;
+    left: 0;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    box-shadow: none; 
+
+    &.open {
+      transform: translateX(0);
+    }
+  }
+
+  .sidebar-header {
+    padding: 24px 15px; // Adjusted padding for left alignment
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+
+    .logo {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start; // Align to the left
+      gap: 10px; // Space between icon and text
+
+      .logo-icon { // Style for the new Font Awesome icons
+        width: 24px;
+        height: 24px;
+        color: get-color($accent, "100"); // Icon color
+        font-size: 24px; // Ensure font awesome icon is correct size
+        flex-shrink: 0;
+      }
+
+      .logo-text {
+        font-size: 20px; // Larger font size for portal title
+        font-weight: 700; // Bolder font weight
+        color: white; // Ensure it's clearly visible
+      }
+    }
+  }
+
+  .sidebar-nav {
+    flex: 1;
+    padding: 20px 0;
+
+    .side {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+
+      .nav-item {
+        margin-bottom: 4px;
+
+        .nav-link {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          padding: 12px 15px; // Adjusted padding for narrower sidebar
+          color: rgba(255, 255, 255, 0.8);
+          text-decoration: none;
+          transition: all 0.3s ease;
+          border-left: 3px solid transparent;
+
+          &:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+          }
+
+          &.nav-link-active {
+            background-color: rgba(255, 255, 255, 0.15);
+            color: white;
+            border-left-color: get-color($accent, "100");
+          }
+
+          .icon {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+
+            i {
+              font-size: 20px;
+            }
+          }
+
+          .title {
+            font-weight: 500;
+            font-size: 14px;
+            margin: 0;
+
+            &.title-active {
+              font-weight: 600;
+            }
+          }
+
+          .arrow {
+            margin-left: auto;
+            transition: transform 0.3s;
+            color: rgba(255, 255, 255, 0.6);
+          }
+        }
+
+        .nav-children {
+          list-style: none;
+          margin: 0;
+          padding: 0;
+          background-color: rgba(0, 0, 0, 0.1);
+
+          .nav-item {
+            .nav-link {
+              padding: 10px 15px 10px 42px; // Adjusted indentation for sub-items
+              color: rgba(255, 255, 255, 0.7);
+              border-left: 3px solid transparent;
+
+              &:hover {
+                background-color: rgba(255, 255, 255, 0.1);
+                color: white;
+              }
+
+              &.nav-link-active {
+                background-color: rgba(255, 255, 255, 0.2);
+                color: white;
+                border-left-color: get-color($accent, "100");
+              }
+
+              .icon {
+                width: 16px;
+                height: 16px;
+                i {
+                  font-size: 16px;
+                }
+              }
+
+              .title {
+                font-size: 13px;
+                font-weight: 400;
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .sidebar-footer {
+    padding: 20px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    margin-top: auto;
+
+    .sidebar-user-profile {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+      cursor: pointer; // Indicate it's clickable
+      transition: background-color 0.3s ease;
+      padding: 8px 12px;
+      border-radius: 8px;
+
+      &:hover {
+        background-color: rgba(255, 255, 255, 0.08);
+      }
+
+      .profile-avatar {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        object-fit: cover;
+        flex-shrink: 0;
+        border: 2px solid get-color($accent, "100");
+      }
+
+      .profile-info {
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1; // Allows info to take available space
+
+        .profile-name {
+          font-size: 14px;
+          font-weight: 600;
+          color: white;
+          white-space: nowrap; // Prevent text wrapping
+          overflow: hidden; // Hide overflow
+          text-overflow: ellipsis; // Show ellipsis for overflow
+        }
+
+        .profile-role {
+          font-size: 12px;
+          color: rgba(255, 255, 255, 0.6);
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+      }
+    }
+
+    .logout-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      width: 100%;
+      padding: 12px 16px;
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 8px;
+      color: rgba(255, 255, 255, 0.8);
+      cursor: pointer;
+      transition: all 0.3s ease;
+
+      &:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+        color: white;
+        border-color: rgba(255, 255, 255, 0.3);
+      }
+
+      i {
+        width: 18px;
+        height: 18px;
+        font-size: 18px;
+      }
+
+      .logout-text {
+        font-size: 14px;
+        font-weight: 500;
+      }
+    }
+  }
+}

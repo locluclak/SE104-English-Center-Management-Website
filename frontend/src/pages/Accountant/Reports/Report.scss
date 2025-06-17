@@ -1,0 +1,150 @@
+/* Report.scss */
+@import "../../../scss/variables";
+/* Container cho báo cáo */
+.reports-container {
+  padding: 20px;
+  background-color: #f4f6f9;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.report-title {
+  font-size: get-font-size($title-font-size, md);
+  font-weight: get-font-weight($font-weight, bold);
+  margin-bottom: 20px;
+  color: get-color($theme-colors, primary);
+}
+
+/* Styles cho bảng */
+.table-container {
+  background-color: $white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Styles cho các button và select nằm trên một hàng */
+.report-controls-row {
+  display: flex;
+  align-items: center;
+  justify-content: left;
+  gap: 20px;
+  margin-bottom: 20px;
+  flex-wrap: wrap; /* Cho phép phần tử tự động xuống dòng khi không đủ không gian */
+
+  @media (max-width: 768px) {
+    flex-direction: column; /* Các phần tử sẽ xếp chồng lên nhau khi màn hình nhỏ */
+    align-items: flex-start; /* Căn chỉnh phần tử về bên trái */
+    gap: 12px; /* Giảm khoảng cách giữa các phần tử khi xuống dòng */
+  }
+}
+
+button.view-button,
+button.export-button {
+  padding: 05px 10px;
+  font-size: get-font-size($body-font-size, sm);
+  font-weight: get-font-weight($font-weight, small);
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+button.view-button {
+  background-color: get-color($theme-colors, primary);
+  color: $white;
+}
+
+button.view-button:hover {
+  background-color: get-color($theme-colors, primary);
+  opacity: 0.8;
+}
+
+button.export-button {
+  background-color: get-color($theme-colors, primary);
+  color: $white;
+}
+
+button.export-button:hover {
+  background-color: get-color($theme-colors, primary);
+  opacity: 0.8;
+}
+
+/* Styles cho phần input và select */
+.report-controls-row input,
+.report-controls-row select {
+  padding: 8px 12px;
+  border-radius: 4px;
+  border: 1px solid #e8e8e8;
+  width: 200px;
+  margin-right: 10px;
+  font-size: get-font-size($body-font-size, sm);
+  color: black; /* Đặt màu chữ của các input, select thành màu đen */
+}
+
+/* Thêm màu sắc cho các label của input/select */
+.report-controls-row label {
+  font-weight: get-font-weight($font-weight, medium);
+  margin-right: 10px;
+  color: get-color($theme-colors, primary); /* Màu chữ cho label */
+}
+
+/* Styles cho Tabs */
+.ant-tabs {
+  margin-bottom: 20px;
+}
+
+.ant-tabs-tab {
+  font-weight: get-font-weight($font-weight, semibold);
+}
+
+.ant-tabs-tab-btn {
+  color: get-color($theme-colors, primary);
+  font-size: get-font-size($body-font-size, md);
+}
+
+.ant-tabs-tab-active .ant-tabs-tab-btn {
+  color: get-color($theme-colors, primary);
+}
+
+.ant-tabs-content {
+  background-color: $white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.total-revenue {
+  margin-top: 20px;
+  font-size: get-font-size($body-font-size, lg);
+  font-weight: get-font-weight($font-weight, bold);
+  color: get-color($theme-colors, primary);
+}
+
+/* Modal Styles */
+.ant-modal-content {
+  border-radius: 8px;
+}
+
+.ant-modal-header {
+  background-color: get-color($theme-colors, primary);
+  color: $white;
+  font-weight: get-font-weight($font-weight, bold);
+  padding: 16px;
+}
+
+.ant-modal-footer {
+  padding: 10px 16px;
+}
+
+.ant-modal-footer .ant-btn {
+  background-color: get-color($theme-colors, primary);
+  color: $white;
+  border: none;
+  padding: 6px 16px;
+}
+
+.ant-modal-footer .ant-btn:hover {
+  background-color: get-color($theme-colors, primary);
+  opacity: 0.8;
+}
