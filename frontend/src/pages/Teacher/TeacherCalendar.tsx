@@ -203,10 +203,6 @@ const TeacherCalendar: React.FC<TeacherCalendarProps> = ({ teacherId }) => {
           </Button>
         </div>
 
-        <Button className="new-event-btn" disabled={loading}>
-          <Plus className="w-4 h-4 mr-2" />
-          Tạo sự kiện
-        </Button>
       </div>
 
       <Card className="calendar-card" loading={loading}>

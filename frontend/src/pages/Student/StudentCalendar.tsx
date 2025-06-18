@@ -254,10 +254,6 @@ const StudentCalendar: React.FC = () => {
           </Button>
         </div>
 
-        {/* Tính năng tạo sự kiện cho sinh viên nếu cần */}
-        <Button className="new-event-btn" disabled>
-          <Plus className="w-4 h-4 mr-2" /> Sự kiện mới
-        </Button>
       </div>
 
       {/* Calendar card ----------------------------------------------------*/}
