@@ -25,6 +25,15 @@ const Register = () => {
 
   const handleRegister = async () => {
     setError('');
+
+    // --- Email format validation ---
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setError('Email không đúng định dạng.');
+      return;
+    }
+    // --- End of Email format validation ---
+
     if (password.length < 6) {
       setError('Mật khẩu phải có ít nhất 6 ký tự.');
       return;
