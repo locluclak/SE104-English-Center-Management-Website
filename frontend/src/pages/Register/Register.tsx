@@ -26,13 +26,15 @@ const Register = () => {
   const handleRegister = async () => {
     setError('');
 
-    // --- Email format validation ---
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    // --- Enhanced Email format validation ---
+    // Allows alphanumeric characters, dots, underscores, and hyphens before the @
+    // and alphanumeric characters, dots, and hyphens after the @
+    const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,6}$/;
     if (!emailRegex.test(email)) {
-      setError('Email không đúng định dạng.');
+      setError('Email không đúng định dạng. Email chỉ được chứa chữ cái, số, dấu chấm, dấu gạch ngang và dấu gạch dưới.');
       return;
     }
-    // --- End of Email format validation ---
+    // --- End of Enhanced Email format validation ---
 
     if (password.length < 6) {
       setError('Mật khẩu phải có ít nhất 6 ký tự.');
