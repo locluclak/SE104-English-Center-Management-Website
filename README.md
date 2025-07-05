@@ -8,14 +8,14 @@
 
 - Quản lý học viên, giáo viên, lớp học, khóa học
 - Quản lý điểm số, lịch học, lịch thi
-- Phân quyền người dùng (Admin, Giáo viên, Học viên)
+- Phân quyền người dùng (Admin, Giáo viên, Kế toán, Học viên)
 - Thống kê, báo cáo
 
 ## Công nghệ sử dụng
 
-- Frontend: ReactJS (hoặc công nghệ bạn sử dụng)
-- Backend: Node.js/Express (hoặc công nghệ bạn sử dụng)
-- Database: MongoDB/MySQL (hoặc công nghệ bạn sử dụng)
+- Frontend: ReactJs, TypeScript
+- Backend: Node.js, Express
+- Database: MySQL
 
 ## Hướng dẫn cài đặt
 
